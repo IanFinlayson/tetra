@@ -1,5 +1,6 @@
 # Generates skeleton for the PATTERN { ACTION } section of a lex file.
 # Takes the same token file as is passed to mktok.awk
+# To test, invoke with 'awk -f mkscan.awk ttoks.txt'
 
 BEGIN {
     FS = "\n"

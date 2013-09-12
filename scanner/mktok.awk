@@ -1,5 +1,6 @@
-# takes a list of tokens for the Tetra scanner and generates a definition 
-# file for them (printed to stdout)
+# Takes a list of tokens for the Tetra scanner and generates a definition 
+# File for them (printed to stdout)
+# To test, invoke with 'awk -f mktok.awk ttoks.txt'
 
 BEGIN {
     FS = "\N"
