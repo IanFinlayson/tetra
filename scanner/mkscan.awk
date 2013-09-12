@@ -5,7 +5,7 @@
 BEGIN {
     FS = "\n"
     RS = ""
-    print "#.*\t/* comments */"
+    print "#.*$\t/* comments */"
 }
 
 NF == 1 {
