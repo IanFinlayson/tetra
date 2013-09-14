@@ -1,18 +1,22 @@
-this_should_be_ident
-"this should be a string"
+# This file is to test the Tetra scanner
 
-forall while
-    ><
-    this
-        indentagain
-    dedent
-        indentagain
-            
+def func(a) : int
+    return a * 2
 
-0b0111001010
-0x121378AFEC
-1235
-1234.
-.1234
-1.1
-1235f
+a = 5
+func(a)
+
+if a == 6:
+    a = 7
+
+while a < 90 && a > 10:
+    a = a + 1
+
+for i in range(10):
+    a = i
+
+if a >= 5 || < 5:
+    print a
+
+forall:
+    print a + 6

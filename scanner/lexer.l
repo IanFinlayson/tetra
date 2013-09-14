@@ -99,6 +99,10 @@ def	                                { return TOK_DEF; }
 "-="	                            { return TOK_MINUSEQ; }
 "&&"	                            { return TOK_AND; }
 "||"	                            { return TOK_OR; }
+":"                                 { return TOK_COLON; }
+"="                                 { return TOK_BECOMES; }
+"("                                 { return TOK_LEFTPAR; }
+")"                                 { return TOK_RIGHTPAR; }
 [[:alpha:]_][[:alnum:]_]*	        { return TOK_IDENT; }
 
 %%
