@@ -8,7 +8,7 @@ int indents[MAX_INDENTS];
 int *num_ind = indents;
 %}
 
-%option noyywrap warn 
+%option noyywrap warn nounput
 %x indentation strings
 %%
 
@@ -76,7 +76,6 @@ false                               { return TOK_BOOL; }
 [[:digit:]]+f                       |
 [[:digit:]]+"."[[:digit:]]*         |
 "."[[:digit:]]+	                    { return TOK_REAL; }
-    /* \"(\\\"|[^"])*\"	                { return TOK_STRING; } */
 if	                                { return TOK_IF; }
 else	                            { return TOK_ELSE; }
 for	                                { return TOK_FOR; }
@@ -118,7 +117,7 @@ int main(int argc, char **argv)
         }
     }
 
-    while (token = yylex()) {
+    while ((token = yylex()) != 0) {
         if (token == TOK_NULL) {
             continue;
         }
@@ -126,7 +125,6 @@ int main(int argc, char **argv)
             for (i = 0; i < dedents; i++) {
                 printf("%d\n", token);
             }
-
         } else {
             printf("%d\n", token);
         }
