@@ -17,11 +17,10 @@ NF == 2 {
 }
 
 NF > 2 {
-    print "(?x: " $2
-    for (i = 3; i < NF; i++) {
-        print "   | " $i
+    for (i = 2; i < NF; i++) {
+        print $i "\t|"
     }
-    print "   | " $NF ")\t{ return TOK_" toupper($1) "; }"
+    print $NF "\t{ return TOK_" toupper($1) "; }"
 }
 
 #NF > 2 {

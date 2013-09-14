@@ -2,6 +2,7 @@
 #ifndef H_TETRA_TOKENS
 #define H_TETRA_TOKENS
 
+#define TOK_NULL 1
 #define TOK_INT 100
 #define TOK_REAL 101
 #define TOK_STRING 102
@@ -32,5 +33,6 @@
 #define TOK_AND 127
 #define TOK_OR 128
 #define TOK_IDENT 129
+#define TOK_NEWLINE 130
 
 #endif

@@ -10,6 +10,7 @@ BEGIN {
     print "/* A list of tokens for the Tetra scanner */"
     print "#ifndef H_TETRA_TOKENS"
     print "#define H_TETRA_TOKENS\n"
+    print "#define TOK_NULL 1"
 }
 
 NF > 0 {
