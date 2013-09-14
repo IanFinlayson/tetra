@@ -1,7 +1,8 @@
 # This file is to test the Tetra scanner
 
-def func(a) : int
-    return a * 2
+def func(a):
+    if true:
+        indent_more
 
 a = 5
 func(a)
