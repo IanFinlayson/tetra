@@ -12,7 +12,7 @@ int *num_ind = indents;
 %x indentation strings
 %%
 
-<*>^[[:blank:]]*\n     /* skip blank lines */
+<*>^[[:blank:]]*\n     /* skip blank lines in all states*/
 <strings>{  /* TODO: make strings more robust */
     (\\\"|[^"\n])+      /* escaped or not a quote or endline, do nothing */
     \n  { printf("Error: non-terminated string.\n  Exiting.\n"); exit (1); }
