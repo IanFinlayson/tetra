@@ -7,6 +7,9 @@
 
 #include <inttypes.h>
 
+typedef intmax_t tetra_int;
+typedef long double tetra_float;
+
 enum Comp_Type { LT, LTE, GT, GTE, EQ, NEQ };
 enum Assign_Type { 
     BEC, MUL_BEC, DIV_BEC, PLU_BEC, MIN_BEC, MOD_BEC, EXP_BEC

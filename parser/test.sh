@@ -1,0 +1,2 @@
+make
+./parser < test.tetra
