@@ -170,10 +170,7 @@ int is_in(int target, int *array, int *end_ptr);
 "bool"      { return TOK_BOOL_T; }
 "string"    { return TOK_STRING_T; }
 
- /* In order to shift between tokenizing most individual characters and
-  * just passing them through, invert the commenting of this section 
-  * and the following sections.
-  */
+ /* Single-character lexemes */
 "<" |
 ">" |
 "=" |
@@ -190,6 +187,7 @@ int is_in(int target, int *array, int *end_ptr);
 "(" |
 ")" |
 "," |
+"$" |
 ":" { return yytext[0]; }
 
  /* Shift operators (TOK_SHIFT) */

@@ -70,8 +70,7 @@ extern int yylineno;
 
 %%
 
-program: stmt-list
-    | TOK_NEWLINE
+program: stmt-list '$' TOK_NEWLINE
 
 stmt-list: stmt
     | stmt stmt-list 
