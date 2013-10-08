@@ -1,6 +1,10 @@
 /*
  * Parser for Tetra.
  *
+ * Currently, "list" rules may be right-recursive for easier building of
+ * a parse tree.  Once things are hammered out, this may change for the
+ * better.
+ *
  * Currently, text values (for TOK_STRING and TOK_IDENT) are passed back
  * from the lexer as a pointer pointing to yytext.  Because of this,
  * text values must be extracted on this side of the parser in their own
@@ -50,7 +54,8 @@ extern int yylineno;
 %token TOK_INDENT TOK_DEDENT TOK_NEWLINE
 %token TOK_INT_DIV TOK_POW
 %token TOK_IF TOK_ELIF TOK_ELSE 
-%token TOK_WHILE TOK_FORALL TOK_FOR TOK_IN TOK_BREAK TOK_CONTINUE
+%token TOK_WHILE  TOK_FOR TOK_IN TOK_BREAK TOK_CONTINUE
+%token TOK_FORALL TOK_PARALLEL
 %token TOK_DEF TOK_GLOBAL
 %token TOK_PASS TOK_RETURN
 %token TOK_INT_T TOK_REAL_T TOK_BOOL_T TOK_STRING_T
@@ -66,30 +71,21 @@ extern int yylineno;
 %%
 
 program: stmt-list
+    | TOK_NEWLINE
 
-stmt-list: stmt {
-    printf("%d: stmt-list: stmt\n", yylineno); //DEBUG
-}
-    | stmt-list stmt {
-        printf("%d: stmt-list: stmt-list stmt\n", yylineno); //DEBUG
-    }
+stmt-list: stmt
+    | stmt stmt-list 
 
-stmt: simple-stmt {
-    printf("%d: stmt: simple-stmt\n", yylineno); //DEBUG
-}
-    | compound-stmt {
-        printf("%d: stmt: compound-stmt\n", yylineno); //DEBUG
-    }
+stmt: simple-stmt
+    | compound-stmt
 
-simple-stmt: small-stmt TOK_NEWLINE
-    | simple-stmt ';' small-stmt TOK_NEWLINE
+simple-stmt: small-stmt-list TOK_NEWLINE
 
-compound-stmt: if-stmt {
-    printf("%d: got an if!\n", yylineno); //DEBUG
-}
-    | while-stmt {
-        printf("%d: Got a while!\n", yylineno); //DEBUG
-    }
+small-stmt-list: small-stmt
+    | small-stmt ';' small-stmt-list
+
+compound-stmt: if-stmt
+    | while-stmt
     | for-stmt
     | func-def
 

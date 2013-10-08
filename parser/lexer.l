@@ -22,7 +22,6 @@
 #include "parser.tab.h"
 
 #define MAX_INDENTS 50
-int dedent_level;
 int indent_level[MAX_INDENTS];
 int *num_ind = indent_level;
 
@@ -30,8 +29,8 @@ void error_exit(const char *str);
 int is_in(int target, int *array, int *end_ptr);
 %}
 
-%option warn nounput noyywrap yylineno
-%x indents dedents strings
+%option warn noyywrap yylineno nounput
+%x indents dedents strings end
 %%
  /* skip blank lines */
 <*>^[[:blank:]]*\n  {
@@ -40,7 +39,7 @@ int is_in(int target, int *array, int *end_ptr);
 
  /* Skip lines containing only blanks and comments */
 <*>^[[:blank:]]*#.*\n    {
-                printf("Comment!\n");
+//                printf("Comment!\n"); //DEBUG
 //                printf("Line %d has a comment\n", yylineno-1); //DEBUG
             }
  /* But make sure that lines with code and comments end right */
@@ -90,7 +89,6 @@ int is_in(int target, int *array, int *end_ptr);
 //    printf("Putting back: %c\n", yytext[0]); //DEBUG
     yyless(0);
     --num_ind;
-//    printf("%d: *num_ind = %d\n", yylineno, *num_ind); //DEBUG
     if (*num_ind == 0) {
         BEGIN(INITIAL);
     }
@@ -156,6 +154,7 @@ int is_in(int target, int *array, int *end_ptr);
 "for"       { return TOK_FOR; }
 "in"        { return TOK_IN; }
 "forall"    { return TOK_FORALL; }
+"parallel"  { return TOK_PARALLEL; }
 "while"     { return TOK_WHILE; }
 "continue"  { return TOK_CONTINUE; }
 "break"     { return TOK_BREAK; }
@@ -265,6 +264,9 @@ int is_in(int target, int *array, int *end_ptr);
             fprintf(stderr, "%d\n", yytext[0]);
             error_exit("Unexpected character");
         }
+
+ /* Finish up all dedents at end of file - SUPER KLUDGE */
+ /* BAH!  More research needed */
 
 %%
 
