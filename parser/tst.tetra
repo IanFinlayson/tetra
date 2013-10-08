@@ -1,4 +1,15 @@
+# This is a file to test rudimentary Tetra parsing
 i = 10.
 
 while i < 20:
     i += i
+    if i > 100:
+        i = 2
+
+# This is a comment to test tracking of line numbers
+if i > 5:
+    i = 2
+elif i < 0:
+    i = 3
+else:
+    a = 34

@@ -30,22 +30,44 @@ void error_exit(const char *str);
 int is_in(int target, int *array, int *end_ptr);
 %}
 
-%option warn nounput yylineno noyywrap
+%option warn nounput noyywrap yylineno
 %x indents dedents strings
 %%
-    /* skip blank lines */
-<INITIAL,indents>^[[:blank:]]*\n     { yylineno++; } 
+ /* skip blank lines */
+<*>^[[:blank:]]*\n  {
+//                        printf("Line %d is blank\n", yylineno-1); //DEBUG
+                    } 
+
+ /* skip comments */
+
+<*>#.*\n
+
+ /* no whitespace to begin line */
+<indents>^[^[:space:]] { 
+//    printf("In state %d: Cur ind_lvl: %d\n", YY_START, *num_ind); //DEBUG
+//    printf("Put back %c\n", yytext[0]); //DEBUG
+    yyless(0);
+    BEGIN(INITIAL);
+    if (*num_ind > 0) {     /* dedented */
+//        printf("Should be dedenting\n"); //DEBUG
+        BEGIN(dedents);
+    }
+}
 
 <indents>^[[:blank:]]* {
+//    printf("%d: Leading whitespace length: %d\n", yylineno, yyleng);//DEBUG
     if (yyleng == *num_ind) {           /* no change */
         BEGIN(INITIAL);
     } else if (yyleng < *num_ind) {     /* dedented */
+//        printf("%d: Should be dedenting 2\n", yylineno); //DEBUG
         if (!is_in(yyleng, indent_level, num_ind)) {
             error_exit("Dedent to non-matching level");
         }
         yyless(0);
         BEGIN(dedents);
     } else {                            /* indented */
+//        printf("%d Indented to %d\n", yylineno, yyleng); //DEBUG
+        BEGIN(INITIAL);
         if (++num_ind == indent_level + MAX_INDENTS) {
             error_exit("Too many levels of indentation");
         }
@@ -54,11 +76,26 @@ int is_in(int target, int *array, int *end_ptr);
     }
 }
  /* Must be sure dedent level exists before entering this state */
-<dedents>^[[:blank:]]* {
+<dedents>[^[:space:]] {
+//    printf("Hooray I'm here! "); //DEBUG
+//    printf("State: %d\n", YY_START); //DEBUG
+//    printf("%d: Dedent length: 0\n", yylineno); //DEBUG
+//    printf("Putting back: %c\n", yytext[0]); //DEBUG
+    yyless(0);
+    --num_ind;
+//    printf("%d: *num_ind = %d\n", yylineno, *num_ind); //DEBUG
+    if (*num_ind == 0) {
+        BEGIN(INITIAL);
+    }
+    return TOK_DEDENT;
+}
+    
+<dedents>[[:blank:]]* {
+//    printf("%d: Dedent length %d\n", yylineno, yyleng); //DEBUG
     if (yyleng == *num_ind) {
         BEGIN(INITIAL);
     } else if (yyleng < *num_ind) {
-        yyless(0);
+        yyless(*num_ind - yyleng);
         --num_ind;
     } else { 
         error_exit("Major goof getting here");
@@ -67,13 +104,12 @@ int is_in(int target, int *array, int *end_ptr);
 }
 
 \n  {
+//    printf("Line: %d\n", yylineno); //DEBUG
     BEGIN(indents);
     return TOK_NEWLINE;
 }
 
 [[:blank:]]+    /* skip spaces & tabs */
-
-#.*$    { yylineno++; }
 
  /* Boolean literals (TOK_BOOL) */
 "True"  { yylval.i = 1; return TOK_BOOL; }
@@ -216,6 +252,12 @@ int is_in(int target, int *array, int *end_ptr);
                                 yylval.text = yytext;
                                 return TOK_IDENTIFIER;
                             }
+ /* Catch unexpected characters */
+<*>.    { 
+            fprintf(stderr, "Error in state %d\n", YY_START);
+            fprintf(stderr, "%d\n", yytext[0]);
+            error_exit("Unexpected character");
+        }
 
 %%
 
@@ -227,12 +269,18 @@ void error_exit(const char *str)
 
 int is_in(int target, int *array, int *end_ptr)
 {
-    if (end_ptr > array)
+//    printf("In function is_in()\n"); //DEBUG
+    if (end_ptr < array) {
+//        printf("end_ptr > array\n"); //DEBUG
         return 0;
+    }
     int *cur;
     for (cur = end_ptr; cur >= array; cur--) {
-        if (*cur == target)
+//        printf("Checking indent level: %d\n", *cur); //DEBUG
+        if (*cur == target) {
+//            printf("Match found: %d\n", *cur); //DEBUG
             return 1;
+        }
     }
     return 0;
 }

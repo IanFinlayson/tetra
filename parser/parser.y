@@ -113,6 +113,7 @@ func-def: TOK_DEF funcname '(' parameter-list ')' return-type ':'
 funcname: identifier
 
 parameter-list: /* empty */
+    | identifier
     | parameter-list ',' identifier
 
 return-type: /* empty */
