@@ -86,7 +86,6 @@ int is_in(int target, int *array, int *end_ptr);
                     }
 [[:digit:]]         |
 [1-9][[:digit:]]+   {   
-                        printf("Found an int\n"); //DEBUG
                         yylval.i = strtoimax(yytext, NULL, 10);
                         return TOK_INT;
                     }
@@ -109,18 +108,29 @@ int is_in(int target, int *array, int *end_ptr);
 
  /* Keywords */
 "if"        { return TOK_IF; }
+"elif"      { return TOK_ELIF; }
 "else"	    { return TOK_ELSE; }
 "for"       { return TOK_FOR; }
+"in"        { return TOK_IN; }
 "forall"    { return TOK_FORALL; }
 "while"     { return TOK_WHILE; }
+"continue"  { return TOK_CONTINUE; }
+"break"     { return TOK_BREAK; }
 "def"       { return TOK_DEF; }
+"global"    { return TOK_GLOBAL; }
 "or"        { return TOK_AND; }
 "and"       { return TOK_OR; }
 "not"       { return TOK_NOT; }
+"pass"      { return TOK_PASS; }
+"return"    { return TOK_RETURN; }
+"int"       { return TOK_INT_T; }
+"real"      { return TOK_REAL_T; }
+"bool"      { return TOK_BOOL_T; }
+"string"    { return TOK_STRING_T; }
 
- /* Rather than tokenizing everything, trying with literal chars.
-  * In order to revert, delete this below section and uncomment all
-  * following.
+ /* In order to shift between tokenizing most individual characters and
+  * just passing them through, invert the commenting of this section 
+  * and the following sections.
   */
 "<" |
 ">" |
@@ -137,25 +147,28 @@ int is_in(int target, int *array, int *end_ptr);
 "~" |
 "(" |
 ")" |
+"," |
 ":" { return yytext[0]; }
 
  /* Shift operators (TOK_SHIFT) */
- /*
+ 
 "<<"    { yylval.i = SHIFT_L; return TOK_SHIFT; }
 ">>"    { yylval.i = SHIFT_R; return TOK_SHIFT; }
- */
+ 
  /* Comparison operators (TOK_COMP) */
- /*
+
 "<="	{ yylval.i = LTE; return TOK_COMP; }
 ">="	{ yylval.i = GTE; return TOK_COMP; }
 "=="	{ yylval.i = EQ;  return TOK_COMP; }
 "<>"    |
 "!="	{ yylval.i = NEQ; return TOK_COMP; }
+ /*
 "<"	    { yylval.i = LT;  return TOK_COMP; }
 ">"	    { yylval.i = GT;  return TOK_COMP; }
  */
+
  /* Bitwise operators (No TOK) */
- /*
+ /* 
 "~"     |
 "|"     |
 "^"     |
@@ -164,23 +177,33 @@ int is_in(int target, int *array, int *end_ptr);
  /* Numeric operators (Various TOK) */
  /*
 "+"	    |
-"-"	    |
+"-"	    { yylval.i = yytext[0]; return TOK_ADD; }
 "%"     |
 "/"	    |
-"*"	    { return yytext[0]; }
+"*"	    { yylval.i = yytext[0]; return TOK_MULT; }
  */
- /*
-"**"    { return TOK_EXP; }
- */
+"//"    { return TOK_INT_DIV; } 
+"**"    { return TOK_POW; }
+
 
  /* Assignment operators (TOK_ASSIGN) */
+ 
  /*
 "="     { yylval.i = BEC;     return TOK_ASSIGN; }
-"/="	{ yylval.i = DIV_BEC; return TOK_ASSIGN; }
-"*="	{ yylval.i = MUL_BEC; return TOK_ASSIGN; }
+ */
 "+="	{ yylval.i = PLU_BEC; return TOK_ASSIGN; }
 "-="	{ yylval.i = MIN_BEC; return TOK_ASSIGN; }
- */
+"*="	{ yylval.i = MUL_BEC; return TOK_ASSIGN; }
+"/="	{ yylval.i = DIV_BEC; return TOK_ASSIGN; }
+"//="   { yylval.i = IDV_BEC; return TOK_ASSIGN; }
+"%="    { yylval.i = MOD_BEC; return TOK_ASSIGN; }
+"**="   { yylval.i = POW_BEC; return TOK_ASSIGN; }
+">>="   { yylval.i = RSH_BEC; return TOK_ASSIGN; }
+"<<="   { yylval.i = LSH_BEC; return TOK_ASSIGN; }
+"&="    { yylval.i = AND_BEC; return TOK_ASSIGN; }
+"^="    { yylval.i = XOR_BEC; return TOK_ASSIGN; }
+"|="    { yylval.i = OR_BEC;  return TOK_ASSIGN; }
+
  /* Single character misc. (No TOK) */
  /*
 ":"     |

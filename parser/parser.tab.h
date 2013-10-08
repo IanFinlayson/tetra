@@ -50,24 +50,35 @@ extern int yydebug;
      TOK_STRING = 259,
      TOK_BOOL = 260,
      TOK_INT = 261,
-     TOK_REAL = 262,
-     TOK_IF = 263,
-     TOK_ELSE = 264,
-     TOK_OR = 265,
-     TOK_AND = 266,
-     TOK_NOT = 267,
-     TOK_COMP = 268,
-     TOK_SHIFT = 269,
-     TOK_ADD = 270,
-     TOK_EXP = 271,
-     TOK_ASSIGN = 272,
-     TOK_INDENT = 273,
-     TOK_DEDENT = 274,
-     TOK_NEWLINE = 275,
-     TOK_FOR = 276,
-     TOK_FORALL = 277,
-     TOK_WHILE = 278,
-     TOK_DEF = 279
+     TOK_ASSIGN = 262,
+     TOK_SHIFT = 263,
+     TOK_COMP = 264,
+     TOK_REAL = 265,
+     TOK_OR = 266,
+     TOK_AND = 267,
+     TOK_NOT = 268,
+     TOK_INDENT = 269,
+     TOK_DEDENT = 270,
+     TOK_NEWLINE = 271,
+     TOK_INT_DIV = 272,
+     TOK_POW = 273,
+     TOK_IF = 274,
+     TOK_ELIF = 275,
+     TOK_ELSE = 276,
+     TOK_WHILE = 277,
+     TOK_FORALL = 278,
+     TOK_FOR = 279,
+     TOK_IN = 280,
+     TOK_BREAK = 281,
+     TOK_CONTINUE = 282,
+     TOK_DEF = 283,
+     TOK_GLOBAL = 284,
+     TOK_PASS = 285,
+     TOK_RETURN = 286,
+     TOK_INT_T = 287,
+     TOK_REAL_T = 288,
+     TOK_BOOL_T = 289,
+     TOK_STRING_T = 290
    };
 #endif
 
@@ -76,7 +87,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 28 "parser.y"
+#line 40 "parser.y"
 
     tetra_float f;
     tetra_int i;
@@ -84,7 +95,7 @@ typedef union YYSTYPE
 
 
 /* Line 2058 of yacc.c  */
-#line 88 "parser.tab.h"
+#line 99 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

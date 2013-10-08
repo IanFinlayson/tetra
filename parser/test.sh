@@ -1,2 +1,2 @@
 make
-./parser < test.tetra
+./parser < tst.tetra

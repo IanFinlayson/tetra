@@ -12,7 +12,8 @@ typedef long double tetra_float;
 
 enum Comp_Type { LT, LTE, GT, GTE, EQ, NEQ };
 enum Assign_Type { 
-    BEC, MUL_BEC, DIV_BEC, PLU_BEC, MIN_BEC, MOD_BEC, EXP_BEC
+    MUL_BEC, DIV_BEC, IDV_BEC, PLU_BEC, MIN_BEC, MOD_BEC, POW_BEC,
+    RSH_BEC, LSH_BEC, AND_BEC, XOR_BEC, OR_BEC
 };
 enum Shift_Type { SHIFT_L, SHIFT_R };
 
