@@ -67,17 +67,29 @@ extern int yylineno;
 
 program: stmt-list
 
-stmt-list: stmt
-    | stmt-list stmt
+stmt-list: stmt {
+    printf("%d: stmt-list: stmt\n", yylineno); //DEBUG
+}
+    | stmt-list stmt {
+        printf("%d: stmt-list: stmt-list stmt\n", yylineno); //DEBUG
+    }
 
-stmt: simple-stmt
-    | compound-stmt
+stmt: simple-stmt {
+    printf("%d: stmt: simple-stmt\n", yylineno); //DEBUG
+}
+    | compound-stmt {
+        printf("%d: stmt: compound-stmt\n", yylineno); //DEBUG
+    }
 
 simple-stmt: small-stmt TOK_NEWLINE
     | simple-stmt ';' small-stmt TOK_NEWLINE
 
-compound-stmt: if-stmt
-    | while-stmt
+compound-stmt: if-stmt {
+    printf("%d: got an if!\n", yylineno); //DEBUG
+}
+    | while-stmt {
+        printf("%d: Got a while!\n", yylineno); //DEBUG
+    }
     | for-stmt
     | func-def
 

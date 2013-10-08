@@ -38,9 +38,16 @@ int is_in(int target, int *array, int *end_ptr);
 //                        printf("Line %d is blank\n", yylineno-1); //DEBUG
                     } 
 
- /* skip comments */
-
-<*>#.*\n
+ /* Skip lines containing only blanks and comments */
+<*>^[[:blank:]]*#.*\n    {
+                printf("Comment!\n");
+//                printf("Line %d has a comment\n", yylineno-1); //DEBUG
+            }
+ /* But make sure that lines with code and comments end right */
+<INITIAL>#.*\n  {
+                    BEGIN(indents);
+                    return TOK_NEWLINE;
+                }
 
  /* no whitespace to begin line */
 <indents>^[^[:space:]] { 

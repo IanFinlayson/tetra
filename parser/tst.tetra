@@ -2,14 +2,18 @@
 i = 10.
 
 while i < 20:
-    i += i
+    i += i # Checking out comments
     if i > 100:
         i = 2
 
 # This is a comment to test tracking of line numbers
 if i > 5:
     i = 2
-elif i < 0:
-    i = 3
+
+    # blank line before dedent
+elif i < 0: #Checking comments before indent
+    i = 3 # Checking comments before dedent
 else:
+
+    # blank line before indent
     a = 34
