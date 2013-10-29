@@ -7,7 +7,7 @@ BEGIN {
     printf opener
 }
 
-$1 ~ /[[:alpha:]-]:/ {
+$1 ~ /[[:alpha:]-]+:/ {
     sub(":", " ", $1)
     if (len + length($1) > max_len) {
         print ""
