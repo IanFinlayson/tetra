@@ -17,6 +17,17 @@ typedef struct node {
     struct node **children;
 } TTR_Node;
 
+/* A series of access macros.  Hopefully will make any changes less painful. */
+#define N_TYPE(n) ((n)->type)
+#define N_NCH(n) ((n)->n_children)
+#define N_CHILDREN(n) ((n)->children)
+#define N_CHILD(n, c) ((n)->children[(c)])
+#define N_CAP(n) ((n)->capacity)
+#define N_LINE(n) ((n)->lineno)
+#define N_INT(n) ((n)->d)
+#define N_FLOAT(n) ((n)->f)
+#define N_STR(n) ((n)->str)
+
 /* 
  * Create a new node on the heap and return a pointer to it.  Returns NULL on
  * error

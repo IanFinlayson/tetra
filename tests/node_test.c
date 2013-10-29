@@ -2,7 +2,7 @@
 #include "../parser/tetra_hdr.h"
 #include "../parser/node.h"
 
-enum { BLUE, ALPHA, NUM };
+enum { BLUE, ALPHA, INT, REAL };
 void print_node_test(TTR_Node *node, int indents);
 
 int main(int argc, char **argv)
@@ -10,10 +10,15 @@ int main(int argc, char **argv)
     TTR_Node *root;
     root = TTR_make_node(BLUE, "", 0, 0.0, 1);
     TTR_add_child(root, TTR_make_node(ALPHA, "Word", 0, 0.0, 2));
-    TTR_add_child(root, TTR_make_node(NUM, "", 34, 0.0, 3));
-    TTR_add_child(root->children[0], TTR_make_node(NUM, "", 0, 1.523, 3));
+    TTR_add_child(root, TTR_make_node(INT, "", 34, 0.0, 3));
+    TTR_add_child(N_CHILD(root, 0), TTR_make_node(REAL, "", 0, 1.523, 3));
+    TTR_add_child(root, TTR_make_node(REAL, "", 0, 1.523, 3));
 
     print_node_test(root, 0);
+
+    TTR_free_node(root);
+
+    return 0;
 }
 
 void print_node_test(TTR_Node *node, int indents)
@@ -25,6 +30,7 @@ void print_node_test(TTR_Node *node, int indents)
             node->type, node->str, node->d, node->f, node->lineno,
             node->n_children);
     printf("Cap %d\n", node->capacity);
-    for (i = 0; i < node->n_children; i++)
-        print_node_test(node->children[i], indents + 1);
+    for (i = 0; i < N_NCH(node); i++) {
+        print_node_test(N_CHILD(node, i), indents + 1);
+    }
 }
