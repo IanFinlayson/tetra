@@ -7,6 +7,8 @@ void print_node_test(TTR_Node *node, int indents);
 
 int main(int argc, char **argv)
 {
+    printf("Don't mind me, just checking: %d %d\n", N_INT, N_FLOAT);
+
     TTR_Node *root;
     root = TTR_make_node(BLUE, "", 0, 0.0, 1);
     TTR_add_child(root, TTR_make_node(ALPHA, "Word", 0, 0.0, 2));

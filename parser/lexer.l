@@ -17,8 +17,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-/* Lest we forget: include definition files BEFORE parser.tab.h, as here */
 #include "tetra_hdr.h"
+/* Lest we forget: include definition files BEFORE parser.tab.h, as here */
 #include "parser.tab.h"
 
 #define MAX_INDENTS 50
@@ -165,10 +165,11 @@ int is_in(int target, int *array, int *end_ptr);
 "not"       { return TOK_NOT; }
 "pass"      { return TOK_PASS; }
 "return"    { return TOK_RETURN; }
-"int"       { return TOK_INT_T; }
-"real"      { return TOK_REAL_T; }
-"bool"      { return TOK_BOOL_T; }
-"string"    { return TOK_STRING_T; }
+"int"       { yylval.i = INT_T; return TOK_TYPE; }
+"real"      { yylval.i = FLOAT_T; return TOK_TYPE; }
+"bool"      { yylval.i = BOOL_T; return TOK_TYPE; }
+"string"    { yylval.i = STRING_T; return TOK_TYPE; }
+"void"      { yylval.i = VOID_T; return TOK_TYPE; }
 
  /* Single-character lexemes */
 "<" |
@@ -192,16 +193,15 @@ int is_in(int target, int *array, int *end_ptr);
 
  /* Shift operators (TOK_SHIFT) */
  
-"<<"    { yylval.i = SHIFT_L; return TOK_SHIFT; }
-">>"    { yylval.i = SHIFT_R; return TOK_SHIFT; }
+"<<"    { return TOK_LSHIFT; }
+">>"    { return TOK_RSHIFT; }
  
  /* Comparison operators (TOK_COMP) */
 
-"<="	{ yylval.i = LTE; return TOK_COMP; }
-">="	{ yylval.i = GTE; return TOK_COMP; }
-"=="	{ yylval.i = EQ;  return TOK_COMP; }
-"<>"    |
-"!="	{ yylval.i = NEQ; return TOK_COMP; }
+"<="	{ yylval.i = LTE; return TOK_LTE; }
+">="	{ yylval.i = GTE; return TOK_GTE; }
+"=="	{ yylval.i = EQ;  return TOK_EQ; }
+"!="	{ yylval.i = NEQ; return TOK_NEQ; }
  /*
 "<"	    { yylval.i = LT;  return TOK_COMP; }
 ">"	    { yylval.i = GT;  return TOK_COMP; }
@@ -222,7 +222,6 @@ int is_in(int target, int *array, int *end_ptr);
 "/"	    |
 "*"	    { yylval.i = yytext[0]; return TOK_MULT; }
  */
-"//"    { return TOK_INT_DIV; } 
 "**"    { return TOK_POW; }
 
 
@@ -235,7 +234,6 @@ int is_in(int target, int *array, int *end_ptr);
 "-="	{ yylval.i = MIN_BEC; return TOK_ASSIGN; }
 "*="	{ yylval.i = MUL_BEC; return TOK_ASSIGN; }
 "/="	{ yylval.i = DIV_BEC; return TOK_ASSIGN; }
-"//="   { yylval.i = IDV_BEC; return TOK_ASSIGN; }
 "%="    { yylval.i = MOD_BEC; return TOK_ASSIGN; }
 "**="   { yylval.i = POW_BEC; return TOK_ASSIGN; }
 ">>="   { yylval.i = RSH_BEC; return TOK_ASSIGN; }
