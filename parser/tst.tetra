@@ -1,3 +1,7 @@
+def range() int:
+    a = 5; b = 2
+    pass
+    return a
 # This is a file to test rudimentary Tetra parsing
 i = 10.
 
@@ -8,13 +12,31 @@ while i < 20:
 
 # This is a comment to test tracking of line numbers
 if i > 5:
-    i = 2
+    i /= 2
 
     # blank line before dedent
 elif i < 0: #Checking comments before indent
-    i = 3 # Checking comments before dedent
+    i **= -3 # Checking comments before dedent
+elif i != i:
+    i = i
+elif a:
+    a = not a
+#elif True == False
+    #print "Does this work"
 else:
 
     # blank line before indent
-    a = 34
+    bond = 007
+    coffee = 0xCAFE
+    tea = 0XcAfE
+    ten_and_ten_is_ten = 0b1010
+    # can_i = 08 does not work (invalid literal correctly caught)
+    # this does not work (takes 'G' to be an identifier) can_i_2 = 0xG
+
+for i in range(12):
+    a += i; print (5 + 3) * (15 / 3)**2
+    continue
+    break
+
+print arthur / dent + 1**10**2 * a % 2
 $

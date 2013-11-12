@@ -6,9 +6,14 @@
 #define H_TETRA_HDR
 
 #include <inttypes.h>
+#include "exit_funcs.h"
 
 typedef int32_t tetra_int;
 typedef double tetra_float;
+
+#define STR_TO_I(str, end, base) (int32_t) strtol((str), (end), (base))
+/* does not take endptr because flex should filter out invalid literals */
+#define STR_TO_F(str) strtod((str), NULL)
 
 enum Comp_Type { LT, LTE, GT, GTE, EQ, NEQ };
 enum Assign_Type { 

@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-TTR_Node *
-TTR_make_node(int type, const char *str, tetra_int d, tetra_float f,
-        int lineno)
+TTR_Node * TTR_make_node(int type, const char *str, tetra_int d, 
+        tetra_float f, int lineno)
 {
     TTR_Node *node;
     node = malloc(sizeof(TTR_Node));
@@ -28,8 +27,7 @@ TTR_make_node(int type, const char *str, tetra_int d, tetra_float f,
     return node;
 }
 
-void
-TTR_free_node(TTR_Node *node)
+void TTR_free_node(TTR_Node *node)
 {
     int i;
 
@@ -45,8 +43,7 @@ TTR_free_node(TTR_Node *node)
     free(node);
 }
 
-int
-TTR_add_child(TTR_Node *parent, TTR_Node *child)
+int TTR_add_child(TTR_Node *parent, TTR_Node *child)
 {
     if (parent == NULL)
         return 1;

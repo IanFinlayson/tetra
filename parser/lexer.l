@@ -18,12 +18,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tetra_hdr.h"
+#include "string_buffer.h"
 /* Lest we forget: include definition files BEFORE parser.tab.h, as here */
 #include "parser.tab.h"
 
 #define MAX_INDENTS 50
 int indent_level[MAX_INDENTS];
 int *num_ind = indent_level;
+
+char *endptr; /* Used to determine if valid non-base-10 literal is used */
+
+Str_Buf *str_buf;
 
 void error_exit(const char *str);
 int is_in(int target, int *array, int *end_ptr);
@@ -33,15 +38,10 @@ int is_in(int target, int *array, int *end_ptr);
 %x indents dedents strings end
 %%
  /* skip blank lines */
-<*>^[[:blank:]]*\n  {
-//                        printf("Line %d is blank\n", yylineno-1); //DEBUG
-                    } 
+<*>^[[:blank:]]*\n  { } 
 
  /* Skip lines containing only blanks and comments */
-<*>^[[:blank:]]*#.*\n    {
-//                printf("Comment!\n"); //DEBUG
-//                printf("Line %d has a comment\n", yylineno-1); //DEBUG
-            }
+<*>^[[:blank:]]*#.*\n    { }
  /* But make sure that lines with code and comments end right */
 <INITIAL>#.*\n  {
                     BEGIN(indents);
@@ -50,29 +50,23 @@ int is_in(int target, int *array, int *end_ptr);
 
  /* no whitespace to begin line */
 <indents>^[^[:space:]] { 
-//    printf("In state %d: Cur ind_lvl: %d\n", YY_START, *num_ind); //DEBUG
-//    printf("Put back %c\n", yytext[0]); //DEBUG
     yyless(0);
     BEGIN(INITIAL);
     if (*num_ind > 0) {     /* dedented */
-//        printf("Should be dedenting\n"); //DEBUG
         BEGIN(dedents);
     }
 }
 
 <indents>^[[:blank:]]* {
-//    printf("%d: Leading whitespace length: %d\n", yylineno, yyleng);//DEBUG
     if (yyleng == *num_ind) {           /* no change */
         BEGIN(INITIAL);
     } else if (yyleng < *num_ind) {     /* dedented */
-//        printf("%d: Should be dedenting 2\n", yylineno); //DEBUG
         if (!is_in(yyleng, indent_level, num_ind)) {
             error_exit("Dedent to non-matching level");
         }
         yyless(0);
         BEGIN(dedents);
     } else {                            /* indented */
-//        printf("%d Indented to %d\n", yylineno, yyleng); //DEBUG
         BEGIN(INITIAL);
         if (++num_ind == indent_level + MAX_INDENTS) {
             error_exit("Too many levels of indentation");
@@ -83,10 +77,6 @@ int is_in(int target, int *array, int *end_ptr);
 }
  /* Must be sure dedent level exists before entering this state */
 <dedents>[^[:space:]] {
-//    printf("Hooray I'm here! "); //DEBUG
-//    printf("State: %d\n", YY_START); //DEBUG
-//    printf("%d: Dedent length: 0\n", yylineno); //DEBUG
-//    printf("Putting back: %c\n", yytext[0]); //DEBUG
     yyless(0);
     --num_ind;
     if (*num_ind == 0) {
@@ -109,10 +99,11 @@ int is_in(int target, int *array, int *end_ptr);
 }
 
 \n  {
-//    printf("Line: %d\n", yylineno); //DEBUG
     BEGIN(indents);
     return TOK_NEWLINE;
 }
+
+\"  { BEGIN(strings); }
 
 [[:blank:]]+    /* skip spaces & tabs */
 
@@ -122,20 +113,22 @@ int is_in(int target, int *array, int *end_ptr);
 
  /* Integer literals (TOK_INT) */
 0[[:digit:]]+       {
-                        yylval.i = strtoimax(yytext, NULL, 8);
+                        yylval.i = STR_TO_I(yytext, &endptr, 8);
+                        if (*endptr != '\0') /* 8 or 9 captured */
+                            error_exit("Invalid octal literal");
                         return TOK_INT;
                     }
 [[:digit:]]         |
 [1-9][[:digit:]]+   {   
-                        yylval.i = strtoimax(yytext, NULL, 10);
+                        yylval.i = STR_TO_I(yytext, NULL, 10);
                         return TOK_INT;
                     }
 0[Bb][01]+          {
-                        yylval.i = strtoimax(yytext+2, NULL, 2);
+                        yylval.i = STR_TO_I(yytext+2, NULL, 2);
                         return TOK_INT;
                     }
 0[Xx][[:xdigit:]]+  { 
-                        yylval.i = strtoimax(yytext+2, NULL, 16);
+                        yylval.i = STR_TO_I(yytext+2, NULL, 16);
                         return TOK_INT;
                     }
 
@@ -143,7 +136,7 @@ int is_in(int target, int *array, int *end_ptr);
 [[:digit:]]+f                   |
 [[:digit:]]+"."[[:digit:]]*     |
 "."[[:digit:]]+	                {
-                                    yylval.f = strtold(yytext, NULL);
+                                    yylval.f = STR_TO_F(yytext);
                                     return TOK_REAL; 
                                 }
 
@@ -165,6 +158,7 @@ int is_in(int target, int *array, int *end_ptr);
 "not"       { return TOK_NOT; }
 "pass"      { return TOK_PASS; }
 "return"    { return TOK_RETURN; }
+"print"     { return TOK_PRINT; }
 "int"       { yylval.i = INT_T; return TOK_TYPE; }
 "real"      { yylval.i = FLOAT_T; return TOK_TYPE; }
 "bool"      { yylval.i = BOOL_T; return TOK_TYPE; }
@@ -189,6 +183,7 @@ int is_in(int target, int *array, int *end_ptr);
 ")" |
 "," |
 "$" |
+";" |
 ":" { return yytext[0]; }
 
  /* Shift operators (TOK_SHIFT) */
