@@ -1,7 +1,7 @@
 #!/bin/sh
 
 make
-./tetra -v tst.tetra
-./tetra -v < tst.tetra
-./tetra -vf tst.tetra
-./tetra -vf tst.tetra tst.tetra
+./tetra -v test.ttr
+./tetra -v < test.ttr
+./tetra -vf test.ttr
+./tetra -vf test.ttr test.ttr

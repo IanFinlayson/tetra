@@ -123,7 +123,10 @@ TTR_Node *parse_tree;
 
 program: stmt-list '$' TOK_NEWLINE { parse_tree = $1; }
 
+ /*
 stmt-list: stmt { N_MAKE_UN($$, N_STMT, $1); }
+ */
+stmt-list: stmt { $$ = $1; }
     | stmt stmt-list { N_MAKE_BIN($$, N_STMT, $1, $2);} 
 
 stmt: simple-stmt { $$ = $1; }
@@ -140,6 +143,14 @@ compound-stmt: if-stmt
     | for-stmt
     | func-def { $$ = $1; }
 
+small-stmt: expression-stmt
+    | pass-stmt
+    | return-stmt
+    | break-stmt
+    | continue-stmt
+    | print-stmt
+    | global-stmt { $$ = $1; }
+
 suite: simple-stmt { $$ = $1; }
     | TOK_NEWLINE TOK_INDENT stmt-list TOK_DEDENT { $$ = $3; }
 
@@ -151,7 +162,7 @@ if-stmt: if { $$ = $1; }
 if: TOK_IF expression ':' suite { N_MAKE_BIN($$, N_IF, $2, $4); }
 
 elif-list: elif { N_MAKE_UN($$, N_ELIFLIST, $1); }
-    | elif-list elif { N_MAKE_BIN($$, N_ELIFLIST, $1, $2); }
+    | elif elif-list { N_MAKE_BIN($$, N_ELIFLIST, $1, $2); }
 
 elif: TOK_ELIF expression ':' suite { N_MAKE_BIN($$, N_ELIF, $2, $4); }
 
@@ -187,14 +198,6 @@ return-type: /* empty */ { N_MAKE_INT($$, N_TYPE, VOID_T); }
     | type { $$ = $1; }
 
 type: TOK_TYPE { N_MAKE_INT($$, N_TYPE, yylval.i); }
-
-small-stmt: expression-stmt
-    | pass-stmt
-    | return-stmt
-    | break-stmt
-    | continue-stmt
-    | print-stmt
-    | global-stmt { $$ = $1; }
 
 expression-stmt: expression-list
 

@@ -4,6 +4,7 @@ def range() int:
     return a
 # This is a file to test rudimentary Tetra parsing
 i = 10.
+a = b = c = 5
 
 while i < 20:
     i += i # Checking out comments
@@ -21,8 +22,9 @@ elif i != i:
     i = i
 elif a:
     a = not a
-#elif True == False
-    #print "Does this work"
+elif True == False:
+    print all_is_wrong
+    print "Does \"this\" work"
 else:
 
     # blank line before indent

@@ -23,6 +23,8 @@
 #include "parser.tab.h"
 
 #define MAX_INDENTS 50
+#define INIT_STR_BUF_CAPACITY 100
+
 int indent_level[MAX_INDENTS];
 int *num_ind = indent_level;
 
@@ -103,7 +105,38 @@ int is_in(int target, int *array, int *end_ptr);
     return TOK_NEWLINE;
 }
 
-\"  { BEGIN(strings); }
+\"  { 
+        if (str_buf == NULL)
+            str_buf = make_str_buf(INIT_STR_BUF_CAPACITY);
+        else
+            reset_str_buf(str_buf, INIT_STR_BUF_CAPACITY);
+        BEGIN(strings); 
+    }
+
+ /*
+  * Borrowed from flex.sourceforge.net/manual/Start-Conditions.html
+  */
+<strings>\"             {
+                            BEGIN(INITIAL);
+                            yylval.text = str_buf->buffer;
+                            return TOK_STRING;
+                        }
+<strings>\n             {
+                            error_exit("Unterminated string literal");
+                        }
+<strings>\\[0-7]{1,3}   {
+                            append_to_str_buf(str_buf, yytext);
+                        }
+<strings>\\[0-9]+       {
+                            append_to_str_buf(str_buf, yytext);
+                        }
+<strings>\\n            |
+<strings>\\t            |
+<strings>\\r            |
+<strings>\\b            |
+<strings>\\f            { append_to_str_buf(str_buf, yytext); }
+<strings>\\(.|\n)       { append_to_str_buf(str_buf, yytext+1); }
+<strings>[^\\\n\"]+     { append_to_str_buf(str_buf, yytext); }
 
 [[:blank:]]+    /* skip spaces & tabs */
 
@@ -269,16 +302,12 @@ void error_exit(const char *str)
 
 int is_in(int target, int *array, int *end_ptr)
 {
-//    printf("In function is_in()\n"); //DEBUG
     if (end_ptr < array) {
-//        printf("end_ptr > array\n"); //DEBUG
         return 0;
     }
     int *cur;
     for (cur = end_ptr; cur >= array; cur--) {
-//        printf("Checking indent level: %d\n", *cur); //DEBUG
         if (*cur == target) {
-//            printf("Match found: %d\n", *cur); //DEBUG
             return 1;
         }
     }

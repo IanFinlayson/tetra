@@ -2,21 +2,25 @@
 #define H_STRING_BUFFER
 
 #include "tetra_hdr.h"
+#include <string.h>
+#include <stdlib.h>
 
-typedef struct string_buffer {
+typedef struct str_buf {
     char *buffer;
     int capacity;
     int filled;
 } Str_Buf;
 
-Str_Buf *make_string_buffer(int initial_size);
+Str_Buf *make_str_buf(int initial_size);
 
-void dest_string_buffer(Str_Buf *buf);
+void init_str_buf(Str_Buf *buf, int capacity);
 
-void add_str(Str_Buf *buf, char *str);
+void dest_str_buf(Str_Buf *buf);
 
-void empty_buffer(Str_Buf *buf);
+void append_to_str_buf(Str_Buf *buf, char *str);
 
-void reset_buffer(Str_Buf *buf);
+void empty_str_buf(Str_Buf *buf);
+
+void reset_str_buf(Str_Buf *buf, int capacity);
 
 #endif /* H_STRING_BUFFER */

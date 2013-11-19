@@ -1,2 +1,2 @@
 make
-./tetra -vf tst.tetra
+./tetra -vf test.ttr
