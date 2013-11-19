@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "tetra_hdr.h"
-#include "parser.tab.h"
 #include "parsetree.h"
 #include "node.h"
+#include "parser.tab.h"
 
 extern struct TTR_Node *parse_tree;
 

@@ -24,7 +24,7 @@ elif a:
     a = not a
 elif True == False:
     print all_is_wrong
-    print "Does \"this\" work"
+    print "Does \t\"this\" work"
 else:
 
     # blank line before indent

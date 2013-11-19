@@ -4,6 +4,16 @@ void print_node(TTR_Node *node)
 {
     char err_msg[100];
 
+    switch(N_DTYPE(node)) {
+    case INVALID_T: printf("INVALID: "); break;
+    case UNDEFINED_T: printf("UNTYPED: "); break;
+    case VOID_T: printf("VOID: "); break;
+    case INT_T: printf("INT: "); break;
+    case FLOAT_T: printf("FLOAT: "); break;
+    case BOOL_T: printf("BOOL: "); break;
+    default: printf("What? "); break;
+    }
+
     switch(N_TYPE(node)) {
     case N_TYPE: printf("TYPE: %d", N_INT(node)); break;
     case N_IDENTIFIER: printf("IDENTIFIER: %s", N_STR(node)); break;

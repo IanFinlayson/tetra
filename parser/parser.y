@@ -1,22 +1,25 @@
 /*
  * Parser for Tetra.
  *
- * Currently, "list" rules may be right-recursive for easier building of
+ * Putting the line number in nodes does not accurately reflect line
+ * numbers, since they are done at the time of the rule and not the
+ * token.  A couple possible fixes: do a mid-action rule to set a line
+ * number, or change the yylval union to contain a struct that has
+ * a union of other values and a line number.
+ *
+ * "List" rules may be right-recursive for easier building of
  * a parse tree.  Once things are hammered out, this may change for the
  * better.
  *
- * Currently, text values (for TOK_STRING and TOK_IDENT) are passed back
+ * Text values (for TOK_STRING and TOK_IDENT) are passed back
  * from the lexer as a pointer pointing to yytext.  Because of this,
  * text values must be extracted on this side of the parser in their own
  * rule.  For example, one must call identifier-atom or some similar
  * non-terminal to extract the value of yylval.text (which is the same as
  * yytext) before more text is read by the lexer.  Behavior otherwise will
  * certainly not be as intended.
- * In the future, this can be fixed by allocating space for yylval.text
- * and using strcpy() on the lexer side.  Research into the max length of
- * yytext and its behavior would be good before doing this, however.
  *
- * Currently, all lexemes that are always a single character (i.e., '+',
+ * All lexemes that are always a single character (i.e., '+',
  * '-', etc., and not identifiers) are passed directly as that character.
  * All lexemes that can be multi-character ("==", "<<", identifiers, etc.)
  * are passed as tokens.  Is this awkward?  You betcha!  But the re-use
@@ -24,9 +27,7 @@
  * arise when a system of pure character passing for mult-character lexemes,
  * seem to make this a decent solution for now.
  *
- * Function calls do not currently allow for keyword arguments.
- *
- * Strings are not yet implemented.
+ * Function calls do not allow for keyword arguments.
  */
 
 
@@ -38,37 +39,54 @@
 #include "node.h"
 
 #define N_MAKE_INT(prnt, type, d) \
-        (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno)
+        (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
+        (prnt)->dtype = INT_T
+#define N_MAKE_BOOL(prnt, type, b) \
+        (prnt) = TTR_make_node((type), "", (b), 0.0, yylineno); \
+        (prnt)->dtype = BOOL_T
 #define N_MAKE_FLOAT(prnt, type, f) \
-        (prnt) =  TTR_make_node((type), "", 0, (f), yylineno)
+        (prnt) =  TTR_make_node((type), "", 0, (f), yylineno); \
+        (prnt)->dtype = FLOAT_T
 #define N_MAKE_STR(prnt, type, s) \
-        (prnt) =  TTR_make_node((type), (s), 0, 0.0, yylineno)
+        (prnt) =  TTR_make_node((type), (s), 0, 0.0, yylineno); \
+        (prnt)->dtype = STRING_T
 #define N_MAKE_VOID(prnt, type) \
-        (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno)
+        (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
+        (prnt)->dtype = VOID_T
 #define N_MAKE_INTSTR(prnt, type, d, s) \
         (prnt) = TTR_make_node((type), (str), (d), 0.0, yylineno)
 #define N_MAKE_UN(prnt, type, ch1) \
         (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
-        TTR_add_child((yyval.node), (ch1))
+        TTR_add_child((yyval.node), (ch1)); \
+        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+            yyerror("Type mismatch")
 #define N_MAKE_BIN(prnt, type, ch1, ch2) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
         TTR_add_child((yyval.node), (ch1)); \
-        TTR_add_child((yyval.node), (ch2))
+        TTR_add_child((yyval.node), (ch2)); \
+        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+            yyerror("Type mismatch")
 #define N_MAKE_TERN(prnt, type, ch1, ch2, ch3) \
         (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
         TTR_add_child((yyval.node), (ch1)); \
         TTR_add_child((yyval.node), (ch2)); \
-        TTR_add_child((yyval.node), (ch3))
+        TTR_add_child((yyval.node), (ch3)); \
+        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+            yyerror("Type mismatch")
 #define N_MAKE_QUAD(prnt, type, ch1, ch2, ch3, ch4) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
         TTR_add_child((yyval.node), (ch1)); \
         TTR_add_child((yyval.node), (ch2)); \
         TTR_add_child((yyval.node), (ch3)); \
-        TTR_add_child((yyval.node), (ch4));
+        TTR_add_child((yyval.node), (ch4)); \
+        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+            yyerror("Type mismatch")
 #define N_MAKE_INT_BIN(prnt, type, d, ch1, ch2) \
         (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
         TTR_add_child((yyval.node), (ch1)); \
-        TTR_add_child((yyval.node), (ch2))
+        TTR_add_child((yyval.node), (ch2)); \
+        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+            yyerror("Type mismatch")
 
 int yywrap(void);
 void yyerror(const char *msg);
@@ -108,7 +126,7 @@ TTR_Node *parse_tree;
 %type <node> program stmt-list stmt simple-stmt small-stmt-list 
 %type <node> compound-stmt suite if-stmt if elif-list elif else 
 %type <node> while-stmt while for-stmt for target-list target func-def 
-%type <node> funcname parameter-list return-type type small-stmt 
+%type <node> funcname parameter-list small-stmt 
 %type <node> expression-stmt expression-list pass-stmt return-stmt 
 %type <node> break-stmt continue-stmt global-stmt identifier-list 
 %type <node> expression assignment-expr identifier conditional-expr 
@@ -116,6 +134,7 @@ TTR_Node *parse_tree;
 %type <node> and-expr shift-expr add-expr mult-expr unary-expr power-expr 
 %type <node> primary atom literal enclosure call argument-list 
 %type <node> positional-arguments print-stmt
+%type <i> return-type type 
 
 %error-verbose
 
@@ -185,7 +204,7 @@ target-list: target { N_MAKE_UN($$, N_TGTS, $1); }
 target: identifier { $$ = $1; }
 
 func-def: TOK_DEF funcname '(' parameter-list ')' return-type ':' suite
-    { N_MAKE_QUAD($$, N_FUNCDEF, $2, $4, $6, $8); }
+    { N_MAKE_TERN($$, N_FUNCDEF, $2, $4, $8); N_DTYPE($$) = $6; }
 
 funcname: identifier { $$ = $1; }
 
@@ -194,10 +213,10 @@ parameter-list: /* empty */ { N_MAKE_VOID($$, N_PARAMLIST); }
     | parameter-list ',' identifier 
         { N_MAKE_BIN($$, N_PARAMLIST, $1, $3); }
 
-return-type: /* empty */ { N_MAKE_INT($$, N_TYPE, VOID_T); }
+return-type: /* empty */ { $$ = VOID_T; }
     | type { $$ = $1; }
 
-type: TOK_TYPE { N_MAKE_INT($$, N_TYPE, yylval.i); }
+type: TOK_TYPE { $$ = yylval.i; }
 
 expression-stmt: expression-list
 
@@ -288,9 +307,12 @@ atom: identifier
     | literal
     | enclosure { $$ = $1; }
 
-identifier: TOK_IDENTIFIER { N_MAKE_STR($$, N_IDENTIFIER, yylval.text); }
+identifier: TOK_IDENTIFIER { 
+    N_MAKE_STR($$, N_IDENTIFIER, yylval.text);
+    N_DTYPE($$) = UNDEFINED_T;
+}
 
-literal: TOK_BOOL { N_MAKE_INT($$, N_BOOL, yylval.i); }
+literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
     | TOK_INT { N_MAKE_INT($$, N_INT, yylval.i); }
     | TOK_REAL { N_MAKE_FLOAT($$, N_FLOAT, yylval.f); }
     | TOK_STRING { N_MAKE_STR($$, N_STRING, yylval.text); }

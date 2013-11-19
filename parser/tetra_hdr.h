@@ -21,6 +21,14 @@ enum Assign_Type {
     RSH_BEC, LSH_BEC, AND_BEC, XOR_BEC, OR_BEC, BEC_BEC
 };
 enum Shift_Type { SHIFT_L, SHIFT_R };
-enum TYPES { INT_T, FLOAT_T, STRING_T, BOOL_T, VOID_T };
+
+/* 
+ * INVALID_T is the result of an attempt to combine incompatible types,
+ * such as BOOL_T and INT_T or STRING_T and FLOAT_T.
+ * UNDEFINED_T is for non-typed nodes, i.e. statements and other such nodes.
+ */
+enum Data_Type { 
+    INVALID_T, UNDEFINED_T, VOID_T, INT_T, FLOAT_T, STRING_T, BOOL_T
+};
 
 #endif /* ifndef H_TETRA_HDR */

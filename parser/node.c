@@ -60,3 +60,31 @@ int TTR_add_child(TTR_Node *parent, TTR_Node *child)
     N_NCH(parent)++;
     return 0;
 }
+
+int TTR_infer_data_type(TTR_Node *node)
+{
+    int p_type, ch_type, i;
+    if (N_NCH(node) == 0) {
+        N_DTYPE(node) = UNDEFINED_T;
+        return UNDEFINED_T;
+    }
+    p_type = N_DTYPE(N_CHILD(node, 0));
+    for (i = 1; i < N_NCH(node); i++) {
+        ch_type = N_DTYPE(N_CHILD(node, i));
+        if (ch_type == UNDEFINED_T)
+            continue;
+        if (p_type == UNDEFINED_T) {
+            p_type = ch_type;
+            continue;
+        }
+        if (p_type == ch_type)
+            p_type = ch_type;
+        else if ((p_type == FLOAT_T || p_type == INT_T) &&
+                 (ch_type == FLOAT_T || ch_type == INT_T))
+            p_type = FLOAT_T;
+        else
+            p_type = INVALID_T;
+    }
+    N_DTYPE(node) = p_type;
+    return p_type;
+}

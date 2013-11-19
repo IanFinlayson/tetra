@@ -7,14 +7,15 @@
 #include "tetra_hdr.h"
 
 typedef struct node {
-    int type;
-    char *str;
-    tetra_int d;
-    tetra_float f;
-    int lineno;
-    int n_children;
-    int capacity;
-    struct node **children;
+    int ntype;                  /* node type (if, while, etc.) */
+    int dtype;                  /* data type (string, int, etc.) */
+    char *str;                  /* identifier or string value */
+    tetra_int d;                /* integer value */
+    tetra_float f;              /* float value */
+    int lineno;                 /* line number */
+    int n_children;             /* number of children */
+    int capacity;               /* capacity for child pointers */
+    struct node **children;     /* list of pointers to children */
 } TTR_Node;
 
 enum Node_Types {
@@ -80,7 +81,8 @@ enum Node_Types {
 /* A series of access macros.  
  * Hopefully will make any changes less painful. 
  */
-#define N_TYPE(n) ((n)->type)
+#define N_TYPE(n) ((n)->ntype)
+#define N_DTYPE(n) ((n)->dtype)
 #define N_NCH(n) ((n)->n_children)
 #define N_CHILDREN(n) ((n)->children)
 #define N_CHILD(n, c) ((n)->children[(c)])
@@ -108,5 +110,14 @@ void TTR_free_node(TTR_Node *node);
  * children.
  */
 int TTR_add_child(TTR_Node *parent, TTR_Node *child);
+
+/*
+ * Poll the children for their data types, and set the parent type
+ * accordingly.  See discussion in tetra_hdr.h for data types and
+ * their meaning.
+ * Returns the type coerced to, which is INVALID_T when a legitimate
+ * coercion could not be performed.
+ */
+int TTR_infer_data_type(TTR_Node *node);
 
 #endif /* H_TETRA_NODE */
