@@ -1,0 +1,11 @@
+i = .10
+
+a = 50
+
+this = "that"
+
+while i < 10:
+    i += .6
+    a = 7
+    this = True
+$

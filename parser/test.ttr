@@ -40,5 +40,9 @@ for i in range(12):
     continue
     break
 
+arthur = 10
+dent = 5.7
+
 print arthur / dent + 1**10**2 * a % 2
+arthur = 10 + 11.1
 $

@@ -2,11 +2,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "tetra_hdr.h"
+#include "symbol_table.h"
 #include "parsetree.h"
 #include "node.h"
 #include "parser.tab.h"
 
-extern struct TTR_Node *parse_tree;
+extern TTR_Node *parse_tree;
+Symbol_Table *symbol_table;
 
 int main(int argc, char **argv)
 {
@@ -37,6 +39,11 @@ int main(int argc, char **argv)
     else if ((fp = fopen(file, "r")) == NULL)
         ferr_exit("Opening file", fp);
 
+    DEBUG("Was good to here before");
+    init_symbol_table(&symbol_table);
+    DEBUG("Symbol table initialized");
+    symbol_table_enter_next_scope(symbol_table);
+    DEBUG("About to parse");
     yyrestart(fp);
     yyparse();
 

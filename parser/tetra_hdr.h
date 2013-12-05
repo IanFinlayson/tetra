@@ -1,12 +1,14 @@
 /*
  * Header file for stuff necessary to construct a Tetra parse tree.
  */
-
 #ifndef H_TETRA_HDR
 #define H_TETRA_HDR
 
 #include <inttypes.h>
+#include <stdio.h>
 #include "exit_funcs.h"
+
+#define DEBUG(msg) fprintf(stderr, "%s\n", (msg))
 
 typedef int32_t tetra_int;
 typedef double tetra_float;

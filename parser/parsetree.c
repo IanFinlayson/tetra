@@ -11,6 +11,7 @@ void print_node(TTR_Node *node)
     case INT_T: printf("INT: "); break;
     case FLOAT_T: printf("FLOAT: "); break;
     case BOOL_T: printf("BOOL: "); break;
+    case STRING_T: printf("STRING: "); break;
     default: printf("What? "); break;
     }
 

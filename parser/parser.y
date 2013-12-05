@@ -37,6 +37,7 @@
 #include <string.h>
 #include "tetra_hdr.h"
 #include "node.h"
+#include "symbol_table.h"
 
 #define N_MAKE_INT(prnt, type, d) \
         (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
@@ -55,6 +56,11 @@
         (prnt)->dtype = VOID_T
 #define N_MAKE_INTSTR(prnt, type, d, s) \
         (prnt) = TTR_make_node((type), (str), (d), 0.0, yylineno)
+#define N_MAKE_STMT(prnt, type) \
+        (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
+        (prnt)->dtype = UNDEFINED_T
+#define N_ADD_CHILD(prnt, child) \
+        TTR_add_child((prnt), (child))
 #define N_MAKE_UN(prnt, type, ch1) \
         (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
         TTR_add_child((yyval.node), (ch1)); \
@@ -87,11 +93,17 @@
         TTR_add_child((yyval.node), (ch2)); \
         if (TTR_infer_data_type((prnt)) == INVALID_T) \
             yyerror("Type mismatch")
+#define SET_IDENT_TYPE(ident, type) \
+        TTR_set_ident_data_type(symbol_table, (ident), (type))
+#define PUSH_SCOPE() \
+        symbol_table_enter_next_scope(symbol_table)
+#define POP_SCOPE() symbol_table_leave_scope(symbol_table)
 
 int yywrap(void);
 void yyerror(const char *msg);
 
 extern int yylineno;
+extern Symbol_Table *symbol_table;
 TTR_Node *parse_tree;
 %}
 
@@ -187,10 +199,19 @@ elif: TOK_ELIF expression ':' suite { N_MAKE_BIN($$, N_ELIF, $2, $4); }
 
 else: TOK_ELSE ':' suite { N_MAKE_UN($$, N_ELSE, $3); }
 
+/*
 while-stmt: while { $$ = $1; }
-    | while else { N_MAKE_BIN($$, N_WHILESTMT, $1, $2); }
 
 while: TOK_WHILE expression ':' suite { N_MAKE_BIN($$, N_WHILE, $2, $4); }
+*/
+while-stmt: while expression ':' suite  {
+                                            $$ = $1;
+                                            N_ADD_CHILD($$, $2);
+                                            N_ADD_CHILD($$, $4);
+                                            POP_SCOPE();
+                                        }
+
+while: TOK_WHILE { PUSH_SCOPE(); N_MAKE_STMT($$, N_WHILE); }
 
 for-stmt: for { $$ = $1; }
     | for else { N_MAKE_BIN($$, N_FORSTMT, $1, $2); }
@@ -245,9 +266,15 @@ expression: assignment-expr { $$ = $1; }
 
 assignment-expr: conditional-expr { $$ = $1; }
     | target '=' assignment-expr 
-        { N_MAKE_INT_BIN($$, N_ASSIGN, BEC_BEC, $1, $3); }
+        { 
+            SET_IDENT_TYPE($1, N_DTYPE($3));
+            N_MAKE_INT_BIN($$, N_ASSIGN, BEC_BEC, $1, $3);
+        }
     | target TOK_ASSIGN assignment-expr
-        { N_MAKE_INT_BIN($$, N_ASSIGN, $2, $1, $3); }
+        {
+            SET_IDENT_TYPE($1, N_DTYPE($3));
+            N_MAKE_INT_BIN($$, N_ASSIGN, $2, $1, $3);
+        }
 
 conditional-expr: or-test { $$ = $1; }
     | or-test TOK_IF or-test TOK_ELSE expression
