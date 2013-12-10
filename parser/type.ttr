@@ -8,4 +8,9 @@ while i < 10:
     i += .6
     a = 7
     this = True
+
+def func() float:
+    return 10.0
+
+a = func()
 $

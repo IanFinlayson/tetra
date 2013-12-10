@@ -1,2 +1,2 @@
-make
+make &&
 ./tetra -vf test.ttr

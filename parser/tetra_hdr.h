@@ -27,10 +27,13 @@ enum Shift_Type { SHIFT_L, SHIFT_R };
 /* 
  * INVALID_T is the result of an attempt to combine incompatible types,
  * such as BOOL_T and INT_T or STRING_T and FLOAT_T.
- * UNDEFINED_T is for non-typed nodes, i.e. statements and other such nodes.
+ * UNTYPED_T is for nodes without types, such as statements.
+ * UNDEFINED_T is for nodes that should be typed, but that lack the
+ * information for type to be inferred.
  */
 enum Data_Type { 
-    INVALID_T, UNDEFINED_T, VOID_T, INT_T, FLOAT_T, STRING_T, BOOL_T
+    INVALID_T, UNTYPED_T, UNDEFINED_T, VOID_T, INT_T,
+    FLOAT_T, STRING_T, BOOL_T
 };
 
 #endif /* ifndef H_TETRA_HDR */

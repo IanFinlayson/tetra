@@ -58,7 +58,7 @@
         (prnt) = TTR_make_node((type), (str), (d), 0.0, yylineno)
 #define N_MAKE_STMT(prnt, type) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
-        (prnt)->dtype = UNDEFINED_T
+        (prnt)->dtype = UNTYPED_T
 #define N_ADD_CHILD(prnt, child) \
         TTR_add_child((prnt), (child))
 #define N_MAKE_UN(prnt, type, ch1) \
@@ -72,29 +72,20 @@
         TTR_add_child((yyval.node), (ch2)); \
         if (TTR_infer_data_type((prnt)) == INVALID_T) \
             yyerror("Type mismatch")
-#define N_MAKE_TERN(prnt, type, ch1, ch2, ch3) \
-        (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
-        TTR_add_child((yyval.node), (ch1)); \
-        TTR_add_child((yyval.node), (ch2)); \
-        TTR_add_child((yyval.node), (ch3)); \
-        if (TTR_infer_data_type((prnt)) == INVALID_T) \
-            yyerror("Type mismatch")
-#define N_MAKE_QUAD(prnt, type, ch1, ch2, ch3, ch4) \
-        (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
-        TTR_add_child((yyval.node), (ch1)); \
-        TTR_add_child((yyval.node), (ch2)); \
-        TTR_add_child((yyval.node), (ch3)); \
-        TTR_add_child((yyval.node), (ch4)); \
-        if (TTR_infer_data_type((prnt)) == INVALID_T) \
-            yyerror("Type mismatch")
 #define N_MAKE_INT_BIN(prnt, type, d, ch1, ch2) \
         (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
         TTR_add_child((yyval.node), (ch1)); \
         TTR_add_child((yyval.node), (ch2)); \
         if (TTR_infer_data_type((prnt)) == INVALID_T) \
             yyerror("Type mismatch")
+#define INFER_DATA_TYPE(prnt) \
+        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+            yyerror("Type mismatch")
 #define SET_IDENT_TYPE(ident, type) \
         TTR_set_ident_data_type(symbol_table, (ident), (type))
+#define GET_IDENT_TYPE(node, ident) \
+        TTR_Node *n = symbol_table_lookup(symbol_table, (ident)); \
+        (node)->dtype = (n == NULL) ? UNDEFINED_T : n->dtype
 #define PUSH_SCOPE() \
         symbol_table_enter_next_scope(symbol_table)
 #define POP_SCOPE() symbol_table_leave_scope(symbol_table)
@@ -137,7 +128,7 @@ TTR_Node *parse_tree;
  */
 %type <node> program stmt-list stmt simple-stmt small-stmt-list 
 %type <node> compound-stmt suite if-stmt if elif-list elif else 
-%type <node> while-stmt while for-stmt for target-list target func-def 
+%type <node> while-stmt for-stmt for target-list target func-def 
 %type <node> funcname parameter-list small-stmt 
 %type <node> expression-stmt expression-list pass-stmt return-stmt 
 %type <node> break-stmt continue-stmt global-stmt identifier-list 
@@ -145,8 +136,9 @@ TTR_Node *parse_tree;
 %type <node> or-test and-test not-test comparison or-expr xor-expr 
 %type <node> and-expr shift-expr add-expr mult-expr unary-expr power-expr 
 %type <node> primary atom literal enclosure call argument-list 
-%type <node> positional-arguments print-stmt
-%type <i> return-type type 
+%type <node> positional-arguments print-stmt def while-tok for-tok
+%type <node> if-tok else-tok elif-tok top-level-stmt callable
+%type <i> return-type type
 
 %error-verbose
 
@@ -154,25 +146,34 @@ TTR_Node *parse_tree;
 
 program: stmt-list '$' TOK_NEWLINE { parse_tree = $1; }
 
- /*
-stmt-list: stmt { N_MAKE_UN($$, N_STMT, $1); }
- */
 stmt-list: stmt { $$ = $1; }
-    | stmt stmt-list { N_MAKE_BIN($$, N_STMT, $1, $2);} 
+    | stmt stmt-list { 
+        N_MAKE_STMT($$, N_STMT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $2);
+    }
 
 stmt: simple-stmt { $$ = $1; }
-    | compound-stmt { $$ = $1; }
+    | top-level-stmt { $$ = $1; }
 
 simple-stmt: small-stmt-list TOK_NEWLINE { $$ = $1; }
 
-small-stmt-list: small-stmt { N_MAKE_UN($$, N_SMALLSTMT, $1); }
-    | small-stmt ';' small-stmt-list 
-        { N_MAKE_BIN($$, N_SMALLSTMT, $1, $3); }
+small-stmt-list: small-stmt { 
+        N_MAKE_STMT($$, N_SMALLSTMT);
+        N_ADD_CHILD($$, $1);
+    }
+    | small-stmt ';' small-stmt-list { 
+        N_MAKE_STMT($$, N_SMALLSTMT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+
+top-level-stmt: func-def
+    | compound-stmt { $$ = $1; }
 
 compound-stmt: if-stmt
     | while-stmt
-    | for-stmt
-    | func-def { $$ = $1; }
+    | for-stmt { $$ = $1; }
 
 small-stmt: expression-stmt
     | pass-stmt
@@ -188,44 +189,80 @@ suite: simple-stmt { $$ = $1; }
 if-stmt: if { $$ = $1; }
     | if else { N_MAKE_BIN($$, N_IF, $1, $2); }
     | if elif-list { N_MAKE_BIN($$, N_IF, $1, $2); }
-    | if elif-list else { N_MAKE_TERN($$, N_IF, $1, $2, $3); }
+    | if elif-list else { 
+        N_MAKE_STMT($$, N_IF);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $2);
+        N_ADD_CHILD($$, $3);
+    }
 
-if: TOK_IF expression ':' suite { N_MAKE_BIN($$, N_IF, $2, $4); }
+if: if-tok expression ':' suite { 
+    $$ = $1;
+    N_ADD_CHILD($$, $2);
+    N_ADD_CHILD($$, $4);
+}
+
+if-tok: TOK_IF { N_MAKE_STMT($$, N_IF); }
 
 elif-list: elif { N_MAKE_UN($$, N_ELIFLIST, $1); }
     | elif elif-list { N_MAKE_BIN($$, N_ELIFLIST, $1, $2); }
 
-elif: TOK_ELIF expression ':' suite { N_MAKE_BIN($$, N_ELIF, $2, $4); }
+elif: elif-tok expression ':' suite { 
+    $$ = $1;
+    N_ADD_CHILD($$, $2);
+    N_ADD_CHILD($$, $4);
+}
 
-else: TOK_ELSE ':' suite { N_MAKE_UN($$, N_ELSE, $3); }
+elif-tok: TOK_ELIF { N_MAKE_STMT($$, N_ELIF); }
+
+else: else-tok ':' suite { 
+    $$ = $1;
+    N_ADD_CHILD($$, $3);
+}
+
+else-tok: TOK_ELSE { N_MAKE_STMT( $$, N_ELSE); }
 
 /*
 while-stmt: while { $$ = $1; }
 
 while: TOK_WHILE expression ':' suite { N_MAKE_BIN($$, N_WHILE, $2, $4); }
 */
-while-stmt: while expression ':' suite  {
-                                            $$ = $1;
-                                            N_ADD_CHILD($$, $2);
-                                            N_ADD_CHILD($$, $4);
-                                            POP_SCOPE();
-                                        }
+while-stmt: while-tok expression ':' suite  {
+    $$ = $1;
+    N_ADD_CHILD($$, $2);
+    N_ADD_CHILD($$, $4);
+}
 
-while: TOK_WHILE { PUSH_SCOPE(); N_MAKE_STMT($$, N_WHILE); }
+while-tok: TOK_WHILE { N_MAKE_STMT($$, N_WHILE); }
 
 for-stmt: for { $$ = $1; }
-    | for else { N_MAKE_BIN($$, N_FORSTMT, $1, $2); }
+    /* | for else { N_MAKE_BIN($$, N_FORSTMT, $1, $2); } */
 
-for: TOK_FOR target-list TOK_IN expression-list ':' suite
-    { N_MAKE_TERN($$, N_FOR, $2, $4, $6); }
+for: for-tok target-list TOK_IN expression-list ':' suite { 
+    $$ = $1;
+    N_ADD_CHILD($$, $2);
+    N_ADD_CHILD($$, $4);
+    N_ADD_CHILD($$, $6);
+}
+
+for-tok: TOK_FOR { N_MAKE_STMT($$, N_FOR); }
 
 target-list: target { N_MAKE_UN($$, N_TGTS, $1); }
     | target-list ',' target { N_MAKE_BIN($$, N_TGTS, $1, $3); }
 
-target: identifier { $$ = $1; }
+target: identifier { $$ = $1; } 
 
-func-def: TOK_DEF funcname '(' parameter-list ')' return-type ':' suite
-    { N_MAKE_TERN($$, N_FUNCDEF, $2, $4, $8); N_DTYPE($$) = $6; }
+func-def: def funcname '(' parameter-list ')' return-type 
+    ':' { PUSH_SCOPE(); } suite { 
+    POP_SCOPE();
+    $$ = $1;     
+    N_ADD_CHILD($$, $2); 
+    N_ADD_CHILD($$, $4); 
+    N_ADD_CHILD($$, $9); 
+    SET_IDENT_TYPE($2, $6);
+}
+
+def: TOK_DEF    { N_MAKE_STMT($$, N_FUNCDEF); }
 
 funcname: identifier { $$ = $1; }
 
@@ -277,8 +314,12 @@ assignment-expr: conditional-expr { $$ = $1; }
         }
 
 conditional-expr: or-test { $$ = $1; }
-    | or-test TOK_IF or-test TOK_ELSE expression
-        { N_MAKE_TERN($$, N_CONDITIONAL, $1, $3, $5); }
+    | or-test TOK_IF or-test TOK_ELSE expression { 
+        N_MAKE_STMT($$, N_CONDITIONAL);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+        N_ADD_CHILD($$, $5);
+    }
 
 or-test: and-test { $$ = $1; }
     | or-test TOK_OR and-test { N_MAKE_BIN($$, N_OR, $1, $3); }
@@ -330,13 +371,15 @@ power-expr: primary { $$ = $1; }
 primary: atom
     | call { $$ = $1; }
 
-atom: identifier
-    | literal
+atom: callable
+    | literal { $$ = $1; }
+
+callable: identifier
     | enclosure { $$ = $1; }
 
 identifier: TOK_IDENTIFIER { 
     N_MAKE_STR($$, N_IDENTIFIER, yylval.text);
-    N_DTYPE($$) = UNDEFINED_T;
+    GET_IDENT_TYPE($$, yylval.text);
 }
 
 literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
@@ -346,8 +389,11 @@ literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
 
 enclosure: '(' expression ')' { $$ = $2; }
 
-call: primary '(' ')' { N_MAKE_UN($$, N_CALL, $1); }
-    | primary '(' argument-list ')' { N_MAKE_BIN($$, N_CALL, $1, $3); }
+call: callable '(' ')' { 
+    N_MAKE_UN($$, N_CALL, $1); 
+    GET_IDENT_TYPE($$, N_STR($1));
+}
+    | callable '(' argument-list ')' { N_MAKE_BIN($$, N_CALL, $1, $3); }
 
 argument-list: positional-arguments { $$ = $1; }
 

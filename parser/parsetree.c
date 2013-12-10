@@ -4,6 +4,8 @@ void print_node(TTR_Node *node)
 {
     char err_msg[100];
 
+    printf("<Line %d> ", N_LINE(node));
+
     switch(N_DTYPE(node)) {
     case INVALID_T: printf("INVALID: "); break;
     case UNDEFINED_T: printf("UNTYPED: "); break;
@@ -12,6 +14,7 @@ void print_node(TTR_Node *node)
     case FLOAT_T: printf("FLOAT: "); break;
     case BOOL_T: printf("BOOL: "); break;
     case STRING_T: printf("STRING: "); break;
+    case UNTYPED_T: printf("UNTYPED: "); break;
     default: printf("What? "); break;
     }
 

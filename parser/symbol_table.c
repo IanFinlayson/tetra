@@ -126,15 +126,14 @@ void TTR_set_ident_data_type(
 
     assert(table != NULL);
     assert(identifier != NULL);
-    assert(N_DTYPE(identifier) == N_IDENTIFIER);
+    assert(N_TYPE(identifier) == N_IDENTIFIER ||
+            N_TYPE(identifier) == N_FUNCDEF);
 
     sym_node = symbol_table_lookup(table, N_STR(identifier));
     if (sym_node == NULL) {
         N_DTYPE(identifier) = type;
         symbol_table_add(table, N_STR(identifier), identifier);
-        DEBUG("Sym node is NULL");
     } else {
         N_DTYPE(identifier) = N_DTYPE(sym_node);
-        DEBUG("Sym node is not NULL");
     }
 }

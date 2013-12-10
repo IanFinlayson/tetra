@@ -9,6 +9,7 @@
 typedef struct node {
     int ntype;                  /* node type (if, while, etc.) */
     int dtype;                  /* data type (string, int, etc.) */
+    int scope;                  /* scope in which the node occurs */
     char *str;                  /* identifier or string value */
     tetra_int d;                /* integer value */
     tetra_float f;              /* float value */
@@ -96,7 +97,7 @@ enum Node_Types {
  * Create a new node on the heap and return a pointer to it.  
  * Returns NULL on error
  */
-TTR_Node * TTR_make_node(int type, const char *str, tetra_int d, 
+TTR_Node *TTR_make_node(int type, const char *str, tetra_int d, 
         tetra_float f, int lineno);
 
 /* 

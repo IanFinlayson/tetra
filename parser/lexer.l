@@ -193,7 +193,7 @@ int is_in(int target, int *array, int *end_ptr);
 "return"    { return TOK_RETURN; }
 "print"     { return TOK_PRINT; }
 "int"       { yylval.i = INT_T; return TOK_TYPE; }
-"real"      { yylval.i = FLOAT_T; return TOK_TYPE; }
+"float"      { yylval.i = FLOAT_T; return TOK_TYPE; }
 "bool"      { yylval.i = BOOL_T; return TOK_TYPE; }
 "string"    { yylval.i = STRING_T; return TOK_TYPE; }
 "void"      { yylval.i = VOID_T; return TOK_TYPE; }
