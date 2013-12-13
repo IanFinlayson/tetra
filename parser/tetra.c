@@ -7,7 +7,7 @@
 #include "node.h"
 #include "parser.tab.h"
 
-extern TTR_Node *parse_tree;
+TTR_Node *parse_tree;
 Symbol_Table *symbol_table;
 
 int main(int argc, char **argv)

@@ -1,11 +1,8 @@
 /*
  * Parser for Tetra.
  *
- * Putting the line number in nodes does not accurately reflect line
- * numbers, since they are done at the time of the rule and not the
- * token.  A couple possible fixes: do a mid-action rule to set a line
- * number, or change the yylval union to contain a struct that has
- * a union of other values and a line number.
+ * Putting the line number in statements does not accurately reflect line
+ * numbers, since they don't have a token to bite onto.
  *
  * "List" rules may be right-recursive for easier building of
  * a parse tree.  Once things are hammered out, this may change for the
@@ -95,7 +92,7 @@ void yyerror(const char *msg);
 
 extern int yylineno;
 extern Symbol_Table *symbol_table;
-TTR_Node *parse_tree;
+extern TTR_Node *parse_tree;
 %}
 
 %union {
@@ -117,14 +114,12 @@ TTR_Node *parse_tree;
 %token TOK_FORALL TOK_PARALLEL
 %token TOK_DEF TOK_GLOBAL
 %token TOK_PASS TOK_RETURN TOK_PRINT
-/* These have been abandoned in favor of TOK_TYPE w/ int val for now
-%token TOK_INT_T TOK_REAL_T TOK_BOOL_T TOK_STRING_T TOK_VOID_T
-*/
 
 /* You can call nonterminals.awk here to generate a type list for all
  * non-terminals (with ":r !awk -f nonterminals.awk parser.y").
  * I suggest re-generating after any changes to the rules section.
  * This assumes that all non-terminals are of the type of node.
+ * Types return-type and type must be hand-done, though, for they are ints.
  */
 %type <node> program stmt-list stmt simple-stmt small-stmt-list 
 %type <node> compound-stmt suite if-stmt if elif-list elif else 
@@ -138,6 +133,7 @@ TTR_Node *parse_tree;
 %type <node> primary atom literal enclosure call argument-list 
 %type <node> positional-arguments print-stmt def while-tok for-tok
 %type <node> if-tok else-tok elif-tok top-level-stmt callable
+%type <node> print-tok
 %type <i> return-type type
 
 %error-verbose
@@ -181,7 +177,7 @@ small-stmt: expression-stmt
     | break-stmt
     | continue-stmt
     | print-stmt
-    | global-stmt { $$ = $1; }
+    | global-stmt { DEBUG("ss"); $$ = $1; }
 
 suite: simple-stmt { $$ = $1; }
     | TOK_NEWLINE TOK_INDENT stmt-list TOK_DEDENT { $$ = $3; }
@@ -204,8 +200,15 @@ if: if-tok expression ':' suite {
 
 if-tok: TOK_IF { N_MAKE_STMT($$, N_IF); }
 
-elif-list: elif { N_MAKE_UN($$, N_ELIFLIST, $1); }
-    | elif elif-list { N_MAKE_BIN($$, N_ELIFLIST, $1, $2); }
+elif-list: elif { 
+        N_MAKE_STMT($$, N_ELIFLIST);
+        N_ADD_CHILD($$, $1);
+    }
+    | elif elif-list { 
+        N_MAKE_STMT($$, N_ELIFLIST);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $2);
+    }
 
 elif: elif-tok expression ':' suite { 
     $$ = $1;
@@ -247,8 +250,15 @@ for: for-tok target-list TOK_IN expression-list ':' suite {
 
 for-tok: TOK_FOR { N_MAKE_STMT($$, N_FOR); }
 
-target-list: target { N_MAKE_UN($$, N_TGTS, $1); }
-    | target-list ',' target { N_MAKE_BIN($$, N_TGTS, $1, $3); }
+target-list: target { 
+        N_MAKE_STMT($$, N_TGTS);
+        N_ADD_CHILD($$, $1);
+    }
+    | target-list ',' target { 
+        N_MAKE_STMT($$, N_TGTS);
+        N_ADD_CHILD($$,$1);
+        N_ADD_CHILD($$, $3);
+    }
 
 target: identifier { $$ = $1; } 
 
@@ -262,14 +272,20 @@ func-def: def funcname '(' parameter-list ')' return-type
     SET_IDENT_TYPE($2, $6);
 }
 
-def: TOK_DEF    { N_MAKE_STMT($$, N_FUNCDEF); }
+def: TOK_DEF { N_MAKE_STMT($$, N_FUNCDEF); }
 
 funcname: identifier { $$ = $1; }
 
 parameter-list: /* empty */ { N_MAKE_VOID($$, N_PARAMLIST); }
-    | identifier { N_MAKE_UN($$, N_PARAMLIST, $1); }
-    | parameter-list ',' identifier 
-        { N_MAKE_BIN($$, N_PARAMLIST, $1, $3); }
+    | identifier { 
+        N_MAKE_STMT($$, N_PARAMLIST);
+        N_ADD_CHILD($$, $1);
+    }
+    | parameter-list ',' identifier { 
+        N_MAKE_STMT($$, N_PARAMLIST);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 return-type: /* empty */ { $$ = VOID_T; }
     | type { $$ = $1; }
@@ -278,20 +294,31 @@ type: TOK_TYPE { $$ = yylval.i; }
 
 expression-stmt: expression-list
 
-expression-list: expression { N_MAKE_UN($$, N_EXPR, $1); }
-    | expression-list ',' expression
-    | expression-list ',' expression ',' 
+expression-list: expression { 
+        N_MAKE_STMT($$, N_EXPR);
+        N_ADD_CHILD($$, $1);
+    }
+    | expression ',' expression-list
+    | expression ',' expression-list ',' 
         { N_MAKE_BIN($$, N_EXPR, $1, $3); }
 
 pass-stmt: TOK_PASS { N_MAKE_VOID($$, N_PASS); }
 
-return-stmt: TOK_RETURN expression { N_MAKE_UN($$, N_RETURN, $2); }
+return-stmt: TOK_RETURN expression { 
+    N_MAKE_STMT($$, N_RETURN);
+    N_ADD_CHILD($$, $2);
+}
 
 break-stmt: TOK_BREAK { N_MAKE_VOID($$, N_BREAK); }
 
 continue-stmt: TOK_CONTINUE { N_MAKE_VOID($$, N_CONTINUE); }
 
-print-stmt: TOK_PRINT expression { N_MAKE_UN($$, N_PRINT, $2); }
+print-stmt: print-tok expression { 
+    $$ = $1;
+    N_ADD_CHILD($$, $2);
+}
+
+print-tok: TOK_PRINT { N_MAKE_STMT($$, N_PRINT); }
 
 global-stmt: TOK_GLOBAL identifier-list { N_MAKE_UN($$, N_GLOBAL, $2); }
 
@@ -398,7 +425,7 @@ call: callable '(' ')' {
 argument-list: positional-arguments { $$ = $1; }
 
 positional-arguments: expression { N_MAKE_UN($$, N_POSARGS, $1); }
-    | positional-arguments ',' expression 
+    | expression ',' positional-arguments
         { N_MAKE_BIN($$, N_POSARGS, $1, $3); }
 
 %%

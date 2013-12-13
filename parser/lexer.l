@@ -10,7 +10,6 @@
  *      Furthermore, no more than 50 levels of indentation are allowed.
  *      This is easily changed by modifying MAX_INDENTS below.
  *
- * STRINGS not implemented
  */
 
 %{
@@ -34,9 +33,11 @@ Str_Buf *str_buf;
 
 void error_exit(const char *str);
 int is_in(int target, int *array, int *end_ptr);
+
+int i;
 %}
 
-%option warn noyywrap yylineno nounput
+%option warn noyywrap yylineno
 %x indents dedents strings end
 %%
  /* skip blank lines */
@@ -77,25 +78,27 @@ int is_in(int target, int *array, int *end_ptr);
         return TOK_INDENT;
     }
 }
+    
+<dedents>[[:blank:]]* { 
+    if (yyleng == *num_ind) {
+        BEGIN(INITIAL);
+    } else if (yyleng < *num_ind) {
+        for (i = 0; i < *num_ind - *(num_ind - 1); i++) {
+            unput(' ');
+        }
+        --num_ind;
+        return TOK_DEDENT;
+    } else { 
+        error_exit("Major goof getting here");
+    }
+}
+
  /* Must be sure dedent level exists before entering this state */
 <dedents>[^[:space:]] {
     yyless(0);
     --num_ind;
     if (*num_ind == 0) {
         BEGIN(INITIAL);
-    }
-    return TOK_DEDENT;
-}
-    
-<dedents>[[:blank:]]* {
-//    printf("%d: Dedent length %d\n", yylineno, yyleng); //DEBUG
-    if (yyleng == *num_ind) {
-        BEGIN(INITIAL);
-    } else if (yyleng < *num_ind) {
-        yyless(*num_ind - yyleng);
-        --num_ind;
-    } else { 
-        error_exit("Major goof getting here");
     }
     return TOK_DEDENT;
 }
@@ -138,7 +141,7 @@ int is_in(int target, int *array, int *end_ptr);
 <strings>\\(.|\n)       { append_to_str_buf(str_buf, yytext+1); }
 <strings>[^\\\n\"]+     { append_to_str_buf(str_buf, yytext); }
 
-[[:blank:]]+    /* skip spaces & tabs */
+[[:blank:]]+   /* Ignore whitespace */ 
 
  /* Boolean literals (TOK_BOOL) */
 "True"  { yylval.i = 1; return TOK_BOOL; }
@@ -186,14 +189,14 @@ int is_in(int target, int *array, int *end_ptr);
 "break"     { return TOK_BREAK; }
 "def"       { return TOK_DEF; }
 "global"    { return TOK_GLOBAL; }
-"or"        { return TOK_AND; }
-"and"       { return TOK_OR; }
+"or"        { return TOK_OR; }
+"and"       { return TOK_AND; }
 "not"       { return TOK_NOT; }
 "pass"      { return TOK_PASS; }
 "return"    { return TOK_RETURN; }
 "print"     { return TOK_PRINT; }
 "int"       { yylval.i = INT_T; return TOK_TYPE; }
-"float"      { yylval.i = FLOAT_T; return TOK_TYPE; }
+"float"     { yylval.i = FLOAT_T; return TOK_TYPE; }
 "bool"      { yylval.i = BOOL_T; return TOK_TYPE; }
 "string"    { yylval.i = STRING_T; return TOK_TYPE; }
 "void"      { yylval.i = VOID_T; return TOK_TYPE; }
