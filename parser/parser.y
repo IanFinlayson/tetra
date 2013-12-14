@@ -35,6 +35,9 @@
 #include "tetra_hdr.h"
 #include "node.h"
 #include "symbol_table.h"
+#include "parsetree.h"
+
+#define FUNC_PARAM_CH 0
 
 #define N_MAKE_INT(prnt, type, d) \
         (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
@@ -68,6 +71,13 @@
         TTR_Node *n = symbol_table_lookup(symbol_table, (ident)); \
         (node)->dtype = (n == NULL) ? UNDEFINED_T : n->dtype
 #define SET_FUNC_TYPE(type) func_type = (type)
+#define COMPARE_TYPES(node1, node2) \
+        if (TTR_compare_trees((node1), (node2), TTR_compatible_types)) \
+            yyerror("Argument types do not match parameter types")
+#define GET_SYMBOL(ident) \
+        symbol_table_lookup(symbol_table, (ident))
+#define ADD_SYMBOL(node) \
+        symbol_table_add(symbol_table, (node)->str, (node))
 #define CHECK_TYPES(type1, type2) \
         if (TTR_promote_type((type1), (type2)) == INVALID_T) \
             yyerror("Type mismatch")
@@ -83,6 +93,7 @@ extern Symbol_Table *symbol_table;
 extern TTR_Node *parse_tree;
 
 int func_type; /* Used when checking validity of return statements */
+TTR_Node *function; /* Used in "call" to check param types */
 %}
 
 %union {
@@ -255,22 +266,23 @@ target-list: target {
 
 target: identifier { $$ = $1; }
 
-func-def: def funcname { PUSH_SCOPE(); } parameters return-type
-        ':' { SET_FUNC_TYPE($[return-type]); } suite {
+func-def: def funcname { PUSH_SCOPE(); } parameters return-type[ret]
+        ':' { SET_FUNC_TYPE($ret); } suite {
         POP_SCOPE();
         $$ = $def;
-        N_ADD_CHILD($$, $funcname);
+        N_STR($$) = N_STR($funcname);
+        //N_ADD_CHILD($$, $funcname);
         N_ADD_CHILD($$, $parameters);
         N_ADD_CHILD($$, $suite);
-        SET_IDENT_TYPE($funcname, $[return-type]);
+        SET_IDENT_TYPE($$, $ret);
     }
 
 def: TOK_DEF { N_MAKE_NODE($$, N_FUNCDEF); }
 
 funcname: identifier { $$ = $1; }
 
-parameters: '(' ')' { $$ = NULL; }
-    | '(' parameter-list ')' { $$ = $[parameter-list]; }
+parameters: '(' ')' { N_MAKE_NODE($$, N_PARAMLIST); }
+    | '(' parameter-list[params] ')' { $$ = $params; }
 
 parameter-list: identifier type {
         N_MAKE_NODE($$, N_PARAMLIST);
@@ -367,62 +379,62 @@ conditional-expr: or-test { $$ = $1; }
 or-test: and-test { $$ = $1; }
     | or-test TOK_OR and-test {
         N_MAKE_NODE($$, N_OR);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
 
 and-test: not-test { $$ = $1; }
     | and-test TOK_AND not-test {
         N_MAKE_NODE($$, N_AND);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
 
 not-test: comparison { $$ = $1; }
     | TOK_NOT not-test {
         N_MAKE_NODE($$, N_NOT);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $2);
-        INFER_TYPE($$);
     }
 
 comparison: or-expr { $$ = $1; }
     | comparison '<' or-expr {
         N_MAKE_NODE($$, N_LT);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
     | comparison '>' or-expr {
         N_MAKE_NODE($$, N_GT);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
     | comparison TOK_LTE or-expr {
         N_MAKE_NODE($$, N_LTE);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
     | comparison TOK_GTE or-expr {
         N_MAKE_NODE($$, N_GTE);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
     | comparison TOK_EQ or-expr {
         N_MAKE_NODE($$, N_EQ);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
     | comparison TOK_NEQ or-expr {
         N_MAKE_NODE($$, N_NEQ);
+        N_DTYPE($$) = BOOL_T;
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
     }
 
 or-expr: xor-expr { $$ = $1; }
@@ -541,31 +553,31 @@ literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
     | TOK_REAL { N_MAKE_FLOAT($$, N_FLOAT, yylval.f); }
     | TOK_STRING { N_MAKE_STR($$, N_STRING, yylval.text); }
 
-enclosure: '(' expression ')' { $$ = $2; }
+enclosure: '(' expression ')' { $$ = $expression; }
 
-call: callable argument-list {
+call: callable argument-list[args] {
         N_MAKE_NODE($$, N_CALL);
         N_ADD_CHILD($$, $callable);
-        N_ADD_CHILD($$, $[argument-list]);
-        GET_IDENT_TYPE($$, N_STR($callable));
+        N_ADD_CHILD($$, $args);
+        GET_IDENT_TYPE($$, N_STR($callable)); 
+        function = GET_SYMBOL(N_STR($callable));
+        if (function != NULL) {
+            COMPARE_TYPES(N_CHILD(function, FUNC_PARAM_CH), $args);
+        }
     }
 
-argument-list: '(' ')' {
-        $$ = NULL;
-    }
-    | '(' positional-arguments ')' {
-        $$ = $[positional-arguments];
-    }
+argument-list: '(' ')' { $$ = N_MAKE_NODE($$, N_POSARGS); }
+    | '(' positional-arguments[args] ')' { $$ = $args; }
 
 positional-arguments: expression {
         N_MAKE_NODE($$, N_POSARGS);
-        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $expression);
         INFER_TYPE($$);
     }
-    | expression ',' positional-arguments {
+    | expression ',' positional-arguments[args] {
         N_MAKE_NODE($$, N_POSARGS);
-        N_ADD_CHILD($$, $1);
-        N_ADD_CHILD($$, $3);
+        N_ADD_CHILD($$, $expression);
+        N_ADD_CHILD($$, $args);
         INFER_TYPE($$);
     }
 

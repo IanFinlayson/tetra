@@ -1,8 +1,11 @@
 #include "parsetree.h"
+#include <assert.h>
 
 void print_node(TTR_Node *node)
 {
     char err_msg[100];
+
+    assert(node != NULL);
 
     printf("<Line %d> ", N_LINE(node));
 
@@ -65,7 +68,7 @@ void print_node(TTR_Node *node)
     case N_BREAK: printf("BREAK:"); break;
     case N_CONTINUE: printf("CONTINUE:"); break;
     case N_FUNC: printf("FUNC:"); break;
-    case N_FUNCDEF: printf("FUNCDEF:"); break;
+    case N_FUNCDEF: printf("FUNCDEF: %s", N_STR(node)); break;
     case N_PARAMLIST: printf("PARAMLIST:"); break;
     case N_POSARGS: printf("POSARGS:"); break;
     case N_CALL: printf("CALL:"); break;
@@ -84,7 +87,8 @@ void print_tree(TTR_Node *root, int indents)
 {
     int i;
 
-    if (!root) return;
+    if (root == NULL)
+        return;
 
     for (i = 0; i < indents; i++) {
         printf("  ");

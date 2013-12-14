@@ -64,7 +64,7 @@ int TTR_add_child(TTR_Node *parent, TTR_Node *child)
 
 int TTR_infer_data_type(TTR_Node *node)
 {
-    int p_type, ch_type, i, undefined = 0;
+    int p_type, ch_type, i;
     if (N_DTYPE(node) == UNTYPED_T) {
         N_DTYPE(node) = UNDEFINED_T;
     }
@@ -115,7 +115,8 @@ int TTR_compatible_types(TTR_Node *node1, TTR_Node *node2)
 int TTR_compare_trees(TTR_Node *node1, TTR_Node *node2, 
         int (*comp)(TTR_Node *, TTR_Node *))
 {
-    int result, ch1, ch2;
+    int result, nch1, nch2;
+    TTR_Node *ch1, *ch2;
 
     if (node1 == NULL) {
         if (node2 == NULL)
@@ -127,19 +128,22 @@ int TTR_compare_trees(TTR_Node *node1, TTR_Node *node2,
         return 1;
     }
 
-    ch1 = N_NCH(node1);
-    ch2 = N_NCH(node2);
+    nch1 = N_NCH(node1);
+    nch2 = N_NCH(node2);
 
-    if (ch1 < ch2)
+    if (nch1 < nch2)
         return -1;
-    if (ch1 > ch2)
+    if (nch1 > nch2)
         return 1;
-    if (ch1 == 0)
+    if (nch1 == 0)
         return 0;
 
-    if ((result = comp(node1, node2)))
+    ch1 = N_CHILD(node1, 0);
+    ch2 = N_CHILD(node2, 0);
+
+    if ((result = comp(ch1, ch2)))
         return result;
-    if (ch1 == 1)
+    if (nch1 == 1)
         return result;
-    return TTR_compare_trees(N_CHILD(node1, 2), N_CHILD(node2, 2), comp);
+    return TTR_compare_trees(N_CHILD(node1, 1), N_CHILD(node2, 1), comp);
 }
