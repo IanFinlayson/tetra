@@ -30,6 +30,13 @@
 #define MAX_INDENTS 50
 #define INIT_STR_BUF_CAPACITY 100
 
+int *ind;
+#define INDENT_INFO() \
+    fprintf(stderr, "<Line %2d> Indent stack: ", yylineno); \
+    for (ind = indent_level; ind <= num_ind; ind++) \
+        fprintf(stderr, "%d ", *ind); \
+    fprintf(stderr, "\n")
+
 int indent_level[MAX_INDENTS];
 int *num_ind = indent_level;
 
@@ -89,7 +96,7 @@ int i;
     if (yyleng == *num_ind) {
         BEGIN(INITIAL);
     } else if (yyleng < *num_ind) {
-        for (i = 0; i < *num_ind - *(num_ind - 1); i++) {
+        for (i = 0; i < yyleng; i++) {
             unput(' ');
         }
         --num_ind;

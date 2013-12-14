@@ -61,12 +61,6 @@
 #define INFER_TYPE(node) \
         if (TTR_infer_data_type((node)) == INVALID_T) \
             yyerror("Type mismatch")
-#define N_MAKE_BIN(prnt, type, ch1, ch2) \
-        (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
-        TTR_add_child((yyval.node), (ch1)); \
-        TTR_add_child((yyval.node), (ch2)); \
-        if (TTR_infer_data_type((prnt)) == INVALID_T) \
-            yyerror("Type mismatch")
 #define INFER_DATA_TYPE(prnt) \
         if (TTR_infer_data_type((prnt)) == INVALID_T) \
             yyerror("Type mismatch")
@@ -75,6 +69,10 @@
 #define GET_IDENT_TYPE(node, ident) \
         TTR_Node *n = symbol_table_lookup(symbol_table, (ident)); \
         (node)->dtype = (n == NULL) ? UNDEFINED_T : n->dtype
+#define SET_FUNC_TYPE(type) func_type = (type)
+#define CHECK_TYPES(type1, type2) \
+        if (TTR_promote_type((type1), (type2)) == INVALID_T) \
+            yyerror("Type mismatch")
 #define PUSH_SCOPE() \
         symbol_table_enter_next_scope(symbol_table)
 #define POP_SCOPE() symbol_table_leave_scope(symbol_table)
@@ -85,6 +83,8 @@ void yyerror(const char *msg);
 extern int yylineno;
 extern Symbol_Table *symbol_table;
 extern TTR_Node *parse_tree;
+
+int func_type; /* Used when checking validity of return statements */
 %}
 
 %union {
@@ -234,7 +234,6 @@ while-stmt: while-tok expression ':' suite  {
 while-tok: TOK_WHILE { N_MAKE_NODE($$, N_WHILE); }
 
 for-stmt: for { $$ = $1; }
-    /* | for else { N_MAKE_BIN($$, N_FORSTMT, $1, $2); } */
 
 for: for-tok target-list TOK_IN expression-list ':' suite {
     $$ = $1;
@@ -258,7 +257,7 @@ target-list: target {
 target: identifier { $$ = $1; }
 
 func-def: def funcname '(' parameter-list ')' return-type
-    ':' { PUSH_SCOPE(); } suite {
+    ':' { SET_FUNC_TYPE($6); PUSH_SCOPE(); } suite {
     POP_SCOPE();
     $$ = $1;
     N_ADD_CHILD($$, $2);
@@ -303,6 +302,7 @@ expression-list: expression {
 pass-stmt: TOK_PASS { N_MAKE_VOID($$, N_PASS); }
 
 return-stmt: TOK_RETURN expression {
+    CHECK_TYPES(N_DTYPE($2), func_type);
     N_MAKE_NODE($$, N_RETURN);
     N_ADD_CHILD($$, $2);
 }

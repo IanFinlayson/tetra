@@ -64,12 +64,11 @@ int TTR_add_child(TTR_Node *parent, TTR_Node *child)
 int TTR_infer_data_type(TTR_Node *node)
 {
     int p_type, ch_type, i;
-    if (N_DTYPE(node) == UNTYPED_T) {
-        return UNTYPED_T;
-    }
+    //if (N_DTYPE(node) == UNTYPED_T) {
+    //    return UNTYPED_T;
+    //}
     if (N_NCH(node) == 0) {
-        N_DTYPE(node) = UNDEFINED_T;
-        return UNDEFINED_T;
+        return N_DTYPE(node);
     }
     p_type = N_DTYPE(N_CHILD(node, 0));
     for (i = 1; i < N_NCH(node); i++) {
@@ -85,8 +84,8 @@ int TTR_infer_data_type(TTR_Node *node)
             continue;
         }
         if (p_type == ch_type)
-            p_type = ch_type;
-        else if ((p_type == FLOAT_T || p_type == INT_T) &&
+            continue;
+        if ((p_type == FLOAT_T || p_type == INT_T) &&
                  (ch_type == FLOAT_T || ch_type == INT_T))
             p_type = FLOAT_T;
         else
@@ -94,4 +93,13 @@ int TTR_infer_data_type(TTR_Node *node)
     }
     N_DTYPE(node) = p_type;
     return p_type;
+}
+
+int TTR_promote_type(int type1, int type2)
+{
+    if (type1 == FLOAT_T && type2 == INT_T)
+        return FLOAT_T;
+    if (type1 == type2)
+        return type1;
+    return INVALID_T;
 }

@@ -116,9 +116,26 @@ int TTR_add_child(TTR_Node *parent, TTR_Node *child);
  * Poll the children for their data types, and set the parent type
  * accordingly.  See discussion in tetra_hdr.h for data types and
  * their meaning.
+ *
+ * Note that this function is best suited to expressions, and not
+ * to assignments, since the semantics differ.  (1 + 5.0 should be a 
+ * float, but a = 5.0 should be an error when a is an int variable).
+ *
  * Returns the type coerced to, which is INVALID_T when a legitimate
  * coercion could not be performed.
  */
 int TTR_infer_data_type(TTR_Node *node);
+
+/*
+ * Take two types, and get the resulting type of that mixture.
+ * type1 should be the type of the "left-hand side", and type2
+ * should be the type of the "right-hand side".
+ *
+ * Note that this should be used with assignments and returns, but
+ * not expressions (see TTR_infer_data_type).
+ * 
+ * Returns the type that type2 should be promoted to.
+ */
+int TTR_promote_type(int type1, int type2);
 
 #endif /* H_TETRA_NODE */
