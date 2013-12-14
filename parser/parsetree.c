@@ -8,7 +8,7 @@ void print_node(TTR_Node *node)
 
     switch(N_DTYPE(node)) {
     case INVALID_T: printf("INVALID: "); break;
-    case UNDEFINED_T: printf("UNTYPED: "); break;
+    case UNDEFINED_T: printf("UNDEFINED: "); break;
     case VOID_T: printf("VOID: "); break;
     case INT_T: printf("INT: "); break;
     case FLOAT_T: printf("FLOAT: "); break;

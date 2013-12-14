@@ -51,8 +51,6 @@
 #define N_MAKE_VOID(prnt, type) \
         (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
         (prnt)->dtype = VOID_T
-#define N_MAKE_INTSTR(prnt, type, d, s) \
-        (prnt) = TTR_make_node((type), (str), (d), 0.0, yylineno)
 #define N_MAKE_NODE(prnt, type) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
         (prnt)->dtype = UNTYPED_T
@@ -194,10 +192,10 @@ if-stmt: if { $$ = $1; }
     }
 
 if: if-tok expression ':' suite {
-    $$ = $1;
-    N_ADD_CHILD($$, $2);
-    N_ADD_CHILD($$, $4);
-}
+        $$ = $1;
+        N_ADD_CHILD($$, $2);
+        N_ADD_CHILD($$, $4);
+    }
 
 if-tok: TOK_IF { N_MAKE_NODE($$, N_IF); }
 
@@ -212,36 +210,36 @@ elif-list: elif {
     }
 
 elif: elif-tok expression ':' suite {
-    $$ = $1;
-    N_ADD_CHILD($$, $2);
-    N_ADD_CHILD($$, $4);
-}
+        $$ = $1;
+        N_ADD_CHILD($$, $2);
+        N_ADD_CHILD($$, $4);
+    }
 
 elif-tok: TOK_ELIF { N_MAKE_NODE($$, N_ELIF); }
 
 else: else-tok ':' suite {
-    $$ = $1;
-    N_ADD_CHILD($$, $3);
-}
+        $$ = $1;
+        N_ADD_CHILD($$, $3);
+    }
 
 else-tok: TOK_ELSE { N_MAKE_NODE( $$, N_ELSE); }
 
 while-stmt: while-tok expression ':' suite  {
-    $$ = $1;
-    N_ADD_CHILD($$, $2);
-    N_ADD_CHILD($$, $4);
-}
+        $$ = $1;
+        N_ADD_CHILD($$, $2);
+        N_ADD_CHILD($$, $4);
+    }
 
 while-tok: TOK_WHILE { N_MAKE_NODE($$, N_WHILE); }
 
 for-stmt: for { $$ = $1; }
 
 for: for-tok target-list TOK_IN expression-list ':' suite {
-    $$ = $1;
-    N_ADD_CHILD($$, $2);
-    N_ADD_CHILD($$, $4);
-    N_ADD_CHILD($$, $6);
-}
+        $$ = $1;
+        N_ADD_CHILD($$, $2);
+        N_ADD_CHILD($$, $4);
+        N_ADD_CHILD($$, $6);
+    }
 
 for-tok: TOK_FOR { N_MAKE_NODE($$, N_FOR); }
 
@@ -258,14 +256,14 @@ target-list: target {
 target: identifier { $$ = $1; }
 
 func-def: def funcname { PUSH_SCOPE(); } parameters return-type
-    ':' { SET_FUNC_TYPE($[return-type]); } suite {
-    POP_SCOPE();
-    $$ = $def;
-    N_ADD_CHILD($$, $funcname);
-    N_ADD_CHILD($$, $parameters);
-    N_ADD_CHILD($$, $suite);
-    SET_IDENT_TYPE($funcname, $[return-type]);
-}
+        ':' { SET_FUNC_TYPE($[return-type]); } suite {
+        POP_SCOPE();
+        $$ = $def;
+        N_ADD_CHILD($$, $funcname);
+        N_ADD_CHILD($$, $parameters);
+        N_ADD_CHILD($$, $suite);
+        SET_IDENT_TYPE($funcname, $[return-type]);
+    }
 
 def: TOK_DEF { N_MAKE_NODE($$, N_FUNCDEF); }
 
@@ -307,10 +305,10 @@ expression-list: expression {
 pass-stmt: TOK_PASS { N_MAKE_VOID($$, N_PASS); }
 
 return-stmt: return-tok expression {
-    CHECK_TYPES(N_DTYPE($expression), func_type);
-    $$ = $[return-tok];
-    N_ADD_CHILD($$, $expression);
-}
+        CHECK_TYPES(N_DTYPE($expression), func_type);
+        $$ = $[return-tok];
+        N_ADD_CHILD($$, $expression);
+    }
 
 return-tok: TOK_RETURN { N_MAKE_NODE($$, N_RETURN); }
 
@@ -319,9 +317,9 @@ break-stmt: TOK_BREAK { N_MAKE_VOID($$, N_BREAK); }
 continue-stmt: TOK_CONTINUE { N_MAKE_VOID($$, N_CONTINUE); }
 
 print-stmt: print-tok expression {
-    $$ = $1;
-    N_ADD_CHILD($$, $2);
-}
+        $$ = $1;
+        N_ADD_CHILD($$, $2);
+    }
 
 print-tok: TOK_PRINT { N_MAKE_NODE($$, N_PRINT); }
 
@@ -342,22 +340,20 @@ identifier-list: identifier {
 expression: assignment-expr { $$ = $1; }
 
 assignment-expr: conditional-expr { $$ = $1; }
-    | target '=' assignment-expr
-        {
-            SET_IDENT_TYPE($1, N_DTYPE($3));
-            N_MAKE_INT($$, N_ASSIGN, BEC_BEC);
-            N_ADD_CHILD($$, $1);
-            N_ADD_CHILD($$, $3);
-            INFER_TYPE($$);
-        }
-    | target TOK_ASSIGN assignment-expr
-        {
-            SET_IDENT_TYPE($1, N_DTYPE($3));
-            N_MAKE_INT($$, N_ASSIGN, $2);
-            N_ADD_CHILD($$, $1);
-            N_ADD_CHILD($$, $3);
-            INFER_TYPE($$);
-        }
+    | target '=' assignment-expr {
+        SET_IDENT_TYPE($1, N_DTYPE($3));
+        N_MAKE_INT($$, N_ASSIGN, BEC_BEC);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+        INFER_TYPE($$);
+    }
+    | target TOK_ASSIGN assignment-expr {
+        SET_IDENT_TYPE($1, N_DTYPE($3));
+        N_MAKE_INT($$, N_ASSIGN, $2);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+        INFER_TYPE($$);
+    }
 
 conditional-expr: or-test { $$ = $1; }
     | or-test TOK_IF or-test TOK_ELSE expression {
@@ -530,15 +526,15 @@ primary: atom
     | call { $$ = $1; }
 
 atom: callable
-    | literal { $$ = $1; }
-    | enclosure
+    | literal
+    | enclosure { $$ = $1; }
 
 callable: identifier { $$ = $1; }
 
 identifier: TOK_IDENTIFIER {
-    N_MAKE_STR($$, N_IDENTIFIER, yylval.text);
-    GET_IDENT_TYPE($$, yylval.text);
-}
+        N_MAKE_STR($$, N_IDENTIFIER, yylval.text);
+        GET_IDENT_TYPE($$, yylval.text);
+    }
 
 literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
     | TOK_INT { N_MAKE_INT($$, N_INT, yylval.i); }
@@ -547,19 +543,19 @@ literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
 
 enclosure: '(' expression ')' { $$ = $2; }
 
-call: callable '(' ')' {
+call: callable argument-list {
         N_MAKE_NODE($$, N_CALL);
-        N_ADD_CHILD($$, $1);
-        GET_IDENT_TYPE($$, N_STR($1));
-    }
-    | callable '(' argument-list ')' {
-        N_MAKE_NODE($$, N_CALL);
-        N_ADD_CHILD($$, $1);
-        N_ADD_CHILD($$, $3);
-        GET_IDENT_TYPE($$, N_STR($1));
+        N_ADD_CHILD($$, $callable);
+        N_ADD_CHILD($$, $[argument-list]);
+        GET_IDENT_TYPE($$, N_STR($callable));
     }
 
-argument-list: positional-arguments { $$ = $1; }
+argument-list: '(' ')' {
+        $$ = NULL;
+    }
+    | '(' positional-arguments ')' {
+        $$ = $[positional-arguments];
+    }
 
 positional-arguments: expression {
         N_MAKE_NODE($$, N_POSARGS);
@@ -584,11 +580,3 @@ void yyerror(const char *msg)
 {
     fprintf(stderr, "<Line %d> Parser error: '%s'.\n", yylineno, msg);
 }
-
-/*
-int main(int argc, char **argv)
-{
-    yyparse();
-    return 0;
-}
-*/

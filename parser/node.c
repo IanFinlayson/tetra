@@ -64,10 +64,10 @@ int TTR_add_child(TTR_Node *parent, TTR_Node *child)
 
 int TTR_infer_data_type(TTR_Node *node)
 {
-    int p_type, ch_type, i;
-    //if (N_DTYPE(node) == UNTYPED_T) {
-    //    return UNTYPED_T;
-    //}
+    int p_type, ch_type, i, undefined = 0;
+    if (N_DTYPE(node) == UNTYPED_T) {
+        N_DTYPE(node) = UNDEFINED_T;
+    }
     if (N_NCH(node) == 0) {
         return N_DTYPE(node);
     }
