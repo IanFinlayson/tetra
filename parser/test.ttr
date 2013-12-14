@@ -16,7 +16,7 @@ def crazy() int:
         print "Mo"
     else:
         print "Work"
-def min_three(a, b, c) int:
+def min_three(a int, b int, c int) int:
     if a < b and a < c:
         return a
     elif b < c:

@@ -1,6 +1,7 @@
 #include "node.h"
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 TTR_Node * TTR_make_node(int type, const char *str, tetra_int d, 
         tetra_float f, int lineno)
@@ -102,4 +103,43 @@ int TTR_promote_type(int type1, int type2)
     if (type1 == type2)
         return type1;
     return INVALID_T;
+}
+
+int TTR_compatible_types(TTR_Node *node1, TTR_Node *node2)
+{
+    if (TTR_promote_type(N_DTYPE(node1), N_DTYPE(node2)) == INVALID_T)
+        return 1;
+    return 0;
+}
+
+int TTR_compare_trees(TTR_Node *node1, TTR_Node *node2, 
+        int (*comp)(TTR_Node *, TTR_Node *))
+{
+    int result, ch1, ch2;
+
+    if (node1 == NULL) {
+        if (node2 == NULL)
+            return 0;
+        else
+            return -1;
+    }
+    if (node2 == NULL) {
+        return 1;
+    }
+
+    ch1 = N_NCH(node1);
+    ch2 = N_NCH(node2);
+
+    if (ch1 < ch2)
+        return -1;
+    if (ch1 > ch2)
+        return 1;
+    if (ch1 == 0)
+        return 0;
+
+    if ((result = comp(node1, node2)))
+        return result;
+    if (ch1 == 1)
+        return result;
+    return TTR_compare_trees(N_CHILD(node1, 2), N_CHILD(node2, 2), comp);
 }

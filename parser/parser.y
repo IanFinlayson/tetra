@@ -125,6 +125,7 @@ int func_type; /* Used when checking validity of return statements */
 %type <node> primary atom literal enclosure call argument-list
 %type <node> positional-arguments print-stmt def while-tok for-tok
 %type <node> if-tok else-tok elif-tok top-level-stmt callable
+%type <node> return-tok parameters
 %type <node> print-tok global-tok
 %type <i> return-type type
 
@@ -169,7 +170,7 @@ small-stmt: expression-stmt
     | break-stmt
     | continue-stmt
     | print-stmt
-    | global-stmt { DEBUG("ss"); $$ = $1; }
+    | global-stmt { $$ = $1; }
 
 suite: simple-stmt { $$ = $1; }
     | TOK_NEWLINE TOK_INDENT stmt-list TOK_DEDENT { $$ = $3; }
@@ -256,29 +257,33 @@ target-list: target {
 
 target: identifier { $$ = $1; }
 
-func-def: def funcname '(' parameter-list ')' return-type
-    ':' { SET_FUNC_TYPE($6); PUSH_SCOPE(); } suite {
+func-def: def funcname { PUSH_SCOPE(); } parameters return-type
+    ':' { SET_FUNC_TYPE($[return-type]); } suite {
     POP_SCOPE();
-    $$ = $1;
-    N_ADD_CHILD($$, $2);
-    N_ADD_CHILD($$, $4);
-    N_ADD_CHILD($$, $9);
-    SET_IDENT_TYPE($2, $6);
+    $$ = $def;
+    N_ADD_CHILD($$, $funcname);
+    N_ADD_CHILD($$, $parameters);
+    N_ADD_CHILD($$, $suite);
+    SET_IDENT_TYPE($funcname, $[return-type]);
 }
 
 def: TOK_DEF { N_MAKE_NODE($$, N_FUNCDEF); }
 
 funcname: identifier { $$ = $1; }
 
-parameter-list: /* empty */ { N_MAKE_NODE($$, N_PARAMLIST); }
-    | identifier {
+parameters: '(' ')' { $$ = NULL; }
+    | '(' parameter-list ')' { $$ = $[parameter-list]; }
+
+parameter-list: identifier type {
         N_MAKE_NODE($$, N_PARAMLIST);
-        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $identifier);
+        SET_IDENT_TYPE($identifier, $type);
     }
-    | parameter-list ',' identifier {
+    | identifier type ',' parameter-list[plist] {
         N_MAKE_NODE($$, N_PARAMLIST);
-        N_ADD_CHILD($$, $1);
-        N_ADD_CHILD($$, $3);
+        N_ADD_CHILD($$, $identifier);
+        N_ADD_CHILD($$, $plist);
+        SET_IDENT_TYPE($identifier, $type);
     }
 
 return-type: /* empty */ { $$ = VOID_T; }
@@ -301,11 +306,13 @@ expression-list: expression {
 
 pass-stmt: TOK_PASS { N_MAKE_VOID($$, N_PASS); }
 
-return-stmt: TOK_RETURN expression {
-    CHECK_TYPES(N_DTYPE($2), func_type);
-    N_MAKE_NODE($$, N_RETURN);
-    N_ADD_CHILD($$, $2);
+return-stmt: return-tok expression {
+    CHECK_TYPES(N_DTYPE($expression), func_type);
+    $$ = $[return-tok];
+    N_ADD_CHILD($$, $expression);
 }
+
+return-tok: TOK_RETURN { N_MAKE_NODE($$, N_RETURN); }
 
 break-stmt: TOK_BREAK { N_MAKE_VOID($$, N_BREAK); }
 

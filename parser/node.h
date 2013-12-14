@@ -138,4 +138,27 @@ int TTR_infer_data_type(TTR_Node *node);
  */
 int TTR_promote_type(int type1, int type2);
 
+/*
+ * Compare the types of two nodes.
+ * Returns 0 if the two types are compatible (i.e., TTR_promote_type
+ * returns anything other than INVALID_T when called with the types of
+ * the nodes in order). 
+ * Returns 1 otherwise.
+ */
+int TTR_compatible_types(TTR_Node *node1, TTR_Node *node2);
+
+/*
+ * Compare two binary node trees.  The first child of the root is compared,
+ * then the first child of the root's second child, etc.
+ *
+ * comp is assumed to return 0 on a match.
+ *
+ * Returns 0 when both nodes run out of children to compare (trees match)
+ * Returns -1 when node2 has children while node1 doesn't
+ * Returns 1 when node1 has children and node2 doesn't
+ * Returns whatever comp returns when two nodes don't match
+ */
+int TTR_compare_trees(TTR_Node *node1, TTR_Node *node2, 
+        int (*comp)(TTR_Node *, TTR_Node *));
+
 #endif /* H_TETRA_NODE */
