@@ -6,6 +6,12 @@
  *      Mixed tabs and spaces are allowed at the moment.  HOWEVER! Tabs and
  *      spaces are treated as equivalent, so one should not mix them in the
  *      same file.  This should be fixed in the future.
+ *      FOR THE FIXER:
+ *          The DEDENT hack has spaces being unput.  If, in the future,
+ *          tabs aren't going to be treated the same as spaces, you
+ *          will need a way to store whether it is tabs or spaces on
+ *          the stack. (The official Python way is to expand tabs
+ *          before putting them on the stack, this would work better)
  *
  *      Furthermore, no more than 50 levels of indentation are allowed.
  *      This is easily changed by modifying MAX_INDENTS below.

@@ -53,15 +53,13 @@
         (prnt)->dtype = VOID_T
 #define N_MAKE_INTSTR(prnt, type, d, s) \
         (prnt) = TTR_make_node((type), (str), (d), 0.0, yylineno)
-#define N_MAKE_STMT(prnt, type) \
+#define N_MAKE_NODE(prnt, type) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
         (prnt)->dtype = UNTYPED_T
 #define N_ADD_CHILD(prnt, child) \
         TTR_add_child((prnt), (child))
-#define N_MAKE_UN(prnt, type, ch1) \
-        (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
-        TTR_add_child((yyval.node), (ch1)); \
-        if (TTR_infer_data_type((prnt)) == INVALID_T) \
+#define INFER_TYPE(node) \
+        if (TTR_infer_data_type((node)) == INVALID_T) \
             yyerror("Type mismatch")
 #define N_MAKE_BIN(prnt, type, ch1, ch2) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
@@ -133,7 +131,7 @@ extern TTR_Node *parse_tree;
 %type <node> primary atom literal enclosure call argument-list 
 %type <node> positional-arguments print-stmt def while-tok for-tok
 %type <node> if-tok else-tok elif-tok top-level-stmt callable
-%type <node> print-tok
+%type <node> print-tok global-tok
 %type <i> return-type type
 
 %error-verbose
@@ -144,7 +142,7 @@ program: stmt-list '$' TOK_NEWLINE { parse_tree = $1; }
 
 stmt-list: stmt { $$ = $1; }
     | stmt stmt-list { 
-        N_MAKE_STMT($$, N_STMT);
+        N_MAKE_NODE($$, N_STMT);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $2);
     }
@@ -155,11 +153,11 @@ stmt: simple-stmt { $$ = $1; }
 simple-stmt: small-stmt-list TOK_NEWLINE { $$ = $1; }
 
 small-stmt-list: small-stmt { 
-        N_MAKE_STMT($$, N_SMALLSTMT);
+        N_MAKE_NODE($$, N_SMALLSTMT);
         N_ADD_CHILD($$, $1);
     }
     | small-stmt ';' small-stmt-list { 
-        N_MAKE_STMT($$, N_SMALLSTMT);
+        N_MAKE_NODE($$, N_SMALLSTMT);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
     }
@@ -186,7 +184,7 @@ if-stmt: if { $$ = $1; }
     | if else { N_MAKE_BIN($$, N_IF, $1, $2); }
     | if elif-list { N_MAKE_BIN($$, N_IF, $1, $2); }
     | if elif-list else { 
-        N_MAKE_STMT($$, N_IF);
+        N_MAKE_NODE($$, N_IF);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $2);
         N_ADD_CHILD($$, $3);
@@ -198,14 +196,14 @@ if: if-tok expression ':' suite {
     N_ADD_CHILD($$, $4);
 }
 
-if-tok: TOK_IF { N_MAKE_STMT($$, N_IF); }
+if-tok: TOK_IF { N_MAKE_NODE($$, N_IF); }
 
 elif-list: elif { 
-        N_MAKE_STMT($$, N_ELIFLIST);
+        N_MAKE_NODE($$, N_ELIFLIST);
         N_ADD_CHILD($$, $1);
     }
     | elif elif-list { 
-        N_MAKE_STMT($$, N_ELIFLIST);
+        N_MAKE_NODE($$, N_ELIFLIST);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $2);
     }
@@ -216,14 +214,14 @@ elif: elif-tok expression ':' suite {
     N_ADD_CHILD($$, $4);
 }
 
-elif-tok: TOK_ELIF { N_MAKE_STMT($$, N_ELIF); }
+elif-tok: TOK_ELIF { N_MAKE_NODE($$, N_ELIF); }
 
 else: else-tok ':' suite { 
     $$ = $1;
     N_ADD_CHILD($$, $3);
 }
 
-else-tok: TOK_ELSE { N_MAKE_STMT( $$, N_ELSE); }
+else-tok: TOK_ELSE { N_MAKE_NODE( $$, N_ELSE); }
 
 /*
 while-stmt: while { $$ = $1; }
@@ -236,7 +234,7 @@ while-stmt: while-tok expression ':' suite  {
     N_ADD_CHILD($$, $4);
 }
 
-while-tok: TOK_WHILE { N_MAKE_STMT($$, N_WHILE); }
+while-tok: TOK_WHILE { N_MAKE_NODE($$, N_WHILE); }
 
 for-stmt: for { $$ = $1; }
     /* | for else { N_MAKE_BIN($$, N_FORSTMT, $1, $2); } */
@@ -248,14 +246,14 @@ for: for-tok target-list TOK_IN expression-list ':' suite {
     N_ADD_CHILD($$, $6);
 }
 
-for-tok: TOK_FOR { N_MAKE_STMT($$, N_FOR); }
+for-tok: TOK_FOR { N_MAKE_NODE($$, N_FOR); }
 
 target-list: target { 
-        N_MAKE_STMT($$, N_TGTS);
+        N_MAKE_NODE($$, N_TGTS);
         N_ADD_CHILD($$, $1);
     }
     | target-list ',' target { 
-        N_MAKE_STMT($$, N_TGTS);
+        N_MAKE_NODE($$, N_TGTS);
         N_ADD_CHILD($$,$1);
         N_ADD_CHILD($$, $3);
     }
@@ -272,17 +270,17 @@ func-def: def funcname '(' parameter-list ')' return-type
     SET_IDENT_TYPE($2, $6);
 }
 
-def: TOK_DEF { N_MAKE_STMT($$, N_FUNCDEF); }
+def: TOK_DEF { N_MAKE_NODE($$, N_FUNCDEF); }
 
 funcname: identifier { $$ = $1; }
 
-parameter-list: /* empty */ { N_MAKE_VOID($$, N_PARAMLIST); }
+parameter-list: /* empty */ { N_MAKE_NODE($$, N_PARAMLIST); }
     | identifier { 
-        N_MAKE_STMT($$, N_PARAMLIST);
+        N_MAKE_NODE($$, N_PARAMLIST);
         N_ADD_CHILD($$, $1);
     }
     | parameter-list ',' identifier { 
-        N_MAKE_STMT($$, N_PARAMLIST);
+        N_MAKE_NODE($$, N_PARAMLIST);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
     }
@@ -295,17 +293,20 @@ type: TOK_TYPE { $$ = yylval.i; }
 expression-stmt: expression-list
 
 expression-list: expression { 
-        N_MAKE_STMT($$, N_EXPR);
+        N_MAKE_NODE($$, N_EXPR);
         N_ADD_CHILD($$, $1);
     }
     | expression ',' expression-list
-    | expression ',' expression-list ',' 
-        { N_MAKE_BIN($$, N_EXPR, $1, $3); }
+    | expression ',' expression-list ',' {
+        N_MAKE_NODE($$, N_EXPR);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 pass-stmt: TOK_PASS { N_MAKE_VOID($$, N_PASS); }
 
 return-stmt: TOK_RETURN expression { 
-    N_MAKE_STMT($$, N_RETURN);
+    N_MAKE_NODE($$, N_RETURN);
     N_ADD_CHILD($$, $2);
 }
 
@@ -318,13 +319,21 @@ print-stmt: print-tok expression {
     N_ADD_CHILD($$, $2);
 }
 
-print-tok: TOK_PRINT { N_MAKE_STMT($$, N_PRINT); }
+print-tok: TOK_PRINT { N_MAKE_NODE($$, N_PRINT); }
 
-global-stmt: TOK_GLOBAL identifier-list { N_MAKE_UN($$, N_GLOBAL, $2); }
+global-stmt: global-tok identifier-list { $$ = $1; N_ADD_CHILD($$, $2); }
 
-identifier-list: identifier { N_MAKE_UN($$, N_IDENTLIST, $1); }
-    | identifier-list ',' identifier 
-        { N_MAKE_BIN($$, N_IDENTLIST, $1, $3); }
+global-tok: TOK_GLOBAL { N_MAKE_NODE($$, N_GLOBAL); }
+
+identifier-list: identifier {
+        N_MAKE_NODE($$, N_IDENTLIST);
+        N_ADD_CHILD($$, $1);
+    }
+    | identifier-list ',' identifier {
+        N_MAKE_NODE($$, N_IDENTLIST);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 expression: assignment-expr { $$ = $1; }
 
@@ -342,10 +351,11 @@ assignment-expr: conditional-expr { $$ = $1; }
 
 conditional-expr: or-test { $$ = $1; }
     | or-test TOK_IF or-test TOK_ELSE expression { 
-        N_MAKE_STMT($$, N_CONDITIONAL);
+        N_MAKE_NODE($$, N_CONDITIONAL);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
         N_ADD_CHILD($$, $5);
+        INFER_TYPE($$);
     }
 
 or-test: and-test { $$ = $1; }
@@ -355,7 +365,11 @@ and-test: not-test { $$ = $1; }
     | and-test TOK_AND not-test { N_MAKE_BIN($$, N_AND, $1, $3); }
 
 not-test: comparison { $$ = $1; }
-    | TOK_NOT not-test { N_MAKE_UN($$, N_NOT, $2); }
+    | TOK_NOT not-test { 
+        N_MAKE_NODE($$, N_NOT); 
+        N_ADD_CHILD($$, $2);
+        INFER_TYPE($$);
+    }
 
 comparison: or-expr { $$ = $1; }
     | comparison '<' or-expr { N_MAKE_BIN($$, N_LT, $1, $3); }
@@ -388,9 +402,21 @@ mult-expr: unary-expr { $$ = $1; }
     | mult-expr '%' unary-expr { N_MAKE_BIN($$, N_MOD, $1, $3); }
 
 unary-expr: power-expr { $$ = $1; }
-    | '+' unary-expr { N_MAKE_UN($$, N_POS, $2); }
-    | '-' unary-expr { N_MAKE_UN($$, N_NEG, $2); }
-    | '~' unary-expr { N_MAKE_UN($$, N_INV, $2); }
+    | '+' unary-expr {
+        N_MAKE_NODE($$, N_POS);
+        N_ADD_CHILD($$, $2);
+        INFER_TYPE($$);
+    }
+    | '-' unary-expr {
+        N_MAKE_NODE($$, N_NEG);
+        N_ADD_CHILD($$, $2);
+        INFER_TYPE($$);
+    }
+    | '~' unary-expr {
+        N_MAKE_NODE($$, N_INV);
+        N_ADD_CHILD($$, $2);
+        INFER_TYPE($$);
+    }
 
 power-expr: primary { $$ = $1; }
     | unary-expr TOK_POW power-expr { N_MAKE_BIN($$, N_POW, $1, $3); }
@@ -417,16 +443,28 @@ literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
 enclosure: '(' expression ')' { $$ = $2; }
 
 call: callable '(' ')' { 
-    N_MAKE_UN($$, N_CALL, $1); 
-    GET_IDENT_TYPE($$, N_STR($1));
-}
-    | callable '(' argument-list ')' { N_MAKE_BIN($$, N_CALL, $1, $3); }
+        N_MAKE_NODE($$, N_CALL);
+        N_ADD_CHILD($$, $1);
+        GET_IDENT_TYPE($$, N_STR($1));
+    }
+    | callable '(' argument-list ')' {
+        N_MAKE_NODE($$, N_CALL);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+        GET_IDENT_TYPE($$, N_STR($1));
+    }
 
 argument-list: positional-arguments { $$ = $1; }
 
-positional-arguments: expression { N_MAKE_UN($$, N_POSARGS, $1); }
-    | expression ',' positional-arguments
-        { N_MAKE_BIN($$, N_POSARGS, $1, $3); }
+positional-arguments: expression { 
+        N_MAKE_NODE($$, N_POSARGS);
+        N_ADD_CHILD($$, $1);
+    }
+    | expression ',' positional-arguments { 
+        N_MAKE_NODE($$, N_POSARGS);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 %%
 
