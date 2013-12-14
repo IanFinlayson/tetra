@@ -67,12 +67,6 @@
         TTR_add_child((yyval.node), (ch2)); \
         if (TTR_infer_data_type((prnt)) == INVALID_T) \
             yyerror("Type mismatch")
-#define N_MAKE_INT_BIN(prnt, type, d, ch1, ch2) \
-        (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
-        TTR_add_child((yyval.node), (ch1)); \
-        TTR_add_child((yyval.node), (ch2)); \
-        if (TTR_infer_data_type((prnt)) == INVALID_T) \
-            yyerror("Type mismatch")
 #define INFER_DATA_TYPE(prnt) \
         if (TTR_infer_data_type((prnt)) == INVALID_T) \
             yyerror("Type mismatch")
@@ -181,8 +175,16 @@ suite: simple-stmt { $$ = $1; }
     | TOK_NEWLINE TOK_INDENT stmt-list TOK_DEDENT { $$ = $3; }
 
 if-stmt: if { $$ = $1; }
-    | if else { N_MAKE_BIN($$, N_IF, $1, $2); }
-    | if elif-list { N_MAKE_BIN($$, N_IF, $1, $2); }
+    | if else {
+        N_MAKE_NODE($$, N_IF);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $2);
+    }
+    | if elif-list {
+        N_MAKE_NODE($$, N_IF);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $2);
+    }
     | if elif-list else { 
         N_MAKE_NODE($$, N_IF);
         N_ADD_CHILD($$, $1);
@@ -223,11 +225,6 @@ else: else-tok ':' suite {
 
 else-tok: TOK_ELSE { N_MAKE_NODE( $$, N_ELSE); }
 
-/*
-while-stmt: while { $$ = $1; }
-
-while: TOK_WHILE expression ':' suite { N_MAKE_BIN($$, N_WHILE, $2, $4); }
-*/
 while-stmt: while-tok expression ':' suite  {
     $$ = $1;
     N_ADD_CHILD($$, $2);
@@ -341,12 +338,18 @@ assignment-expr: conditional-expr { $$ = $1; }
     | target '=' assignment-expr 
         { 
             SET_IDENT_TYPE($1, N_DTYPE($3));
-            N_MAKE_INT_BIN($$, N_ASSIGN, BEC_BEC, $1, $3);
+            N_MAKE_INT($$, N_ASSIGN, BEC_BEC);
+            N_ADD_CHILD($$, $1);
+            N_ADD_CHILD($$, $3);
+            INFER_TYPE($$);
         }
     | target TOK_ASSIGN assignment-expr
         {
             SET_IDENT_TYPE($1, N_DTYPE($3));
-            N_MAKE_INT_BIN($$, N_ASSIGN, $2, $1, $3);
+            N_MAKE_INT($$, N_ASSIGN, $2);
+            N_ADD_CHILD($$, $1);
+            N_ADD_CHILD($$, $3);
+            INFER_TYPE($$);
         }
 
 conditional-expr: or-test { $$ = $1; }
@@ -359,10 +362,18 @@ conditional-expr: or-test { $$ = $1; }
     }
 
 or-test: and-test { $$ = $1; }
-    | or-test TOK_OR and-test { N_MAKE_BIN($$, N_OR, $1, $3); }
+    | or-test TOK_OR and-test {
+        N_MAKE_NODE($$, N_OR);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 and-test: not-test { $$ = $1; }
-    | and-test TOK_AND not-test { N_MAKE_BIN($$, N_AND, $1, $3); }
+    | and-test TOK_AND not-test {
+        N_MAKE_NODE($$, N_AND);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+}
 
 not-test: comparison { $$ = $1; }
     | TOK_NOT not-test { 
@@ -372,34 +383,98 @@ not-test: comparison { $$ = $1; }
     }
 
 comparison: or-expr { $$ = $1; }
-    | comparison '<' or-expr { N_MAKE_BIN($$, N_LT, $1, $3); }
-    | comparison '>' or-expr { N_MAKE_BIN($$, N_GT, $1, $3); }
-    | comparison TOK_LTE or-expr { N_MAKE_BIN($$, N_LTE, $1, $3); }
-    | comparison TOK_GTE or-expr { N_MAKE_BIN($$, N_GTE, $1, $3); }
-    | comparison TOK_EQ or-expr { N_MAKE_BIN($$, N_EQ, $1, $3); }
-    | comparison TOK_NEQ or-expr { N_MAKE_BIN($$, N_NEQ, $1, $3); }
+    | comparison '<' or-expr {
+        N_MAKE_NODE($$, N_LT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | comparison '>' or-expr {
+        N_MAKE_NODE($$, N_GT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | comparison TOK_LTE or-expr {
+        N_MAKE_NODE($$, N_LTE);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | comparison TOK_GTE or-expr {
+        N_MAKE_NODE($$, N_GTE);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | comparison TOK_EQ or-expr {
+        N_MAKE_NODE($$, N_EQ);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | comparison TOK_NEQ or-expr {
+        N_MAKE_NODE($$, N_NEQ);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 or-expr: xor-expr { $$ = $1; }
-    | or-expr '|' xor-expr { N_MAKE_BIN($$, N_BOR, $1, $3); }
+    | or-expr '|' xor-expr {
+        N_MAKE_NODE($$, N_BOR);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 xor-expr: and-expr { $$ = $1; }
-    | xor-expr '^' and-expr { N_MAKE_BIN($$, N_BXOR, $1, $3); }
+    | xor-expr '^' and-expr {
+        N_MAKE_NODE($$, N_BXOR);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 and-expr: shift-expr { $$ = $1; }
-    | and-expr '&' shift-expr { N_MAKE_BIN($$, N_BAND, $1, $3); }
+    | and-expr '&' shift-expr {
+        N_MAKE_NODE($$, N_BAND);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 shift-expr: add-expr { $$ = $1; }
-    | shift-expr TOK_LSHIFT add-expr { N_MAKE_BIN($$, N_LSHIFT, $1, $3); }
-    | shift-expr TOK_RSHIFT add-expr { N_MAKE_BIN($$, N_RSHIFT, $1, $3); }
+    | shift-expr TOK_LSHIFT add-expr {
+        N_MAKE_NODE($$, N_LSHIFT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | shift-expr TOK_RSHIFT add-expr {
+        N_MAKE_NODE($$, N_RSHIFT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 add-expr: mult-expr { $$ = $1; }
-    | add-expr '+' mult-expr { N_MAKE_BIN($$, N_ADD, $1, $3); }
-    | add-expr '-' mult-expr { N_MAKE_BIN($$, N_SUB, $1, $3); }
+    | add-expr '+' mult-expr {
+        N_MAKE_NODE($$, N_ADD);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | add-expr '-' mult-expr {
+        N_MAKE_NODE($$, N_SUB);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 mult-expr: unary-expr { $$ = $1; }
-    | mult-expr '*' unary-expr { N_MAKE_BIN($$, N_MULT, $1, $3); }
-    | mult-expr '/' unary-expr { N_MAKE_BIN($$, N_DIV, $1, $3); }
-    | mult-expr '%' unary-expr { N_MAKE_BIN($$, N_MOD, $1, $3); }
+    | mult-expr '*' unary-expr {
+        N_MAKE_NODE($$, N_MULT);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | mult-expr '/' unary-expr {
+        N_MAKE_NODE($$, N_DIV);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
+    | mult-expr '%' unary-expr {
+        N_MAKE_NODE($$, N_MOD);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 unary-expr: power-expr { $$ = $1; }
     | '+' unary-expr {
@@ -419,7 +494,11 @@ unary-expr: power-expr { $$ = $1; }
     }
 
 power-expr: primary { $$ = $1; }
-    | unary-expr TOK_POW power-expr { N_MAKE_BIN($$, N_POW, $1, $3); }
+    | unary-expr TOK_POW power-expr {
+        N_MAKE_NODE($$, N_POW);
+        N_ADD_CHILD($$, $1);
+        N_ADD_CHILD($$, $3);
+    }
 
 primary: atom
     | call { $$ = $1; }

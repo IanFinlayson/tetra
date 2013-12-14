@@ -38,4 +38,4 @@ node.o: node.c
 	${CC} ${CFLAGS} node.c
 
 clean:
-	rm -f parser lex.yy.c parser.tab.h parser.tab.c *.o
+	rm -f parser lex.yy.c parser.tab.h parser.tab.c *.o tetra
