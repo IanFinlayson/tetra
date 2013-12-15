@@ -41,22 +41,28 @@
 
 #define N_MAKE_INT(prnt, type, d) \
         (prnt) =  TTR_make_node((type), "", (d), 0.0, yylineno); \
-        (prnt)->dtype = INT_T
+        (prnt)->dtype = INT_T; \
+        (prnt)->scope = symbol_table_current_scope(symbol_table)
 #define N_MAKE_BOOL(prnt, type, b) \
         (prnt) = TTR_make_node((type), "", (b), 0.0, yylineno); \
-        (prnt)->dtype = BOOL_T
+        (prnt)->dtype = BOOL_T; \
+        (prnt)->scope = symbol_table_current_scope(symbol_table)
 #define N_MAKE_FLOAT(prnt, type, f) \
         (prnt) =  TTR_make_node((type), "", 0, (f), yylineno); \
-        (prnt)->dtype = FLOAT_T
+        (prnt)->dtype = FLOAT_T; \
+        (prnt)->scope = symbol_table_current_scope(symbol_table)
 #define N_MAKE_STR(prnt, type, s) \
         (prnt) =  TTR_make_node((type), (s), 0, 0.0, yylineno); \
-        (prnt)->dtype = STRING_T
+        (prnt)->dtype = STRING_T; \
+        (prnt)->scope = symbol_table_current_scope(symbol_table)
 #define N_MAKE_VOID(prnt, type) \
         (prnt) =  TTR_make_node((type), "", 0, 0.0, yylineno); \
-        (prnt)->dtype = VOID_T
+        (prnt)->dtype = VOID_T; \
+        (prnt)->scope = symbol_table_current_scope(symbol_table)
 #define N_MAKE_NODE(prnt, type) \
         (prnt) = TTR_make_node((type), "", 0, 0.0, yylineno); \
-        (prnt)->dtype = UNTYPED_T
+        (prnt)->dtype = UNTYPED_T; \
+        (prnt)->scope = symbol_table_current_scope(symbol_table)
 #define N_ADD_CHILD(prnt, child) \
         TTR_add_child((prnt), (child))
 #define INFER_DTYPE(prnt) \
@@ -159,6 +165,7 @@ small-stmt-list: small-stmt {
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
     }
+
 
 top-level-stmt: func-def
     | compound-stmt { $$ = $1; }

@@ -1,4 +1,7 @@
+def totol() void:
+    a = 0x16F
 def crazy() int:
+    a = "brisbane"
     if 1 == 1: 
         print "Yo!"
         if 2 == 2:
@@ -42,8 +45,6 @@ elif i < 0: #Checking comments before indent
     i **= -3 # Checking comments before dedent
 elif i != i:
     i = i
-elif a:
-    a = not a
 elif True == False:
     print all_is_wrong
     print "Does \t\"this\" work"
@@ -57,10 +58,10 @@ else:
     # can_i = 08 does not work (invalid literal correctly caught)
     # this does not work (takes 'G' to be an identifier) can_i_2 = 0xG
 
-for i in range(12):
-    a += i; print (5 + 3) * (15 / 3)**2
-    continue
-    break
+#for i in range(12):
+#    a += i; print (5 + 3) * (15 / 3)**2
+#    continue
+#    break
 
 arthur = 10
 dent = 5.7

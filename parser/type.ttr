@@ -5,8 +5,7 @@ def min(a float, b float, c float) float:
         return b
     return c
 
-a = 2
-b = 3
+a = 2; b = 3
 c = 22
 m = min(33.0, b, c)
 undef_var = undeffunc()

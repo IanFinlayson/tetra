@@ -71,6 +71,7 @@ void patch(void)
     TTR_Node *node, *stored;
     int type;
 
+    SET_GLOBAL_SCOPE();
     for (   node = dll_pop_head(call_patch_list);
             node != NULL;
             node = dll_pop_head(call_patch_list)) {
@@ -93,6 +94,8 @@ void patch(void)
     for (   node = dll_pop_head(var_patch_list);
             node != NULL;
             node = dll_pop_head(var_patch_list)) {
+        SET_GLOBAL_SCOPE();
+        ENTER_SCOPE(N_SCOPE(node));
         if (N_TYPE(node) == N_ASSIGN) {
             TTR_set_ident_data_type(symbol_table,
                     N_CHILD(node, 0), N_DTYPE(N_CHILD(node, 1)));

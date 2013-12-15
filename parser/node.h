@@ -32,6 +32,7 @@ typedef struct node {
 #define N_CHILD(n, c) ((n)->children[(c)])
 #define N_CAP(n) ((n)->capacity)
 #define N_LINE(n) ((n)->lineno)
+#define N_SCOPE(n) ((n)->scope)
 #define N_INT(n) ((n)->d)
 #define N_FLOAT(n) ((n)->f)
 #define N_STR(n) ((n)->str)

@@ -119,6 +119,13 @@ void symbol_table_leave_scope(Symbol_Table *table)
     table->sp--;
 }
 
+inline int symbol_table_current_scope(Symbol_Table *table)
+{
+    if (table->sp == 0)
+        return 0;
+    return table->scope_stack[table->sp-1];
+}
+
 void TTR_set_ident_data_type(
         Symbol_Table *table, TTR_Node *identifier, int type)
 {

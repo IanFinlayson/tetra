@@ -1,0 +1,90 @@
+Minimal Language Specification for Tetra
+
+TYPES
+
+    Basic types:
+        Reals    (float) : literals take the form of 17f, 17., .16, or 101.1
+        Integers (int)   : literals take the form of 11 (decimal),
+                            07 (octal), 0b1110010 (binary),
+                            or 0x1A or 0X34c (hex)
+        Booleans (bool)  : literals take the form of True or False
+        Strings  (string): literals take the form "A string in here"
+
+    Lists:
+        NOT IMPLEMENTED YET
+        Lists must have consistent types in them.  A type declaration
+        looks like [int] or [float], for example.
+
+    Derived types:
+        NOT EVEN DESIGNED
+
+    Without explicit conversion, the only type coercion is done when an
+    int is promoted to a float (floats are never demoted to ints). In any
+    other case, mixing types is an error.
+
+    Undecided: whether an [int] can promote to a [float].  That doesn't
+    matter, though, since we don't have lists up and running.
+
+STATEMENTS
+
+    Statements are modeled off Python, with some exceptions (mostly
+    reductions in variety).  The biggest exception is that assignments
+    have become expressions, like in C.
+    
+    Statements have various levels.  The smallest statements are the
+    appropriately named "small statements", which include pass, break,
+    continue, expression statements, returns, etc.  These cannot contain
+    any other statements.
+
+    The next level is the compound statments.  These include the while, if,
+    and various fors.  These statments may contain other compound
+    statements or small statements.
+
+    The last level is the toplevel statements.  There is only one statement
+    at this level, and it is the function definition.  The toplevel
+    statements may themselves contain compound and small statements.
+
+EXPRESSIONS
+
+    Expressions follow a familiar hierarchy, which can be seen in the
+    parser.
+
+TYPE INFERENCE
+    
+    The type inference system is rather simple.  It uses a LeBlank/Cook
+    symbol table.  As types are discovered, they are put into the table
+    with their associated scope.  When a type for a symbol is needed,
+    the table is searched.
+
+    If a type cannot be found when it is needed to infer the type of
+    something else, then the type inferred is UNDEFINED, and the symbol
+    that is undefined is put into a patch list.  Two patch lists are
+    maintained: that for function calls and that for other expressions.
+
+    The function calls are patched first (since if a function has
+    not been defined by this point, it is an error), and then the
+    expressions.  Since expressions are pushed onto the tail of the
+    list, but popped from the head during patching, it means that lower
+    level type issues are always resolved first, obviating the need
+    for recursive descent (since the order of the recursive descent has
+    already been preserved in the order of the table).
+
+    This order preservation also means that variables must always have 
+    a type associated with them before they are used in a right-hand-side 
+    context.
+
+FUNCTIONS
+
+    Scope:
+        There are only three levels of textual scoping in Tetra.
+        Level  0: Pre-defined functions (something like range())
+        Level  1: Global
+        Level >1: In a function definition
+        The reason it is called Level >1 is that each function
+        definition gets its own unique scope identifier, however,
+        the scope stack should never have more than 3 items on it.
+
+    Form:
+        Functions take the form:
+            def funcname(paramname1 paramtype1, ...) functype:
+        and must be followed by a suitable suite.

@@ -17,6 +17,20 @@ typedef double tetra_float;
 /* does not take endptr because flex should filter out invalid literals */
 #define STR_TO_F(str) strtod((str), NULL)
 
+#define PUSH_SCOPE() \
+        symbol_table_enter_next_scope(symbol_table)
+#define POP_SCOPE() symbol_table_leave_scope(symbol_table)
+#define ENTER_SCOPE(scope) \
+        symbol_table_enter_scope(symbol_table, (scope))
+#define SET_GLOBAL_SCOPE() \
+        while (symbol_table_current_scope(symbol_table) > 1) \
+            symbol_table_leave_scope(symbol_table)
+#define GET_SYMBOL(ident) \
+        symbol_table_lookup(symbol_table, (ident))
+#define ADD_SYMBOL(node) \
+        symbol_table_add(symbol_table, (node)->str, (node))
+#define CURRENT_SCOPE() (symbol_table->scope_stack[symbol_table->sp-1])
+
 enum Comp_Type { LT, LTE, GT, GTE, EQ, NEQ };
 enum Assign_Type { 
     MUL_BEC, DIV_BEC, PLU_BEC, MIN_BEC, MOD_BEC, POW_BEC,
