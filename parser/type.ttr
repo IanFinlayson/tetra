@@ -9,4 +9,8 @@ a = 2
 b = 3
 c = 22
 m = min(33.0, b, c)
+undef_var = undeffunc()
+def undeffunc() string:
+    print "boogie"
+    return "boogie"
 $

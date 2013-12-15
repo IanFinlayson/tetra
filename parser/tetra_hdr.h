@@ -13,7 +13,7 @@
 typedef int32_t tetra_int;
 typedef double tetra_float;
 
-#define STR_TO_I(str, end, base) (int32_t) strtol((str), (end), (base))
+#define STR_TO_I(str, end, base) (tetra_int) strtol((str), (end), (base))
 /* does not take endptr because flex should filter out invalid literals */
 #define STR_TO_F(str) strtod((str), NULL)
 

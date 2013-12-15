@@ -6,6 +6,9 @@
 
 #include "tetra_hdr.h"
 
+#define COMPARE_TYPES(node1, node2) \
+        TTR_compare_trees((node1), (node2), TTR_compatible_types)
+
 typedef struct node {
     int ntype;                  /* node type (if, while, etc.) */
     int dtype;                  /* data type (string, int, etc.) */
@@ -18,6 +21,20 @@ typedef struct node {
     int capacity;               /* capacity for child pointers */
     struct node **children;     /* list of pointers to children */
 } TTR_Node;
+
+/* A series of access macros.  
+ * Hopefully will make any changes less painful. 
+ */
+#define N_TYPE(n) ((n)->ntype)
+#define N_DTYPE(n) ((n)->dtype)
+#define N_NCH(n) ((n)->n_children)
+#define N_CHILDREN(n) ((n)->children)
+#define N_CHILD(n, c) ((n)->children[(c)])
+#define N_CAP(n) ((n)->capacity)
+#define N_LINE(n) ((n)->lineno)
+#define N_INT(n) ((n)->d)
+#define N_FLOAT(n) ((n)->f)
+#define N_STR(n) ((n)->str)
 
 enum Node_Types {
     /* Expression types */
@@ -78,20 +95,6 @@ enum Node_Types {
     N_RETURN,
     N_TGTS 
 };
-
-/* A series of access macros.  
- * Hopefully will make any changes less painful. 
- */
-#define N_TYPE(n) ((n)->ntype)
-#define N_DTYPE(n) ((n)->dtype)
-#define N_NCH(n) ((n)->n_children)
-#define N_CHILDREN(n) ((n)->children)
-#define N_CHILD(n, c) ((n)->children[(c)])
-#define N_CAP(n) ((n)->capacity)
-#define N_LINE(n) ((n)->lineno)
-#define N_INT(n) ((n)->d)
-#define N_FLOAT(n) ((n)->f)
-#define N_STR(n) ((n)->str)
 
 /* 
  * Create a new node on the heap and return a pointer to it.  

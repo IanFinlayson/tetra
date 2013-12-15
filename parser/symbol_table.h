@@ -8,6 +8,14 @@
 #include "hash_table.h"
 #include "node.h" 
 
+#define PUSH_SCOPE() \
+        symbol_table_enter_next_scope(symbol_table)
+#define POP_SCOPE() symbol_table_leave_scope(symbol_table)
+#define GET_SYMBOL(ident) \
+        symbol_table_lookup(symbol_table, (ident))
+#define ADD_SYMBOL(node) \
+        symbol_table_add(symbol_table, (node)->str, (node))
+
 #define MAX_SCOPES 100
 
 typedef struct sym_entry {

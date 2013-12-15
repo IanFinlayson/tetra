@@ -134,6 +134,11 @@ void TTR_set_ident_data_type(
         N_DTYPE(identifier) = type;
         symbol_table_add(table, N_STR(identifier), identifier);
     } else {
-        N_DTYPE(identifier) = N_DTYPE(sym_node);
+        if (N_DTYPE(sym_node) == UNDEFINED_T) {
+            N_DTYPE(identifier) = type;
+            N_DTYPE(sym_node) = type;
+        } else {
+            N_DTYPE(identifier) = N_DTYPE(sym_node);
+        }
     }
 }

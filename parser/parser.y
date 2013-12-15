@@ -35,7 +35,7 @@
 #include "tetra_hdr.h"
 #include "node.h"
 #include "symbol_table.h"
-#include "parsetree.h"
+#include "dlinked_list.h"
 
 #define FUNC_PARAM_CH 0
 
@@ -59,31 +59,22 @@
         (prnt)->dtype = UNTYPED_T
 #define N_ADD_CHILD(prnt, child) \
         TTR_add_child((prnt), (child))
-#define INFER_TYPE(node) \
-        if (TTR_infer_data_type((node)) == INVALID_T) \
-            yyerror("Type mismatch")
-#define INFER_DATA_TYPE(prnt) \
-        if (TTR_infer_data_type((prnt)) == INVALID_T) \
-            yyerror("Type mismatch")
-#define SET_IDENT_TYPE(ident, type) \
+#define INFER_DTYPE(prnt) \
+        expr_type = TTR_infer_data_type((prnt)); \
+        if (expr_type == INVALID_T) \
+            yyerror("Type mismatch"); \
+        else if (expr_type == UNDEFINED_T) \
+            dll_push_tail(var_patch_list, (prnt))
+#define SET_IDENT_DTYPE(ident, type) \
         TTR_set_ident_data_type(symbol_table, (ident), (type))
-#define GET_IDENT_TYPE(node, ident) \
+#define GET_IDENT_DTYPE(node, ident) \
         TTR_Node *n = symbol_table_lookup(symbol_table, (ident)); \
         (node)->dtype = (n == NULL) ? UNDEFINED_T : n->dtype
-#define SET_FUNC_TYPE(type) func_type = (type)
-#define COMPARE_TYPES(node1, node2) \
-        if (TTR_compare_trees((node1), (node2), TTR_compatible_types)) \
-            yyerror("Argument types do not match parameter types")
-#define GET_SYMBOL(ident) \
-        symbol_table_lookup(symbol_table, (ident))
-#define ADD_SYMBOL(node) \
-        symbol_table_add(symbol_table, (node)->str, (node))
+#define SET_FUNC_DTYPE(func, type) \
+        TTR_set_ident_data_type(symbol_table, (func), (type))
 #define CHECK_TYPES(type1, type2) \
         if (TTR_promote_type((type1), (type2)) == INVALID_T) \
             yyerror("Type mismatch")
-#define PUSH_SCOPE() \
-        symbol_table_enter_next_scope(symbol_table)
-#define POP_SCOPE() symbol_table_leave_scope(symbol_table)
 
 int yywrap(void);
 void yyerror(const char *msg);
@@ -91,9 +82,12 @@ void yyerror(const char *msg);
 extern int yylineno;
 extern Symbol_Table *symbol_table;
 extern TTR_Node *parse_tree;
+extern TTR_List *call_patch_list;
+extern TTR_List *var_patch_list;
 
 int func_type; /* Used when checking validity of return statements */
 TTR_Node *function; /* Used in "call" to check param types */
+int expr_type; /* Used when inferring types */
 %}
 
 %union {
@@ -267,14 +261,14 @@ target-list: target {
 target: identifier { $$ = $1; }
 
 func-def: def funcname { PUSH_SCOPE(); } parameters return-type[ret]
-        ':' { SET_FUNC_TYPE($ret); } suite {
+        ':' { func_type = $ret; } suite {
         POP_SCOPE();
         $$ = $def;
         N_STR($$) = N_STR($funcname);
         //N_ADD_CHILD($$, $funcname);
         N_ADD_CHILD($$, $parameters);
         N_ADD_CHILD($$, $suite);
-        SET_IDENT_TYPE($$, $ret);
+        SET_FUNC_DTYPE($$, $ret);
     }
 
 def: TOK_DEF { N_MAKE_NODE($$, N_FUNCDEF); }
@@ -287,13 +281,13 @@ parameters: '(' ')' { N_MAKE_NODE($$, N_PARAMLIST); }
 parameter-list: identifier type {
         N_MAKE_NODE($$, N_PARAMLIST);
         N_ADD_CHILD($$, $identifier);
-        SET_IDENT_TYPE($identifier, $type);
+        SET_IDENT_DTYPE($identifier, $type);
     }
     | identifier type ',' parameter-list[plist] {
         N_MAKE_NODE($$, N_PARAMLIST);
         N_ADD_CHILD($$, $identifier);
         N_ADD_CHILD($$, $plist);
-        SET_IDENT_TYPE($identifier, $type);
+        SET_IDENT_DTYPE($identifier, $type);
     }
 
 return-type: /* empty */ { $$ = VOID_T; }
@@ -353,18 +347,18 @@ expression: assignment-expr { $$ = $1; }
 
 assignment-expr: conditional-expr { $$ = $1; }
     | target '=' assignment-expr {
-        SET_IDENT_TYPE($1, N_DTYPE($3));
+        SET_IDENT_DTYPE($1, N_DTYPE($3));
         N_MAKE_INT($$, N_ASSIGN, BEC_BEC);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | target TOK_ASSIGN assignment-expr {
-        SET_IDENT_TYPE($1, N_DTYPE($3));
+        SET_IDENT_DTYPE($1, N_DTYPE($3));
         N_MAKE_INT($$, N_ASSIGN, $2);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 conditional-expr: or-test { $$ = $1; }
@@ -373,7 +367,7 @@ conditional-expr: or-test { $$ = $1; }
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
         N_ADD_CHILD($$, $5);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 or-test: and-test { $$ = $1; }
@@ -442,7 +436,7 @@ or-expr: xor-expr { $$ = $1; }
         N_MAKE_NODE($$, N_BOR);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 xor-expr: and-expr { $$ = $1; }
@@ -450,7 +444,7 @@ xor-expr: and-expr { $$ = $1; }
         N_MAKE_NODE($$, N_BXOR);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 and-expr: shift-expr { $$ = $1; }
@@ -458,7 +452,7 @@ and-expr: shift-expr { $$ = $1; }
         N_MAKE_NODE($$, N_BAND);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 shift-expr: add-expr { $$ = $1; }
@@ -466,13 +460,13 @@ shift-expr: add-expr { $$ = $1; }
         N_MAKE_NODE($$, N_LSHIFT);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | shift-expr TOK_RSHIFT add-expr {
         N_MAKE_NODE($$, N_RSHIFT);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 add-expr: mult-expr { $$ = $1; }
@@ -480,13 +474,13 @@ add-expr: mult-expr { $$ = $1; }
         N_MAKE_NODE($$, N_ADD);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | add-expr '-' mult-expr {
         N_MAKE_NODE($$, N_SUB);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 mult-expr: unary-expr { $$ = $1; }
@@ -494,36 +488,36 @@ mult-expr: unary-expr { $$ = $1; }
         N_MAKE_NODE($$, N_MULT);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | mult-expr '/' unary-expr {
         N_MAKE_NODE($$, N_DIV);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | mult-expr '%' unary-expr {
         N_MAKE_NODE($$, N_MOD);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 unary-expr: power-expr { $$ = $1; }
     | '+' unary-expr {
         N_MAKE_NODE($$, N_POS);
         N_ADD_CHILD($$, $2);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | '-' unary-expr {
         N_MAKE_NODE($$, N_NEG);
         N_ADD_CHILD($$, $2);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | '~' unary-expr {
         N_MAKE_NODE($$, N_INV);
         N_ADD_CHILD($$, $2);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 power-expr: primary { $$ = $1; }
@@ -531,7 +525,7 @@ power-expr: primary { $$ = $1; }
         N_MAKE_NODE($$, N_POW);
         N_ADD_CHILD($$, $1);
         N_ADD_CHILD($$, $3);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 primary: atom
@@ -545,7 +539,7 @@ callable: identifier { $$ = $1; }
 
 identifier: TOK_IDENTIFIER {
         N_MAKE_STR($$, N_IDENTIFIER, yylval.text);
-        GET_IDENT_TYPE($$, yylval.text);
+        GET_IDENT_DTYPE($$, yylval.text);
     }
 
 literal: TOK_BOOL { N_MAKE_BOOL($$, N_BOOL, yylval.i); }
@@ -557,12 +551,17 @@ enclosure: '(' expression ')' { $$ = $expression; }
 
 call: callable argument-list[args] {
         N_MAKE_NODE($$, N_CALL);
-        N_ADD_CHILD($$, $callable);
+        //N_ADD_CHILD($$, $callable);
+        N_STR($$) = N_STR($callable);
         N_ADD_CHILD($$, $args);
-        GET_IDENT_TYPE($$, N_STR($callable)); 
         function = GET_SYMBOL(N_STR($callable));
         if (function != NULL) {
-            COMPARE_TYPES(N_CHILD(function, FUNC_PARAM_CH), $args);
+            N_DTYPE($$) = N_DTYPE(function);
+            if(COMPARE_TYPES(N_CHILD(function, FUNC_PARAM_CH), $args))
+                yyerror("Argument types do not match parameter types");
+        } else {
+            N_DTYPE($$) = UNDEFINED_T;
+            dll_push_tail(call_patch_list, $$);
         }
     }
 
@@ -572,13 +571,13 @@ argument-list: '(' ')' { $$ = N_MAKE_NODE($$, N_POSARGS); }
 positional-arguments: expression {
         N_MAKE_NODE($$, N_POSARGS);
         N_ADD_CHILD($$, $expression);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
     | expression ',' positional-arguments[args] {
         N_MAKE_NODE($$, N_POSARGS);
         N_ADD_CHILD($$, $expression);
         N_ADD_CHILD($$, $args);
-        INFER_TYPE($$);
+        INFER_DTYPE($$);
     }
 
 %%

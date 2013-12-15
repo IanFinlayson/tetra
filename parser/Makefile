@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-c -Wall
 
-tetra: lex.yy.o node.o exit_funcs.o tetra.o parsetree.o string_buffer.o symbol_table.o hash_table.o
+tetra: lex.yy.o node.o exit_funcs.o tetra.o parsetree.o string_buffer.o symbol_table.o hash_table.o dlinked_list.o
 	$(CC) -Wall *.o -o tetra
 
 tetra.o: tetra.c
@@ -21,6 +21,9 @@ hash_table.o: hash_table.c
 
 symbol_table.o: symbol_table.c
 	$(CC) $(CFLAGS) symbol_table.c
+
+dlinked_list.o: dlinked_list.c
+	$(CC) $(CFLAGS) dlinked_list.c
 
 lex.yy.o: lex.yy.c parser.tab.o
 	$(CC) $(CFLAGS) lex.yy.c

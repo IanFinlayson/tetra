@@ -71,7 +71,7 @@ void print_node(TTR_Node *node)
     case N_FUNCDEF: printf("FUNCDEF: %s", N_STR(node)); break;
     case N_PARAMLIST: printf("PARAMLIST:"); break;
     case N_POSARGS: printf("POSARGS:"); break;
-    case N_CALL: printf("CALL:"); break;
+    case N_CALL: printf("CALL: %s", N_STR(node)); break;
     case N_GLOBAL: printf("GLOBAL:"); break;
     case N_IDENTLIST: printf("IDENTLIST:"); break;
     case N_RETURN: printf("RETURN:"); break;
