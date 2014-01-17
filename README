@@ -1,6 +1,8 @@
-tetra
-=====
+Tetra is a parallel programming language.  It is still a work in progress, but
+will feature an editor which will allow for debugging and visualization of
+programs, as well as an efficient compiler.
 
-Tetra educational parallel programming language
+Tetra is licensed under the MIT license.
 
-See docs/ for documentation, should I ever put anything worthwhile there.
+See http://tetra-lang.org for more details.
+
