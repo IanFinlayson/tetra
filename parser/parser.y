@@ -84,6 +84,7 @@
 
 int yywrap(void);
 void yyerror(const char *msg);
+int yylex( );
 
 extern int yylineno;
 extern Symbol_Table *symbol_table;
