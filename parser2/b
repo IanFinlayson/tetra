@@ -1,8 +1,0 @@
-#!/bin/sh
-
-bison -d parser.y -o parser.gen.cpp
-flex -o lexer.gen.cpp lexer.l
-g++ *.cpp
-
-
-

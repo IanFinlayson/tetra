@@ -2,6 +2,11 @@
 #include <iostream>
 #include <string>
 
+#include "tetra.hpp"
+
+extern int yylineno;
+
+int yylex( );
 int yywrap( );
 void yyerror(const char* str);
 %}
@@ -86,9 +91,18 @@ void yyerror(const char* str);
 
 
 program: TOK_INTVAL {
-  std::cout << "YES!" << endl;
+  std::cout << "YES!" << std::endl;
 }
 
+%%
+
+int yywrap( ) { 
+  return 1;
+}
+
+void yyerror(const char* str) {
+  fail(str, yylineno);
+}
 
 
 

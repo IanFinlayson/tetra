@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 #include "tetra.hpp"
-#include "parser.tab.h"
+#include "parser.gen.hpp"
 
 std::string buffer;
 
@@ -105,7 +105,7 @@ std::string buffer;
 "false" {yylval.boolval = false; return TOK_BOOLVAL;}
 
  /* identifiers */
-[a-zA-Z_][a-zA-Z0-9_]* {strcpy(yylval.id, yytext); return TOK_IDENT;}
+[a-zA-Z_][a-zA-Z0-9_]* {strcpy(yylval.stringval, yytext); return TOK_IDENT;}
 
  /* ignore whitespace and comments */
 "#".*$   {}
