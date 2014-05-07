@@ -166,3 +166,4 @@ int TTR_compare_trees(TTR_Node *node1, TTR_Node *node2,
         int (*comp)(TTR_Node *, TTR_Node *));
 
 #endif /* H_TETRA_NODE */
+
