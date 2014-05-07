@@ -29,13 +29,12 @@
 
 
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <list>
+#include <iostream>
+#include <string>
 #include "tetra_hdr.h"
 #include "node.h"
 #include "symbol_table.h"
-#include "dlinked_list.h"
 
 #define FUNC_PARAM_CH 0
 
@@ -89,8 +88,8 @@ int yylex( );
 extern int yylineno;
 extern Symbol_Table *symbol_table;
 extern TTR_Node *parse_tree;
-extern TTR_List *call_patch_list;
-extern TTR_List *var_patch_list;
+extern std::list<TTR_Node> call_patch_list;
+extern std::list<TTR_Node> var_patch_list;
 
 int func_type; /* Used when checking validity of return statements */
 TTR_Node *function; /* Used in "call" to check param types */
@@ -100,7 +99,7 @@ int expr_type; /* Used when inferring types */
 %union {
     tetra_float f;
     tetra_int i;
-    char *text;
+    char text[1024];
     struct node *node;
 }
 

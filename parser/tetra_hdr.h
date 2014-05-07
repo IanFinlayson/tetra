@@ -6,7 +6,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
-#include "exit_funcs.h"
+#include "exit_funcs.hpp"
 
 #define DEBUG(msg) fprintf(stderr, "%s\n", (msg))
 

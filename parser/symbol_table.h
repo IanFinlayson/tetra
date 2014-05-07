@@ -5,7 +5,8 @@
 #ifndef H_SYMBOL_TABLE
 #define H_SYMBOL_TABLE
 
-#include "hash_table.h"
+#include <map>
+
 #include "node.h" 
 
 #define MAX_SCOPES 100

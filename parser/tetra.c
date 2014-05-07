@@ -1,11 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
+#include <list>
+#include <iostream>
 #include <unistd.h>
 #include "tetra_hdr.h"
 #include "symbol_table.h"
 #include "parsetree.h"
 #include "node.h"
-#include "dlinked_list.h"
 #include "parser.tab.h"
 
 void patch(void);
@@ -13,8 +12,8 @@ void parse(FILE *);
 
 TTR_Node *parse_tree;
 Symbol_Table *symbol_table;
-TTR_List *call_patch_list;
-TTR_List *var_patch_list;
+std::list<TTR_node> call_patch_list;
+std::list<TTR_node> var_patch_list;
 
 int main(int argc, char **argv)
 {

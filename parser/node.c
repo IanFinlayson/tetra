@@ -6,8 +6,7 @@
 TTR_Node * TTR_make_node(int type, const char *str, tetra_int d, 
         tetra_float f, int lineno)
 {
-    TTR_Node *node;
-    node = malloc(sizeof(TTR_Node));
+    TTR_Node *node = malloc(sizeof(TTR_Node));
     if (node == NULL) /* malloc() error */
         return node;
     N_TYPE(node) = type;

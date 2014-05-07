@@ -19,23 +19,19 @@
  */
 
 %{
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <iostream>
+#include <string>
 #include "tetra_hdr.h"
-#include "string_buffer.h"
-/* Lest we forget: include definition files BEFORE parser.tab.h, as here */
 #include "parser.tab.h"
 
 #define MAX_INDENTS 50
-#define INIT_STR_BUF_CAPACITY 100
 
 int indent_level[MAX_INDENTS];
 int *num_ind = indent_level;
 
 char *endptr; /* Used to determine if valid non-base-10 literal is used */
 
-Str_Buf *str_buf;
+std::string buffer;
 
 void error_exit(const char *str);
 int is_in(int target, int *array, int *end_ptr);
@@ -115,10 +111,7 @@ int i;
 }
 
 \"  { 
-        if (str_buf == NULL)
-            str_buf = make_str_buf(INIT_STR_BUF_CAPACITY);
-        else
-            reset_str_buf(str_buf, INIT_STR_BUF_CAPACITY);
+        buffer = "";
         BEGIN(strings); 
     }
 
@@ -127,25 +120,25 @@ int i;
   */
 <strings>\"             {
                             BEGIN(INITIAL);
-                            yylval.text = str_buf->buffer;
+                            strcpy(yylval.text, buffer.c_str( ));
                             return TOK_STRING;
                         }
 <strings>\n             {
                             error_exit("Unterminated string literal");
                         }
 <strings>\\[0-7]{1,3}   {
-                            append_to_str_buf(str_buf, yytext);
+                            buffer += yytext;
                         }
 <strings>\\[0-9]+       {
-                            append_to_str_buf(str_buf, yytext);
+                            buffer += yytext;
                         }
 <strings>\\n            |
 <strings>\\t            |
 <strings>\\r            |
 <strings>\\b            |
-<strings>\\f            { append_to_str_buf(str_buf, yytext); }
-<strings>\\(.|\n)       { append_to_str_buf(str_buf, yytext+1); }
-<strings>[^\\\n\"]+     { append_to_str_buf(str_buf, yytext); }
+<strings>\\f            { buffer += yytext; }
+<strings>\\(.|\n)       { buffer += yytext + 1; }
+<strings>[^\\\n\"]+     { buffer += yytext; }
 
 [[:blank:]]+   /* Ignore whitespace */ 
 
@@ -208,8 +201,6 @@ int i;
 "void"      { yylval.i = VOID_T; return TOK_TYPE; }
 
  /* Single-character lexemes */
-"<" |
-">" |
 "=" |
 "+" |
 "-" |
@@ -239,10 +230,8 @@ int i;
 ">="	{ yylval.i = GTE; return TOK_GTE; }
 "=="	{ yylval.i = EQ;  return TOK_EQ; }
 "!="	{ yylval.i = NEQ; return TOK_NEQ; }
- /*
 "<"	    { yylval.i = LT;  return TOK_COMP; }
 ">"	    { yylval.i = GT;  return TOK_COMP; }
- */
 
  /* Bitwise operators (No TOK) */
  /* 
