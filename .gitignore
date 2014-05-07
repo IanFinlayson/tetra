@@ -1,6 +1,4 @@
 tetra
 *.o
-lex.yy.c
-*.tab.h
-*.tab.c
+*.gen.*
 

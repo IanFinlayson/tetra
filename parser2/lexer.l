@@ -4,14 +4,88 @@
 #include "tetra.hpp"
 #include "parser.gen.hpp"
 
+/* used for string literals */
 std::string buffer;
+
+/* used for whitespace indentation */
+const int MAX_INDENTS = 50;
+int indent_level[MAX_INDENTS];
+int *num_ind = indent_level;
+int is_in(int target, int *array, int *end_ptr);
 
 %}
 %option warn noyywrap yylineno
 %x indents dedents strings end
 %%
 
- /* Keywords */
+ /* skip blank lines */
+<*>^[[:blank:]]*\n { } 
+
+ /* Skip lines containing only blanks and comments */
+<*>^[[:blank:]]*#.*\n { }
+
+ /* but make sure that lines with code and comments end right */
+<INITIAL>#.*\n  {BEGIN(indents); return TOK_NEWLINE;}
+
+ /* no whitespace to begin line */
+<indents>^[^[:space:]] { 
+  yyless(0);
+  BEGIN(INITIAL);
+  if (*num_ind > 0) {     /* dedented */
+    BEGIN(dedents);
+  }
+}
+
+<indents>^[[:blank:]]* {
+  if (yyleng == *num_ind) {           /* no change */
+    BEGIN(INITIAL);
+  } else if (yyleng < *num_ind) {     /* dedented */
+    if (!is_in(yyleng, indent_level, num_ind)) {
+      fail("Dedent to non-matching level", yylineno);
+    }
+    yyless(0);
+    BEGIN(dedents);
+  } else {                            /* indented */
+    BEGIN(INITIAL);
+    if (++num_ind == indent_level + MAX_INDENTS) {
+      fail("Too many levels of indentation", yylineno);
+    }
+    *num_ind = yyleng;
+    return TOK_INDENT;
+  }
+}
+    
+<dedents>[[:blank:]]* { 
+  if (yyleng == *num_ind) {
+    BEGIN(INITIAL);
+  } else if (yyleng < *num_ind) {
+    for (int i = 0; i < yyleng; i++) {
+      unput(' ');
+    }
+    --num_ind;
+    return TOK_DEDENT;
+  } else { 
+    fail("Major goof getting here", yylineno);
+  }
+}
+
+ /* must be sure dedent level exists before entering this state */
+<dedents>[^[:space:]] {
+  yyless(0);
+  --num_ind;
+  if (*num_ind == 0) {
+    BEGIN(INITIAL);
+  }
+  return TOK_DEDENT;
+}
+
+\n  {
+  BEGIN(indents);
+  return TOK_NEWLINE;
+}
+
+
+ /* keywords */
 "if"       {return TOK_IF;}
 "elif"     {return TOK_ELIF;}
 "else"     {return TOK_ELSE;}
@@ -34,13 +108,7 @@ std::string buffer;
 "bool"     {return TOK_BOOL;}
 "string"   {return TOK_STRING;}
 
-
-
-
- /* TODO whitespace */
-
-
-
+ /* operators */
 "="     {return TOK_ASSIGN;}
 "+"     {return TOK_PLUS;}
 "-"     {return TOK_MINUS;}
@@ -117,4 +185,16 @@ std::string buffer;
 %%
 
 
+int is_in(int target, int *array, int *end_ptr) {
+  if (end_ptr < array) {
+    return 0;
+  }
+  int *cur;
+  for (cur = end_ptr; cur >= array; cur--) {
+    if (*cur == target) {
+      return 1;
+    }
+  }
+  return 0;
+}
 

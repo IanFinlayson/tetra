@@ -85,6 +85,11 @@ void yyerror(const char* str);
 %token <stringval> TOK_STRINGVAL
 %token <id> TOK_IDENT
 
+/* dummy tokens */
+%token TOK_INDENT
+%token TOK_DEDENT
+%token TOK_NEWLINE
+
 %error-verbose
 
 %%
