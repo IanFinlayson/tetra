@@ -1,0 +1,71 @@
+def totol() void:
+    a = 0x16F
+def crazy() int:
+    a = "brisbane"
+    if 1 == 1: 
+        print "Yo!"
+        if 2 == 2:
+            print "Yo2!"
+            if 3 == 3:
+                print "Yo?"
+                if 5 == 5:
+                    print "gah"
+                    if 6 == 6:
+                            print "blah"
+        print "No"
+    elif 2 == 2:
+        print "D'oh!"
+    elif 3 == 3:
+        print "Mo"
+    else:
+        print "Work"
+def min_three(a int, b int, c int) int:
+    if a < b and a < c:
+        return a
+    elif b < c:
+        return b
+    else:
+        return c
+# This is a file to test rudimentary Tetra parsing
+i = 10.
+a = b = c = 5
+d = min_three(a, b, c)
+
+while i < 20:
+    i += i # Checking out comments
+    if i > 100:
+        i = 2
+
+# This is a comment to test tracking of line numbers
+if i > 5:
+    i /= 2
+
+    # blank line before dedent
+elif i < 0: #Checking comments before indent
+    i **= -3 # Checking comments before dedent
+elif i != i:
+    i = i
+elif True == False:
+    print all_is_wrong
+    print "Does \t\"this\" work"
+else:
+
+    # blank line before indent
+    bond = 007
+    coffee = 0xCAFE
+    tea = 0XcAfE
+    ten_and_ten_is_ten = 0b1010
+    # can_i = 08 does not work (invalid literal correctly caught)
+    # this does not work (takes 'G' to be an identifier) can_i_2 = 0xG
+
+#for i in range(12):
+#    a += i; print (5 + 3) * (15 / 3)**2
+#    continue
+#    break
+
+arthur = 10
+dent = 5.7
+
+print arthur / dent + 1**10**2 * a % 2
+arthur = 10 + 11.1
+$

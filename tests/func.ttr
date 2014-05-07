@@ -1,0 +1,6 @@
+def function(a float, b int) string:
+    if a > b:
+        print "Yo!"
+
+    return "Hello"
+$
