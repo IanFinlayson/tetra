@@ -5,10 +5,12 @@
 #include "tetra.hpp"
 
 extern int yylineno;
-
 int yylex( );
 int yywrap( );
 void yyerror(const char* str);
+
+struct Node* root;
+
 %}
 
 /* each non-terminal is represented with a node literlas are doubles */
@@ -90,14 +92,40 @@ void yyerror(const char* str);
 %token TOK_DEDENT
 %token TOK_NEWLINE
 
+/* types */
+%type <node> stmts stmt simple_stmt small_stmt_list small_stmt top_level_stmt
+
 %error-verbose
 
 %%
 
+program: stmts TOK_DOLLAR TOK_NEWLINE {root = $1;}
 
-program: TOK_INTVAL {
-  std::cout << "YES!" << std::endl;
-}
+stmts: stmt {$$ = $1;}
+     | stmt stmts {
+         $$ = make_node(NODE_STMT);
+         $$->children.push_back($1);
+         $$->children.push_back($2);
+     }
+
+stmt: simple_stmt {$$ = $1;}
+    | top_level_stmt {$$ = $1;}
+
+simple_stmt: small_stmt_list TOK_NEWLINE {$$ = $1;}
+
+small_stmt_list: small_stmt {
+                  $$ = $1;
+               } | small_stmt ';' small_stmt_list {
+                  $$ = make_node(NODE_STMT);
+                  $$->children.push_back($1);
+                  $$->children.push_back($2);
+               }
+
+
+
+
+top_level_stmt: TOK_INTVAL {$$ = NULL;}
+small_stmt: TOK_INTVAL {$$ = NULL;}
 
 %%
 
@@ -108,6 +136,4 @@ int yywrap( ) {
 void yyerror(const char* str) {
   fail(str, yylineno);
 }
-
-
 

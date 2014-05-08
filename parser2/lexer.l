@@ -176,7 +176,6 @@ int is_in(int target, int *array, int *end_ptr);
 [a-zA-Z_][a-zA-Z0-9_]* {strcpy(yylval.stringval, yytext); return TOK_IDENT;}
 
  /* ignore whitespace and comments */
-"#".*$   {}
 [ \t\n]+ {}
 
  /* anything else is an error */

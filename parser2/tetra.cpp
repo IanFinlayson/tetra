@@ -3,8 +3,11 @@
 #include <cstdlib>
 #include <cstdio>
 #include "parser.gen.hpp"
-
 #include "tetra.hpp"
+
+
+int yyparse( );
+
 
 /* print an error message and quit */
 void fail(const std::string& mesg, int lineno) {
@@ -15,6 +18,12 @@ void fail(const std::string& mesg, int lineno) {
   std::cerr << std::endl;
 }
 
+/* node functions */
+Node* make_node(int type) {
+  Node* n = new Node;
+  n->type = type;
+  return n;
+}
 
 /* the main function */
 int main(int argc, char** argv) {

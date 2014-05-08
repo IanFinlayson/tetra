@@ -1,6 +1,6 @@
 #!/bin/sh
 
-CC = clang++
+CC = g++
 CFLAGS = -W -Wall -g
 
 tetra: parser.gen.o lexer.gen.o tetra.o
