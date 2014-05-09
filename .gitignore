@@ -1,4 +1,5 @@
 tetra
 *.o
 *.gen.*
+tags
 

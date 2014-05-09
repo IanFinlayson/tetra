@@ -5,17 +5,45 @@
 #include <vector>
 
 /* types of nodes */
-const int NODE_STMT = 0;
+enum NodeType {
+  NODE_FUNCTION,
+  NODE_FUNCTION_LIST,
+  NODE_STATEMENT,
+  NODE_PARAM,
+  NODE_PARAM_LIST,
+  NODE_TYPE,
+  NODE_PASS,
+  NODE_RETURN,
+  NODE_BREAK,
+  NODE_CONTINUE,
+  NODE_IF,
+  NODE_WHILE
 
-
-struct Node {
-    int type;
-    std::vector<Node*> children;
+  
 };
 
+/* data types */
+enum DataType {
+  TYPE_INT,
+  TYPE_REAL,
+  TYPE_STRING,
+  TYPE_BOOL,
+  TYPE_VOID
+};
 
-/* node functions */
-Node* make_node(int type);
+class Node {
+  public:
+    Node(NodeType type);
+    void addChild(Node* child);
+    void setDataType(DataType data_type);
+    void setIdentifier(std::string identifier);
+
+  private:
+    NodeType node_type;
+    DataType data_type;
+    std::vector<Node*> children;
+    std::string identifier;
+};
 
 void fail(const std::string& mesg, int lineno = 0);
 

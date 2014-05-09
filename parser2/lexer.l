@@ -104,7 +104,7 @@ int is_in(int target, int *array, int *end_ptr);
 "pass"     {return TOK_PASS;}
 "return"   {return TOK_RETURN;}
 "int"      {return TOK_INT;}
-"float"    {return TOK_FLOAT;}
+"real"     {return TOK_REAL;}
 "bool"     {return TOK_BOOL;}
 "string"   {return TOK_STRING;}
 
@@ -173,7 +173,7 @@ int is_in(int target, int *array, int *end_ptr);
 "false" {yylval.boolval = false; return TOK_BOOLVAL;}
 
  /* identifiers */
-[a-zA-Z_][a-zA-Z0-9_]* {strcpy(yylval.stringval, yytext); return TOK_IDENT;}
+[a-zA-Z_][a-zA-Z0-9_]* {strcpy(yylval.stringval, yytext); return TOK_IDENTIFIER;}
 
  /* ignore whitespace and comments */
 [ \t\n]+ {}

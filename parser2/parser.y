@@ -9,17 +9,18 @@ int yylex( );
 int yywrap( );
 void yyerror(const char* str);
 
-struct Node* root;
+Node* root;
 
 %}
 
 /* each non-terminal is represented with a node literlas are doubles */
 %union {
-  struct Node* node;
+  Node* node;
   int intval;
   double realval;
   bool boolval;
   char stringval[256];
+  DataType data_type;
 }
 
 /* typless tokens */
@@ -41,7 +42,7 @@ struct Node* root;
 %token TOK_PASS
 %token TOK_RETURN
 %token TOK_INT
-%token TOK_FLOAT
+%token TOK_REAL
 %token TOK_BOOL
 %token TOK_STRING
 %token TOK_ASSIGN
@@ -85,7 +86,7 @@ struct Node* root;
 %token <realval> TOK_REALVAL
 %token <boolval> TOK_BOOLVAL
 %token <stringval> TOK_STRINGVAL
-%token <id> TOK_IDENT
+%token <stringval> TOK_IDENTIFIER
 
 /* dummy tokens */
 %token TOK_INDENT
@@ -93,39 +94,167 @@ struct Node* root;
 %token TOK_NEWLINE
 
 /* types */
-%type <node> stmts stmt simple_stmt small_stmt_list small_stmt top_level_stmt
+%type <node> functions function param-list statements statement block params param simple_statements
+%type <node> compound_statement simple_statement pass_statement return_statement break_statement
+%type <node> continue_statement expression if_statement while_statement else-option
+%type <data_type> return-type type
 
 %error-verbose
 
 %%
 
-program: stmts TOK_DOLLAR TOK_NEWLINE {root = $1;}
+/* a program is a list of functions */
+program: functions {
+  root = $1;
+}
 
-stmts: stmt {$$ = $1;}
-     | stmt stmts {
-         $$ = make_node(NODE_STMT);
-         $$->children.push_back($1);
-         $$->children.push_back($2);
-     }
+/* a list of functions */
+functions: function functions {
+  $$ = new Node(NODE_FUNCTION_LIST);
+  $$->addChild($1);
+  $$->addChild($2);
+} | {
+  $$ = NULL;
+}
 
-stmt: simple_stmt {$$ = $1;}
-    | top_level_stmt {$$ = $1;}
+/* a single function */
+function: TOK_DEF TOK_IDENTIFIER param-list return-type TOK_COLON block {
+  $$ = new Node(NODE_FUNCTION);
+  $$->setDataType($4);
+  $$->addChild($3);
+  $$->addChild($6);
+}
 
-simple_stmt: small_stmt_list TOK_NEWLINE {$$ = $1;}
+/* a parameter list (with bannanas) */
+param-list: TOK_LEFTPARENS params TOK_RIGHTPARENS {
+  $$ = $2;
+} | TOK_LEFTPARENS TOK_RIGHTPARENS {
+  $$ = NULL;
+}
 
-small_stmt_list: small_stmt {
-                  $$ = $1;
-               } | small_stmt ';' small_stmt_list {
-                  $$ = make_node(NODE_STMT);
-                  $$->children.push_back($1);
-                  $$->children.push_back($3);
-               }
+/* a list of at least one parameter */
+params: param TOK_COMMA params {
+  $$ = new Node(NODE_PARAM_LIST);
+  $$->addChild($1);
+  $$->addChild($3);
+} | param {
+  $$ = NULL;
+}
 
+/* a single parameter */
+param: TOK_IDENTIFIER type {
+  $$ = new Node(NODE_PARAM);
+  $$->setIdentifier(std::string($1));
+  $$->setDataType($2);
+}
 
+/* types (keeping it simple for now...) */
+type: TOK_INT {
+  $$ = TYPE_INT;
+} | TOK_REAL {
+  $$ = TYPE_REAL;
+} | TOK_STRING {
+  $$ = TYPE_STRING;
+} | TOK_BOOL {
+  $$ = TYPE_BOOL;
+}
 
+/* a return type is either a simple type or none which means void */
+return-type: type {
+  $$ = $1;
+} | {
+  $$ = TYPE_VOID;
+}
 
-top_level_stmt: TOK_INTVAL {$$ = NULL;}
-small_stmt: TOK_INTVAL {$$ = NULL;}
+/* a block is a set of statements, indented over */
+block: TOK_NEWLINE TOK_INDENT statements TOK_DEDENT {
+  $$ = $3;
+}
+
+/* a list of at least one statement */
+statements: statement statements {
+  $$ = new Node(NODE_STATEMENT);
+  $$->addChild($1);
+  $$->addChild($2);
+} | statement {
+  $$ = $1;
+}
+
+/* a single statement */
+statement: simple_statements
+  | compound_statement {
+  $$ = $1;
+}
+
+/* simple statements are a list of simple statements separated by semi-conlons on one line */
+simple_statements: simple_statement TOK_SEMICOLON simple_statements TOK_NEWLINE {
+  $$ = new Node(NODE_STATEMENT);
+  $$->addChild($1);
+  $$->addChild($3);
+} | simple_statement TOK_NEWLINE {
+  $$ = $1;
+}
+
+/* a simple statement is a one-liner that can't be broken down */
+simple_statement: pass_statement
+  | return_statement
+  | break_statement
+  | continue_statement
+  | expression {
+  $$ = $1;
+}
+
+/* a compound statement is one which has a block of code under it */
+compound_statement: if_statement
+/*  | elif_statement
+  | for_statement */
+  | while_statement {
+  $$ = $1;
+}
+
+/* simple statements */
+pass_statement: TOK_PASS {
+  $$ = new Node(NODE_PASS);
+}
+return_statement: TOK_RETURN {
+  $$ = new Node(NODE_RETURN);
+}
+break_statement: TOK_BREAK {
+  $$ = new Node(NODE_BREAK);
+}
+continue_statement: TOK_CONTINUE {
+  $$ = new Node(NODE_CONTINUE);
+}
+
+/* if statement with or without else */
+if_statement: TOK_IF expression TOK_COLON block else-option {
+  $$ = new Node(NODE_IF);
+  $$->addChild($2);
+  $$->addChild($4);
+  if ($5) {
+    $$->addChild($5);
+  }
+}
+
+/* either an else block or nothing */
+else-option: TOK_ELSE TOK_COLON block {
+  $$ = $3;
+} | {
+  $$ = NULL;
+}
+
+/* a while loop */
+while_statement: TOK_WHILE expression TOK_COLON block {
+  $$ = new Node(NODE_WHILE);
+  $$->addChild($2);
+  $$->addChild($4);
+}
+
+/* TODO expressions */
+expression: TOK_INTVAL {
+  $$ = NULL;
+}
+
 
 %%
 

@@ -2,8 +2,10 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstdio>
-#include "parser.gen.hpp"
 #include "tetra.hpp"
+#include "parser.gen.hpp"
+
+int yylex( );
 
 /* print an error message and quit */
 void fail(const std::string& mesg, int lineno) {
@@ -14,11 +16,21 @@ void fail(const std::string& mesg, int lineno) {
   std::cerr << std::endl;
 }
 
-/* node functions */
-Node* make_node(int type) {
-  Node* n = new Node;
-  n->type = type;
-  return n;
+/* node member functions */
+Node::Node(NodeType node_type) {
+  this->node_type = node_type;
+}
+ 
+void Node::addChild(Node* child) {
+  children.push_back(child);
+}
+
+void Node::setDataType(DataType data_type) {
+  this->data_type = data_type;
+}
+
+void Node::setIdentifier(std::string identifier) {
+  this->identifier = identifier;
 }
 
 /* the main function */
@@ -31,8 +43,13 @@ int main(int argc, char** argv) {
     }
   }
 
+  int tok;
+  do {
+    std::cout << (tok = yylex( )) << std::endl;
+  } while (tok);
+
   /* parse it */
-  yyparse( );
+  //yyparse( );
 
   return 0;
 }
