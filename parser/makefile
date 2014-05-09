@@ -21,7 +21,11 @@ lexer.gen.o: lexer.gen.cpp
 lexer.gen.cpp: lexer.l
 	flex -o lexer.gen.cpp lexer.l
 
+.PHONY: clean tags
+
 clean:
 	rm -f lexer.gen.cpp parser.gen.cpp parser.gen.hpp tetra *.o
 
+tags:
+	ctags -R .
 
