@@ -5,10 +5,6 @@
 #include "parser.gen.hpp"
 #include "tetra.hpp"
 
-
-int yyparse( );
-
-
 /* print an error message and quit */
 void fail(const std::string& mesg, int lineno) {
   std::cerr << "Tetra error: " << mesg;

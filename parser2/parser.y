@@ -118,7 +118,7 @@ small_stmt_list: small_stmt {
                } | small_stmt ';' small_stmt_list {
                   $$ = make_node(NODE_STMT);
                   $$->children.push_back($1);
-                  $$->children.push_back($2);
+                  $$->children.push_back($3);
                }
 
 
