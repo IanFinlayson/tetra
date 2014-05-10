@@ -27,5 +27,5 @@ clean:
 	rm -f lexer.gen.cpp parser.gen.cpp parser.gen.hpp tetra *.o
 
 tags:
-	ctags -R .
+	ctags -R *.cpp *.hpp
 

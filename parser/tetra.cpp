@@ -14,6 +14,8 @@ void fail(const std::string& mesg, int lineno) {
     std::cerr << " (Line " << lineno << ")";
   }
   std::cerr << std::endl;
+
+  exit(1);
 }
 
 /* node member functions */

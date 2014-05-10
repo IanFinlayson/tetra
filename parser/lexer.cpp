@@ -1,10 +1,24 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>
 
 #include "tetra.hpp"
 #include "parser.gen.hpp"
 
 using std::cin;
+
+
+/* whether or not we have seen whitespace so far this line */
+int start_of_line = 1;
+
+
+
+
+
+void REPLfail(std::string m) {
+  std::cout << m << std::endl;
+  exit(1);
+}
 
 /* look up a string and return its token code */
 int lookupId(const std::string& id) {
@@ -29,6 +43,8 @@ int lookupId(const std::string& id) {
   if (id == "real")     {return TOK_REAL;}
   if (id == "bool")     {return TOK_BOOL;}
   if (id == "string")   {return TOK_STRING;}
+
+  /* TODO, save the identifier */
   return TOK_IDENTIFIER;
 }
 
@@ -43,12 +59,56 @@ int lexIdent(int start) {
   return lookupId(id);
 }
 
-/* lex a number */
+/* lex a number
+ * TODO handle more bases, scientific notation etc. */
 int lexNumber(int start) {
-  /* TODO */
+  std::string number((char) start, 1);
 
+  while (isdigit(cin.peek( )) || cin.peek( ) == '.') {
+    number.push_back(cin.get( ));
+  }
 
+  /* if there's no decimal
+   * TODO save the value! */
+  if (number.find('.') == std::string::npos) {
+    return TOK_INTVAL;
+  } else {
+    return TOK_REALVAL;
+  }
+}
 
+/* lex a string constant */
+int lexString( ) {
+  std::string str;
+  while (true) {
+    char next = cin.get( );
+    if (next == '\\') {
+      /* get the thing after this */
+      next = cin.get( );
+      switch (next) {
+        case 'n':
+          str.push_back('\n');
+          break;
+        case 't':
+          str.push_back('\t');
+          break;
+        case '"':
+          str.push_back('"');
+        case '\\':
+          str.push_back('\\');
+          break;
+        default:
+          str.push_back(next);
+      }
+    } else if (next == '"') {
+      break;
+    } else {
+      str.push_back(next);
+    }
+  }
+
+  /* TODO save the string */
+  return TOK_STRINGVAL;
 }
 
 /* the lexer function - Tetra would have used flex, but it is not possible (without
@@ -58,21 +118,60 @@ int yylex( ) {
   /* read in the next character in the stream */
   int next = cin.get( );
 
+  /* check for EOF */
+  if (cin.eof( )) {
+    return 0;
+  }
+
+  /* if it's a new line, set to beginning of line and return it */
+  if (next == '\n') {
+    start_of_line = 1;
+    return TOK_NEWLINE;
+  }
+
+  /* if it's whitespace, NOT at the start of a line, ignore it */
+  if (!start_of_line && (next == ' ' || next == '\t')) {
+    /* recurse to skip it */
+    return yylex( );
+  }
+
+  /* if it's whitespace and IS at the start of the line */
+  if (start_of_line && (next == ' ' || next == '\t')) {
+    /* TODO */
+
+  } else if (start_of_line) {
+    /* else it's the start of line, but NOT whitespace TODO */
+
+  }
+
+
+
   /* if it's a letter or underscore, we have an identifier (or reserved word) */
   if (isalpha(next)) {
     return lexIdent(next);
   }
 
   /* if it's a number or decimal point, we have a number of some kind */
-  if (isdigit(next)) {
+  if (isdigit(next) || next == '.') {
     return lexNumber(next);
   }
 
-  /* TODO handle whitespace */
+  /* handle comments */
+  if (next == '#') {
+    /* eat it all */
+    while (cin.peek( ) != '\n') {
+      cin.get( );
+    }
+    /* get the new line */
+    cin.get( );
+    /* return the new line */
+    return TOK_NEWLINE;
+  }
 
-  /* TODO handle comments */
-
-  /* TODO handle string constants */
+  /* handle string constants */
+  if (next == '"') {
+    return lexString( );
+  }
 
   /* character operators and punctuation */
   switch (next) {
@@ -157,7 +256,7 @@ int yylex( ) {
       }
     case '!':
       if (cin.peek( ) != '=') {
-        fail("Error, invalid lexeme '!'");
+        REPLfail("Error, invalid lexeme '!'");
       } else {
         cin.get( );
         return TOK_NEQ;
@@ -195,10 +294,20 @@ int yylex( ) {
   }
 
   /* if we get down here, there must be a lexer error :( */
-  fail(std::string(next, 1) + " is not a valid lexeme.");
+  REPLfail(std::string(next, 1) + " is not a valid lexeme.");
+  return 0;
 }
 
 
+int main( ) {
+  int token;
+
+  do {
+    std::cout << (token = yylex( )) << std::endl;
+  } while (token);
+
+  return 0;
+}
 
 
 
