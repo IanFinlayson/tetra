@@ -63,6 +63,7 @@ Node* root;
 %token TOK_COLON
 %token TOK_LSHIFT
 %token TOK_RSHIFT
+%token TOK_EXP
 %token TOK_LTE
 %token TOK_GTE
 %token TOK_EQ
@@ -94,10 +95,10 @@ Node* root;
 %token TOK_NEWLINE
 
 /* types */
-%type <node> functions function param-list statements statement block params param simple_statements
+%type <node> functions function param_list statements statement block params param simple_statements
 %type <node> compound_statement simple_statement pass_statement return_statement break_statement
-%type <node> continue_statement expression if_statement while_statement else-option
-%type <data_type> return-type type
+%type <node> continue_statement expression if_statement while_statement else_option
+%type <data_type> return_type type
 
 %error-verbose
 
@@ -118,7 +119,7 @@ functions: function functions {
 }
 
 /* a single function */
-function: TOK_DEF TOK_IDENTIFIER param-list return-type TOK_COLON block {
+function: TOK_DEF TOK_IDENTIFIER param_list return_type TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
   $$->setDataType($4);
   $$->addChild($3);
@@ -126,7 +127,7 @@ function: TOK_DEF TOK_IDENTIFIER param-list return-type TOK_COLON block {
 }
 
 /* a parameter list (with bannanas) */
-param-list: TOK_LEFTPARENS params TOK_RIGHTPARENS {
+param_list: TOK_LEFTPARENS params TOK_RIGHTPARENS {
   $$ = $2;
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = NULL;
@@ -160,7 +161,7 @@ type: TOK_INT {
 }
 
 /* a return type is either a simple type or none which means void */
-return-type: type {
+return_type: type {
   $$ = $1;
 } | {
   $$ = TYPE_VOID;
@@ -227,7 +228,7 @@ continue_statement: TOK_CONTINUE {
 }
 
 /* if statement with or without else */
-if_statement: TOK_IF expression TOK_COLON block else-option {
+if_statement: TOK_IF expression TOK_COLON block else_option {
   $$ = new Node(NODE_IF);
   $$->addChild($2);
   $$->addChild($4);
@@ -237,7 +238,7 @@ if_statement: TOK_IF expression TOK_COLON block else-option {
 }
 
 /* either an else block or nothing */
-else-option: TOK_ELSE TOK_COLON block {
+else_option: TOK_ELSE TOK_COLON block {
   $$ = $3;
 } | {
   $$ = NULL;
