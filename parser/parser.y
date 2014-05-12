@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+using namespace std;
+
 #include "tetra.hpp"
 
 extern int yylineno;
@@ -126,6 +128,7 @@ functions: function functions {
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER param_list return_type TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
+  $$->setIdentifier(string($2));
   $$->setDataType($4);
   $$->addChild($3);
   $$->addChild($6);
@@ -144,13 +147,13 @@ params: param TOK_COMMA params {
   $$->addChild($1);
   $$->addChild($3);
 } | param {
-  $$ = NULL;
+  $$ = $1;
 }
 
 /* a single parameter */
 param: TOK_IDENTIFIER type {
   $$ = new Node(NODE_PARAM);
-  $$->setIdentifier(std::string($1));
+  $$->setIdentifier(string($1));
   $$->setDataType($2);
 }
 
@@ -258,7 +261,7 @@ while_statement: TOK_WHILE expression TOK_COLON block {
 
 /* TODO expressions */
 expression: TOK_INTVAL {
-  $$ = NULL;
+  $$ = new Node(NODE_INTVAL);
 }
 
 
@@ -273,8 +276,8 @@ void yyerror(const char* str) {
 }
 
 /* print an error message and quit */
-void fail(const std::string& mesg) {
-  std::cerr << "Tetra error: " << mesg << " (Line " << yylineno << ")" << std::endl;
+void fail(const string& mesg) {
+  cerr << "Tetra error: " << mesg << " (Line " << yylineno << ")" << endl;
   exit(1);
 }
 

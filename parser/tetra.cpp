@@ -10,6 +10,7 @@
 /* node member functions */
 Node::Node(NodeType node_type) {
   this->node_type = node_type;
+  data_type = TYPE_VOID;
 }
  
 void Node::addChild(Node* child) {
@@ -20,8 +21,7 @@ void Node::setDataType(DataType data_type) {
   this->data_type = data_type;
 }
 
-void Node::setIdentifier(std::string identifier) {
+void Node::setIdentifier(string identifier) {
   this->identifier = identifier;
 }
-
 

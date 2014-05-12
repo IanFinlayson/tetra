@@ -5,12 +5,12 @@
 
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <cstdlib>
 
 #include "tetra.hpp"
 #include "parser.gen.hpp"
 
-using std::cin;
 using namespace std;
 
 /* whether or not we have seen whitespace so far this line */
@@ -28,8 +28,11 @@ int dedents_left = 0;
 /* line number we are at - used for error messages */
 int yylineno;
 
+/* the symbol used to comunicate with bison */
+extern YYSTYPE yylval;
+
 /* look up a string and return its token code */
-int lookupId(const std::string& id) {
+int lookupId(const string& id) {
   if (id == "if")       {return TOK_IF;}
   if (id == "elif")     {return TOK_ELIF;}
   if (id == "else")     {return TOK_ELSE;}
@@ -52,13 +55,14 @@ int lookupId(const std::string& id) {
   if (id == "bool")     {return TOK_BOOL;}
   if (id == "string")   {return TOK_STRING;}
 
-  /* TODO, save the identifier */
+  /* save the identifier */
+  strcpy(yylval.stringval, id.c_str( ));
   return TOK_IDENTIFIER;
 }
 
 /* lex an identifier (or reserved word) given a start */
 int lexIdent(int start) {
-  std::string id;
+  string id;
   id.push_back((char) start);
 
   while (isalnum(cin.peek( )) || cin.peek( ) == '_') {
@@ -71,7 +75,7 @@ int lexIdent(int start) {
 /* lex a number
  * TODO handle more bases, scientific notation etc. */
 int lexNumber(int start) {
-  std::string number;
+  string number;
   number.push_back((char) start);
 
   while (isdigit(cin.peek( )) || cin.peek( ) == '.') {
@@ -80,7 +84,7 @@ int lexNumber(int start) {
 
   /* if there's no decimal
    * TODO save the value! */
-  if (number.find('.') == std::string::npos) {
+  if (number.find('.') == string::npos) {
     return TOK_INTVAL;
   } else {
     return TOK_REALVAL;
@@ -89,7 +93,7 @@ int lexNumber(int start) {
 
 /* lex a string constant */
 int lexString( ) {
-  std::string str;
+  string str;
   while (true) {
     char next = cin.get( );
     if (next == '\\') {
@@ -172,8 +176,8 @@ int yylex( ) {
     }
     start_of_line = 0;
 
-    //std::cout << "spaces = " << spaces << std::endl
-    //  << "indent_level = " << indent_level << std::endl;
+    //cout << "spaces = " << spaces << endl
+    //  << "indent_level = " << indent_level << endl;
 
     /* if this is the first one, treat it as the level */
     if (spaces_per_indent == 0) {
@@ -374,7 +378,7 @@ int yylex( ) {
   }
 
   /* if we get down here, there must be a lexer error :( */
-  fail(std::string(next, 1) + " is not a valid lexeme.");
+  fail(string(next, 1) + " is not a valid lexeme.");
   return 0;
 }
 

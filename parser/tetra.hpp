@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 /* types of nodes */
 enum NodeType {
   NODE_FUNCTION,
@@ -19,9 +21,10 @@ enum NodeType {
   NODE_BREAK,
   NODE_CONTINUE,
   NODE_IF,
-  NODE_WHILE
+  NODE_WHILE,
 
-  
+
+  NODE_INTVAL
 };
 
 /* data types */
@@ -36,20 +39,21 @@ enum DataType {
 /* the node class represents one element of a parse tree */
 class Node {
   public:
+    /* functions */
     Node(NodeType type);
     void addChild(Node* child);
     void setDataType(DataType data_type);
-    void setIdentifier(std::string identifier);
+    void setIdentifier(string identifier);
 
-  private:
+    /* data */
+    vector<Node*> children;
     NodeType node_type;
     DataType data_type;
-    std::vector<Node*> children;
-    std::string identifier;
+    string identifier;
 };
 
 /* error handling routine */
-void fail(const std::string& mesg);
+void fail(const string& mesg);
 
 #endif
 
