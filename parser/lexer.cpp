@@ -69,7 +69,8 @@ int lexIdent(int start) {
 /* lex a number
  * TODO handle more bases, scientific notation etc. */
 int lexNumber(int start) {
-  std::string number((char) start, 1);
+  std::string number;
+  number.push_back((char) start);
 
   while (isdigit(cin.peek( )) || cin.peek( ) == '.') {
     number.push_back(cin.get( ));
@@ -313,23 +314,23 @@ int yylex( ) {
     case '^':
       if (cin.peek( ) == '=') {
         cin.get( );
-        return TOK_BITXOR;
-      } else {
         return TOK_XOREQ;
+      } else {
+        return TOK_BITXOR;
       }
     case '|':
       if (cin.peek( ) == '=') {
         cin.get( );
-        return TOK_BITOR;
-      } else {
         return TOK_OREQ;
+      } else {
+        return TOK_BITOR;
       }
     case '&':
       if (cin.peek( ) == '=') {
         cin.get( );
-        return TOK_BITAND;
-      } else {
         return TOK_ANDEQ;
+      } else {
+        return TOK_BITAND;
       }
     case '!':
       if (cin.peek( ) != '=') {
@@ -342,7 +343,7 @@ int yylex( ) {
       if (cin.peek( ) == '=') {
         cin.get( );
         return TOK_LTE;
-      } else if (cin.get( ) == '<') {
+      } else if (cin.peek( ) == '<') {
         cin.get( );
         if (cin.peek( ) == '=') {
           cin.get( );
@@ -357,7 +358,7 @@ int yylex( ) {
       if (cin.peek( ) == '=') {
         cin.get( );
         return TOK_GTE;
-      } else if (cin.get( ) == '>') {
+      } else if (cin.peek( ) == '>') {
         cin.get( );
         if (cin.peek( ) == '=') {
           cin.get( );
