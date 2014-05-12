@@ -3,11 +3,14 @@
 CC = clang++
 CFLAGS = -W -Wall -g
 
-parse-test: parser.gen.o lexer.o parse-test.o
-	$(CC) $(CFLAGS) parser.gen.o lexer.o parse-test.o -o parse-test
+parse-test: parser.gen.o lexer.o parse-test.o tetra.o
+	$(CC) $(CFLAGS) parser.gen.o lexer.o parse-test.o tetra.o -o parse-test
 
 parse-test.o: parse-test.cpp
 	$(CC) $(CFLAGS) -c parse-test.cpp
+
+tetra.o: tetra.cpp
+	$(CC) $(CFLAGS) -c tetra.cpp
 
 parser.gen.o: parser.gen.cpp
 	$(CC) $(CFLAGS) -c parser.gen.cpp
