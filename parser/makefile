@@ -1,13 +1,13 @@
 #!/bin/sh
 
-CC = g++
+CC = clang++
 CFLAGS = -W -Wall -g
 
-tetra: parser.gen.o lexer.gen.o tetra.o
-	$(CC) $(CFLAGS) parser.gen.o lexer.gen.o tetra.o -o tetra
+parse-test: parser.gen.o lexer.o parse-test.o
+	$(CC) $(CFLAGS) parser.gen.o lexer.o parse-test.o -o parse-test
 
-tetra.o: tetra.cpp
-	$(CC) $(CFLAGS) -c tetra.cpp
+parse-test.o: parse-test.cpp
+	$(CC) $(CFLAGS) -c parse-test.cpp
 
 parser.gen.o: parser.gen.cpp
 	$(CC) $(CFLAGS) -c parser.gen.cpp
@@ -15,16 +15,13 @@ parser.gen.o: parser.gen.cpp
 parser.gen.cpp: parser.y
 	bison -d parser.y -o parser.gen.cpp
 
-lexer.gen.o: lexer.gen.cpp
-	$(CC) $(CFLAGS) -c lexer.gen.cpp
-
-lexer.gen.cpp: lexer.l
-	flex -o lexer.gen.cpp lexer.l
+lexer.o: lexer.cpp
+	$(CC) $(CFLAGS) -c lexer.cpp
 
 .PHONY: clean tags
 
 clean:
-	rm -f lexer.gen.cpp parser.gen.cpp parser.gen.hpp tetra *.o
+	rm -f parser.gen.cpp parser.gen.hpp parse-test *.o
 
 tags:
 	ctags -R *.cpp *.hpp

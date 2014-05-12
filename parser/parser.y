@@ -9,6 +9,7 @@ int yylex( );
 int yywrap( );
 void yyerror(const char* str);
 
+/* the root of the parse tree - this can be used after calling yyparse */
 Node* root;
 
 %}
@@ -264,6 +265,13 @@ int yywrap( ) {
 }
 
 void yyerror(const char* str) {
-  fail(str, yylineno);
+  fail(str);
 }
+
+/* print an error message and quit */
+void fail(const std::string& mesg) {
+  std::cerr << "Tetra error: " << mesg << " (Line " << yylineno << ")" << std::endl;
+  exit(1);
+}
+
 

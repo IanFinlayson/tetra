@@ -5,18 +5,8 @@
 #include "tetra.hpp"
 #include "parser.gen.hpp"
 
+extern int yylineno;
 int yylex( );
-
-/* print an error message and quit */
-void fail(const std::string& mesg, int lineno) {
-  std::cerr << "Tetra error: " << mesg;
-  if (lineno) {
-    std::cerr << " (Line " << lineno << ")";
-  }
-  std::cerr << std::endl;
-
-  exit(1);
-}
 
 /* node member functions */
 Node::Node(NodeType node_type) {
@@ -45,13 +35,8 @@ int main(int argc, char** argv) {
     }
   }
 
-  int tok;
-  do {
-    std::cout << (tok = yylex( )) << std::endl;
-  } while (tok);
-
   /* parse it */
-  //yyparse( );
+  yyparse( );
 
   return 0;
 }

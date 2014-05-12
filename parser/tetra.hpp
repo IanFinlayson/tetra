@@ -31,6 +31,7 @@ enum DataType {
   TYPE_VOID
 };
 
+/* the node class represents one element of a parse tree */
 class Node {
   public:
     Node(NodeType type);
@@ -45,7 +46,8 @@ class Node {
     std::string identifier;
 };
 
-void fail(const std::string& mesg, int lineno = 0);
+/* error handling routine */
+void fail(const std::string& mesg);
 
 #endif
 

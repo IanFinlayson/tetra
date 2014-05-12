@@ -20,11 +20,8 @@ int indent_level = 0;
 /* the number of DEDENTs to return before anything else */
 int dedents_left = 0;
 
-/* TODO this should be the one in tetra.cpp when done */
-void REPLfail(std::string m) {
-  std::cout << m << std::endl;
-  exit(1);
-}
+/* line number we are at - used for error messages */
+int yylineno;
 
 /* look up a string and return its token code */
 int lookupId(const std::string& id) {
@@ -145,7 +142,7 @@ int yylex( ) {
 
   /* we do NOT allow tabs */
   if (next == '\t') {
-    REPLfail("Tab characters are not allowed in Tetra!");
+    fail("Tab characters are not allowed in Tetra!");
   }
 
   /* if it's a new line, set to beginning of line and return it */
@@ -181,7 +178,7 @@ int yylex( ) {
     /* level is spaces / spaces_per_indent */
     int level = spaces / spaces_per_indent;
     if ((spaces % spaces_per_indent) != 0) {
-      REPLfail("Indentation level inconsistent.");
+      fail("Indentation level inconsistent.");
     }
 
     /* if the level is greater than the current one (by one) indent */
@@ -192,7 +189,7 @@ int yylex( ) {
 
     /* If the level is EVEN greater than that, error */
     if (level > indent_level) {
-      REPLfail("Too much indentation.");
+      fail("Too much indentation.");
     }
 
     /* if the level is less than the current one */
@@ -334,7 +331,7 @@ int yylex( ) {
       }
     case '!':
       if (cin.peek( ) != '=') {
-        REPLfail("Error, invalid lexeme '!'");
+        fail("Error, invalid lexeme '!'");
       } else {
         cin.get( );
         return TOK_NEQ;
@@ -372,22 +369,8 @@ int yylex( ) {
   }
 
   /* if we get down here, there must be a lexer error :( */
-  REPLfail(std::string(next, 1) + " is not a valid lexeme.");
+  fail(std::string(next, 1) + " is not a valid lexeme.");
   return 0;
 }
-
-
-int main( ) {
-  int token;
-
-  do {
-    std::cout << (token = yylex( )) << std::endl;
-  } while (token);
-
-  return 0;
-}
-
-
-
 
 
