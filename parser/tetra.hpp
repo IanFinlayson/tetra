@@ -1,3 +1,5 @@
+/* types and declarations for Tetra */
+
 #ifndef TETRA_HPP
 #define TETRA_HPP
 

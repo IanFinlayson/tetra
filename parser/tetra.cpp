@@ -1,3 +1,5 @@
+/* functions for dealing with node creation, management etc. */
+
 #include <string>
 #include <iostream>
 #include <cstdlib>

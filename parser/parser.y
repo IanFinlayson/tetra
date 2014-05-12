@@ -1,4 +1,8 @@
 %{                                                                             
+/* the parser for Tetra, this Bison parser generates a yyparse function which
+ * is used to parse Tetra code from stdin into a parse tree stored in the root
+ * variable (this should be externed into programs which use Tetra parsing */
+
 #include <iostream>
 #include <string>
 

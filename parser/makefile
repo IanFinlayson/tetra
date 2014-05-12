@@ -1,4 +1,4 @@
-#!/bin/sh
+# makefile for the Tetra parser
 
 CC = clang++
 CFLAGS = -W -Wall -g
