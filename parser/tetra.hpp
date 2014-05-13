@@ -8,14 +8,20 @@
 
 using namespace std;
 
+/* rather than hard code the C types associated with Tetra types, we use these */
+typedef int TetraInt;
+typedef float TetraReal;
+typedef bool TetraBool;
+typedef string TetraString;
+
 /* types of nodes */
 enum NodeType {
+  /* statement and grouping nodes */
   NODE_FUNCTION,
   NODE_FUNCTION_LIST,
   NODE_STATEMENT,
-  NODE_PARAM,
-  NODE_PARAM_LIST,
-  NODE_TYPE,
+  NODE_FORMAL_PARAM,
+  NODE_FORMAL_PARAM_LIST,
   NODE_PASS,
   NODE_RETURN,
   NODE_BREAK,
@@ -23,8 +29,53 @@ enum NodeType {
   NODE_IF,
   NODE_WHILE,
 
+  /* operator nodes */
+  NODE_OR,
+  NODE_AND,
+  NODE_LT,
+  NODE_LTE,
+  NODE_GT,
+  NODE_GTE,
+  NODE_EQ,
+  NODE_NEQ,
+  NODE_NOT,
+  NODE_BITXOR,
+  NODE_BITAND,
+  NODE_BITOR,
+  NODE_BITNOT,
+  NODE_SHIFTL,
+  NODE_SHIFTR,
+  NODE_PLUS,
+  NODE_MINUS,
+  NODE_TIMES,
+  NODE_DIVIDE,
+  NODE_MODULUS,
+  NODE_EXP,
 
-  NODE_INTVAL
+  /* assignment nodes */
+  NODE_ASSIGN,
+  NODE_PLUSEQ,
+  NODE_MINUSEQ,
+  NODE_TIMESEQ,
+  NODE_DIVIDEEQ,
+  NODE_MODULUSEQ,
+  NODE_EXPEQ,
+  NODE_SHIFTREQ,
+  NODE_SHIFTLEQ,
+  NODE_BITANDEQ,
+  NODE_BITOREQ,
+  NODE_BITXOREQ,
+
+  /* function call */
+  NODE_FUNCALL,
+  NODE_ACTUAL_PARAM_LIST,
+
+  /* leafy nodes */
+  NODE_INTVAL,
+  NODE_REALVAL,
+  NODE_BOOLVAL,
+  NODE_STRINGVAL,
+  NODE_IDENTIFIER
 };
 
 /* data types */
@@ -36,6 +87,8 @@ enum DataType {
   TYPE_VOID
 };
 
+string typeToString(DataType t);
+
 /* the node class represents one element of a parse tree */
 class Node {
   public:
@@ -43,13 +96,26 @@ class Node {
     Node(NodeType type);
     void addChild(Node* child);
     void setDataType(DataType data_type);
-    void setIdentifier(string identifier);
+    void setStringval(TetraString stringval);
+    void setIntval(TetraInt intval);
+    void setBoolval(TetraBool boolval);
+    void setRealval(TetraReal realval);
 
-    /* data */
+
+    /* the children nodes of this node */
     vector<Node*> children;
+
+    /* the type of node it is (eg plus vs stmt vs intval etc.) */
     NodeType node_type;
+
+    /* the data type of the node (void if not applicable) */
     DataType data_type;
-    string identifier;
+
+    /* the values associated with the node (many will be blank) */
+    TetraString stringval;
+    TetraReal realval;
+    TetraInt intval;
+    TetraBool boolval;
 };
 
 /* error handling routine */

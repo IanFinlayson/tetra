@@ -8,7 +8,6 @@
 EXPRESSION PRECEDENCE:
 # From lowest to highest precedence.
 
-lambda
 conditional
 logical OR
 logical AND

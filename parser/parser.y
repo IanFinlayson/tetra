@@ -23,10 +23,10 @@ Node* root;
 /* each non-terminal is represented with a node literlas are doubles */
 %union {
   Node* node;
-  int intval;
-  double realval;
-  bool boolval;
-  char stringval[256];
+  TetraInt intval;
+  TetraReal realval;
+  TetraBool boolval;
+  char stringval[256]; /* PODS only in union! */
   DataType data_type;
 }
 
@@ -102,9 +102,13 @@ Node* root;
 %token TOK_NEWLINE
 
 /* types */
-%type <node> functions function param_list statements statement block params param simple_statements
+%type <node> functions function formal_param_list statements statement block formal_params
 %type <node> compound_statement simple_statement pass_statement return_statement break_statement
-%type <node> continue_statement expression if_statement while_statement else_option
+%type <node> continue_statement expression if_statement while_statement else_option orterm andterm
+%type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
+%type <node> expterm funcall formal_param simple_statements actual_param_list 
+
+
 %type <data_type> return_type type
 
 %error-verbose
@@ -126,34 +130,34 @@ functions: function functions {
 }
 
 /* a single function */
-function: TOK_DEF TOK_IDENTIFIER param_list return_type TOK_COLON block {
+function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
-  $$->setIdentifier(string($2));
+  $$->setStringval(string($2));
   $$->setDataType($4);
   $$->addChild($3);
   $$->addChild($6);
 }
 
 /* a parameter list (with bannanas) */
-param_list: TOK_LEFTPARENS params TOK_RIGHTPARENS {
+formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
   $$ = $2;
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = NULL;
 }
 
 /* a list of at least one parameter */
-params: param TOK_COMMA params {
-  $$ = new Node(NODE_PARAM_LIST);
+formal_params: formal_param TOK_COMMA formal_params {
+  $$ = new Node(NODE_FORMAL_PARAM_LIST);
   $$->addChild($1);
   $$->addChild($3);
-} | param {
+} | formal_param {
   $$ = $1;
 }
 
 /* a single parameter */
-param: TOK_IDENTIFIER type {
-  $$ = new Node(NODE_PARAM);
-  $$->setIdentifier(string($1));
+formal_param: TOK_IDENTIFIER type {
+  $$ = new Node(NODE_FORMAL_PARAM);
+  $$->setStringval(string($1));
   $$->setDataType($2);
 }
 
@@ -196,7 +200,7 @@ statement: simple_statements
 }
 
 /* simple statements are a list of simple statements separated by semi-conlons on one line */
-simple_statements: simple_statement TOK_SEMICOLON simple_statements TOK_NEWLINE {
+simple_statements: simple_statement TOK_SEMICOLON simple_statements {
   $$ = new Node(NODE_STATEMENT);
   $$->addChild($1);
   $$->addChild($3);
@@ -227,6 +231,9 @@ pass_statement: TOK_PASS {
 }
 return_statement: TOK_RETURN {
   $$ = new Node(NODE_RETURN);
+} | TOK_RETURN expression {
+  $$ = new Node(NODE_RETURN);
+  $$->addChild($2);
 }
 break_statement: TOK_BREAK {
   $$ = new Node(NODE_BREAK);
@@ -259,9 +266,201 @@ while_statement: TOK_WHILE expression TOK_COLON block {
   $$->addChild($4);
 }
 
-/* TODO expressions */
-expression: TOK_INTVAL {
+/* expressions - or operator */
+expression: expression TOK_OR orterm {
+  $$ = new Node(NODE_OR);
+  $$->addChild($1);
+  $$->addChild($3);
+} | orterm {
+  $$ = $1;
+}
+
+/* and operator */
+orterm: orterm TOK_AND andterm {
+  $$ = new Node(NODE_AND);
+  $$->addChild($1);
+  $$->addChild($3);
+} | andterm {
+  $$ = $1;
+}
+
+/* not operator */
+andterm: TOK_NOT andterm {
+  $$ = new Node(NODE_NOT);
+  $$->addChild($2);
+} | notterm {
+  $$ = $1;
+}
+
+/* relational operators */
+notterm: notterm TOK_LT relterm {
+  $$ = new Node(NODE_LT);
+  $$->addChild($1);
+  $$->addChild($3);
+} | notterm TOK_GT relterm {
+  $$ = new Node(NODE_GT);
+  $$->addChild($1);
+  $$->addChild($3);
+} | notterm TOK_LTE relterm {
+  $$ = new Node(NODE_LTE);
+  $$->addChild($1);
+  $$->addChild($3);
+} | notterm TOK_GTE relterm {
+  $$ = new Node(NODE_GTE);
+  $$->addChild($1);
+  $$->addChild($3);
+} | notterm TOK_EQ relterm {
+  $$ = new Node(NODE_EQ);
+  $$->addChild($1);
+  $$->addChild($3);
+} | notterm TOK_NEQ relterm {
+  $$ = new Node(NODE_NEQ);
+  $$->addChild($1);
+  $$->addChild($3);
+} | relterm {
+  $$ = $1;
+}
+
+/* | operator */
+relterm: relterm TOK_BITOR bitorterm {
+  $$ = new Node(NODE_BITOR);
+  $$->addChild($1);
+  $$->addChild($3);
+} | bitorterm {
+  $$ = $1;
+}
+
+/* ^ operator */
+bitorterm: bitorterm TOK_BITXOR xorterm {
+  $$ = new Node(NODE_BITXOR);
+  $$->addChild($1);
+  $$->addChild($3);
+} | xorterm {
+  $$ = $1;
+}
+
+/* & operator */
+xorterm: xorterm TOK_BITAND bitandterm {
+  $$ = new Node(NODE_BITAND);
+  $$->addChild($1);
+  $$->addChild($3);
+} | bitandterm {
+  $$ = $1;
+}
+
+/* << and >> operator */
+bitandterm: bitandterm TOK_LSHIFT shiftterm {
+  $$ = new Node(NODE_SHIFTL);
+  $$->addChild($1);
+  $$->addChild($3);
+} | bitandterm TOK_RSHIFT shiftterm {
+  $$ = new Node(NODE_SHIFTR);
+  $$->addChild($1);
+  $$->addChild($3);
+} | shiftterm {
+  $$ = $1;
+}
+
+/* + and - operator */
+shiftterm: shiftterm TOK_PLUS plusterm {
+  $$ = new Node(NODE_PLUS);
+  $$->addChild($1);
+  $$->addChild($3);
+} | shiftterm TOK_MINUS plusterm {
+  $$ = new Node(NODE_MINUS);
+  $$->addChild($1);
+  $$->addChild($3);
+} | plusterm {
+  $$ = $1;
+}
+
+/* * / % operators */
+plusterm: plusterm TOK_TIMES timesterm {
+  $$ = new Node(NODE_TIMES);
+  $$->addChild($1);
+  $$->addChild($3);
+} | plusterm TOK_DIVIDE timesterm {
+  $$ = new Node(NODE_DIVIDE);
+  $$->addChild($1);
+  $$->addChild($3);
+} | plusterm TOK_MODULUS timesterm {
+  $$ = new Node(NODE_MODULUS);
+  $$->addChild($1);
+  $$->addChild($3);
+} | timesterm {
+  $$ = $1;
+}
+
+/* unary operators */
+timesterm: TOK_PLUS timesterm {
+  /* why would anybody do this??? */
+  $$ = $2;
+} | TOK_MINUS timesterm {
+  /* subtract from zero */
+  $$ = new Node(NODE_MINUS);
+  Node* zero = new Node(NODE_INTVAL);
+  zero->setIntval(0);
+  $$->addChild(zero);
+  $$->addChild($2);
+} | TOK_BITNOT timesterm {
+  $$ = new Node(NODE_BITNOT);
+  $$->addChild($2);
+} | unaryterm {
+  $$ = $1;
+}
+
+/* exponent operator - this is right associative!!! */
+unaryterm: expterm TOK_EXP unaryterm {
+  $$ = new Node(NODE_EXP);
+  $$->addChild($1);
+  $$->addChild($3);
+} | expterm {
+  $$ = $1;
+}
+
+/* indivisible thing */
+expterm: funcall {
+  $$ = $1;
+} | TOK_LEFTPARENS expression TOK_RIGHTPARENS {
+  $$ = $2;
+} | TOK_INTVAL {
   $$ = new Node(NODE_INTVAL);
+  $$->setIntval($1);
+} | TOK_REALVAL {
+  $$ = new Node(NODE_REALVAL);
+  $$->setRealval($1);
+} | TOK_BOOLVAL {
+  $$ = new Node(NODE_BOOLVAL);
+  $$->setBoolval($1);
+} | TOK_STRINGVAL {
+  $$ = new Node(NODE_STRINGVAL);
+  $$->setStringval($1);
+} | TOK_IDENTIFIER {
+  $$ = new Node(NODE_IDENTIFIER);
+  $$->setStringval($1);
+}
+
+/* TODO += -= etc. */
+
+
+
+/* a function call */
+funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
+  $$ = new Node(NODE_FUNCALL);
+  $$->setStringval($1);
+} | TOK_IDENTIFIER TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
+  $$ = new Node(NODE_FUNCALL);
+  $$->setStringval($1);
+  $$->addChild($3);
+}
+
+/* a list of at least one parameter */
+actual_param_list: expression TOK_COMMA actual_param_list {
+  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
+  $$->addChild($1);
+  $$->addChild($3);
+} | expression {
+  $$ = $1;
 }
 
 

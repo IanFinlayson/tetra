@@ -26,7 +26,7 @@ int indent_level = 0;
 int dedents_left = 0;
 
 /* line number we are at - used for error messages */
-int yylineno;
+int yylineno = 1;
 
 /* the symbol used to comunicate with bison */
 extern YYSTYPE yylval;
@@ -82,11 +82,12 @@ int lexNumber(int start) {
     number.push_back(cin.get( ));
   }
 
-  /* if there's no decimal
-   * TODO save the value! */
+  /* if there's no decimal its an int */
   if (number.find('.') == string::npos) {
+    yylval.intval = atoi(number.c_str( ));
     return TOK_INTVAL;
   } else {
+    yylval.realval = atof(number.c_str( ));
     return TOK_REALVAL;
   }
 }
@@ -121,7 +122,8 @@ int lexString( ) {
     }
   }
 
-  /* TODO save the string */
+  /* save the string */
+  strcpy(yylval.stringval, str.c_str( ));
   return TOK_STRINGVAL;
 }
 
@@ -157,6 +159,7 @@ int yylex( ) {
   /* if it's a new line, set to beginning of line and return it */
   if (next == '\n') {
     start_of_line = 1;
+    yylineno++;
     return TOK_NEWLINE;
   }
 
@@ -249,6 +252,7 @@ int yylex( ) {
     cin.get( );
     /* return the new line */
     start_of_line = 1;
+    yylineno++;
     return TOK_NEWLINE;
   }
 

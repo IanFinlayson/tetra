@@ -25,26 +25,54 @@ void print_tree(Node* node, int level = 0) {
 
   /* print this type of node */
   switch (node->node_type) {
-    case NODE_FUNCTION: cout << "FUNCTION"; break;
+    /* statements and groups */
+    case NODE_FUNCTION: cout << "FUNCTION: " << node->stringval; break;
     case NODE_FUNCTION_LIST: cout << "FUNCTION LIST"; break;
     case NODE_STATEMENT: cout << "STATEMENT"; break;
-    case NODE_PARAM: cout << "PARAM"; break;
-    case NODE_PARAM_LIST: cout << "PARAM LIST"; break;
-    case NODE_TYPE: cout << "TYPE"; break;
+    case NODE_FORMAL_PARAM: cout << "FORMAL PARAM: " << node->stringval; break;
+    case NODE_FORMAL_PARAM_LIST: cout << "FORMAL PARAM LIST"; break;
     case NODE_PASS: cout << "PASS"; break;
     case NODE_RETURN: cout << "RETURN"; break;
     case NODE_BREAK: cout << "BREAK"; break;
     case NODE_CONTINUE: cout << "CONTINUE"; break;
     case NODE_IF: cout << "IF"; break;
     case NODE_WHILE: cout << "WHILE"; break;
-    case NODE_INTVAL: cout << "INTVAL"; break;
+    case NODE_FUNCALL: cout << "FUNCALL: " << node->stringval; break;
+    case NODE_ACTUAL_PARAM_LIST: cout << "ACTUAL PARAM LIST"; break;
+
+    /* operators */
+    case NODE_OR: cout << "OR"; break;
+    case NODE_AND: cout << "AND"; break;
+    case NODE_LT: cout << "LESS THAN"; break;
+    case NODE_LTE: cout << "LESS THAN EQUAL TO"; break;
+    case NODE_GT: cout << "GREATER THAN"; break;
+    case NODE_GTE: cout << "GREATER THAN EQUAL TO"; break;
+    case NODE_EQ: cout << "EQUAL TO"; break;
+    case NODE_NEQ: cout << "NOT EQUAL TO"; break;
+    case NODE_NOT: cout << "NOT"; break;
+    case NODE_BITXOR: cout << "XOR"; break;
+    case NODE_BITAND: cout << "BITAND"; break;
+    case NODE_BITOR: cout << "BITOR"; break;
+    case NODE_BITNOT: cout << "BITNOT"; break;
+    case NODE_SHIFTL: cout << "SHIFT LEFT"; break;
+    case NODE_SHIFTR: cout << "SHIFT RIGHT"; break;
+    case NODE_PLUS: cout << "PLUS"; break;
+    case NODE_MINUS: cout << "MINUS"; break;
+    case NODE_TIMES: cout << "TIMES"; break;
+    case NODE_DIVIDE: cout << "DIVIDE"; break;
+    case NODE_MODULUS: cout << "MOD"; break;
+    case NODE_EXP: cout << "EXP"; break;
+
+    /* leafs */
+    case NODE_INTVAL: cout << "INTVAL: " << node->intval; break;
+    case NODE_REALVAL: cout << "REALVAL: " << node->realval;  break;
+    case NODE_STRINGVAL: cout << "STRINGVAL: " << node->stringval; break;
+    case NODE_IDENTIFIER: cout << "IDENTIFIER: " << node->stringval; break;
+    case NODE_BOOLVAL: cout << "BOOLVAL: " << node->boolval; break;
     default: fail("Unsupported node type!"); break;
   }
-  if (node->identifier != "") {
-    cout << " (ID:" << node->identifier << ")";
-  }
   if (node->data_type != TYPE_VOID) {
-    cout << " (TYPE:" << node->data_type << ")";
+    cout << " (TYPE:" << typeToString(node->data_type) << ")";
   }
 
   cout << endl;
@@ -54,7 +82,6 @@ void print_tree(Node* node, int level = 0) {
     print_tree(node->children[i], level + 1);
   }
 }
-
 
 /* the main function */
 int main(int argc, char** argv) {
