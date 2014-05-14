@@ -141,6 +141,7 @@ newl_plus: TOK_NEWLINE newl_star {}
 /* a list of functions */
 functions: newl_star function functions {
   $$ = new Node(NODE_FUNCTION_LIST);
+  $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
 } | {

@@ -1,4 +1,4 @@
-parse-test
+dump-tree
 *.o
 *.gen.*
 tags

@@ -226,6 +226,8 @@ int yylex( ) {
     start_of_line = 0;
     /* if there is indentation, set the dedents to return to that - 1, and return 1 */
     if (indent_level > 0) {
+      /* put the thing we read back! */
+      in->putback(next);
       dedents_left = indent_level - 1;
       indent_level = 0;
       return TOK_DEDENT;
