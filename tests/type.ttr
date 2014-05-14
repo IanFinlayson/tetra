@@ -1,15 +1,17 @@
-def min(a float, b float, c float) float:
+def min(a real, b real, c real) real:
     if a < b and a < c:
         return a
     if b < c:
         return b
     return c
 
-a = 2; b = 3
-c = 22
-m = min(33.0, b, c)
-undef_var = undeffunc()
 def undeffunc() string:
-    print "boogie"
+    print("boogie")
     return "boogie"
-$
+
+def main( ):
+    a = 2; b = 3
+    c = 22
+    m = min(33.0, b, c)
+    undef_var = undeffunc()
+

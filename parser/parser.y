@@ -106,7 +106,7 @@ Node* root;
 %type <node> compound_statement simple_statement pass_statement return_statement break_statement
 %type <node> continue_statement expression if_statement while_statement else_option orterm andterm
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
-%type <node> expterm funcall formal_param simple_statements actual_param_list 
+%type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
 
 
 %type <data_type> return_type type
@@ -266,8 +266,93 @@ while_statement: TOK_WHILE expression TOK_COLON block {
   $$->addChild($4);
 }
 
-/* expressions - or operator */
-expression: expression TOK_OR orterm {
+/* expressions - assignments first */
+expression: variable TOK_ASSIGN assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  $$->addChild($3);
+} | variable TOK_PLUSEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_PLUS);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_MINUSEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_MINUS);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_TIMESEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_TIMES);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_DIVIDEEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_DIVIDE);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_MODULUSEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_MODULUS);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_EXPEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_EXP);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_LSHIFTEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_SHIFTL);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_RSHIFTEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_SHIFTR);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_ANDEQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_BITAND);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_OREQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_BITOR);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | variable TOK_XOREQ assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  Node* rhs = new Node(NODE_BITXOR);
+  rhs->addChild($1);
+  rhs->addChild($3);
+  $$->addChild(rhs);
+} | assignterm {
+  $$ = $1;
+}
+
+assignterm: assignterm TOK_OR orterm {
   $$ = new Node(NODE_OR);
   $$->addChild($1);
   $$->addChild($3);
@@ -435,14 +520,15 @@ expterm: funcall {
 } | TOK_STRINGVAL {
   $$ = new Node(NODE_STRINGVAL);
   $$->setStringval($1);
-} | TOK_IDENTIFIER {
+} | variable {
+  $$ = $1;
+}
+
+/* an l-value - will need to have vector refs too */
+variable: TOK_IDENTIFIER {
   $$ = new Node(NODE_IDENTIFIER);
   $$->setStringval($1);
 }
-
-/* TODO += -= etc. */
-
-
 
 /* a function call */
 funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {

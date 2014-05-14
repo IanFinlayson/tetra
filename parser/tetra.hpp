@@ -30,6 +30,7 @@ enum NodeType {
   NODE_WHILE,
 
   /* operator nodes */
+  NODE_ASSIGN,
   NODE_OR,
   NODE_AND,
   NODE_LT,
@@ -51,20 +52,6 @@ enum NodeType {
   NODE_DIVIDE,
   NODE_MODULUS,
   NODE_EXP,
-
-  /* assignment nodes */
-  NODE_ASSIGN,
-  NODE_PLUSEQ,
-  NODE_MINUSEQ,
-  NODE_TIMESEQ,
-  NODE_DIVIDEEQ,
-  NODE_MODULUSEQ,
-  NODE_EXPEQ,
-  NODE_SHIFTREQ,
-  NODE_SHIFTLEQ,
-  NODE_BITANDEQ,
-  NODE_BITOREQ,
-  NODE_BITXOREQ,
 
   /* function call */
   NODE_FUNCALL,

@@ -1,4 +1,4 @@
-tetra
+parse-test
 *.o
 *.gen.*
 tags
