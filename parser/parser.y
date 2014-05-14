@@ -98,6 +98,8 @@ stack<int> linenos;
 %token TOK_ANDEQ
 %token TOK_XOREQ
 %token TOK_OREQ
+%token TOK_BACKGROUND
+%token TOK_LOCK
 
 /* typed tokens */
 %token <intval> TOK_INTVAL

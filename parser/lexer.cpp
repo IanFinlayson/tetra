@@ -36,27 +36,27 @@ istream* in;
 
 /* look up a string and return its token code */
 int lookupId(const string& id) {
-  if (id == "if")       {return TOK_IF;}
-  if (id == "elif")     {return TOK_ELIF;}
-  if (id == "else")     {return TOK_ELSE;}
-  if (id == "for")      {return TOK_FOR;}
-  if (id == "in")       {return TOK_IN;}
-  if (id == "forall")   {return TOK_FORALL;}
-  if (id == "parallel") {return TOK_PARALLEL;}
-  if (id == "while")    {return TOK_WHILE;}
-  if (id == "continue") {return TOK_CONTINUE;}
-  if (id == "break")    {return TOK_BREAK;}
-  if (id == "def")      {return TOK_DEF;}
-  if (id == "global")   {return TOK_GLOBAL;}
-  if (id == "or")       {return TOK_OR;}
-  if (id == "and")      {return TOK_AND;}
-  if (id == "not")      {return TOK_NOT;}
-  if (id == "pass")     {return TOK_PASS;}
-  if (id == "return")   {return TOK_RETURN;}
-  if (id == "int")      {return TOK_INT;}
-  if (id == "real")     {return TOK_REAL;}
-  if (id == "bool")     {return TOK_BOOL;}
-  if (id == "string")   {return TOK_STRING;}
+  if (id == "if")         {return TOK_IF;}
+  if (id == "elif")       {return TOK_ELIF;}
+  if (id == "else")       {return TOK_ELSE;}
+  if (id == "for")        {return TOK_FOR;}
+  if (id == "in")         {return TOK_IN;}
+  if (id == "parallel")   {return TOK_PARALLEL;}
+  if (id == "while")      {return TOK_WHILE;}
+  if (id == "continue")   {return TOK_CONTINUE;}
+  if (id == "break")      {return TOK_BREAK;}
+  if (id == "def")        {return TOK_DEF;}
+  if (id == "or")         {return TOK_OR;}
+  if (id == "and")        {return TOK_AND;}
+  if (id == "not")        {return TOK_NOT;}
+  if (id == "pass")       {return TOK_PASS;}
+  if (id == "return")     {return TOK_RETURN;}
+  if (id == "background") {return TOK_BACKGROUND;}
+  if (id == "lock")       {return TOK_LOCK;}
+  if (id == "int")        {return TOK_INT;}
+  if (id == "real")       {return TOK_REAL;}
+  if (id == "bool")       {return TOK_BOOL;}
+  if (id == "string")     {return TOK_STRING;}
 
   /* save the identifier */
   strcpy(yylval.stringval, id.c_str( ));

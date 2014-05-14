@@ -1,3 +1,4 @@
+# a simple factorial function
 def fact(x int) int:
     if x == 0:
         return 1
