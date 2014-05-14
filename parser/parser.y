@@ -107,6 +107,7 @@ Node* root;
 %type <node> continue_statement expression if_statement while_statement else_option orterm andterm
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
+%type <node> elif_clause elif_clauses elif_statement
 
 
 %type <data_type> return_type type
@@ -219,8 +220,8 @@ simple_statement: pass_statement
 
 /* a compound statement is one which has a block of code under it */
 compound_statement: if_statement
-/*  | elif_statement
-  | for_statement */
+  | elif_statement
+/*  | for_statement */
   | while_statement {
   $$ = $1;
 }
@@ -258,6 +259,34 @@ else_option: TOK_ELSE TOK_COLON block {
 } | {
   $$ = NULL;
 }
+
+/* an elif statement */
+elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
+  $$ = new Node(NODE_ELIF);
+  $$->addChild($2);
+  $$->addChild($4);
+  $$->addChild($5);
+  if ($6) {
+    $$->addChild($6);
+  }
+}
+
+/* one or more elif clauses */
+elif_clauses: elif_clause elif_clauses {
+  $$ = new Node(NODE_ELIF_CHAIN);
+  $$->addChild($1);
+  $$->addChild($2);
+} | elif_clause {
+  $$ = $1;
+}
+
+/* a single elif clause */
+elif_clause: TOK_ELIF expression TOK_COLON block {
+  $$ = new Node(NODE_ELIF_CLAUSE);
+  $$->addChild($2);
+  $$->addChild($4);
+}
+
 
 /* a while loop */
 while_statement: TOK_WHILE expression TOK_COLON block {

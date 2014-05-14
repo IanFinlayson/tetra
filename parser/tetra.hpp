@@ -27,6 +27,9 @@ enum NodeType {
   NODE_BREAK,
   NODE_CONTINUE,
   NODE_IF,
+  NODE_ELIF,
+  NODE_ELIF_CHAIN,
+  NODE_ELIF_CLAUSE,
   NODE_WHILE,
 
   /* operator nodes */
