@@ -2,4 +2,5 @@ parse-test
 *.o
 *.gen.*
 tags
+.*.swp
 
