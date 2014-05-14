@@ -1,5 +1,6 @@
 # a simple factorial function
 def fact(x int) int:
+    # if x is zero, then 1
     if x == 0:
         return 1
     else:

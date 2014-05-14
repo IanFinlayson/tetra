@@ -52,7 +52,6 @@ stack<int> linenos;
 %token TOK_CONTINUE
 %token TOK_BREAK
 %token TOK_DEF
-%token TOK_GLOBAL
 %token TOK_OR
 %token TOK_AND
 %token TOK_NOT
@@ -75,7 +74,6 @@ stack<int> linenos;
 %token TOK_LEFTPARENS
 %token TOK_RIGHTPARENS
 %token TOK_COMMA
-%token TOK_DOLLAR
 %token TOK_SEMICOLON
 %token TOK_COLON
 %token TOK_LSHIFT
@@ -133,11 +131,18 @@ program: functions {
   root = $1;
 }
 
+/* zero or more new lines */
+newl_star: TOK_NEWLINE newl_star {}
+  | {}
+
+/* one or more new lines */
+newl_plus: TOK_NEWLINE newl_star {}
+
 /* a list of functions */
-functions: function functions {
+functions: newl_star function functions {
   $$ = new Node(NODE_FUNCTION_LIST);
-  $$->addChild($1);
   $$->addChild($2);
+  $$->addChild($3);
 } | {
   $$ = NULL;
 }
@@ -199,7 +204,7 @@ return_type: type {
 }
 
 /* a block is a set of statements, indented over */
-block: TOK_NEWLINE TOK_INDENT statements TOK_DEDENT {
+block: newl_plus TOK_INDENT statements TOK_DEDENT {
   $$ = $3;
 }
 
@@ -227,7 +232,7 @@ simple_statements: simple_statement TOK_SEMICOLON simple_statements {
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
-} | simple_statement TOK_NEWLINE {
+} | simple_statement newl_plus {
   $$ = $1;
 }
 

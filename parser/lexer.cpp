@@ -253,10 +253,11 @@ int yylex( ) {
     }
     /* get the new line */
     in->get( );
-    /* return the new line */
     start_of_line = 1;
     yylineno++;
-    return TOK_NEWLINE;
+
+    /* skip it */
+    return yylex( );
   }
 
   /* handle string constants */
