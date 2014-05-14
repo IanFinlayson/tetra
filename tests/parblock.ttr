@@ -1,0 +1,6 @@
+def doStuff( ):
+    parallel:
+        func1( )
+        func2( )
+        func3( )
+

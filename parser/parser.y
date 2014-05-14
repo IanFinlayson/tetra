@@ -46,7 +46,6 @@ stack<int> linenos;
 %token TOK_ELSE
 %token TOK_FOR
 %token TOK_IN
-%token TOK_FORALL
 %token TOK_PARALLEL
 %token TOK_WHILE
 %token TOK_CONTINUE
@@ -117,7 +116,8 @@ stack<int> linenos;
 %type <node> continue_statement expression if_statement while_statement else_option orterm andterm
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
-%type <node> elif_clause elif_clauses elif_statement
+%type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
+%type <node> background lock_statement
 
 
 %type <data_type> return_type type
@@ -250,8 +250,12 @@ simple_statement: pass_statement
 /* a compound statement is one which has a block of code under it */
 compound_statement: if_statement
   | elif_statement
-/*  | for_statement */
-  | while_statement {
+  | for_statement
+  | while_statement 
+  | parfor
+  | background
+  | lock_statement
+  | parblock {
   $$ = $1;
 }
 
@@ -299,8 +303,13 @@ else_option: TOK_ELSE TOK_COLON block {
 /* an elif statement */
 elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
   $$ = new Node(NODE_ELIF);
-  $$->addChild($2);
-  $$->addChild($4);
+  
+  /* make a node for the first clause */
+  Node* c1 = new Node(NODE_ELIF_CLAUSE);
+  c1->addChild($2);
+  c1->addChild($4);
+  $$->addChild(c1);
+
   $$->addChild($5);
   if ($6) {
     $$->addChild($6);
@@ -323,10 +332,44 @@ elif_clause: TOK_ELIF expression TOK_COLON block {
   $$->addChild($4);
 }
 
+/* a for loop */
+for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
+  $$ = new Node(NODE_FOR);
+  $$->addChild($2);
+  $$->addChild($4);
+  $$->addChild($6);
+}
+
+/* a parallel for loop */
+parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
+  $$ = new Node(NODE_PARFOR);
+  $$->addChild($3);
+  $$->addChild($5);
+  $$->addChild($7);
+}
 
 /* a while loop */
 while_statement: TOK_WHILE expression TOK_COLON block {
   $$ = new Node(NODE_WHILE);
+  $$->addChild($2);
+  $$->addChild($4);
+}
+
+/* a parallel block */
+parblock: TOK_PARALLEL TOK_COLON block {
+  $$ = new Node(NODE_PARALLEL);
+  $$->addChild($3);
+}
+
+/* a background block */
+background: TOK_BACKGROUND TOK_COLON block {
+  $$ = new Node(NODE_BACKGROUND);
+  $$->addChild($3);
+}
+
+/* a lock statement */
+lock_statement: TOK_LOCK identifier TOK_COLON block {
+  $$ = new Node(NODE_LOCK);
   $$->addChild($2);
   $$->addChild($4);
 }
@@ -590,7 +633,12 @@ expterm: funcall {
 }
 
 /* an l-value - will need to have vector refs too */
-variable: TOK_IDENTIFIER {
+variable: identifier {
+  $$ = $1;
+}
+
+/* a node wrapper around an ID */
+identifier: TOK_IDENTIFIER {
   $$ = new Node(NODE_IDENTIFIER);
   $$->setStringval($1);
 }

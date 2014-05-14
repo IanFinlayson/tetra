@@ -30,9 +30,14 @@ string stringType(Node* node) {
     case NODE_CONTINUE: return "CONTINUE";
     case NODE_IF: return "IF";
     case NODE_WHILE: return "WHILE";
+    case NODE_FOR: return "FOR";
     case NODE_ELIF: return "ELIF";
     case NODE_ELIF_CHAIN: return "ELIF CHAIN";
     case NODE_ELIF_CLAUSE: return "ELIF CLAUSE";
+    case NODE_PARALLEL: return "PARALLEL";
+    case NODE_PARFOR: return "PARFOR";
+    case NODE_BACKGROUND: return "BACKGROUND";
+    case NODE_LOCK: return "LOCK";
 
     /* operators */
     case NODE_ASSIGN: return "=";

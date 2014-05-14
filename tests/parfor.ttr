@@ -1,0 +1,4 @@
+def pfl(times int):
+    parallel for i in range(times):
+        print(i)
+

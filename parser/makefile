@@ -3,22 +3,22 @@
 CC = clang++
 CFLAGS = -W -Wall -g
 
-dump-tree: parser.gen.o lexer.o dump-tree.o tetra.o
+dump-tree: parser.gen.o lexer.o dump-tree.o tetra.o tetra.hpp
 	$(CC) $(CFLAGS) parser.gen.o lexer.o dump-tree.o tetra.o -o dump-tree
 
-dump-tree.o: dump-tree.cpp
+dump-tree.o: dump-tree.cpp tetra.hpp
 	$(CC) $(CFLAGS) -c dump-tree.cpp
 
-tetra.o: tetra.cpp
+tetra.o: tetra.cpp tetra.hpp
 	$(CC) $(CFLAGS) -c tetra.cpp
 
 parser.gen.o: parser.gen.cpp
 	$(CC) $(CFLAGS) -c parser.gen.cpp
 
-parser.gen.cpp: parser.y
+parser.gen.cpp: parser.y tetra.hpp
 	bison -d parser.y -o parser.gen.cpp
 
-lexer.o: lexer.cpp
+lexer.o: lexer.cpp tetra.hpp
 	$(CC) $(CFLAGS) -c lexer.cpp
 
 .PHONY: clean tags

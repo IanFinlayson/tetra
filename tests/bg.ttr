@@ -1,0 +1,6 @@
+def doStuff( ):
+    background:
+        func1( )
+        func2( )
+        func3( )
+

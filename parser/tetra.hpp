@@ -31,6 +31,11 @@ enum NodeType {
   NODE_ELIF_CHAIN,
   NODE_ELIF_CLAUSE,
   NODE_WHILE,
+  NODE_FOR,
+  NODE_PARALLEL,
+  NODE_PARFOR,
+  NODE_BACKGROUND,
+  NODE_LOCK,
 
   /* operator nodes */
   NODE_ASSIGN,
