@@ -9,6 +9,9 @@ It combines a friendly, Python-like syntax; static typing; powerful data
 structures; and built-in parallelism. It comes with a graphical development
 environment with several unique features.
 
+About
+-----
+
 Tetra is still a work in progress, but will combine the following components:
 
 - A programming language geared towards making parallel programming as easy as
@@ -25,6 +28,14 @@ be non-deterministic and thus hard to find.
 
 - A compiler that compiles Tetra code down to efficient low-level parallel code
 that can be run on a variety of parallel architectures.
+
+Requirements
+------------
+
+1. Bison.
+2. A C++ compiler (clang++ is default).
+3. make
+4. graphviz for automatic tree diagrams.
 
 Tetra is licensed under the MIT license.
 

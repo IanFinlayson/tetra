@@ -32,7 +32,9 @@ Node::Node(NodeType node_type) {
 }
  
 void Node::addChild(Node* child) {
-  children.push_back(child);
+  if (child) {
+    children.push_back(child);
+  }
 }
 
 void Node::setDataType(DataType data_type) {

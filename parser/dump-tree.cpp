@@ -4,6 +4,8 @@
 
 #include <string>
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <cstdlib>
 #include <cstdio>
 #include "tetra.hpp"
@@ -11,65 +13,138 @@
 
 using namespace std;
 
-void print_tree(Node* node, int level = 0) {
+/* returns a string representation of a node type */
+string stringType(Node* node) {
+  stringstream ss;
+
+  switch (node->node_type) {
+    /* statements and groups */
+    case NODE_FUNCTION: return "FUNC " + node->stringval;
+    case NODE_FUNCTION_LIST: return "FUNCS";
+    case NODE_STATEMENT: return "STMTS";
+    case NODE_FORMAL_PARAM: return "PARAM: " + node->stringval;
+    case NODE_FORMAL_PARAM_LIST: return "PARAMS";
+    case NODE_PASS: return "PASS";
+    case NODE_RETURN: return "RETURN";
+    case NODE_BREAK: return "BREAK";
+    case NODE_CONTINUE: return "CONTINUE";
+    case NODE_IF: return "IF";
+    case NODE_WHILE: return "WHILE";
+    case NODE_ELIF: return "ELIF";
+    case NODE_ELIF_CHAIN: return "ELIF CHAIN";
+    case NODE_ELIF_CLAUSE: return "ELIF CLAUSE";
+
+    /* operators */
+    case NODE_ASSIGN: return "=";
+    case NODE_OR: return "or";
+    case NODE_AND: return "and";
+    case NODE_LT: return "<";
+    case NODE_LTE: return "<=";
+    case NODE_GT: return ">";
+    case NODE_GTE: return ">=";
+    case NODE_EQ: return "==";
+    case NODE_NEQ: return "!=";
+    case NODE_NOT: return "not";
+    case NODE_BITXOR: return "^";
+    case NODE_BITAND: return "&";
+    case NODE_BITOR: return "|";
+    case NODE_BITNOT: return "~";
+    case NODE_SHIFTL: return "<<";
+    case NODE_SHIFTR: return ">>";
+    case NODE_PLUS: return "+";
+    case NODE_MINUS: return "-";
+    case NODE_TIMES: return "*";
+    case NODE_DIVIDE: return "/";
+    case NODE_MODULUS: return "%";
+    case NODE_EXP: return "EXP";
+
+    /* functions */
+    case NODE_FUNCALL: return "CALL: " + node->stringval;
+    case NODE_ACTUAL_PARAM_LIST: return "ARGS";
+
+    /* leafs */
+    case NODE_INTVAL:
+      ss << "INT: " << node->intval;
+      return ss.str( );
+    case NODE_REALVAL:
+      ss << "REAL: " << node->realval;
+      return ss.str( );
+    case NODE_STRINGVAL: return "\\\"" +  node->stringval + "\\\"";
+    case NODE_IDENTIFIER: return "ID " + node->stringval;
+    case NODE_BOOLVAL:
+      if (node->boolval) {
+        return "true";
+      } else {
+        return "false";
+      }
+    default:
+      throw Error("Unsupported node type!");
+  }
+}
+
+/* generate a unique label for a node */
+string genId( ) {
+  static int count = 0;
+  count++;
+  stringstream ss;
+  ss << "n" << count;
+  return ss.str( );
+}
+
+
+void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
+  if (!node) {
+    return;
+  }
+
+  /* dump the node designator */
+  out << "  " << id << "[label=\"";
+  out << stringType(node);
+  out << "\"];\n";
+
+  /* for each child */
+  for (unsigned int i = 0; i < node->children.size( ); i++) {
+    /* generate a new id */
+    string childId = genId( );
+
+    /* dump the connection */
+    out << "  " << id << " -> " << childId << ";\n";
+
+    /* dump the child itself */
+    dumpNodeGraphviz(node->children[i], childId, out);
+  }
+}
+
+
+void dumpTreeGraphviz(Node* node) {
+  ofstream out("tree.gv");
+  out << "digraph G {\n";
+  dumpNodeGraphviz(node, "n0", out);
+  out << "}\n";
+  out.close( );
+
+  system("rm tree.png");
+  system("dot -Tpng tree.gv -o tree.png");
+  system("rm tree.gv");
+  system("xdg-open tree.png");
+}
+
+
+void dumpTreeStdout(Node* node, int level = 0) {
   /* base case */
   if (!node) {
     return;
   }
 
-  /* print leading spaces */
+  /* dump leading spaces */
   for (int i = 0; i < level; i++) {
     cout << "    ";
   }
 
-  /* print this type of node */
-  switch (node->node_type) {
-    /* statements and groups */
-    case NODE_FUNCTION: cout << "FUNCTION: " << node->stringval; break;
-    case NODE_FUNCTION_LIST: cout << "FUNCTION LIST"; break;
-    case NODE_STATEMENT: cout << "STATEMENT"; break;
-    case NODE_FORMAL_PARAM: cout << "FORMAL PARAM: " << node->stringval; break;
-    case NODE_FORMAL_PARAM_LIST: cout << "FORMAL PARAM LIST"; break;
-    case NODE_PASS: cout << "PASS"; break;
-    case NODE_RETURN: cout << "RETURN"; break;
-    case NODE_BREAK: cout << "BREAK"; break;
-    case NODE_CONTINUE: cout << "CONTINUE"; break;
-    case NODE_IF: cout << "IF"; break;
-    case NODE_WHILE: cout << "WHILE"; break;
-    case NODE_FUNCALL: cout << "FUNCALL: " << node->stringval; break;
-    case NODE_ACTUAL_PARAM_LIST: cout << "ACTUAL PARAM LIST"; break;
+  /* dump this type of node */
+  cout << stringType(node);
 
-    /* operators */
-    case NODE_OR: cout << "OR"; break;
-    case NODE_AND: cout << "AND"; break;
-    case NODE_LT: cout << "LESS THAN"; break;
-    case NODE_LTE: cout << "LESS THAN EQUAL TO"; break;
-    case NODE_GT: cout << "GREATER THAN"; break;
-    case NODE_GTE: cout << "GREATER THAN EQUAL TO"; break;
-    case NODE_EQ: cout << "EQUAL TO"; break;
-    case NODE_NEQ: cout << "NOT EQUAL TO"; break;
-    case NODE_NOT: cout << "NOT"; break;
-    case NODE_BITXOR: cout << "XOR"; break;
-    case NODE_BITAND: cout << "BITAND"; break;
-    case NODE_BITOR: cout << "BITOR"; break;
-    case NODE_BITNOT: cout << "BITNOT"; break;
-    case NODE_SHIFTL: cout << "SHIFT LEFT"; break;
-    case NODE_SHIFTR: cout << "SHIFT RIGHT"; break;
-    case NODE_PLUS: cout << "PLUS"; break;
-    case NODE_MINUS: cout << "MINUS"; break;
-    case NODE_TIMES: cout << "TIMES"; break;
-    case NODE_DIVIDE: cout << "DIVIDE"; break;
-    case NODE_MODULUS: cout << "MOD"; break;
-    case NODE_EXP: cout << "EXP"; break;
-
-    /* leafs */
-    case NODE_INTVAL: cout << "INTVAL: " << node->intval; break;
-    case NODE_REALVAL: cout << "REALVAL: " << node->realval;  break;
-    case NODE_STRINGVAL: cout << "STRINGVAL: " << node->stringval; break;
-    case NODE_IDENTIFIER: cout << "IDENTIFIER: " << node->stringval; break;
-    case NODE_BOOLVAL: cout << "BOOLVAL: " << node->boolval; break;
-    default: throw Error("Unsupported node type!"); break;
-  }
+  /* dump the type and line if relevant */
   if (node->data_type != TYPE_VOID) {
     cout << " (TYPE:" << typeToString(node->data_type) << ")";
   }
@@ -80,9 +155,9 @@ void print_tree(Node* node, int level = 0) {
 
   cout << endl;
 
-  /* print children */
+  /* dump children */
   for (unsigned int i = 0; i < node->children.size( ); i++) {
-    print_tree(node->children[i], level + 1);
+    dumpTreeStdout(node->children[i], level + 1);
   }
 }
 
@@ -97,7 +172,8 @@ int main(int argc, char** argv) {
   /* try to parse the tree from this file and dump it to the screen */
   try {
     Node* tree = parseFile(argv[1]);
-    print_tree(tree);
+    dumpTreeStdout(tree);
+    dumpTreeGraphviz(tree);
   } catch(Error e) {
     cout << e;
   }
