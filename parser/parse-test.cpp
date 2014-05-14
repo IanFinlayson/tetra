@@ -9,7 +9,6 @@
 #include "tetra.hpp"
 #include "parser.gen.hpp"
 
-extern Node* root;
 using namespace std;
 
 void print_tree(Node* node, int level = 0) {
@@ -69,10 +68,14 @@ void print_tree(Node* node, int level = 0) {
     case NODE_STRINGVAL: cout << "STRINGVAL: " << node->stringval; break;
     case NODE_IDENTIFIER: cout << "IDENTIFIER: " << node->stringval; break;
     case NODE_BOOLVAL: cout << "BOOLVAL: " << node->boolval; break;
-    default: fail("Unsupported node type!"); break;
+    default: throw Error("Unsupported node type!"); break;
   }
   if (node->data_type != TYPE_VOID) {
     cout << " (TYPE:" << typeToString(node->data_type) << ")";
+  }
+
+  if (node->lineno) {
+    cout << " (LINE:" << node->lineno << ")";
   }
 
   cout << endl;
@@ -86,18 +89,18 @@ void print_tree(Node* node, int level = 0) {
 /* the main function */
 int main(int argc, char** argv) {
   /* if a file was passed, use that over stdin */
-  if (argc >= 2) {
-    stdin = fopen(argv[1], "r");
-    if (!stdin) {
-      fail(string("Could not open file ") + argv[1] + string(" for reading."));
-    }
+  if (argc < 2) {
+    cerr << "Please pass a file name!" << endl;
+    return 0;
   }
 
-  /* parse it */
-  yyparse( );
-
-  /* dump the tree to the screen */
-  print_tree(root);
+  /* try to parse the tree from this file and dump it to the screen */
+  try {
+    Node* tree = parseFile(argv[1]);
+    print_tree(tree);
+  } catch(Error e) {
+    cout << e;
+  }
 
   return 0;
 }

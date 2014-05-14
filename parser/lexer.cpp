@@ -31,6 +31,9 @@ int yylineno = 1;
 /* the symbol used to comunicate with bison */
 extern YYSTYPE yylval;
 
+/* the istream to use for doing all input */
+istream* in;
+
 /* look up a string and return its token code */
 int lookupId(const string& id) {
   if (id == "if")       {return TOK_IF;}
@@ -65,8 +68,8 @@ int lexIdent(int start) {
   string id;
   id.push_back((char) start);
 
-  while (isalnum(cin.peek( )) || cin.peek( ) == '_') {
-    id.push_back(cin.get( ));
+  while (isalnum(in->peek( )) || in->peek( ) == '_') {
+    id.push_back(in->get( ));
   }
 
   return lookupId(id);
@@ -78,8 +81,8 @@ int lexNumber(int start) {
   string number;
   number.push_back((char) start);
 
-  while (isdigit(cin.peek( )) || cin.peek( ) == '.') {
-    number.push_back(cin.get( ));
+  while (isdigit(in->peek( )) || in->peek( ) == '.') {
+    number.push_back(in->get( ));
   }
 
   /* if there's no decimal its an int */
@@ -96,10 +99,10 @@ int lexNumber(int start) {
 int lexString( ) {
   string str;
   while (true) {
-    char next = cin.get( );
+    char next = in->get( );
     if (next == '\\') {
       /* get the thing after this */
-      next = cin.get( );
+      next = in->get( );
       switch (next) {
         case 'n':
           str.push_back('\n');
@@ -139,10 +142,10 @@ int yylex( ) {
   }
 
   /* read in the next character in the stream */
-  int next = cin.get( );
+  int next = in->get( );
 
   /* check for EOF */
-  if (cin.eof( )) {
+  if (in->eof( )) {
     if (indent_level != 0) {
       dedents_left = indent_level;
       return yylex( );
@@ -153,7 +156,7 @@ int yylex( ) {
 
   /* we do NOT allow tabs */
   if (next == '\t') {
-    fail("Tab characters are not allowed in Tetra!");
+    throw Error("Tab characters are not allowed in Tetra!", yylineno);
   }
 
   /* if it's a new line, set to beginning of line and return it */
@@ -173,8 +176,8 @@ int yylex( ) {
   if (start_of_line && next == ' ') {
     /* count the spaces */
     int spaces = 1;
-    while (cin.peek( ) == ' ') {
-      cin.get( );
+    while (in->peek( ) == ' ') {
+      in->get( );
       spaces++;
     }
     start_of_line = 0;
@@ -190,7 +193,7 @@ int yylex( ) {
     /* level is spaces / spaces_per_indent */
     int level = spaces / spaces_per_indent;
     if ((spaces % spaces_per_indent) != 0) {
-      fail("Indentation level inconsistent.");
+      throw Error("Indentation level inconsistent.", yylineno);
     }
 
     /* if the level is greater than the current one (by one) indent */
@@ -201,7 +204,7 @@ int yylex( ) {
 
     /* If the level is EVEN greater than that, error */
     if (level > indent_level) {
-      fail("Too much indentation.");
+      throw Error("Too much indentation.", yylineno);
     }
 
     /* if the level is less than the current one */
@@ -245,11 +248,11 @@ int yylex( ) {
   /* handle comments */
   if (next == '#') {
     /* eat it all */
-    while (cin.peek( ) != '\n') {
-      cin.get( );
+    while (in->peek( ) != '\n') {
+      in->get( );
     }
     /* get the new line */
-    cin.get( );
+    in->get( );
     /* return the new line */
     start_of_line = 1;
     yylineno++;
@@ -272,34 +275,34 @@ int yylex( ) {
     case ':': return TOK_COLON;
     /* ones that have some single and double ones */
     case '=':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_EQ;
       } else {
         return TOK_ASSIGN;
       }
     case '+':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_PLUSEQ;
       } else {
         return TOK_PLUS;
       }
     case '-':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_MINUSEQ;
       } else {
         return TOK_MINUS;
       }
     case '*':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_TIMESEQ;
-      } else if (cin.peek( ) == '*') {
-        cin.get( );
-        if (cin.peek( ) == '=') {
-          cin.get( );
+      } else if (in->peek( ) == '*') {
+        in->get( );
+        if (in->peek( ) == '=') {
+          in->get( );
           return TOK_EXPEQ;
         } else {
           return TOK_EXP;
@@ -308,55 +311,55 @@ int yylex( ) {
         return TOK_TIMES;
       }
     case '/':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_DIVIDEEQ;
       } else {
         return TOK_DIVIDE;
       }
     case '%':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_MODULUSEQ;
       } else {
         return TOK_MODULUS;
       }
     case '^':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_XOREQ;
       } else {
         return TOK_BITXOR;
       }
     case '|':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_OREQ;
       } else {
         return TOK_BITOR;
       }
     case '&':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_ANDEQ;
       } else {
         return TOK_BITAND;
       }
     case '!':
-      if (cin.peek( ) != '=') {
-        fail("Error, invalid lexeme '!'");
+      if (in->peek( ) != '=') {
+        throw Error("Error, invalid lexeme '!'", yylineno);
       } else {
-        cin.get( );
+        in->get( );
         return TOK_NEQ;
       }
     case '<':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_LTE;
-      } else if (cin.peek( ) == '<') {
-        cin.get( );
-        if (cin.peek( ) == '=') {
-          cin.get( );
+      } else if (in->peek( ) == '<') {
+        in->get( );
+        if (in->peek( ) == '=') {
+          in->get( );
           return TOK_LSHIFTEQ;
         } else {
           return TOK_LSHIFT;
@@ -365,13 +368,13 @@ int yylex( ) {
         return TOK_LT;
       }
     case '>':
-      if (cin.peek( ) == '=') {
-        cin.get( );
+      if (in->peek( ) == '=') {
+        in->get( );
         return TOK_GTE;
-      } else if (cin.peek( ) == '>') {
-        cin.get( );
-        if (cin.peek( ) == '=') {
-          cin.get( );
+      } else if (in->peek( ) == '>') {
+        in->get( );
+        if (in->peek( ) == '=') {
+          in->get( );
           return TOK_RSHIFTEQ;
         } else {
           return TOK_RSHIFT;
@@ -382,7 +385,7 @@ int yylex( ) {
   }
 
   /* if we get down here, there must be a lexer error :( */
-  fail(string(next, 1) + " is not a valid lexeme.");
+  throw Error(string(next, 1) + " is not a valid lexeme.", yylineno);
   return 0;
 }
 

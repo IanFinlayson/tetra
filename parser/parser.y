@@ -4,7 +4,9 @@
  * variable (this should be externed into programs which use Tetra parsing */
 
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <stack>
 
 using namespace std;
 
@@ -15,8 +17,16 @@ int yylex( );
 int yywrap( );
 void yyerror(const char* str);
 
-/* the root of the parse tree - this can be used after calling yyparse */
+/* the root of the parse tree - this is set as a result of calling yyparse */
 Node* root;
+
+/* this function calls yyparse on a file and returns the parse tree node */
+Node* parseFile(const string& fname);
+
+/* this is a stack of line numbers, it is used for saving the appropriate line numbers
+ * with each node.  eg. when a function is parsed, yylineno is the LAST line of the
+ * function, so we save the start of the function before parsing the rest of it out */
+stack<int> linenos;
 
 %}
 
@@ -131,17 +141,21 @@ functions: function functions {
 }
 
 /* a single function */
-function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
+function: TOK_DEF TOK_IDENTIFIER {linenos.push(yylineno);} formal_param_list return_type TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
   $$->setStringval(string($2));
-  $$->setDataType($4);
-  $$->addChild($3);
-  $$->addChild($6);
+  $$->setDataType($5);
+  $$->addChild($4);
+  $$->addChild($7);
+
+  $$->setLine(linenos.top( ));
+  linenos.pop( );
 }
 
 /* a parameter list (with bannanas) */
 formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
   $$ = $2;
+  $$->setLine(yylineno);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = NULL;
 }
@@ -149,6 +163,7 @@ formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
 /* a list of at least one parameter */
 formal_params: formal_param TOK_COMMA formal_params {
   $$ = new Node(NODE_FORMAL_PARAM_LIST);
+  $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
 } | formal_param {
@@ -158,6 +173,7 @@ formal_params: formal_param TOK_COMMA formal_params {
 /* a single parameter */
 formal_param: TOK_IDENTIFIER type {
   $$ = new Node(NODE_FORMAL_PARAM);
+  $$->setLine(yylineno);
   $$->setStringval(string($1));
   $$->setDataType($2);
 }
@@ -186,10 +202,13 @@ block: TOK_NEWLINE TOK_INDENT statements TOK_DEDENT {
 }
 
 /* a list of at least one statement */
-statements: statement statements {
+statements: statement {linenos.push(yylineno);} statements {
   $$ = new Node(NODE_STATEMENT);
   $$->addChild($1);
-  $$->addChild($2);
+  $$->addChild($3);
+
+  $$->setLine(linenos.top( ));
+  linenos.pop( );
 } | statement {
   $$ = $1;
 }
@@ -203,6 +222,7 @@ statement: simple_statements
 /* simple statements are a list of simple statements separated by semi-conlons on one line */
 simple_statements: simple_statement TOK_SEMICOLON simple_statements {
   $$ = new Node(NODE_STATEMENT);
+  $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
 } | simple_statement TOK_NEWLINE {
@@ -216,6 +236,7 @@ simple_statement: pass_statement
   | continue_statement
   | expression {
   $$ = $1;
+  $$->setLine(yylineno);
 }
 
 /* a compound statement is one which has a block of code under it */
@@ -229,18 +250,24 @@ compound_statement: if_statement
 /* simple statements */
 pass_statement: TOK_PASS {
   $$ = new Node(NODE_PASS);
+  $$->setLine(yylineno);
 }
 return_statement: TOK_RETURN {
   $$ = new Node(NODE_RETURN);
-} | TOK_RETURN expression {
+  $$->setLine(yylineno);
+} | TOK_RETURN {linenos.push(yylineno);} expression {
   $$ = new Node(NODE_RETURN);
-  $$->addChild($2);
+  $$->addChild($3);
+  $$->setLine(linenos.top( ));
+  linenos.pop( );
 }
 break_statement: TOK_BREAK {
   $$ = new Node(NODE_BREAK);
+  $$->setLine(yylineno);
 }
 continue_statement: TOK_CONTINUE {
   $$ = new Node(NODE_CONTINUE);
+  $$->setLine(yylineno);
 }
 
 /* if statement with or without else */
@@ -248,6 +275,7 @@ if_statement: TOK_IF expression TOK_COLON block else_option {
   $$ = new Node(NODE_IF);
   $$->addChild($2);
   $$->addChild($4);
+
   if ($5) {
     $$->addChild($5);
   }
@@ -586,13 +614,27 @@ int yywrap( ) {
 }
 
 void yyerror(const char* str) {
-  fail(str);
+  throw Error(str, yylineno);
 }
 
-/* print an error message and quit */
-void fail(const string& mesg) {
-  cerr << "Tetra error: " << mesg << " (Line " << yylineno << ")" << endl;
-  exit(1);
-}
+/* parse from a file */
+extern istream* in;
+Node* parseFile(const string& fname) {
+  /* open the file */
+  ifstream file(fname.c_str( ));
 
+  /* if it's not open, we failed */
+  if (!file.is_open( )) {
+    throw Error("Could not open file '" + fname + "'");
+  }
+  
+  /* set the in stream (defined in lexer.cpp) */
+  in = &file;
+
+  /* call yyparse */
+  yyparse( );
+
+  /* return the root of the parse tree */
+  return root;
+}
 

@@ -90,7 +90,7 @@ class Node {
     void setIntval(TetraInt intval);
     void setBoolval(TetraBool boolval);
     void setRealval(TetraReal realval);
-
+    void setLine(int lineno);
 
     /* the children nodes of this node */
     vector<Node*> children;
@@ -106,10 +106,28 @@ class Node {
     TetraReal realval;
     TetraInt intval;
     TetraBool boolval;
+
+    /* the line number most closely associated with this node */
+    int lineno;
 };
 
-/* error handling routine */
-void fail(const string& mesg);
+/* function which parses a file and returns the parse tree */
+Node* parseFile(const string& fname);
+
+/* any type of error is handled with this exception */
+class Error {
+  public:
+    Error(const string& mesg, int lineno = 0);
+    string getMessage( ) const;
+    int getLine( ) const;
+
+  private:
+    string mesg;
+    int lineno;
+};
+
+/* print an error */
+ostream& operator<<(ostream& out, const Error& error);
 
 #endif
 
