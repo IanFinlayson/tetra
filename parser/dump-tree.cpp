@@ -1,6 +1,6 @@
 /* this program takes in Tetra code and produces a parse tree which allows it
  * to be tested and visualized.  It now produces a structured text dump.
- * TODO add graphical output with graphiz or similar */
+ * along with graphical output with graphiz */
 
 #include <string>
 #include <iostream>
@@ -100,7 +100,7 @@ void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
   /* dump the node designator */
   out << "  " << id << "[label=\"";
   out << stringType(node);
-  out << "\"];\n";
+  out << "\", fontname=\"courier\"];\n";
 
   /* for each child */
   for (unsigned int i = 0; i < node->children.size( ); i++) {
