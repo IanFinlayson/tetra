@@ -67,6 +67,10 @@ string stringType(Node* node) {
     case NODE_FUNCALL: return "CALL: " + node->stringval;
     case NODE_ACTUAL_PARAM_LIST: return "ARGS";
 
+    /* vectors */
+    case NODE_VECREF: return "VECREF";
+    case NODE_INDEX: return "INDEX";
+
     /* leafs */
     case NODE_INTVAL:
       ss << "INT: " << node->intval;
@@ -150,7 +154,7 @@ void dumpTreeStdout(Node* node, int level = 0) {
   cout << stringType(node);
 
   /* dump the type and line if relevant */
-  if (node->data_type != TYPE_VOID) {
+  if (node->data_type) {
     cout << " (TYPE:" << typeToString(node->data_type) << ")";
   }
 

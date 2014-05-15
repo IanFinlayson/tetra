@@ -9,13 +9,15 @@
 
 extern int yylineno;
 
-string typeToString(DataType t) {
-  switch (t) {
+string typeToString(DataType* t) {
+  switch (t->kind) {
     case TYPE_INT: return "int";
     case TYPE_REAL: return "real";
     case TYPE_STRING: return "string";
     case TYPE_BOOL: return "bool";
     case TYPE_VOID: return "void";
+    case TYPE_VECTOR:
+      return "[" + typeToString(t->subtype) + "]";
     default: throw Error("typeToString: Unknown data type");
   }
 }
@@ -23,7 +25,7 @@ string typeToString(DataType t) {
 /* node member functions */
 Node::Node(NodeType node_type) {
   this->node_type = node_type;
-  data_type = TYPE_VOID;
+  this->data_type = NULL;
   stringval = "";
   intval = 0;
   realval = 0.0;
@@ -37,7 +39,7 @@ void Node::addChild(Node* child) {
   }
 }
 
-void Node::setDataType(DataType data_type) {
+void Node::setDataType(DataType* data_type) {
   this->data_type = data_type;
 }
 
@@ -136,5 +138,14 @@ ostream& operator<<(ostream& out, const Error& error) {
   return out;
 }
 
+/* data type functions */
+DataType::DataType(DataTypeType kind) {
+  this->kind = kind;
+  subtype = NULL;
+}
+
+void DataType::setSubType(DataType* subtype) {
+  this->subtype = subtype;
+}
 
 

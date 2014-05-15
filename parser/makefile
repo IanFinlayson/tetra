@@ -3,6 +3,9 @@
 CC = clang++
 CFLAGS = -W -Wall -g
 
+all: dump-tree tags
+	@echo "All done :)"
+
 dump-tree: parser.gen.o lexer.o dump-tree.o tetra.o tetra.hpp
 	$(CC) $(CFLAGS) parser.gen.o lexer.o dump-tree.o tetra.o -o dump-tree
 
@@ -21,10 +24,10 @@ parser.gen.cpp: parser.y tetra.hpp
 lexer.o: lexer.cpp tetra.hpp
 	$(CC) $(CFLAGS) -c lexer.cpp
 
-.PHONY: clean tags
+.PHONY: clean tags all
 
 clean:
-	rm -f parser.gen.cpp parser.gen.hpp dump-tree *.o
+	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o
 
 tags:
 	ctags -R *.cpp *.hpp

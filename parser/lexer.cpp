@@ -275,6 +275,8 @@ int yylex( ) {
     case ',': return TOK_COMMA;
     case ';': return TOK_SEMICOLON;
     case ':': return TOK_COLON;
+    case '[': return TOK_LEFTBRACKET;
+    case ']': return TOK_RIGHTBRACKET;
     /* ones that have some single and double ones */
     case '=':
       if (in->peek( ) == '=') {

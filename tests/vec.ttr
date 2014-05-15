@@ -1,0 +1,8 @@
+def sum(nums [int]):
+  i = 0
+  sum = 0
+  while i < len(nums):
+    sum += nums[i]
+    i += 1
+  return sum
+

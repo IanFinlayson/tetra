@@ -39,7 +39,7 @@ stack<int> linenos;
   TetraReal realval;
   TetraBool boolval;
   char stringval[256]; /* PODS only in union! */
-  DataType data_type;
+  DataType* data_type;
 }
 
 /* typless tokens */
@@ -74,6 +74,8 @@ stack<int> linenos;
 %token TOK_BITNOT
 %token TOK_LEFTPARENS
 %token TOK_RIGHTPARENS
+%token TOK_LEFTBRACKET
+%token TOK_RIGHTBRACKET
 %token TOK_COMMA
 %token TOK_SEMICOLON
 %token TOK_COLON
@@ -119,7 +121,7 @@ stack<int> linenos;
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
 %type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-%type <node> background lock_statement
+%type <node> background lock_statement index indices
 
 
 %type <data_type> return_type type
@@ -188,22 +190,25 @@ formal_param: TOK_IDENTIFIER type {
   $$->setDataType($2);
 }
 
-/* types (keeping it simple for now...) */
+/* types just primitives and vectors for now */
 type: TOK_INT {
-  $$ = TYPE_INT;
+  $$ = new DataType(TYPE_INT);
 } | TOK_REAL {
-  $$ = TYPE_REAL;
+  $$ = new DataType(TYPE_REAL);
 } | TOK_STRING {
-  $$ = TYPE_STRING;
+  $$ = new DataType(TYPE_STRING);
 } | TOK_BOOL {
-  $$ = TYPE_BOOL;
+  $$ = new DataType(TYPE_BOOL);
+} | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
+  $$ = new DataType(TYPE_VECTOR);
+  $$->setSubType($2);
 }
 
 /* a return type is either a simple type or none which means void */
 return_type: type {
   $$ = $1;
 } | {
-  $$ = TYPE_VOID;
+  $$ = new DataType(TYPE_VOID);
 }
 
 /* a block is a set of statements, indented over */
@@ -634,9 +639,31 @@ expterm: funcall {
   $$ = $1;
 }
 
-/* an l-value - will need to have vector refs too */
-variable: identifier {
-  $$ = $1;
+/* an l-value - any identifier with any number of indexes after it */
+variable: identifier indices {
+  /* if it's a vector reference */
+  if ($2) {
+    $$ = new Node(NODE_VECREF);
+    $$->addChild($1);
+    $$->addChild($2);
+  } else {
+    /* just a humble identifier */
+    $$ = $1;
+  }
+}
+
+/* any number of indices */
+indices: index indices {
+  $$ = new Node(NODE_INDEX);
+  $$->addChild($1);
+  $$->addChild($2);
+} | {
+  $$ = NULL;
+}
+
+/* a single index */
+index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
+  $$ = $2;
 }
 
 /* a node wrapper around an ID */

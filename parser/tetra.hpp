@@ -60,6 +60,8 @@ enum NodeType {
   NODE_DIVIDE,
   NODE_MODULUS,
   NODE_EXP,
+  NODE_VECREF,
+  NODE_INDEX,
 
   /* function call */
   NODE_FUNCALL,
@@ -73,16 +75,29 @@ enum NodeType {
   NODE_IDENTIFIER
 };
 
-/* data types */
-enum DataType {
+/* the type of data type it is */
+enum DataTypeType {
   TYPE_INT,
   TYPE_REAL,
   TYPE_STRING,
   TYPE_BOOL,
-  TYPE_VOID
+  TYPE_VOID,
+  TYPE_VECTOR
 };
 
-string typeToString(DataType t);
+/* a data type contains the above enum, along with a pointer to the "sub" type
+ * currently this is only used for vectors */
+class DataType {
+  public:
+    DataType(DataTypeType kind);
+    void setSubType(DataType* subtype);
+
+    DataTypeType kind;
+    DataType* subtype;
+};
+
+
+string typeToString(DataType* t);
 
 /* the node class represents one element of a parse tree */
 class Node {
@@ -90,7 +105,7 @@ class Node {
     /* functions */
     Node(NodeType type);
     void addChild(Node* child);
-    void setDataType(DataType data_type);
+    void setDataType(DataType* data_type);
     void setStringval(TetraString stringval);
     void setIntval(TetraInt intval);
     void setBoolval(TetraBool boolval);
@@ -103,8 +118,8 @@ class Node {
     /* the type of node it is (eg plus vs stmt vs intval etc.) */
     NodeType node_type;
 
-    /* the data type of the node (void if not applicable) */
-    DataType data_type;
+    /* the data type of the node (NULL if not applicable) */
+    DataType* data_type;
 
     /* the values associated with the node (many will be blank) */
     TetraString stringval;
