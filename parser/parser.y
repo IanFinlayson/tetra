@@ -8,6 +8,8 @@
 #include <string>
 #include <stack>
 
+#define YYDEBUG 1
+
 using namespace std;
 
 #include "tetra.hpp"

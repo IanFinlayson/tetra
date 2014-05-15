@@ -1,0 +1,55 @@
+
+def doStuff( ):
+    background:
+        func1( )
+        func2( )
+        func3( )
+
+
+def printDigit(x int):
+    if x == 0:
+        print("Zero")
+    elif x == 1:
+        print("One")
+    elif x == 2:
+        print("Two")
+    elif x == 3:
+        print("Three")
+    else:
+        print("Many")
+
+
+# a simple factorial function
+def fact(x int) int:
+    # if x is zero, then 1
+    if x == 0:
+        return 1
+    else:
+        return x * fact(x - 1)
+
+
+def for_test( ):
+    for i in range(10):
+        print(i)
+
+
+def function(a real, b int) string:
+    if a > b:
+        print("Yo!")
+    return "Hello"
+
+
+
+
+def function(a real, b int) string:
+    if a > b:
+        print("Yo!")
+    return "Hello"
+
+
+def lockTest( ):
+    lock total:
+        total += sum
+
+
+

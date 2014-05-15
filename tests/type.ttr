@@ -1,4 +1,5 @@
 def min(a real, b real, c real) real:
+    # return the minimum thing
     if a < b and a < c:
         return a
     if b < c:
@@ -7,11 +8,15 @@ def min(a real, b real, c real) real:
 
 def undeffunc() string:
     print("boogie")
+
+    # hey!!!!!!1
+
     return "boogie"
 
 def main( ):
     a = 2; b = 3
     c = 22
+
     m = min(33.0, b, c)
     undef_var = undeffunc()
 

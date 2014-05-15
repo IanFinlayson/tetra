@@ -159,7 +159,7 @@ int yylex( ) {
     throw Error("Tab characters are not allowed in Tetra!", yylineno);
   }
 
-  /* if it's a new line, set to beginning of line and return it */
+  /* if it's a new line, set to beginning of line and return next */
   if (next == '\n') {
     start_of_line = 1;
     yylineno++;
@@ -182,9 +182,6 @@ int yylex( ) {
     }
     start_of_line = 0;
 
-    //cout << "spaces = " << spaces << endl
-    //  << "indent_level = " << indent_level << endl;
-
     /* if this is the first one, treat it as the level */
     if (spaces_per_indent == 0) {
       spaces_per_indent = spaces;
@@ -204,6 +201,8 @@ int yylex( ) {
 
     /* If the level is EVEN greater than that, error */
     if (level > indent_level) {
+      cerr << "Level = " << level << endl;
+      cerr << "Indent level = " << indent_level << endl;
       throw Error("Too much indentation.", yylineno);
     }
 
@@ -229,7 +228,7 @@ int yylex( ) {
       /* put the thing we read back! */
       in->putback(next);
       dedents_left = indent_level - 1;
-      indent_level = 0;
+      indent_level--;
       return TOK_DEDENT;
     }
   }

@@ -16,7 +16,7 @@ parser.gen.o: parser.gen.cpp
 	$(CC) $(CFLAGS) -c parser.gen.cpp
 
 parser.gen.cpp: parser.y tetra.hpp
-	bison -d parser.y -o parser.gen.cpp
+	bison -d -v parser.y -o parser.gen.cpp
 
 lexer.o: lexer.cpp tetra.hpp
 	$(CC) $(CFLAGS) -c lexer.cpp
