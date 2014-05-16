@@ -24,11 +24,11 @@ parser.gen.cpp: parser.y tetra.hpp
 lexer.o: lexer.cpp tetra.hpp
 	$(CC) $(CFLAGS) -c lexer.cpp
 
-.PHONY: clean tags all
+.PHONY: clean all
 
 clean:
 	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o
 
-tags:
+tags: tetra.hpp tetra.cpp parser.y lexer.cpp dump-tree.cpp 
 	ctags -R *.cpp *.hpp
 

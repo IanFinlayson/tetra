@@ -285,7 +285,7 @@ DataType* checkVector(Node* vec, map<string, Symbol>* symtable) {
 Node* findFunction(const string& name, int lineno) {
   Node* f = root;
 
-  while (f) {
+  while (f && (f->children.size( ) > 0)) {
     /* see if this node is the thing */
     if (f->children[0]->stringval == name) {
       return f->children[0];
@@ -309,7 +309,14 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
   Node* actual = funcall->children[0];
 
   while (formal && actual) {
-    DataType* t = inferExpression(actual->children[0], symtable);
+    DataType* t;
+    
+    /* it could be a list, or an actual param */
+    if (actual->node_type == NODE_ACTUAL_PARAM_LIST) 
+      t = inferExpression(actual->children[0], symtable);
+    else
+      t = inferExpression(actual, symtable);
+
     if (*t != *(formal->data_type)) {
       throw Error("Parameter type mismatch", funcall->lineno);
     }
@@ -324,7 +331,6 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
     }
 
     /* move on to the next one */
-    actual = actual->children[1];
     if (actual->children.size( ) > 1) {
       actual = actual->children[1];
     } else if (actual->children.size( ) > 0) {
@@ -335,8 +341,10 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
   }
 
   /* if there are any left, the arity mismatched */
-  if (formal || actual) {
-    throw Error("Too many/few parameters to function '" + funcall->stringval + "'", funcall->lineno);
+  if (formal) {
+    throw Error("Too few parameters to function '" + funcall->stringval + "'", funcall->lineno);
+  } else if (actual) {
+    throw Error("Too many parameters to function '" + funcall->stringval + "'", funcall->lineno);
   }
 
   /* return the type of function itself */
