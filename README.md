@@ -11,7 +11,6 @@ environment with several unique features.
 
 About
 -----
-
 Tetra is still a work in progress, but will combine the following components:
 
 - A programming language geared towards making parallel programming as easy as
