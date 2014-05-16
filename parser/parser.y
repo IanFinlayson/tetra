@@ -133,6 +133,8 @@ stack<int> linenos;
 /* a program is a list of functions */
 program: functions {
   root = $1;
+  /* check and infer the types in the tree */
+  inferTypes(root);
 }
 
 /* zero or more new lines */

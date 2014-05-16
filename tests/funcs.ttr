@@ -1,4 +1,8 @@
 
+def print(x string):
+    # yeah, about that...
+    pass
+
 def doStuff( ):
     background:
         func1( )
@@ -30,7 +34,7 @@ def fact(x int) int:
 
 def for_test( ):
     for i in range(10):
-        print(i)
+        print("HEY!!!")
 
 
 def function(a real, b int) string:

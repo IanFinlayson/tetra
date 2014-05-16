@@ -1,0 +1,27 @@
+
+def intFunc(x int) int:
+    y = x + 1
+    b = 7
+    return y + b
+
+
+def stringFunc(s string):
+    a = "hello"
+    b = a + " world"
+
+
+def realFunc( ) real:
+    a = 9.18
+    b = a + 1
+    return b
+
+def boolFunc(a bool) bool:
+    if a:
+        b = false
+    else:
+        b = true
+    c = not b
+    return c
+
+
+

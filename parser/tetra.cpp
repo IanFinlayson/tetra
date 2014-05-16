@@ -7,7 +7,32 @@
 #include "tetra.hpp"
 #include "parser.gen.hpp"
 
+extern Node* root;
 extern int yylineno;
+
+/* insert a symbol into the symtable */
+void insertSymbol(Symbol sym, map<string, Symbol>* symtable) {
+  /* check if it's there first */
+  if (symtable->count(sym.name) > 0) {
+    throw Error("'" + sym.name + "' has already been declared", sym.lineno);
+  }
+
+  /* add it in */
+  symtable->insert(pair<string, Symbol>(sym.name, sym));
+}
+
+/* lookup a symbol from a symbol table */
+Symbol lookupSymbol(string name, map<string, Symbol>* symtable, int lineno) {
+  map<string, Symbol>::iterator it = symtable->find(name);
+
+  if (it == symtable->end( )) {
+    throw Error("Symbol '" + name + "' not found!", lineno);
+  }
+
+  /* return the record */
+  return it->second;
+}
+
 
 string typeToString(DataType* t) {
   switch (t->kind) {
@@ -148,4 +173,467 @@ void DataType::setSubType(DataType* subtype) {
   this->subtype = subtype;
 }
 
+bool operator==(const DataType& lhs, const DataType& rhs) {
+  /* if they're not the same kind, fail */
+  if (lhs.kind != rhs.kind) {
+    cout << lhs.kind << ":" << rhs.kind << endl;
+    return false;
+  }
+
+  /* if they're vectors, recursively ensure the subtypes match */
+  if (lhs.kind == TYPE_VECTOR) {
+    return (lhs.subtype == rhs.subtype);
+  }
+
+  /* otherwise return true */
+  return true;
+}
+
+bool operator!=(const DataType& lhs, const DataType& rhs) {
+  return !(lhs == rhs);
+}
+
+
+
+
+Symbol::Symbol(string name, DataType* type, int lineno) {
+  this->name = name;
+  this->type = type;
+  this->lineno = lineno;
+}
+
+Symbol::Symbol( ) {
+  name = "";
+  type = NULL;
+  lineno = 0;
+}
+
+/* add the parameters of a function into its symtable */
+void addParams(Node* params, map<string, Symbol>* symtable) {
+  if (!params) return;
+
+  /* if it's more than one, recurse on both */
+  if (params->node_type == NODE_FORMAL_PARAM_LIST) {
+    addParams(params->children[0], symtable);
+    addParams(params->children[1], symtable);
+
+  } 
+  /* else if it's just one param, handle it */
+  else if (params->node_type == NODE_FORMAL_PARAM) {
+    insertSymbol(Symbol(params->stringval, params->data_type, params->lineno), symtable);
+  }
+}
+
+DataTypeType baseType(DataType* t) {
+  if (t->kind == TYPE_VECTOR)
+    return baseType(t->subtype);
+  else
+    return t->kind;
+}
+
+
+DataType* inferExpression(Node* expr, map<string, Symbol>* symtable);
+
+int countIndices(Node* idx, map<string, Symbol>* symtable) {
+  if (!idx) return 0;
+
+  /* check the index for being an int */
+  DataType* itype = inferExpression(idx->children[0], symtable);
+  if (itype->kind != TYPE_INT) {
+    throw Error("Index must be integral", idx->lineno);
+  }
+
+  /* return 1 for this, and recurse */
+  return 1 + countIndices(idx->children[1], symtable);
+}
+
+int countDimensions(DataType* t) {
+  if (t->kind == TYPE_VECTOR) {
+    return 1 + countDimensions(t->subtype);
+  } else {
+    return 0;
+  }
+}
+
+/* this is fairly annoying */
+DataType* checkVector(Node* vec, map<string, Symbol>* symtable) {
+  /* look up the left hand side */
+  Symbol sym = lookupSymbol(vec->children[0]->stringval, symtable, vec->lineno);
+
+  /* count the indices on the right (also ensure they are ints! */
+  int levels = countIndices(vec->children[1], symtable);
+
+  /* count the dimension of a vector */
+  int dim = countDimensions(sym.type);
+
+  /* make sure dim is at least big enough for this many indexes */
+  if (dim < levels) {
+    throw Error("Too many indexes on vector", vec->lineno);
+  }
+
+  /* dereference the symbol this many times */
+  DataType* result = new DataType(baseType(sym.type));
+  for (int i = 0; i < levels; i++) {
+    DataType* r = new DataType(TYPE_VECTOR);
+    r->setSubType(result);
+    result = r;
+  }
+
+  return result;
+}
+
+Node* findFunction(const string& name, int lineno) {
+  Node* f = root;
+
+  while (f) {
+    /* see if this node is the thing */
+    if (f->children[0]->stringval == name) {
+      return f->children[0];
+    }
+
+    /* move to the next */
+    f = f->children[1];
+  }
+
+  throw Error("Function '" + name + "' not defined", lineno);
+}
+
+
+/* infer the function of a function call and check the types */
+DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
+  /* find the function node this thing matches */
+  Node* f = findFunction(funcall->stringval, funcall->lineno);
+
+  /* for each param, and also for each expression, make sure they match up */
+  Node* formal = f->children[0];
+  Node* actual = funcall->children[0];
+
+  while (formal && actual) {
+    DataType* t = inferExpression(actual->children[0], symtable);
+    if (*t != *(formal->data_type)) {
+      throw Error("Parameter type mismatch", funcall->lineno);
+    }
+
+    /* move on to the next one */
+    if (formal->children.size( ) > 1)
+     formal = formal->children[1];
+    else if (formal->children.size( ) > 0) {
+     formal = formal->children[0];
+    } else {
+      formal = NULL;
+    }
+
+    /* move on to the next one */
+    actual = actual->children[1];
+    if (actual->children.size( ) > 1) {
+      actual = actual->children[1];
+    } else if (actual->children.size( ) > 0) {
+      actual = actual->children[0];
+    } else {
+      actual = NULL;
+    }
+  }
+
+  /* if there are any left, the arity mismatched */
+  if (formal || actual) {
+    throw Error("Too many/few parameters to function '" + funcall->stringval + "'", funcall->lineno);
+  }
+
+  /* return the type of function itself */
+  return f->data_type;
+}
+
+/* infer the types of an expression, and also return the type */
+DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
+  if (!expr) return NULL;
+
+  /* the left hand side, right hand side, and result used below */
+  DataType *lhs, *rhs;
+
+  /* switch on the type of expression */
+  switch (expr->node_type) {
+    case NODE_ASSIGN: {
+      /* get the type of the right hand side */
+      rhs = inferExpression(expr->children[1], symtable);
+
+      /* assume this symbol exists and check that the types match */
+      try {
+        Symbol sym = lookupSymbol(expr->children[0]->stringval, symtable, 0);
+        if (sym.type != rhs) {
+          throw Error("Assigning '" + expr->children[0]->stringval + "' to a new type", expr->lineno);
+        }
+      } catch(Error& e) {
+        /* an error means the id was not found, so we should insert a new one! */
+        insertSymbol(Symbol(expr->children[0]->stringval, rhs, expr->lineno), symtable);
+      }
+      break;}
+
+    case NODE_OR:
+    case NODE_AND:
+      /* check that both children are bools */
+      lhs = inferExpression(expr->children[0], symtable);
+      rhs = inferExpression(expr->children[1], symtable);
+      if ((lhs->kind != TYPE_BOOL) || (rhs->kind != TYPE_BOOL)) {
+        throw Error("Only bool values may be used with and/or", expr->lineno);
+      }
+      /* the result is a bool as well */
+      return new DataType(TYPE_BOOL);
+    case NODE_LT:
+    case NODE_LTE:
+    case NODE_GT:
+    case NODE_GTE:
+    case NODE_EQ:
+    case NODE_NEQ:
+      /* check that both sides have the same type
+       * TODO ar some point add in int->real promotion */
+      lhs = inferExpression(expr->children[0], symtable);
+      rhs = inferExpression(expr->children[1], symtable);
+      if (*lhs != *rhs) {
+        cout << "A = " << typeToString(lhs) << endl;
+        cout << "B = " << typeToString(rhs) << endl;
+        throw Error("Only matching types can be compared", expr->lineno);
+      }
+
+      /* the result is a bool */
+      return new DataType(TYPE_BOOL);
+
+    case NODE_NOT:
+      /* check that the operand is bool */
+      lhs = inferExpression(expr->children[0], symtable);
+      if (lhs->kind != TYPE_BOOL) {
+        throw Error("Operand of not must be a bool", expr->lineno);
+      }
+      return new DataType(TYPE_BOOL);
+
+    case NODE_BITXOR:
+    case NODE_BITAND:
+    case NODE_BITOR:
+    case NODE_SHIFTL:
+    case NODE_SHIFTR:
+      /* check that both operands are integers */
+      lhs = inferExpression(expr->children[0], symtable);
+      rhs = inferExpression(expr->children[1], symtable);
+
+      if ((lhs->kind != TYPE_INT) || (rhs->kind != TYPE_INT)) {
+        throw Error("Operands to bitwise operator must be integer", expr->lineno);
+      }
+
+      /* returns an integer back */
+      return new DataType(TYPE_INT);
+
+    case NODE_BITNOT:
+      /* check that the operand is an int */
+      lhs = inferExpression(expr->children[0], symtable);
+      if (lhs->kind != TYPE_INT) {
+        throw Error("Operand to bitwise not must be an integer", expr->lineno);
+      }
+      return new DataType(TYPE_INT);
+
+    case NODE_PLUS:
+    case NODE_MINUS:
+    case NODE_TIMES:
+    case NODE_DIVIDE:
+    case NODE_MODULUS:
+    case NODE_EXP:
+      /* check that both operands match and that they are int/real 
+       * TODO at some point add in int->real promotion... */
+      lhs = inferExpression(expr->children[0], symtable);
+      rhs = inferExpression(expr->children[1], symtable);
+
+      if (*lhs != *rhs) {
+        throw Error("Type mismatch", expr->lineno);
+      }
+      if ((lhs->kind != TYPE_INT) && (rhs->kind != TYPE_REAL)) {
+        throw Error("Numeric type required", expr->lineno);
+      }
+
+      /* return the same type back */
+      return new DataType(lhs->kind);
+
+    case NODE_VECREF:
+      /* check vector */
+      return checkVector(expr, symtable);
+    case NODE_INDEX:
+      throw Error("inferExpression: should not an index here");
+
+
+    case NODE_FUNCALL:
+      return inferFuncall(expr, symtable);
+    case NODE_ACTUAL_PARAM_LIST:
+      throw Error("inferExpression: should not a param list here");
+      break;
+
+    case NODE_IDENTIFIER: {
+      /* look it up and return that type */
+      Symbol sym = lookupSymbol(expr->stringval, symtable, expr->lineno);
+      return sym.type;
+      break;}
+
+    /* return these types */
+    case NODE_INTVAL:
+      return new DataType(TYPE_INT);
+    case NODE_REALVAL:
+      return new DataType(TYPE_REAL);
+    case NODE_BOOLVAL:
+      return new DataType(TYPE_BOOL);
+    case NODE_STRINGVAL:
+      return new DataType(TYPE_STRING);
+
+    default:
+      throw Error("inferExpression: unknown node type");
+      break;
+  }
+
+  throw Error("inferExpression: unhandled type");
+}
+
+/* infer an expression and assign it to the node */
+DataType* inferExpression(Node* expr, map<string, Symbol>* symtable) {
+  /* do the inference */
+  DataType* t = inferExpressionPrime(expr, symtable);
+
+  /* assign it into this node */
+  expr->data_type = t;
+
+  /* return it */
+  return t;
+}
+
+/* infer types in a block and add them into the symbol table */
+void inferBlock(Node* block, map<string, Symbol>* symtable) {
+  if (!block) return;
+
+  /* switch on the different types */
+  switch (block->node_type) {
+    case NODE_STATEMENT:
+      /* handle both children */
+      inferBlock(block->children[0], symtable);
+      inferBlock(block->children[1], symtable);
+      break;
+    case NODE_RETURN:
+      /* infer the expression TODO check that it matches the return type */
+      inferExpression(block->children[0], symtable);
+      break;
+    case NODE_IF: {
+      /* infer the type of the expression */
+      DataType* cond = inferExpression(block->children[0], symtable);
+
+      /* check that it is a BOOL */
+      if (cond->kind != TYPE_BOOL) {
+        throw Error("if condition must be a bool", block->lineno);
+      }
+
+      /* infer both the then and else blocks */
+      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[2], symtable);
+      break;}
+    case NODE_ELIF:
+      /* check the first child which is the first elf clause */
+      inferBlock(block->children[0], symtable);
+
+      /* check the second child which is the chain of the rest of the elifs */
+      inferBlock(block->children[1], symtable);
+
+      /* check the third child which is the else clause (maybe NULL) */
+      inferBlock(block->children[2], symtable);
+      break;
+    case NODE_ELIF_CHAIN:
+      /* check the clause on the left and the chain on the right */
+      inferBlock(block->children[0], symtable);
+      inferBlock(block->children[1], symtable);
+      break;
+    case NODE_ELIF_CLAUSE: {
+      /* check the expression on the left */
+      DataType* cond = inferExpression(block->children[0], symtable);
+
+      /* check that it is a BOOL */
+      if (cond->kind != TYPE_BOOL) {
+        throw Error("elif condition must be a bool", block->lineno);
+      }
+
+      /* check the statements on the right */
+      inferBlock(block->children[1], symtable);
+      break;}
+    case NODE_WHILE: {
+      /* infer the type of the expression */
+      DataType* cond = inferExpression(block->children[0], symtable);
+
+      /* check that it is a BOOL */
+      if (cond->kind != TYPE_BOOL) {
+        throw Error("while condition must be a bool", block->lineno);
+      }
+
+      /* infer the body */
+      inferBlock(block->children[1], symtable);
+      break;}
+    case NODE_PARFOR:
+    case NODE_FOR: {
+      /* infer the type of the expression */
+      DataType* expr_type = inferExpression(block->children[1], symtable);
+
+      /* make sure it is some type of vector */
+      if (expr_type->kind != TYPE_VECTOR) {
+        throw Error("for expression must have vector type", block->lineno);
+      }
+
+      /* put the identifier in the symtable */
+      Symbol induction;
+      induction.name = block->children[0]->stringval;
+      induction.type = expr_type->subtype;
+      induction.lineno = block->lineno;
+      insertSymbol(induction, symtable);
+
+      /* check the block under this */
+      inferBlock(block->children[2], symtable);
+      break;}
+    case NODE_PARALLEL:
+    case NODE_BACKGROUND:
+      /* check the sub-block */
+      inferBlock(block->children[0], symtable);
+      break;
+    case NODE_LOCK:
+      /* how will locks actually be implemented??? */
+      inferBlock(block->children[1], symtable);
+      break;
+
+    /* these require no work... */
+    case NODE_PASS:
+    case NODE_BREAK:
+    case NODE_CONTINUE:
+      break;
+
+    default:
+      /* handle it as an expression */
+      inferExpression(block, symtable);
+  }
+}
+
+/* infer types based on a single function */
+void inferFunction(Node* node) {
+  /* only works on functions */
+  if (!node || (node->node_type != NODE_FUNCTION)) {
+    return;
+  }
+
+  /* create the symbol table for this function */
+  node->symtable = new map<string, Symbol>( );
+
+  /* add the parameters into the table */
+  addParams(node->children[0], node->symtable);
+
+  /* infer the body of the function */
+  inferBlock(node->children[1], node->symtable);
+}
+
+/* this function does type checking/type inference on a parse tree */
+void inferTypes(Node* node) {
+  /* infer each function */
+  if (node && (node->node_type == NODE_FUNCTION_LIST)) {
+    /* infer the function on the left */
+    inferFunction(node->children[0]);
+
+    /* recursively infer any other functions */
+    inferTypes(node->children[1]);
+  }
+}
 

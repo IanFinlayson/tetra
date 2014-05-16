@@ -3,6 +3,7 @@
 #ifndef TETRA_HPP
 #define TETRA_HPP
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -96,8 +97,22 @@ class DataType {
     DataType* subtype;
 };
 
+bool operator==(const DataType& lhs, const DataType& rhs);
+bool operator!=(const DataType& lhs, const DataType& rhs);
 
 string typeToString(DataType* t);
+
+/* an entry in the symbol table */
+class Symbol {
+  public:
+    Symbol( );
+    Symbol(string name, DataType* type, int lineno);
+
+    string name;
+    DataType* type;
+    int lineno;
+};
+
 
 /* the node class represents one element of a parse tree */
 class Node {
@@ -115,6 +130,9 @@ class Node {
     /* the children nodes of this node */
     vector<Node*> children;
 
+    /* the symbol table used for this Node - currently only function nodes have one */
+    map<string, Symbol>* symtable;
+
     /* the type of node it is (eg plus vs stmt vs intval etc.) */
     NodeType node_type;
 
@@ -130,6 +148,9 @@ class Node {
     /* the line number most closely associated with this node */
     int lineno;
 };
+
+/* this function does type checking/type inference on a parse tree */
+void inferTypes(Node* node);
 
 /* function which parses a file and returns the parse tree */
 Node* parseFile(const string& fname);
