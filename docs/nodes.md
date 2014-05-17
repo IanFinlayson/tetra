@@ -50,9 +50,46 @@ A return node represents the *return* statement.  It has either no children, for
 or one child representing the expression to be returned.
 
 ### NODE_IF
+This represents an if statement.  The first child is an expression representing
+the if condition.  The second child represents the block of code to run if the
+condition is true.  The third child is either NULL or, if there was an else
+clause, represents the code to run if the condition was false.
+
 ### NODE_ELIF
+An elif node represents an entire if/elif*/else? structure.  The first child is
+a NODE_ELIF_CLAUSE representing the first condition/statement pair.  The second
+child is a NODE_ELIF_CHAIN representing the other clauses.  The third child (if
+present) represents the statement block to run if none of the conditions are
+true.
+
 ### NODE_ELIF_CHAIN
+A chain of one or more elif clauses.  The first child is the next clause.  The
+second child is either another chain, or the last clause in the chain.
+
 ### NODE_ELIF_CLAUSE
+An elif clause is one condition/statement pair.  The first child is the
+condition, and the second is the statement to execute if it is true.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+TODO
+
 ### NODE_WHILE
 ### NODE_FOR
 ### NODE_PARALLEL
@@ -118,55 +155,7 @@ on integral ones.
 
 
 
-/* if statement with or without else */
-if_statement: TOK_IF expression TOK_COLON block else_option {
-  $$ = new Node(NODE_IF);
-  $$->addChild($2);
-  $$->addChild($4);
 
-  if ($5) {
-    $$->addChild($5);
-  }
-}
-
-/* either an else block or nothing */
-else_option: TOK_ELSE TOK_COLON block {
-  $$ = $3;
-} | {
-  $$ = NULL;
-}
-
-/* an elif statement */
-elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
-  $$ = new Node(NODE_ELIF);
-  
-  /* make a node for the first clause */
-  Node* c1 = new Node(NODE_ELIF_CLAUSE);
-  c1->addChild($2);
-  c1->addChild($4);
-  $$->addChild(c1);
-
-  $$->addChild($5);
-  if ($6) {
-    $$->addChild($6);
-  }
-}
-
-/* one or more elif clauses */
-elif_clauses: elif_clause elif_clauses {
-  $$ = new Node(NODE_ELIF_CHAIN);
-  $$->addChild($1);
-  $$->addChild($2);
-} | elif_clause {
-  $$ = $1;
-}
-
-/* a single elif clause */
-elif_clause: TOK_ELIF expression TOK_COLON block {
-  $$ = new Node(NODE_ELIF_CLAUSE);
-  $$->addChild($2);
-  $$->addChild($4);
-}
 
 /* a for loop */
 for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
@@ -210,247 +199,10 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
   $$->addChild($4);
 }
 
-/* expressions - assignments first */
-expression: variable TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  $$->addChild($3);
-} | variable TOK_PLUSEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_PLUS);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_MINUSEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_MINUS);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_TIMESEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_TIMES);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_DIVIDEEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_DIVIDE);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_MODULUSEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_MODULUS);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_EXPEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_EXP);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_LSHIFTEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_SHIFTL);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_RSHIFTEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_SHIFTR);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_ANDEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_BITAND);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_OREQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_BITOR);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | variable TOK_XOREQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  Node* rhs = new Node(NODE_BITXOR);
-  rhs->addChild($1);
-  rhs->addChild($3);
-  $$->addChild(rhs);
-} | assignterm {
-  $$ = $1;
-}
 
 
 
 
-
-
-assignterm: assignterm TOK_OR orterm {
-  $$ = new Node(NODE_OR);
-  $$->addChild($1);
-  $$->addChild($3);
-} | orterm {
-  $$ = $1;
-}
-
-/* and operator */
-orterm: orterm TOK_AND andterm {
-  $$ = new Node(NODE_AND);
-  $$->addChild($1);
-  $$->addChild($3);
-} | andterm {
-  $$ = $1;
-}
-
-/* not operator */
-andterm: TOK_NOT andterm {
-  $$ = new Node(NODE_NOT);
-  $$->addChild($2);
-} | notterm {
-  $$ = $1;
-}
-
-/* relational operators */
-notterm: notterm TOK_LT relterm {
-  $$ = new Node(NODE_LT);
-  $$->addChild($1);
-  $$->addChild($3);
-} | notterm TOK_GT relterm {
-  $$ = new Node(NODE_GT);
-  $$->addChild($1);
-  $$->addChild($3);
-} | notterm TOK_LTE relterm {
-  $$ = new Node(NODE_LTE);
-  $$->addChild($1);
-  $$->addChild($3);
-} | notterm TOK_GTE relterm {
-  $$ = new Node(NODE_GTE);
-  $$->addChild($1);
-  $$->addChild($3);
-} | notterm TOK_EQ relterm {
-  $$ = new Node(NODE_EQ);
-  $$->addChild($1);
-  $$->addChild($3);
-} | notterm TOK_NEQ relterm {
-  $$ = new Node(NODE_NEQ);
-  $$->addChild($1);
-  $$->addChild($3);
-} | relterm {
-  $$ = $1;
-}
-
-/* | operator */
-relterm: relterm TOK_BITOR bitorterm {
-  $$ = new Node(NODE_BITOR);
-  $$->addChild($1);
-  $$->addChild($3);
-} | bitorterm {
-  $$ = $1;
-}
-
-/* ^ operator */
-bitorterm: bitorterm TOK_BITXOR xorterm {
-  $$ = new Node(NODE_BITXOR);
-  $$->addChild($1);
-  $$->addChild($3);
-} | xorterm {
-  $$ = $1;
-}
-
-/* & operator */
-xorterm: xorterm TOK_BITAND bitandterm {
-  $$ = new Node(NODE_BITAND);
-  $$->addChild($1);
-  $$->addChild($3);
-} | bitandterm {
-  $$ = $1;
-}
-
-/* << and >> operator */
-bitandterm: bitandterm TOK_LSHIFT shiftterm {
-  $$ = new Node(NODE_SHIFTL);
-  $$->addChild($1);
-  $$->addChild($3);
-} | bitandterm TOK_RSHIFT shiftterm {
-  $$ = new Node(NODE_SHIFTR);
-  $$->addChild($1);
-  $$->addChild($3);
-} | shiftterm {
-  $$ = $1;
-}
-
-/* + and - operator */
-shiftterm: shiftterm TOK_PLUS plusterm {
-  $$ = new Node(NODE_PLUS);
-  $$->addChild($1);
-  $$->addChild($3);
-} | shiftterm TOK_MINUS plusterm {
-  $$ = new Node(NODE_MINUS);
-  $$->addChild($1);
-  $$->addChild($3);
-} | plusterm {
-  $$ = $1;
-}
-
-/* * / % operators */
-plusterm: plusterm TOK_TIMES timesterm {
-  $$ = new Node(NODE_TIMES);
-  $$->addChild($1);
-  $$->addChild($3);
-} | plusterm TOK_DIVIDE timesterm {
-  $$ = new Node(NODE_DIVIDE);
-  $$->addChild($1);
-  $$->addChild($3);
-} | plusterm TOK_MODULUS timesterm {
-  $$ = new Node(NODE_MODULUS);
-  $$->addChild($1);
-  $$->addChild($3);
-} | timesterm {
-  $$ = $1;
-}
-
-/* unary operators */
-timesterm: TOK_PLUS timesterm {
-  /* why would anybody do this??? */
-  $$ = $2;
-} | TOK_MINUS timesterm {
-  /* subtract from zero */
-  $$ = new Node(NODE_MINUS);
-  Node* zero = new Node(NODE_INTVAL);
-  zero->setIntval(0);
-  $$->addChild(zero);
-  $$->addChild($2);
-} | TOK_BITNOT timesterm {
-  $$ = new Node(NODE_BITNOT);
-  $$->addChild($2);
-} | unaryterm {
-  $$ = $1;
-}
-
-/* exponent operator - this is right associative!!! */
-unaryterm: expterm TOK_EXP unaryterm {
-  $$ = new Node(NODE_EXP);
-  $$->addChild($1);
-  $$->addChild($3);
-} | expterm {
-  $$ = $1;
-}
 
 /* indivisible thing */
 expterm: funcall {
