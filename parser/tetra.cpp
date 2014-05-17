@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <cstdlib>
 #include <cstdio>
 #include "tetra.hpp"
@@ -9,6 +10,12 @@
 
 extern Node* root;
 extern int yylineno;
+
+string itoa(int num) {
+  stringstream ss;
+  ss << num;
+  return ss.str( );
+}
 
 /* insert a symbol into the symtable */
 void insertSymbol(Symbol sym, map<string, Symbol>* symtable) {
@@ -176,13 +183,12 @@ void DataType::setSubType(DataType* subtype) {
 bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're not the same kind, fail */
   if (lhs.kind != rhs.kind) {
-    cout << lhs.kind << ":" << rhs.kind << endl;
     return false;
   }
 
   /* if they're vectors, recursively ensure the subtypes match */
   if (lhs.kind == TYPE_VECTOR) {
-    return (lhs.subtype == rhs.subtype);
+    return (*(lhs.subtype) == *(rhs.subtype));
   }
 
   /* otherwise return true */
@@ -271,9 +277,11 @@ DataType* checkVector(Node* vec, map<string, Symbol>* symtable) {
     throw Error("Too many indexes on vector", vec->lineno);
   }
 
-  /* dereference the symbol this many times */
+  /* the base type is that of the symbol  */
   DataType* result = new DataType(baseType(sym.type));
-  for (int i = 0; i < levels; i++) {
+
+  /* add veector wrapper for dim-levels times */
+  for (int i = 0; i < (dim - levels); i++) {
     DataType* r = new DataType(TYPE_VECTOR);
     r->setSubType(result);
     result = r;
@@ -301,6 +309,7 @@ Node* findFunction(const string& name, int lineno) {
 
 /* infer the function of a function call and check the types */
 DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
+
   /* find the function node this thing matches */
   Node* f = findFunction(funcall->stringval, funcall->lineno);
 
@@ -308,6 +317,7 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
   Node* formal = f->children[0];
   Node* actual = funcall->children[0];
 
+  int p = 1;
   while (formal && actual) {
     DataType* t;
     
@@ -318,23 +328,22 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
       t = inferExpression(actual, symtable);
 
     if (*t != *(formal->data_type)) {
-      throw Error("Parameter type mismatch", funcall->lineno);
+      throw Error("Function '" + funcall->stringval + "' expected " + 
+          typeToString(formal->data_type) + " but was called with " + typeToString(t) + 
+          " for parameter " + itoa(p), funcall->lineno);
     }
+    p++;
 
     /* move on to the next one */
-    if (formal->children.size( ) > 1)
+    if (formal->node_type == NODE_FORMAL_PARAM_LIST) {
      formal = formal->children[1];
-    else if (formal->children.size( ) > 0) {
-     formal = formal->children[0];
     } else {
       formal = NULL;
     }
 
     /* move on to the next one */
-    if (actual->children.size( ) > 1) {
+    if (actual->node_type == NODE_ACTUAL_PARAM_LIST) {
       actual = actual->children[1];
-    } else if (actual->children.size( ) > 0) {
-      actual = actual->children[0];
     } else {
       actual = NULL;
     }
@@ -364,16 +373,19 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
       /* get the type of the right hand side */
       rhs = inferExpression(expr->children[1], symtable);
 
-      /* assume this symbol exists and check that the types match */
-      try {
+      /* check if this symbol exists and check that the types match */
+      if (symtable->count(expr->children[0]->stringval) > 0) {
         Symbol sym = lookupSymbol(expr->children[0]->stringval, symtable, 0);
-        if (sym.type != rhs) {
+        if (*sym.type != *rhs) {
           throw Error("Assigning '" + expr->children[0]->stringval + "' to a new type", expr->lineno);
         }
-      } catch(Error& e) {
-        /* an error means the id was not found, so we should insert a new one! */
+      } else {
+        /* it's not there, so we should insert a new one */
         insertSymbol(Symbol(expr->children[0]->stringval, rhs, expr->lineno), symtable);
       }
+
+      /* return the type of the rhs */
+      return rhs;
       break;}
 
     case NODE_OR:
@@ -449,7 +461,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
       rhs = inferExpression(expr->children[1], symtable);
 
       if (*lhs != *rhs) {
-        throw Error("Type mismatch", expr->lineno);
+        throw Error("In binary operator, the types " + typeToString(lhs) + " and " +
+            typeToString(rhs) + " are not compatible", expr->lineno);
       }
       if ((lhs->kind != TYPE_INT) && (rhs->kind != TYPE_REAL)) {
         throw Error("Numeric type required", expr->lineno);

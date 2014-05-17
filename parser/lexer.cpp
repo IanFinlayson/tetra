@@ -57,6 +57,13 @@ int lookupId(const string& id) {
   if (id == "real")       {return TOK_REAL;}
   if (id == "bool")       {return TOK_BOOL;}
   if (id == "string")     {return TOK_STRING;}
+  if (id == "true") {
+    yylval.boolval = true;
+    return TOK_BOOLVAL;
+  } else if (id == "false") {
+    yylval.boolval = false;
+    return TOK_BOOLVAL;
+  }
 
   /* save the identifier */
   strcpy(yylval.stringval, id.c_str( ));

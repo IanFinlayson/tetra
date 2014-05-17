@@ -1,6 +1,6 @@
 def fact(x int) int:
-    fact = 1
+    f = 1
     while x > 1:
-        fact *= x
+        f *= x
         x -= 1
-    return fact
+    return f

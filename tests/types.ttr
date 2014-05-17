@@ -7,7 +7,7 @@ def intFunc(x int) int:
 
 def stringFunc(s string):
     a = "hello"
-    b = a + " world"
+    b = " world"
 
 
 def realFunc( ) real:
