@@ -9,12 +9,6 @@
 
 using namespace std;
 
-/* rather than hard code the C types associated with Tetra types, we use these */
-typedef int TetraInt;
-typedef float TetraReal;
-typedef bool TetraBool;
-typedef string TetraString;
-
 /* types of nodes */
 enum NodeType {
   /* statement and grouping nodes */
@@ -92,14 +86,19 @@ class DataType {
   public:
     DataType(DataTypeType kind);
     void setSubType(DataType* subtype);
+    DataTypeType getKind( ) const;
+    DataType* getSub( ) const;
 
+  private:
     DataTypeType kind;
     DataType* subtype;
 };
 
+/* operators for comparing types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs);
 bool operator!=(const DataType& lhs, const DataType& rhs);
 
+/* function which returns a string representation of a data type */
 string typeToString(DataType* t);
 
 /* an entry in the symbol table */
@@ -107,12 +106,15 @@ class Symbol {
   public:
     Symbol( );
     Symbol(string name, DataType* type, int lineno);
+    int getLine( ) const;
+    string getName( ) const;
+    DataType* getType( ) const;
 
+  private:
     string name;
     DataType* type;
     int lineno;
 };
-
 
 /* the node class represents one element of a parse tree */
 class Node {
@@ -121,11 +123,28 @@ class Node {
     Node(NodeType type);
     void addChild(Node* child);
     void setDataType(DataType* data_type);
-    void setStringval(TetraString stringval);
-    void setIntval(TetraInt intval);
-    void setBoolval(TetraBool boolval);
-    void setRealval(TetraReal realval);
+    void setStringval(const string& stringval);
+    void setIntval(int intval);
+    void setBoolval(bool boolval);
+    void setRealval(double realval);
     void setLine(int lineno);
+
+    int getLine( ) const {
+      return lineno;
+    }
+
+    string getString( ) const {
+      return stringval;
+    }
+    int getInt( ) const {
+      return intval;
+    }
+    double getReal( ) const {
+      return realval;
+    }
+    bool getBool( ) const {
+      return boolval;
+    }
 
     /* the children nodes of this node */
     vector<Node*> children;
@@ -139,11 +158,12 @@ class Node {
     /* the data type of the node (NULL if not applicable) */
     DataType* data_type;
 
+  private:
     /* the values associated with the node (many will be blank) */
-    TetraString stringval;
-    TetraReal realval;
-    TetraInt intval;
-    TetraBool boolval;
+    string stringval;
+    double realval;
+    int intval;
+    bool boolval;
 
     /* the line number most closely associated with this node */
     int lineno;

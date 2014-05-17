@@ -19,10 +19,10 @@ string stringType(Node* node) {
 
   switch (node->node_type) {
     /* statements and groups */
-    case NODE_FUNCTION: return "FUNC " + node->stringval;
+    case NODE_FUNCTION: return "FUNC " + node->getString( );
     case NODE_FUNCTION_LIST: return "FUNCS";
     case NODE_STATEMENT: return "STMTS";
-    case NODE_FORMAL_PARAM: return "PARAM: " + node->stringval;
+    case NODE_FORMAL_PARAM: return "PARAM: " + node->getString( );
     case NODE_FORMAL_PARAM_LIST: return "PARAMS";
     case NODE_PASS: return "PASS";
     case NODE_RETURN: return "RETURN";
@@ -64,7 +64,7 @@ string stringType(Node* node) {
     case NODE_EXP: return "EXP";
 
     /* functions */
-    case NODE_FUNCALL: return "CALL: " + node->stringval;
+    case NODE_FUNCALL: return "CALL: " + node->getString( );
     case NODE_ACTUAL_PARAM_LIST: return "ARGS";
 
     /* vectors */
@@ -73,15 +73,15 @@ string stringType(Node* node) {
 
     /* leafs */
     case NODE_INTVAL:
-      ss << "INT: " << node->intval;
+      ss << "INT: " << node->getInt( );
       return ss.str( );
     case NODE_REALVAL:
-      ss << "REAL: " << node->realval;
+      ss << "REAL: " << node->getReal( );
       return ss.str( );
-    case NODE_STRINGVAL: return "\\\"" +  node->stringval + "\\\"";
-    case NODE_IDENTIFIER: return "ID " + node->stringval;
+    case NODE_STRINGVAL: return "\\\"" +  node->getString( ) + "\\\"";
+    case NODE_IDENTIFIER: return "ID " + node->getString( );
     case NODE_BOOLVAL:
-      if (node->boolval) {
+      if (node->getBool( )) {
         return "true";
       } else {
         return "false";
@@ -158,8 +158,8 @@ void dumpTreeStdout(Node* node, int level = 0) {
     cout << " (TYPE:" << typeToString(node->data_type) << ")";
   }
 
-  if (node->lineno) {
-    cout << " (LINE:" << node->lineno << ")";
+  if (node->getLine( )) {
+    cout << " (LINE:" << node->getLine( ) << ")";
   }
 
   cout << endl;

@@ -35,9 +35,9 @@ stack<int> linenos;
 /* each non-terminal is represented with a node literlas are doubles */
 %union {
   Node* node;
-  TetraInt intval;
-  TetraReal realval;
-  TetraBool boolval;
+  int intval;
+  double realval;
+  bool boolval;
   char stringval[256]; /* PODS only in union! */
   DataType* data_type;
 }

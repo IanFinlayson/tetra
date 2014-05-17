@@ -27,7 +27,7 @@ lexer.o: lexer.cpp tetra.hpp
 .PHONY: clean all
 
 clean:
-	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o
+	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o tags
 
 tags: tetra.hpp tetra.cpp parser.y lexer.cpp dump-tree.cpp 
 	ctags -R *.cpp *.hpp

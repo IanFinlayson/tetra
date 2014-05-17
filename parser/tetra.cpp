@@ -20,12 +20,12 @@ string itoa(int num) {
 /* insert a symbol into the symtable */
 void insertSymbol(Symbol sym, map<string, Symbol>* symtable) {
   /* check if it's there first */
-  if (symtable->count(sym.name) > 0) {
-    throw Error("'" + sym.name + "' has already been declared", sym.lineno);
+  if (symtable->count(sym.getName( )) > 0) {
+    throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
   }
 
   /* add it in */
-  symtable->insert(pair<string, Symbol>(sym.name, sym));
+  symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
 }
 
 /* lookup a symbol from a symbol table */
@@ -42,14 +42,14 @@ Symbol lookupSymbol(string name, map<string, Symbol>* symtable, int lineno) {
 
 
 string typeToString(DataType* t) {
-  switch (t->kind) {
+  switch (t->getKind( )) {
     case TYPE_INT: return "int";
     case TYPE_REAL: return "real";
     case TYPE_STRING: return "string";
     case TYPE_BOOL: return "bool";
     case TYPE_VOID: return "void";
     case TYPE_VECTOR:
-      return "[" + typeToString(t->subtype) + "]";
+      return "[" + typeToString(t->getSub( )) + "]";
     default: throw Error("typeToString: Unknown data type");
   }
 }
@@ -75,19 +75,19 @@ void Node::setDataType(DataType* data_type) {
   this->data_type = data_type;
 }
 
-void Node::setStringval(TetraString stringval) {
+void Node::setStringval(const string& stringval) {
   this->stringval = stringval;
 }
 
-void Node::setIntval(TetraInt intval) {
+void Node::setIntval(int intval) {
   this->intval = intval;
 }
 
-void Node::setBoolval(TetraBool boolval) {
+void Node::setBoolval(bool boolval) {
   this->boolval = boolval;
 }
 
-void Node::setRealval(TetraReal realval) {
+void Node::setRealval(double realval) {
   this->realval = realval;
 }
 
@@ -176,19 +176,27 @@ DataType::DataType(DataTypeType kind) {
   subtype = NULL;
 }
 
+DataTypeType DataType::getKind( ) const {
+  return kind;
+}
+
+DataType* DataType::getSub( ) const {
+  return subtype;
+}
+
 void DataType::setSubType(DataType* subtype) {
   this->subtype = subtype;
 }
 
 bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're not the same kind, fail */
-  if (lhs.kind != rhs.kind) {
+  if (lhs.getKind( ) != rhs.getKind( )) {
     return false;
   }
 
   /* if they're vectors, recursively ensure the subtypes match */
-  if (lhs.kind == TYPE_VECTOR) {
-    return (*(lhs.subtype) == *(rhs.subtype));
+  if (lhs.getKind( ) == TYPE_VECTOR) {
+    return (*(lhs.getSub( )) == *(rhs.getSub( )));
   }
 
   /* otherwise return true */
@@ -206,6 +214,16 @@ Symbol::Symbol(string name, DataType* type, int lineno) {
   this->name = name;
   this->type = type;
   this->lineno = lineno;
+}
+
+int Symbol::getLine( ) const {
+  return lineno;
+}
+string Symbol::getName( ) const {
+  return name;
+}
+DataType* Symbol::getType( ) const {
+  return type;
 }
 
 Symbol::Symbol( ) {
@@ -226,15 +244,15 @@ void addParams(Node* params, map<string, Symbol>* symtable) {
   } 
   /* else if it's just one param, handle it */
   else if (params->node_type == NODE_FORMAL_PARAM) {
-    insertSymbol(Symbol(params->stringval, params->data_type, params->lineno), symtable);
+    insertSymbol(Symbol(params->getString( ), params->data_type, params->getLine( )), symtable);
   }
 }
 
 DataTypeType baseType(DataType* t) {
-  if (t->kind == TYPE_VECTOR)
-    return baseType(t->subtype);
+  if (t->getKind( ) == TYPE_VECTOR)
+    return baseType(t->getSub( ));
   else
-    return t->kind;
+    return t->getKind( );
 }
 
 
@@ -245,8 +263,8 @@ int countIndices(Node* idx, map<string, Symbol>* symtable) {
 
   /* check the index for being an int */
   DataType* itype = inferExpression(idx->children[0], symtable);
-  if (itype->kind != TYPE_INT) {
-    throw Error("Index must be integral", idx->lineno);
+  if (itype->getKind( ) != TYPE_INT) {
+    throw Error("Index must be integral", idx->getLine( ));
   }
 
   /* return 1 for this, and recurse */
@@ -254,8 +272,8 @@ int countIndices(Node* idx, map<string, Symbol>* symtable) {
 }
 
 int countDimensions(DataType* t) {
-  if (t->kind == TYPE_VECTOR) {
-    return 1 + countDimensions(t->subtype);
+  if (t->getKind( ) == TYPE_VECTOR) {
+    return 1 + countDimensions(t->getSub( ));
   } else {
     return 0;
   }
@@ -264,21 +282,21 @@ int countDimensions(DataType* t) {
 /* this is fairly annoying */
 DataType* checkVector(Node* vec, map<string, Symbol>* symtable) {
   /* look up the left hand side */
-  Symbol sym = lookupSymbol(vec->children[0]->stringval, symtable, vec->lineno);
+  Symbol sym = lookupSymbol(vec->children[0]->getString( ), symtable, vec->getLine( ));
 
   /* count the indices on the right (also ensure they are ints! */
   int levels = countIndices(vec->children[1], symtable);
 
   /* count the dimension of a vector */
-  int dim = countDimensions(sym.type);
+  int dim = countDimensions(sym.getType( ));
 
   /* make sure dim is at least big enough for this many indexes */
   if (dim < levels) {
-    throw Error("Too many indexes on vector", vec->lineno);
+    throw Error("Too many indexes on vector", vec->getLine( ));
   }
 
   /* the base type is that of the symbol  */
-  DataType* result = new DataType(baseType(sym.type));
+  DataType* result = new DataType(baseType(sym.getType( )));
 
   /* add veector wrapper for dim-levels times */
   for (int i = 0; i < (dim - levels); i++) {
@@ -295,7 +313,7 @@ Node* findFunction(const string& name, int lineno) {
 
   while (f && (f->children.size( ) > 0)) {
     /* see if this node is the thing */
-    if (f->children[0]->stringval == name) {
+    if (f->children[0]->getString( ) == name) {
       return f->children[0];
     }
 
@@ -311,7 +329,7 @@ Node* findFunction(const string& name, int lineno) {
 DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
 
   /* find the function node this thing matches */
-  Node* f = findFunction(funcall->stringval, funcall->lineno);
+  Node* f = findFunction(funcall->getString( ), funcall->getLine( ));
 
   /* for each param, and also for each expression, make sure they match up */
   Node* formal = f->children[0];
@@ -328,9 +346,9 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
       t = inferExpression(actual, symtable);
 
     if (*t != *(formal->data_type)) {
-      throw Error("Function '" + funcall->stringval + "' expected " + 
+      throw Error("Function '" + funcall->getString( ) + "' expected " + 
           typeToString(formal->data_type) + " but was called with " + typeToString(t) + 
-          " for parameter " + itoa(p), funcall->lineno);
+          " for parameter " + itoa(p), funcall->getLine( ));
     }
     p++;
 
@@ -351,9 +369,9 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
 
   /* if there are any left, the arity mismatched */
   if (formal) {
-    throw Error("Too few parameters to function '" + funcall->stringval + "'", funcall->lineno);
+    throw Error("Too few parameters to function '" + funcall->getString( ) + "'", funcall->getLine( ));
   } else if (actual) {
-    throw Error("Too many parameters to function '" + funcall->stringval + "'", funcall->lineno);
+    throw Error("Too many parameters to function '" + funcall->getString( ) + "'", funcall->getLine( ));
   }
 
   /* return the type of function itself */
@@ -374,14 +392,14 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
       rhs = inferExpression(expr->children[1], symtable);
 
       /* check if this symbol exists and check that the types match */
-      if (symtable->count(expr->children[0]->stringval) > 0) {
-        Symbol sym = lookupSymbol(expr->children[0]->stringval, symtable, 0);
-        if (*sym.type != *rhs) {
-          throw Error("Assigning '" + expr->children[0]->stringval + "' to a new type", expr->lineno);
+      if (symtable->count(expr->children[0]->getString( )) > 0) {
+        Symbol sym = lookupSymbol(expr->children[0]->getString( ), symtable, 0);
+        if (*sym.getType( ) != *rhs) {
+          throw Error("Assigning '" + expr->children[0]->getString( ) + "' to a new type", expr->getLine( ));
         }
       } else {
         /* it's not there, so we should insert a new one */
-        insertSymbol(Symbol(expr->children[0]->stringval, rhs, expr->lineno), symtable);
+        insertSymbol(Symbol(expr->children[0]->getString( ), rhs, expr->getLine( )), symtable);
       }
 
       /* return the type of the rhs */
@@ -393,8 +411,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
       /* check that both children are bools */
       lhs = inferExpression(expr->children[0], symtable);
       rhs = inferExpression(expr->children[1], symtable);
-      if ((lhs->kind != TYPE_BOOL) || (rhs->kind != TYPE_BOOL)) {
-        throw Error("Only bool values may be used with and/or", expr->lineno);
+      if ((lhs->getKind( ) != TYPE_BOOL) || (rhs->getKind( ) != TYPE_BOOL)) {
+        throw Error("Only bool values may be used with and/or", expr->getLine( ));
       }
       /* the result is a bool as well */
       return new DataType(TYPE_BOOL);
@@ -411,7 +429,7 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
       if (*lhs != *rhs) {
         cout << "A = " << typeToString(lhs) << endl;
         cout << "B = " << typeToString(rhs) << endl;
-        throw Error("Only matching types can be compared", expr->lineno);
+        throw Error("Only matching types can be compared", expr->getLine( ));
       }
 
       /* the result is a bool */
@@ -420,8 +438,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
     case NODE_NOT:
       /* check that the operand is bool */
       lhs = inferExpression(expr->children[0], symtable);
-      if (lhs->kind != TYPE_BOOL) {
-        throw Error("Operand of not must be a bool", expr->lineno);
+      if (lhs->getKind( ) != TYPE_BOOL) {
+        throw Error("Operand of not must be a bool", expr->getLine( ));
       }
       return new DataType(TYPE_BOOL);
 
@@ -434,8 +452,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
       lhs = inferExpression(expr->children[0], symtable);
       rhs = inferExpression(expr->children[1], symtable);
 
-      if ((lhs->kind != TYPE_INT) || (rhs->kind != TYPE_INT)) {
-        throw Error("Operands to bitwise operator must be integer", expr->lineno);
+      if ((lhs->getKind( ) != TYPE_INT) || (rhs->getKind( ) != TYPE_INT)) {
+        throw Error("Operands to bitwise operator must be integer", expr->getLine( ));
       }
 
       /* returns an integer back */
@@ -444,8 +462,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
     case NODE_BITNOT:
       /* check that the operand is an int */
       lhs = inferExpression(expr->children[0], symtable);
-      if (lhs->kind != TYPE_INT) {
-        throw Error("Operand to bitwise not must be an integer", expr->lineno);
+      if (lhs->getKind( ) != TYPE_INT) {
+        throw Error("Operand to bitwise not must be an integer", expr->getLine( ));
       }
       return new DataType(TYPE_INT);
 
@@ -462,14 +480,14 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
 
       if (*lhs != *rhs) {
         throw Error("In binary operator, the types " + typeToString(lhs) + " and " +
-            typeToString(rhs) + " are not compatible", expr->lineno);
+            typeToString(rhs) + " are not compatible", expr->getLine( ));
       }
-      if ((lhs->kind != TYPE_INT) && (rhs->kind != TYPE_REAL)) {
-        throw Error("Numeric type required", expr->lineno);
+      if ((lhs->getKind( ) != TYPE_INT) && (rhs->getKind( ) != TYPE_REAL)) {
+        throw Error("Numeric type required", expr->getLine( ));
       }
 
       /* return the same type back */
-      return new DataType(lhs->kind);
+      return new DataType(lhs->getKind( ));
 
     case NODE_VECREF:
       /* check vector */
@@ -486,8 +504,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
 
     case NODE_IDENTIFIER: {
       /* look it up and return that type */
-      Symbol sym = lookupSymbol(expr->stringval, symtable, expr->lineno);
-      return sym.type;
+      Symbol sym = lookupSymbol(expr->getString( ), symtable, expr->getLine( ));
+      return sym.getType( );
       break;}
 
     /* return these types */
@@ -537,7 +555,7 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
 
       /* check that it matches the return type */
       if (*ret != *functype) {
-        throw Error("Return value type does not match function's declared type", block->lineno);
+        throw Error("Return value type does not match function's declared type", block->getLine( ));
       }
       break;}
     case NODE_IF: {
@@ -545,8 +563,8 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       DataType* cond = inferExpression(block->children[0], symtable);
 
       /* check that it is a BOOL */
-      if (cond->kind != TYPE_BOOL) {
-        throw Error("if condition must be a bool", block->lineno);
+      if (cond->getKind( ) != TYPE_BOOL) {
+        throw Error("if condition must be a bool", block->getLine( ));
       }
 
       /* infer both the then and else blocks */
@@ -573,8 +591,8 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       DataType* cond = inferExpression(block->children[0], symtable);
 
       /* check that it is a BOOL */
-      if (cond->kind != TYPE_BOOL) {
-        throw Error("elif condition must be a bool", block->lineno);
+      if (cond->getKind( ) != TYPE_BOOL) {
+        throw Error("elif condition must be a bool", block->getLine( ));
       }
 
       /* check the statements on the right */
@@ -585,8 +603,8 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       DataType* cond = inferExpression(block->children[0], symtable);
 
       /* check that it is a BOOL */
-      if (cond->kind != TYPE_BOOL) {
-        throw Error("while condition must be a bool", block->lineno);
+      if (cond->getKind( ) != TYPE_BOOL) {
+        throw Error("while condition must be a bool", block->getLine( ));
       }
 
       /* infer the body */
@@ -598,15 +616,12 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       DataType* expr_type = inferExpression(block->children[1], symtable);
 
       /* make sure it is some type of vector */
-      if (expr_type->kind != TYPE_VECTOR) {
-        throw Error("for expression must have vector type", block->lineno);
+      if (expr_type->getKind( ) != TYPE_VECTOR) {
+        throw Error("for expression must have vector type", block->getLine( ));
       }
 
       /* put the identifier in the symtable */
-      Symbol induction;
-      induction.name = block->children[0]->stringval;
-      induction.type = expr_type->subtype;
-      induction.lineno = block->lineno;
+      Symbol induction(block->children[0]->getString( ), expr_type->getSub( ), block->getLine( ));
       insertSymbol(induction, symtable);
 
       /* check the block under this */
