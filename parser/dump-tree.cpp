@@ -100,7 +100,7 @@ string genId( ) {
   return ss.str( );
 }
 
-
+/* dump a single node to a graphviz dot file */
 void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
   if (!node) {
     return;
@@ -124,7 +124,7 @@ void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
   }
 }
 
-
+/* dump an entrie tree to a graphviz dot file */
 void dumpTreeGraphviz(Node* node) {
   ofstream out("tree.gv");
   out << "digraph G {\n";
@@ -138,7 +138,7 @@ void dumpTreeGraphviz(Node* node) {
   system("xdg-open tree.png");
 }
 
-
+/* dump a tree to stdout */
 void dumpTreeStdout(Node* node, int level = 0) {
   /* base case */
   if (!node) {

@@ -1,4 +1,4 @@
-/* functions for dealing with node creation, management etc. */
+/* functions for type handling and inference */
 
 #include <string>
 #include <iostream>
@@ -9,15 +9,15 @@
 #include "parser.gen.hpp"
 
 extern Node* root;
-extern int yylineno;
 
+/* return a string of an int */
 string itoa(int num) {
   stringstream ss;
   ss << num;
   return ss.str( );
 }
 
-
+/* return a string of a data type */
 string typeToString(DataType* t) {
   switch (t->getKind( )) {
     case TYPE_INT: return "int";
@@ -29,189 +29,6 @@ string typeToString(DataType* t) {
       return "[" + typeToString(t->getSub( )) + "]";
     default: throw Error("typeToString: Unknown data type");
   }
-}
-
-/* node member functions */
-Node::Node(NodeKind node_type) {
-  this->node_type = node_type;
-  this->data_type = NULL;
-  stringval = "";
-  intval = 0;
-  realval = 0.0;
-  boolval = false;
-  lineno = yylineno;  /* this is often inaccurate! */
-}
- 
-void Node::addChild(Node* child) {
-  if (child) {
-    children.push_back(child);
-  }
-}
-
-void Node::setDataType(DataType* data_type) {
-  this->data_type = data_type;
-}
-
-void Node::setStringval(const string& stringval) {
-  this->stringval = stringval;
-}
-
-void Node::setIntval(int intval) {
-  this->intval = intval;
-}
-
-void Node::setBoolval(bool boolval) {
-  this->boolval = boolval;
-}
-
-void Node::setRealval(double realval) {
-  this->realval = realval;
-}
-
-void Node::setLine(int lineno) {
-  this->lineno = lineno;
-}
-
-int Node::getLine( ) const {
-  return lineno;
-}
-string Node::getString( ) const {
-  return stringval;
-}
-int Node::getInt( ) const {
-  return intval;
-}
-double Node::getReal( ) const {
-  return realval;
-}
-bool Node::getBool( ) const {
-  return boolval;
-}
-NodeKind Node::kind( ) const {
-  return node_type;
-}
-DataType* Node::type( ) const {
-  return data_type;
-}
-void Node::setType(DataType* t) {
-  data_type = t;
-}
-int Node::numChildren( ) const {
-  return children.size( );
-}
-Node* Node::child(int which) const {
-  return children[which];
-}
-/* insert a symbol into the symtable */
-void Node::insertSymbol(Symbol sym) {
-  /* create symtable if needed */
-  if (!symtable) {
-    symtable = new map<string, Symbol>( );
-  }
-
-  /* check if it's there first */
-  if (symtable->count(sym.getName( )) > 0) {
-    throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
-  }
-
-  /* add it in */
-  symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
-}
-
-/* lookup a symbol from a symbol table */
-Symbol Node::lookupSymbol(string name, int lineno) {
-  map<string, Symbol>::iterator it = symtable->find(name);
-
-  if (it == symtable->end( )) {
-    throw Error("Symbol '" + name + "' not found!", lineno);
-  }
-
-  /* return the record */
-  return it->second;
-}
-
-bool Node::hasSymbol(const string& name) {
-  if (!symtable) {
-    return false;
-  }
-  return (symtable->count(name) > 0);
-}
-
-
-
-/* this function search and replaces a string in place */
-void replace(string& str, const string& from, const string& to) {
-  size_t start_pos = str.find(from);
-  if(start_pos != string::npos) {
-    str.replace(start_pos, from.length( ), to);
-    replace(str, from, to);
-  }
-}
-
-/* this function takes a string and modifies it in place
- * with TOK_ missing and some other pretty printing */
-void prettyPrintMessage(string& str) {
-  replace(str, "PLUS", "'+'");
-  replace(str, "MINUS", "'-'");
-  replace(str, "TIMES", "'*'");
-  replace(str, "DIVIDE", "'/'");
-  replace(str, "MODULUS", "'%'");
-  replace(str, "BITXOR", "'^'");
-  replace(str, "BITAND", "'&'");
-  replace(str, "BITOR", "'|'");
-  replace(str, "BITNOT", "'~'");
-  replace(str, "LEFTPARENS", "'('");
-  replace(str, "RIGHTPARENS", "')'");
-  replace(str, "COMMA", "','");
-  replace(str, "SEMICOLON", "';'");
-  replace(str, "COLON", "':'");
-  replace(str, "LSHIFT", "'<<'");
-  replace(str, "RSHIFT", "'>>'");
-  replace(str, "EXP", "'**'");
-  replace(str, "LTE", "'<='");
-  replace(str, "GTE", "'>='");
-  replace(str, "EQ", "'=='");
-  replace(str, "NEQ", "'!='");
-  replace(str, "LT", "'<'");
-  replace(str, "GT", "'>'");
-  replace(str, "MINUSEQ", "'-='");
-  replace(str, "PLUSEQ", "'+='");
-  replace(str, "TIMESEQ", "'*='");
-  replace(str, "DIVIDEEQ", "'/='");
-  replace(str, "MODULUSEQ", "'%='");
-  replace(str, "EXPEQ", "'**='");
-  replace(str, "RSHIFTEQ", "'>>='");
-  replace(str, "LSHIFTEQ", "'<<='");
-  replace(str, "ANDEQ", "'&='");
-  replace(str, "XOREQ", "'^='");
-  replace(str, "OREQ", "'|='");
-  replace(str, "TOK_", "");
-}
-
-/* Error exception functions */
-Error::Error(const string& mesg, int lineno) {
-  this->mesg = mesg;
-  prettyPrintMessage(this->mesg);
-  this->lineno = lineno;
-}
-
-string Error::getMessage( ) const {
-  return mesg;
-}
-
-int Error::getLine( ) const {
-  return lineno;
-}
-
-/* print an error */
-ostream& operator<<(ostream& out, const Error& error) {
-  out << "Error: ";
-  if (error.getLine( )) {
-    out << "(line " << error.getLine( ) << ") ";
-  }
-
-  out << error.getMessage( ) << endl;
-  return out;
 }
 
 /* data type functions */
@@ -232,6 +49,16 @@ void DataType::setSubType(DataType* subtype) {
   this->subtype = subtype;
 }
 
+/* find the base type of a data type */
+DataTypeType baseType(DataType* t) {
+  if (t->getKind( ) == TYPE_VECTOR)
+    return baseType(t->getSub( ));
+  else
+    return t->getKind( );
+}
+
+
+/* compare two data types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're not the same kind, fail */
   if (lhs.getKind( ) != rhs.getKind( )) {
@@ -247,33 +74,9 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
   return true;
 }
 
+/* compare two data types for in-equality */
 bool operator!=(const DataType& lhs, const DataType& rhs) {
   return !(lhs == rhs);
-}
-
-
-
-
-Symbol::Symbol(string name, DataType* type, int lineno) {
-  this->name = name;
-  this->type = type;
-  this->lineno = lineno;
-}
-
-int Symbol::getLine( ) const {
-  return lineno;
-}
-string Symbol::getName( ) const {
-  return name;
-}
-DataType* Symbol::getType( ) const {
-  return type;
-}
-
-Symbol::Symbol( ) {
-  name = "";
-  type = NULL;
-  lineno = 0;
 }
 
 /* add the parameters of a function into its symtable */
@@ -292,16 +95,10 @@ void addParams(Node* params, Node* func) {
   }
 }
 
-DataTypeType baseType(DataType* t) {
-  if (t->getKind( ) == TYPE_VECTOR)
-    return baseType(t->getSub( ));
-  else
-    return t->getKind( );
-}
-
-
+/* forward declaration needed as these are mutually-recursive */
 DataType* inferExpression(Node* expr, Node* func);
 
+/* count the number of indices used in an index operation */
 int countIndices(Node* idx, Node* func) {
   if (!idx) return 0;
 
@@ -315,6 +112,7 @@ int countIndices(Node* idx, Node* func) {
   return 1 + countIndices(idx->child(1), func);
 }
 
+/* count the number of dimensions in a data type */
 int countDimensions(DataType* t) {
   if (t->getKind( ) == TYPE_VECTOR) {
     return 1 + countDimensions(t->getSub( ));
@@ -323,7 +121,7 @@ int countDimensions(DataType* t) {
   }
 }
 
-/* this is fairly annoying */
+/* this do checking of types on a vector reference */
 DataType* checkVector(Node* vec, Node* func) {
   /* look up the left hand side */
   Symbol sym = func->lookupSymbol(vec->child(0)->getString( ), vec->getLine( ));
@@ -352,6 +150,7 @@ DataType* checkVector(Node* vec, Node* func) {
   return result;
 }
 
+/* find a function by name in the parse tree */
 Node* findFunction(const string& name, int lineno) {
   Node* f = root;
 
