@@ -17,29 +17,6 @@ string itoa(int num) {
   return ss.str( );
 }
 
-/* insert a symbol into the symtable */
-void insertSymbol(Symbol sym, map<string, Symbol>* symtable) {
-  /* check if it's there first */
-  if (symtable->count(sym.getName( )) > 0) {
-    throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
-  }
-
-  /* add it in */
-  symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
-}
-
-/* lookup a symbol from a symbol table */
-Symbol lookupSymbol(string name, map<string, Symbol>* symtable, int lineno) {
-  map<string, Symbol>::iterator it = symtable->find(name);
-
-  if (it == symtable->end( )) {
-    throw Error("Symbol '" + name + "' not found!", lineno);
-  }
-
-  /* return the record */
-  return it->second;
-}
-
 
 string typeToString(DataType* t) {
   switch (t->getKind( )) {
@@ -233,18 +210,18 @@ Symbol::Symbol( ) {
 }
 
 /* add the parameters of a function into its symtable */
-void addParams(Node* params, map<string, Symbol>* symtable) {
+void addParams(Node* params, Node* func) {
   if (!params) return;
 
   /* if it's more than one, recurse on both */
   if (params->kind( ) == NODE_FORMAL_PARAM_LIST) {
-    addParams(params->child(0), symtable);
-    addParams(params->child(1), symtable);
+    addParams(params->child(0), func);
+    addParams(params->child(1), func);
 
   } 
   /* else if it's just one param, handle it */
   else if (params->kind( ) == NODE_FORMAL_PARAM) {
-    insertSymbol(Symbol(params->getString( ), params->type( ), params->getLine( )), symtable);
+    func->insertSymbol(Symbol(params->getString( ), params->type( ), params->getLine( )));
   }
 }
 
@@ -256,19 +233,19 @@ DataTypeType baseType(DataType* t) {
 }
 
 
-DataType* inferExpression(Node* expr, map<string, Symbol>* symtable);
+DataType* inferExpression(Node* expr, Node* func);
 
-int countIndices(Node* idx, map<string, Symbol>* symtable) {
+int countIndices(Node* idx, Node* func) {
   if (!idx) return 0;
 
   /* check the index for being an int */
-  DataType* itype = inferExpression(idx->child(0), symtable);
+  DataType* itype = inferExpression(idx->child(0), func);
   if (itype->getKind( ) != TYPE_INT) {
     throw Error("Index must be integral", idx->getLine( ));
   }
 
   /* return 1 for this, and recurse */
-  return 1 + countIndices(idx->child(1), symtable);
+  return 1 + countIndices(idx->child(1), func);
 }
 
 int countDimensions(DataType* t) {
@@ -280,12 +257,12 @@ int countDimensions(DataType* t) {
 }
 
 /* this is fairly annoying */
-DataType* checkVector(Node* vec, map<string, Symbol>* symtable) {
+DataType* checkVector(Node* vec, Node* func) {
   /* look up the left hand side */
-  Symbol sym = lookupSymbol(vec->child(0)->getString( ), symtable, vec->getLine( ));
+  Symbol sym = func->lookupSymbol(vec->child(0)->getString( ), vec->getLine( ));
 
   /* count the indices on the right (also ensure they are ints! */
-  int levels = countIndices(vec->child(1), symtable);
+  int levels = countIndices(vec->child(1), func);
 
   /* count the dimension of a vector */
   int dim = countDimensions(sym.getType( ));
@@ -326,7 +303,7 @@ Node* findFunction(const string& name, int lineno) {
 
 
 /* infer the function of a function call and check the types */
-DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
+DataType* inferFuncall(Node* funcall, Node* func) {
 
   /* find the function node this thing matches */
   Node* f = findFunction(funcall->getString( ), funcall->getLine( ));
@@ -341,9 +318,9 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
     
     /* it could be a list, or an actual param */
     if (actual->kind( ) == NODE_ACTUAL_PARAM_LIST) 
-      t = inferExpression(actual->child(0), symtable);
+      t = inferExpression(actual->child(0), func);
     else
-      t = inferExpression(actual, symtable);
+      t = inferExpression(actual, func);
 
     if (*t != *(formal->type( ))) {
       throw Error("Function '" + funcall->getString( ) + "' expected " + 
@@ -379,7 +356,7 @@ DataType* inferFuncall(Node* funcall, map<string, Symbol>* symtable) {
 }
 
 /* infer the types of an expression, and also return the type */
-DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
+DataType* inferExpressionPrime(Node* expr, Node* func) {
   if (!expr) return NULL;
 
   /* the left hand side, right hand side, and result used below */
@@ -389,17 +366,17 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
   switch (expr->kind( )) {
     case NODE_ASSIGN: {
       /* get the type of the right hand side */
-      rhs = inferExpression(expr->child(1), symtable);
+      rhs = inferExpression(expr->child(1), func);
 
       /* check if this symbol exists and check that the types match */
-      if (symtable->count(expr->child(0)->getString( )) > 0) {
-        Symbol sym = lookupSymbol(expr->child(0)->getString( ), symtable, 0);
+      if (func->hasSymbol(expr->child(0)->getString( ))) {
+        Symbol sym = func->lookupSymbol(expr->child(0)->getString( ), 0);
         if (*sym.getType( ) != *rhs) {
           throw Error("Assigning '" + expr->child(0)->getString( ) + "' to a new type", expr->getLine( ));
         }
       } else {
         /* it's not there, so we should insert a new one */
-        insertSymbol(Symbol(expr->child(0)->getString( ), rhs, expr->getLine( )), symtable);
+        func->insertSymbol(Symbol(expr->child(0)->getString( ), rhs, expr->getLine( )));
       }
 
       /* return the type of the rhs */
@@ -409,8 +386,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
     case NODE_OR:
     case NODE_AND:
       /* check that both children are bools */
-      lhs = inferExpression(expr->child(0), symtable);
-      rhs = inferExpression(expr->child(1), symtable);
+      lhs = inferExpression(expr->child(0), func);
+      rhs = inferExpression(expr->child(1), func);
       if ((lhs->getKind( ) != TYPE_BOOL) || (rhs->getKind( ) != TYPE_BOOL)) {
         throw Error("Only bool values may be used with and/or", expr->getLine( ));
       }
@@ -424,8 +401,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
     case NODE_NEQ:
       /* check that both sides have the same type
        * TODO ar some point add in int->real promotion */
-      lhs = inferExpression(expr->child(0), symtable);
-      rhs = inferExpression(expr->child(1), symtable);
+      lhs = inferExpression(expr->child(0), func);
+      rhs = inferExpression(expr->child(1), func);
       if (*lhs != *rhs) {
         cout << "A = " << typeToString(lhs) << endl;
         cout << "B = " << typeToString(rhs) << endl;
@@ -437,7 +414,7 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
 
     case NODE_NOT:
       /* check that the operand is bool */
-      lhs = inferExpression(expr->child(0), symtable);
+      lhs = inferExpression(expr->child(0), func);
       if (lhs->getKind( ) != TYPE_BOOL) {
         throw Error("Operand of not must be a bool", expr->getLine( ));
       }
@@ -449,8 +426,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
     case NODE_SHIFTL:
     case NODE_SHIFTR:
       /* check that both operands are integers */
-      lhs = inferExpression(expr->child(0), symtable);
-      rhs = inferExpression(expr->child(1), symtable);
+      lhs = inferExpression(expr->child(0), func);
+      rhs = inferExpression(expr->child(1), func);
 
       if ((lhs->getKind( ) != TYPE_INT) || (rhs->getKind( ) != TYPE_INT)) {
         throw Error("Operands to bitwise operator must be integer", expr->getLine( ));
@@ -461,7 +438,7 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
 
     case NODE_BITNOT:
       /* check that the operand is an int */
-      lhs = inferExpression(expr->child(0), symtable);
+      lhs = inferExpression(expr->child(0), func);
       if (lhs->getKind( ) != TYPE_INT) {
         throw Error("Operand to bitwise not must be an integer", expr->getLine( ));
       }
@@ -475,8 +452,8 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
     case NODE_EXP:
       /* check that both operands match and that they are int/real 
        * TODO at some point add in int->real promotion... */
-      lhs = inferExpression(expr->child(0), symtable);
-      rhs = inferExpression(expr->child(1), symtable);
+      lhs = inferExpression(expr->child(0), func);
+      rhs = inferExpression(expr->child(1), func);
 
       if (*lhs != *rhs) {
         throw Error("In binary operator, the types " + typeToString(lhs) + " and " +
@@ -491,20 +468,20 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
 
     case NODE_VECREF:
       /* check vector */
-      return checkVector(expr, symtable);
+      return checkVector(expr, func);
     case NODE_INDEX:
       throw Error("inferExpression: should not an index here");
 
 
     case NODE_FUNCALL:
-      return inferFuncall(expr, symtable);
+      return inferFuncall(expr, func);
     case NODE_ACTUAL_PARAM_LIST:
       throw Error("inferExpression: should not a param list here");
       break;
 
     case NODE_IDENTIFIER: {
       /* look it up and return that type */
-      Symbol sym = lookupSymbol(expr->getString( ), symtable, expr->getLine( ));
+      Symbol sym = func->lookupSymbol(expr->getString( ), expr->getLine( ));
       return sym.getType( );
       break;}
 
@@ -527,9 +504,9 @@ DataType* inferExpressionPrime(Node* expr, map<string, Symbol>* symtable) {
 }
 
 /* infer an expression and assign it to the node */
-DataType* inferExpression(Node* expr, map<string, Symbol>* symtable) {
+DataType* inferExpression(Node* expr, Node* func) {
   /* do the inference */
-  DataType* t = inferExpressionPrime(expr, symtable);
+  DataType* t = inferExpressionPrime(expr, func);
 
   /* assign it into this node */
   expr->setType(t);
@@ -539,28 +516,28 @@ DataType* inferExpression(Node* expr, map<string, Symbol>* symtable) {
 }
 
 /* infer types in a block and add them into the symbol table */
-void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) {
+void inferBlock(Node* block, Node* func) {
   if (!block) return;
 
   /* switch on the different types */
   switch (block->kind( )) {
     case NODE_STATEMENT:
       /* handle both children */
-      inferBlock(block->child(0), symtable, functype);
-      inferBlock(block->child(1), symtable, functype);
+      inferBlock(block->child(0), func);
+      inferBlock(block->child(1), func);
       break;
     case NODE_RETURN: {
       /* infer the expression */
-      DataType* ret = inferExpression(block->child(0), symtable);
+      DataType* ret = inferExpression(block->child(0), func);
 
       /* check that it matches the return type */
-      if (*ret != *functype) {
+      if (*ret != *(func->type( ))) {
         throw Error("Return value type does not match function's declared type", block->getLine( ));
       }
       break;}
     case NODE_IF: {
       /* infer the type of the expression */
-      DataType* cond = inferExpression(block->child(0), symtable);
+      DataType* cond = inferExpression(block->child(0), func);
 
       /* check that it is a BOOL */
       if (cond->getKind( ) != TYPE_BOOL) {
@@ -568,27 +545,27 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       }
 
       /* infer both the then and else blocks */
-      inferBlock(block->child(1), symtable, functype);
-      inferBlock(block->child(2), symtable, functype);
+      inferBlock(block->child(1), func);
+      inferBlock(block->child(2), func);
       break;}
     case NODE_ELIF:
       /* check the first child which is the first elf clause */
-      inferBlock(block->child(0), symtable, functype);
+      inferBlock(block->child(0), func);
 
       /* check the second child which is the chain of the rest of the elifs */
-      inferBlock(block->child(1), symtable, functype);
+      inferBlock(block->child(1), func);
 
       /* check the third child which is the else clause (maybe NULL) */
-      inferBlock(block->child(2), symtable, functype);
+      inferBlock(block->child(2), func);
       break;
     case NODE_ELIF_CHAIN:
       /* check the clause on the left and the chain on the right */
-      inferBlock(block->child(0), symtable, functype);
-      inferBlock(block->child(1), symtable, functype);
+      inferBlock(block->child(0), func);
+      inferBlock(block->child(1), func);
       break;
     case NODE_ELIF_CLAUSE: {
       /* check the expression on the left */
-      DataType* cond = inferExpression(block->child(0), symtable);
+      DataType* cond = inferExpression(block->child(0), func);
 
       /* check that it is a BOOL */
       if (cond->getKind( ) != TYPE_BOOL) {
@@ -596,11 +573,11 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       }
 
       /* check the statements on the right */
-      inferBlock(block->child(1), symtable, functype);
+      inferBlock(block->child(1), func);
       break;}
     case NODE_WHILE: {
       /* infer the type of the expression */
-      DataType* cond = inferExpression(block->child(0), symtable);
+      DataType* cond = inferExpression(block->child(0), func);
 
       /* check that it is a BOOL */
       if (cond->getKind( ) != TYPE_BOOL) {
@@ -608,33 +585,32 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
       }
 
       /* infer the body */
-      inferBlock(block->child(1), symtable, functype);
+      inferBlock(block->child(1), func);
       break;}
     case NODE_PARFOR:
     case NODE_FOR: {
       /* infer the type of the expression */
-      DataType* expr_type = inferExpression(block->child(1), symtable);
+      DataType* expr_type = inferExpression(block->child(1), func);
 
       /* make sure it is some type of vector */
       if (expr_type->getKind( ) != TYPE_VECTOR) {
         throw Error("for expression must have vector type", block->getLine( ));
       }
 
-      /* put the identifier in the symtable */
-      Symbol induction(block->child(0)->getString( ), expr_type->getSub( ), block->getLine( ));
-      insertSymbol(induction, symtable);
+      /* put the identifier in the func */
+      func->insertSymbol(Symbol(block->child(0)->getString( ), expr_type->getSub( ), block->getLine( )));
 
       /* check the block under this */
-      inferBlock(block->child(2), symtable, functype);
+      inferBlock(block->child(2), func);
       break;}
     case NODE_PARALLEL:
     case NODE_BACKGROUND:
       /* check the sub-block */
-      inferBlock(block->child(0), symtable, functype);
+      inferBlock(block->child(0), func);
       break;
     case NODE_LOCK:
       /* how will locks actually be implemented??? */
-      inferBlock(block->child(1), symtable, functype);
+      inferBlock(block->child(1), func);
       break;
 
     /* these require no work... */
@@ -645,7 +621,7 @@ void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) 
 
     default:
       /* handle it as an expression */
-      inferExpression(block, symtable);
+      inferExpression(block, func);
   }
 }
 
@@ -656,14 +632,11 @@ void inferFunction(Node* node) {
     return;
   }
 
-  /* create the symbol table for this function */
-  node->symtable = new map<string, Symbol>( );
-
   /* add the parameters into the table */
-  addParams(node->child(0), node->symtable);
+  addParams(node->child(0), node);
 
   /* infer the body of the function */
-  inferBlock(node->child(1), node->symtable, node->type( ));
+  inferBlock(node->child(1), node);
 }
 
 /* this function does type checking/type inference on a parse tree */

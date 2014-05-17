@@ -80,6 +80,21 @@ enum DataTypeType {
   TYPE_VECTOR
 };
 
+/* any type of error is handled with this exception */
+class Error {
+  public:
+    Error(const string& mesg, int lineno = 0);
+    string getMessage( ) const;
+    int getLine( ) const;
+
+  private:
+    string mesg;
+    int lineno;
+};
+
+/* print an error */
+ostream& operator<<(ostream& out, const Error& error);
+
 /* a data type contains the above enum, along with a pointer to the "sub" type
  * currently this is only used for vectors */
 class DataType {
@@ -160,15 +175,48 @@ class Node {
     Node* child(int which) const {
       return children[which];
     }
+    /* insert a symbol into the symtable */
+    void insertSymbol(Symbol sym) {
+      /* create symtable if needed */
+      if (!symtable) {
+        symtable = new map<string, Symbol>( );
+      }
+
+      /* check if it's there first */
+      if (symtable->count(sym.getName( )) > 0) {
+        throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
+      }
+
+      /* add it in */
+      symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
+    }
+
+    /* lookup a symbol from a symbol table */
+    Symbol lookupSymbol(string name, int lineno) {
+      map<string, Symbol>::iterator it = symtable->find(name);
+
+      if (it == symtable->end( )) {
+        throw Error("Symbol '" + name + "' not found!", lineno);
+      }
+
+      /* return the record */
+      return it->second;
+    }
+    bool hasSymbol(const string& name) {
+      if (!symtable) {
+        return false;
+      }
+      return (symtable->count(name) > 0);
+    }
     /* end cut */
 
-
-    /* the symbol table used for this Node - currently only function nodes have one */
-    map<string, Symbol>* symtable;
 
   private:
     /* the children nodes of this node */
     vector<Node*> children;
+
+    /* the symbol table used for this Node - currently only function nodes have one */
+    map<string, Symbol>* symtable;
 
     /* the type of node it is (eg plus vs stmt vs intval etc.) */
     NodeType node_type;
@@ -191,21 +239,6 @@ void inferTypes(Node* node);
 
 /* function which parses a file and returns the parse tree */
 Node* parseFile(const string& fname);
-
-/* any type of error is handled with this exception */
-class Error {
-  public:
-    Error(const string& mesg, int lineno = 0);
-    string getMessage( ) const;
-    int getLine( ) const;
-
-  private:
-    string mesg;
-    int lineno;
-};
-
-/* print an error */
-ostream& operator<<(ostream& out, const Error& error);
 
 #endif
 
