@@ -17,7 +17,7 @@ using namespace std;
 string stringType(Node* node) {
   stringstream ss;
 
-  switch (node->node_type) {
+  switch (node->kind( )) {
     /* statements and groups */
     case NODE_FUNCTION: return "FUNC " + node->getString( );
     case NODE_FUNCTION_LIST: return "FUNCS";
@@ -112,7 +112,7 @@ void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
   out << "\", fontname=\"courier\"];\n";
 
   /* for each child */
-  for (unsigned int i = 0; i < node->children.size( ); i++) {
+  for (int i = 0; i < node->numChildren( ); i++) {
     /* generate a new id */
     string childId = genId( );
 
@@ -120,7 +120,7 @@ void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
     out << "  " << id << " -> " << childId << ";\n";
 
     /* dump the child itself */
-    dumpNodeGraphviz(node->children[i], childId, out);
+    dumpNodeGraphviz(node->child(i), childId, out);
   }
 }
 
@@ -154,8 +154,8 @@ void dumpTreeStdout(Node* node, int level = 0) {
   cout << stringType(node);
 
   /* dump the type and line if relevant */
-  if (node->data_type) {
-    cout << " (TYPE:" << typeToString(node->data_type) << ")";
+  if (node->type( )) {
+    cout << " (TYPE:" << typeToString(node->type( )) << ")";
   }
 
   if (node->getLine( )) {
@@ -165,8 +165,8 @@ void dumpTreeStdout(Node* node, int level = 0) {
   cout << endl;
 
   /* dump children */
-  for (unsigned int i = 0; i < node->children.size( ); i++) {
-    dumpTreeStdout(node->children[i], level + 1);
+  for (int i = 0; i < node->numChildren( ); i++) {
+    dumpTreeStdout(node->child(i), level + 1);
   }
 }
 

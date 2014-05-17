@@ -129,10 +129,10 @@ class Node {
     void setRealval(double realval);
     void setLine(int lineno);
 
+    /* begin cut */
     int getLine( ) const {
       return lineno;
     }
-
     string getString( ) const {
       return stringval;
     }
@@ -145,12 +145,30 @@ class Node {
     bool getBool( ) const {
       return boolval;
     }
+    NodeType kind( ) const {
+      return node_type;
+    }
+    DataType* type( ) const {
+      return data_type;
+    }
+    void setType(DataType* t) {
+      data_type = t;
+    }
+    int numChildren( ) const {
+      return children.size( );
+    }
+    Node* child(int which) const {
+      return children[which];
+    }
+    /* end cut */
 
-    /* the children nodes of this node */
-    vector<Node*> children;
 
     /* the symbol table used for this Node - currently only function nodes have one */
     map<string, Symbol>* symtable;
+
+  private:
+    /* the children nodes of this node */
+    vector<Node*> children;
 
     /* the type of node it is (eg plus vs stmt vs intval etc.) */
     NodeType node_type;
@@ -158,7 +176,6 @@ class Node {
     /* the data type of the node (NULL if not applicable) */
     DataType* data_type;
 
-  private:
     /* the values associated with the node (many will be blank) */
     string stringval;
     double realval;
