@@ -1,7 +1,6 @@
 Minimal Language Specification for Tetra
 
 TYPES
-
     Basic types:
         Reals    (float) : literals take the form of 17f, 17., .16, or 101.1
         Integers (int)   : literals take the form of 11 (decimal),
