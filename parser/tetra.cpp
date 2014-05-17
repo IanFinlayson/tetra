@@ -521,20 +521,25 @@ DataType* inferExpression(Node* expr, map<string, Symbol>* symtable) {
 }
 
 /* infer types in a block and add them into the symbol table */
-void inferBlock(Node* block, map<string, Symbol>* symtable) {
+void inferBlock(Node* block, map<string, Symbol>* symtable, DataType* functype) {
   if (!block) return;
 
   /* switch on the different types */
   switch (block->node_type) {
     case NODE_STATEMENT:
       /* handle both children */
-      inferBlock(block->children[0], symtable);
-      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[0], symtable, functype);
+      inferBlock(block->children[1], symtable, functype);
       break;
-    case NODE_RETURN:
-      /* infer the expression TODO check that it matches the return type */
-      inferExpression(block->children[0], symtable);
-      break;
+    case NODE_RETURN: {
+      /* infer the expression */
+      DataType* ret = inferExpression(block->children[0], symtable);
+
+      /* check that it matches the return type */
+      if (*ret != *functype) {
+        throw Error("Return value type does not match function's declared type", block->lineno);
+      }
+      break;}
     case NODE_IF: {
       /* infer the type of the expression */
       DataType* cond = inferExpression(block->children[0], symtable);
@@ -545,23 +550,23 @@ void inferBlock(Node* block, map<string, Symbol>* symtable) {
       }
 
       /* infer both the then and else blocks */
-      inferBlock(block->children[1], symtable);
-      inferBlock(block->children[2], symtable);
+      inferBlock(block->children[1], symtable, functype);
+      inferBlock(block->children[2], symtable, functype);
       break;}
     case NODE_ELIF:
       /* check the first child which is the first elf clause */
-      inferBlock(block->children[0], symtable);
+      inferBlock(block->children[0], symtable, functype);
 
       /* check the second child which is the chain of the rest of the elifs */
-      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[1], symtable, functype);
 
       /* check the third child which is the else clause (maybe NULL) */
-      inferBlock(block->children[2], symtable);
+      inferBlock(block->children[2], symtable, functype);
       break;
     case NODE_ELIF_CHAIN:
       /* check the clause on the left and the chain on the right */
-      inferBlock(block->children[0], symtable);
-      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[0], symtable, functype);
+      inferBlock(block->children[1], symtable, functype);
       break;
     case NODE_ELIF_CLAUSE: {
       /* check the expression on the left */
@@ -573,7 +578,7 @@ void inferBlock(Node* block, map<string, Symbol>* symtable) {
       }
 
       /* check the statements on the right */
-      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[1], symtable, functype);
       break;}
     case NODE_WHILE: {
       /* infer the type of the expression */
@@ -585,7 +590,7 @@ void inferBlock(Node* block, map<string, Symbol>* symtable) {
       }
 
       /* infer the body */
-      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[1], symtable, functype);
       break;}
     case NODE_PARFOR:
     case NODE_FOR: {
@@ -605,16 +610,16 @@ void inferBlock(Node* block, map<string, Symbol>* symtable) {
       insertSymbol(induction, symtable);
 
       /* check the block under this */
-      inferBlock(block->children[2], symtable);
+      inferBlock(block->children[2], symtable, functype);
       break;}
     case NODE_PARALLEL:
     case NODE_BACKGROUND:
       /* check the sub-block */
-      inferBlock(block->children[0], symtable);
+      inferBlock(block->children[0], symtable, functype);
       break;
     case NODE_LOCK:
       /* how will locks actually be implemented??? */
-      inferBlock(block->children[1], symtable);
+      inferBlock(block->children[1], symtable, functype);
       break;
 
     /* these require no work... */
@@ -643,7 +648,7 @@ void inferFunction(Node* node) {
   addParams(node->children[0], node->symtable);
 
   /* infer the body of the function */
-  inferBlock(node->children[1], node->symtable);
+  inferBlock(node->children[1], node->symtable, node->data_type);
 }
 
 /* this function does type checking/type inference on a parse tree */
