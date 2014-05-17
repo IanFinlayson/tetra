@@ -1,7 +1,26 @@
 # Tetra Node Documentation
 
-### NODE_FUNCTION
+Each of the following describes a *kind* of node.
+The kind defines which other fields of the node make sense to use,
+and tells you what number and kind of children it should have.
+
+Below we describe each kind of node.
+
 ### NODE_FUNCTION_LIST
+A list of functions.  These nodes are used for chaining all of the functions in a program
+together.
+Most have two children, the first being a function
+and the second being another list of functions.  The last function in the list has only one child.
+
+
+### NODE_FUNCTION
+A function node represents a function definition.
+Its name is stored in the string field.
+Its data type stores the return type for the function.
+Its first child is the parameter list for the function.
+Its second child holds the block of code that represents the body.
+
+
 ### NODE_STATEMENT
 ### NODE_FORMAL_PARAM
 ### NODE_FORMAL_PARAM_LIST
@@ -72,27 +91,7 @@ newl_star: TOK_NEWLINE newl_star {}
 /* one or more new lines */
 newl_plus: TOK_NEWLINE newl_star {}
 
-/* a list of functions */
-functions: newl_star function functions {
-  $$ = new Node(NODE_FUNCTION_LIST);
-  $$->setLine(0);
-  $$->addChild($2);
-  $$->addChild($3);
-} | {
-  $$ = NULL;
-}
 
-/* a single function */
-function: TOK_DEF TOK_IDENTIFIER {linenos.push(yylineno);} formal_param_list return_type TOK_COLON block {
-  $$ = new Node(NODE_FUNCTION);
-  $$->setStringval(string($2));
-  $$->setDataType($5);
-  $$->addChild($4);
-  $$->addChild($7);
-
-  $$->setLine(linenos.top( ));
-  linenos.pop( );
-}
 
 /* a parameter list (with bannanas) */
 formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
