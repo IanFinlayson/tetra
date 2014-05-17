@@ -10,7 +10,7 @@
 using namespace std;
 
 /* types of nodes */
-enum NodeType {
+enum NodeKind {
   /* statement and grouping nodes */
   NODE_FUNCTION,
   NODE_FUNCTION_LIST,
@@ -70,16 +70,6 @@ enum NodeType {
   NODE_IDENTIFIER
 };
 
-/* the type of data type it is */
-enum DataTypeType {
-  TYPE_INT,
-  TYPE_REAL,
-  TYPE_STRING,
-  TYPE_BOOL,
-  TYPE_VOID,
-  TYPE_VECTOR
-};
-
 /* any type of error is handled with this exception */
 class Error {
   public:
@@ -94,6 +84,16 @@ class Error {
 
 /* print an error */
 ostream& operator<<(ostream& out, const Error& error);
+
+/* the different possibilities a data type can be */
+enum DataTypeType {
+  TYPE_INT,
+  TYPE_REAL,
+  TYPE_STRING,
+  TYPE_BOOL,
+  TYPE_VOID,
+  TYPE_VECTOR
+};
 
 /* a data type contains the above enum, along with a pointer to the "sub" type
  * currently this is only used for vectors */
@@ -134,82 +134,34 @@ class Symbol {
 /* the node class represents one element of a parse tree */
 class Node {
   public:
-    /* functions */
-    Node(NodeType type);
-    void addChild(Node* child);
+    /* constructor and modifiers */
+    Node(NodeKind type);
     void setDataType(DataType* data_type);
     void setStringval(const string& stringval);
     void setIntval(int intval);
     void setBoolval(bool boolval);
     void setRealval(double realval);
     void setLine(int lineno);
+    void setType(DataType* t);
 
-    /* begin cut */
-    int getLine( ) const {
-      return lineno;
-    }
-    string getString( ) const {
-      return stringval;
-    }
-    int getInt( ) const {
-      return intval;
-    }
-    double getReal( ) const {
-      return realval;
-    }
-    bool getBool( ) const {
-      return boolval;
-    }
-    NodeType kind( ) const {
-      return node_type;
-    }
-    DataType* type( ) const {
-      return data_type;
-    }
-    void setType(DataType* t) {
-      data_type = t;
-    }
-    int numChildren( ) const {
-      return children.size( );
-    }
-    Node* child(int which) const {
-      return children[which];
-    }
-    /* insert a symbol into the symtable */
-    void insertSymbol(Symbol sym) {
-      /* create symtable if needed */
-      if (!symtable) {
-        symtable = new map<string, Symbol>( );
-      }
+    /* accessors */
+    int getLine( ) const;
+    string getString( ) const;
+    int getInt( ) const;
+    double getReal( ) const;
+    bool getBool( ) const;
+    NodeKind kind( ) const;
+    DataType* type( ) const;
 
-      /* check if it's there first */
-      if (symtable->count(sym.getName( )) > 0) {
-        throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
-      }
+    /* children functions */
+    void addChild(Node* child);
+    int numChildren( ) const;
+    Node* child(int which) const;
 
-      /* add it in */
-      symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
-    }
-
-    /* lookup a symbol from a symbol table */
-    Symbol lookupSymbol(string name, int lineno) {
-      map<string, Symbol>::iterator it = symtable->find(name);
-
-      if (it == symtable->end( )) {
-        throw Error("Symbol '" + name + "' not found!", lineno);
-      }
-
-      /* return the record */
-      return it->second;
-    }
-    bool hasSymbol(const string& name) {
-      if (!symtable) {
-        return false;
-      }
-      return (symtable->count(name) > 0);
-    }
-    /* end cut */
-
+    /* symbol functions */
+    void insertSymbol(Symbol sym);
+    Symbol lookupSymbol(string name, int lineno);
+    bool hasSymbol(const string& name);
 
   private:
     /* the children nodes of this node */
@@ -219,7 +171,7 @@ class Node {
     map<string, Symbol>* symtable;
 
     /* the type of node it is (eg plus vs stmt vs intval etc.) */
-    NodeType node_type;
+    NodeKind node_type;
 
     /* the data type of the node (NULL if not applicable) */
     DataType* data_type;

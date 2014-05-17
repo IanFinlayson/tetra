@@ -32,7 +32,7 @@ string typeToString(DataType* t) {
 }
 
 /* node member functions */
-Node::Node(NodeType node_type) {
+Node::Node(NodeKind node_type) {
   this->node_type = node_type;
   this->data_type = NULL;
   stringval = "";
@@ -71,6 +71,73 @@ void Node::setRealval(double realval) {
 void Node::setLine(int lineno) {
   this->lineno = lineno;
 }
+
+int Node::getLine( ) const {
+  return lineno;
+}
+string Node::getString( ) const {
+  return stringval;
+}
+int Node::getInt( ) const {
+  return intval;
+}
+double Node::getReal( ) const {
+  return realval;
+}
+bool Node::getBool( ) const {
+  return boolval;
+}
+NodeKind Node::kind( ) const {
+  return node_type;
+}
+DataType* Node::type( ) const {
+  return data_type;
+}
+void Node::setType(DataType* t) {
+  data_type = t;
+}
+int Node::numChildren( ) const {
+  return children.size( );
+}
+Node* Node::child(int which) const {
+  return children[which];
+}
+/* insert a symbol into the symtable */
+void Node::insertSymbol(Symbol sym) {
+  /* create symtable if needed */
+  if (!symtable) {
+    symtable = new map<string, Symbol>( );
+  }
+
+  /* check if it's there first */
+  if (symtable->count(sym.getName( )) > 0) {
+    throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
+  }
+
+  /* add it in */
+  symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
+}
+
+/* lookup a symbol from a symbol table */
+Symbol Node::lookupSymbol(string name, int lineno) {
+  map<string, Symbol>::iterator it = symtable->find(name);
+
+  if (it == symtable->end( )) {
+    throw Error("Symbol '" + name + "' not found!", lineno);
+  }
+
+  /* return the record */
+  return it->second;
+}
+
+bool Node::hasSymbol(const string& name) {
+  if (!symtable) {
+    return false;
+  }
+  return (symtable->count(name) > 0);
+}
+
+
 
 /* this function search and replaces a string in place */
 void replace(string& str, const string& from, const string& to) {
