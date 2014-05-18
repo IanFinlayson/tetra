@@ -21,7 +21,7 @@ block of code that represents the body.
 ### NODE_FORMAL_PARAM_LIST
 A list of formal parameters into a function.  A *formal* parameter is one in a
 function definition (as opposed to an *actual* parameter which is used in a
-    function call).  It has two children: the first is represents the next
+function call).  It has two children: the first is represents the next
 parameter, and the second is either the list of remaining parameters or the
 last parameter.
 
@@ -46,8 +46,9 @@ A break node represents the *break* statement.  It has no children.
 A continue node represents the *continue* statement.  It has no children.
 
 ### NODE_RETURN
-A return node represents the *return* statement.  It has either no children, for a return in a void function,
-or one child representing the expression to be returned.
+A return node represents the *return* statement.  It has either no children,
+for a return in a void function, or one child representing the expression to be
+returned.
 
 ### NODE_IF
 This represents an if statement.  The first child is an expression representing
@@ -70,32 +71,25 @@ second child is either another chain, or the last clause in the chain.
 An elif clause is one condition/statement pair.  The first child is the
 condition, and the second is the statement to execute if it is true.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-TODO
-
 ### NODE_WHILE
-### NODE_FOR
-### NODE_PARALLEL
-### NODE_PARFOR
-### NODE_BACKGROUND
+Represents a while statement.  The first child is the condition expression
+node, and the second child is the body to be executed as long as the condition
+is true.
+
+### NODE_FOR or NODE_PARFOR
+Represents a for loop or parallel for loop statement.  The first child is the
+identifier node for the control variable.  The second child is the expression
+that evaluates to a vector of elements to loop over.  The third child is the
+body of the loop.
+
+### NODE_PARALLEL and NODE_BACKGROUND
+These represent parallel and background blocks respectively.  The only child is
+the body of the block giving the code to run in parallel - or in the
+background.
+
 ### NODE_LOCK
+Represents a lock statement.  The first child is the identifier node of the
+lock, the second child is the block of code to do under the lcok.
 
 ### NODE_ASSIGN
 An assignment node has two children.  The first is an identifier node giving
@@ -133,148 +127,34 @@ These two unary operators have one child representing their operand.  The
 difference is that NODE_NOT is used for boolean values and NODE_BITNOT is used
 on integral ones.
 
-
-
 ### NODE_VECREF
+A node which represents a vector reference - an identifier followed by some
+number of indices.  The first child is an identifier node which stores the
+vector id.  The second child is a NODE_INDEX.
+
 ### NODE_INDEX
+A node which represents a set of indices on an identifier.  The first child is
+the next expression used for calculating the index.  If there are more indices,
+they are stored as a NODE_INDEX in the second child.
 
 ### NODE_FUNCALL
+Represents a function call.  The string value stores the name of the function
+being called.  If there are parameters, they are stored in a child node.  If
+there is only one, it is an expression.  If there are multiple, then they are
+stored as a NODE_ACTUAL_PARAM_LIST.
+
 ### NODE_ACTUAL_PARAM_LIST
+Represents a list of *actual* parameters - those used in a function call.  The
+first child is the next actual parameter to be passed.  The second child is
+either the last parameter (an expression) or another NODE_ACTUAL_PARAM_LIST
+node.
 
-### NODE_INTVAL
-### NODE_REALVAL
-### NODE_BOOLVAL
-### NODE_STRINGVAL
+
+### NODE_INTVAL, NODE_REALVAL, NODE_BOOLVAL and NODE_STRINGVAL
+Each of these are leaf nodes which store only one value in the correspondingly
+typed value.
+
 ### NODE_IDENTIFIER
-
-
-
-
-
-
-
-
-
-
-
-/* a for loop */
-for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
-  $$ = new Node(NODE_FOR);
-  $$->addChild($2);
-  $$->addChild($4);
-  $$->addChild($6);
-}
-
-/* a parallel for loop */
-parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
-  $$ = new Node(NODE_PARFOR);
-  $$->addChild($3);
-  $$->addChild($5);
-  $$->addChild($7);
-}
-
-/* a while loop */
-while_statement: TOK_WHILE expression TOK_COLON block {
-  $$ = new Node(NODE_WHILE);
-  $$->addChild($2);
-  $$->addChild($4);
-}
-
-/* a parallel block */
-parblock: TOK_PARALLEL TOK_COLON block {
-  $$ = new Node(NODE_PARALLEL);
-  $$->addChild($3);
-}
-
-/* a background block */
-background: TOK_BACKGROUND TOK_COLON block {
-  $$ = new Node(NODE_BACKGROUND);
-  $$->addChild($3);
-}
-
-/* a lock statement */
-lock_statement: TOK_LOCK identifier TOK_COLON block {
-  $$ = new Node(NODE_LOCK);
-  $$->addChild($2);
-  $$->addChild($4);
-}
-
-
-
-
-
-
-/* indivisible thing */
-expterm: funcall {
-  $$ = $1;
-} | TOK_LEFTPARENS expression TOK_RIGHTPARENS {
-  $$ = $2;
-} | TOK_INTVAL {
-  $$ = new Node(NODE_INTVAL);
-  $$->setIntval($1);
-} | TOK_REALVAL {
-  $$ = new Node(NODE_REALVAL);
-  $$->setRealval($1);
-} | TOK_BOOLVAL {
-  $$ = new Node(NODE_BOOLVAL);
-  $$->setBoolval($1);
-} | TOK_STRINGVAL {
-  $$ = new Node(NODE_STRINGVAL);
-  $$->setStringval($1);
-} | variable {
-  $$ = $1;
-}
-
-/* an l-value - any identifier with any number of indexes after it */
-variable: identifier indices {
-  /* if it's a vector reference */
-  if ($2) {
-    $$ = new Node(NODE_VECREF);
-    $$->addChild($1);
-    $$->addChild($2);
-  } else {
-    /* just a humble identifier */
-    $$ = $1;
-  }
-}
-
-/* any number of indices */
-indices: index indices {
-  $$ = new Node(NODE_INDEX);
-  $$->addChild($1);
-  $$->addChild($2);
-} | {
-  $$ = NULL;
-}
-
-/* a single index */
-index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
-  $$ = $2;
-}
-
-/* a node wrapper around an ID */
-identifier: TOK_IDENTIFIER {
-  $$ = new Node(NODE_IDENTIFIER);
-  $$->setStringval($1);
-}
-
-/* a function call */
-funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
-  $$ = new Node(NODE_FUNCALL);
-  $$->setStringval($1);
-} | TOK_IDENTIFIER TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
-  $$ = new Node(NODE_FUNCALL);
-  $$->setStringval($1);
-  $$->addChild($3);
-}
-
-/* a list of at least one parameter */
-actual_param_list: expression TOK_COMMA actual_param_list {
-  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
-  $$->addChild($1);
-  $$->addChild($3);
-} | expression {
-  $$ = $1;
-}
-
+A leaf node that represents an identifier node and stores the name in the
+string value.
 
