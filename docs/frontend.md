@@ -13,58 +13,58 @@ different kinds of nodes produced.
 ```cpp
  Node(NodeKind type);
 ```
+The constructor takes the *kind* of node to be created.  This is an enum whose values
+are described at the end of this document.
 
 ```cpp
  void setDataType(DataType* data_type);
 ```
+This sets the DataType of the node.  Not all nodes have a data type (such as a node
+representing a while loop), but many do (such as values, operators, etc.)
 
 ```cpp
  void setStringval(const string& stringval);
-```
-
-```cpp
  void setIntval(int intval);
-```
-
-```cpp
+ void setRealval(double realval);
  void setBoolval(bool boolval);
 ```
+These functions set the string, int, real and bool values associated with nodes.
 
-```cpp
- void setRealval(double realval);
-```
+Most types of nodes do not have any of these values associated with them.
+Identifiers, functions and string constants do have string values, and nodes
+representing numeric or boolean literals have the appropriate value set.
 
 ```cpp
  void setLine(int lineno);
 ```
+This sets the source line number to be associated with this node.
 
 ```cpp
  void setType(DataType* t);
 ```
+This sets the data type to be associated with this node.  Not all nodes have a data type
+(again like a while loop node), but many do.  The frontend tries to infer as many types
+as it can, and sets the types using this function.
 
 ```cpp
  int getLine( );
 ```
+Returns the line number associated with the node - this is used in error reporting.
+The line numbers actually may not be entirely accurate.  The frontend currently does
+not do a very good job of assigning accurate line numbers, but this should be fixed.
 
 ```cpp
  string getString( );
-```
-
-```cpp
  int getInt( );
-```
-
-```cpp
  double getReal( );
-```
-
-```cpp
  bool getBool( );
 ```
+Each of these functions returns the value associated with the node as described above.
 
 ```cpp
  NodeKind kind( );
 ```
+This function returns the kind of node this is - the possible values are described in detail below.
 
 ```cpp
  DataType* type( );
