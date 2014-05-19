@@ -9,6 +9,7 @@ Below, we describe the member functions of this class along with the
 different kinds of nodes produced.
 
 ###### Member Functions
+
 ```cpp
  Node(NodeKind type);
 ```
@@ -42,31 +43,31 @@ different kinds of nodes produced.
 ```
 
 ```cpp
- int getLine( ) const;
+ int getLine( );
 ```
 
 ```cpp
- string getString( ) const;
+ string getString( );
 ```
 
 ```cpp
- int getInt( ) const;
+ int getInt( );
 ```
 
 ```cpp
- double getReal( ) const;
+ double getReal( );
 ```
 
 ```cpp
- bool getBool( ) const;
+ bool getBool( );
 ```
 
 ```cpp
- NodeKind kind( ) const;
+ NodeKind kind( );
 ```
 
 ```cpp
- DataType* type( ) const;
+ DataType* type( );
 ```
 
 ```cpp
@@ -74,11 +75,11 @@ different kinds of nodes produced.
 ```
 
 ```cpp
- int numChildren( ) const;
+ int numChildren( );
 ```
 
 ```cpp
- Node* child(int which) const;
+ Node* child(int which);
 ```
 
 ```cpp
