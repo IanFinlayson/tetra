@@ -13,5 +13,4 @@
 - Imporve the accuracy of the line numbers associated with nodes.
 - Allow for the automatic promotion of ints to reals.
 - Improve type checking on binary operators.
-- Add support for vector literals.
 

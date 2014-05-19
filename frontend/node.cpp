@@ -80,7 +80,11 @@ int Node::numChildren( ) const {
   return children.size( );
 }
 Node* Node::child(int which) const {
-  return children[which];
+  if (which < 0 || which >= (int)children.size( )) {
+    return NULL;
+  } else {
+    return children[which];
+  }
 }
 /* insert a symbol into the symtable */
 void Node::insertSymbol(Symbol sym) {

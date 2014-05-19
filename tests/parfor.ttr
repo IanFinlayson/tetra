@@ -1,4 +1,7 @@
+def print(x int):
+    pass
+
 def pfl(times int):
-    parallel for i in range(times):
+    parallel for i in [1 ... 10]:
         print(i)
 

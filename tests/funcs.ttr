@@ -33,11 +33,11 @@ def fact(x int) int:
 
 
 def for_test( ):
-    for i in range(10):
+    for i in [1 ... 10]:
         print("HEY!!!")
 
 
-def function(a real, b int) string:
+def function(a real, b real) string:
     if a > b:
         print("Yo!")
     return "Hello"
@@ -45,7 +45,7 @@ def function(a real, b int) string:
 
 
 
-def function(a real, b int) string:
+def function(a real, b real) string:
     if a > b:
         print("Yo!")
     return "Hello"

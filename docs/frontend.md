@@ -369,6 +369,13 @@ node.
 Each of these are leaf nodes which store only one value in the correspondingly
 typed value.
 
+##### NODE_VECVAL
+This node type represents a vector literal.  If there are no children, it
+represents the empty vector [].  If there is one child, that child is an
+expression which gives the value of the next element in the vector.  If there
+is a second child, it is another NODE_VECVAL giving the rest of the vectors
+values.
+
 ##### NODE_IDENTIFIER
 A leaf node that represents an identifier node and stores the name in the
 string value.

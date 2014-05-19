@@ -248,6 +248,17 @@ int yylex( ) {
     return lexIdent(next);
   }
 
+  /* if it's three decimal points, it's an elipsis */
+  if (next == '.' && in->peek( ) == '.') {
+    in->get( );
+
+    if(in->get( ) != '.') {
+      throw Error("Lexical error: '..' not correct", yylineno);
+    }
+
+    return TOK_ELLIPSIS;
+  }
+
   /* if it's a number or decimal point, we have a number of some kind */
   if (isdigit(next) || next == '.') {
     return lexNumber(next);

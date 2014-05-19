@@ -99,6 +99,7 @@ stack<int> linenos;
 %token TOK_ANDEQ
 %token TOK_XOREQ
 %token TOK_OREQ
+%token TOK_ELLIPSIS
 %token TOK_BACKGROUND
 %token TOK_LOCK
 
@@ -121,7 +122,7 @@ stack<int> linenos;
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
 %type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-%type <node> background lock_statement index indices
+%type <node> background lock_statement index indices vector_value vector_values
 
 
 %type <data_type> return_type type
@@ -637,9 +638,57 @@ expterm: funcall {
 } | TOK_STRINGVAL {
   $$ = new Node(NODE_STRINGVAL);
   $$->setStringval($1);
+} | vector_value {
+  $$ = $1;
 } | variable {
   $$ = $1;
 }
+
+/* a vector literal */
+vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
+  /* an empty vector definition */
+  $$ = new Node(NODE_VECVAL);
+} | TOK_LEFTBRACKET TOK_INTVAL TOK_ELLIPSIS TOK_INTVAL TOK_RIGHTBRACKET {
+  /* a vector with elipsis eg [1 .. 5] */
+  $$ = new Node(NODE_VECVAL);
+
+  /* check that the values are legit */
+  if ($2 >= $4) {
+    throw Error("Left value must be less than right value in a range declaration", yylineno);
+  }
+
+  /* add all of the children in place */
+  Node* parent = $$;
+  for (int i = $2; i <= $4; i++) {
+    /* add in the next number */
+    Node* num = new Node(NODE_INTVAL);
+    num->setIntval(i);
+    parent->addChild(num);
+
+    /* if there are more */
+    if (i < $4) {
+      /* add in the rest */
+      Node* next = new Node(NODE_VECVAL);
+      parent->addChild(next);
+      parent = next;
+    }
+  }
+} | TOK_LEFTBRACKET vector_values TOK_RIGHTBRACKET {
+  /* a set of one or more vector initializers */
+  $$ = $2;
+}
+
+/* one or more expressions to be made into a vector */
+vector_values: expression TOK_COMMA vector_values {
+  $$ = new Node(NODE_VECVAL);
+  $$->addChild($1);
+  $$->addChild($3);
+} | expression {
+  $$ = new Node(NODE_VECVAL);
+  $$->addChild($1);
+}
+
+
 
 /* an l-value - any identifier with any number of indexes after it */
 variable: identifier indices {

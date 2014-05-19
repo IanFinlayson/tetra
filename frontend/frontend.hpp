@@ -62,6 +62,9 @@ enum NodeKind {
   NODE_FUNCALL,
   NODE_ACTUAL_PARAM_LIST,
 
+  /* vector constants */
+  NODE_VECVAL,
+
   /* leafy nodes */
   NODE_INTVAL,
   NODE_REALVAL,

@@ -361,7 +361,15 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_STRINGVAL:
       return new DataType(TYPE_STRING);
 
+    case NODE_VECVAL: {
+      DataType* dt = new DataType(TYPE_VECTOR);
+      dt->setSubType(inferExpression(expr->child(0), func));
+      /* TODO check that all of the expressions match! */
+      return dt;
+    }
+
     default:
+      cout << expr->kind( ) << endl;
       throw Error("inferExpression: unknown node type");
       break;
   }

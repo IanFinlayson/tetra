@@ -2,7 +2,11 @@ def len(nums [int]) int:
   # this is probably good enough :)
   return 7
 
-def sum(nums [int]):
+def getPrimes( ) [int]:
+  # some of them anyway
+  return [2, 3, 5, 7, 11, 13, 17, 19, 23]
+
+def sum(nums [int]) int:
   i = 0
   sum = 0
   while i < len(nums):
