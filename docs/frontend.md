@@ -96,7 +96,7 @@ different kinds of nodes produced.
 
 
 
-###### Kinds
+##### Kinds
 Each of the following describes a *kind* of node.  The kind defines which other
 fields of the node make sense to use, and tells you what number and kind of
 children it should have.
