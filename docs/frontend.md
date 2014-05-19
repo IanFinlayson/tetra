@@ -10,67 +10,88 @@ different kinds of nodes produced.
 
 ###### Member Functions
 ```cpp
- Node(NodeKind type);```
+ Node(NodeKind type);
+```
 
 ```cpp
- void setDataType(DataType* data_type);```
+ void setDataType(DataType* data_type);
+```
 
 ```cpp
- void setStringval(const string& stringval);```
+ void setStringval(const string& stringval);
+```
 
 ```cpp
- void setIntval(int intval);```
+ void setIntval(int intval);
+```
 
 ```cpp
- void setBoolval(bool boolval);```
+ void setBoolval(bool boolval);
+```
 
 ```cpp
- void setRealval(double realval);```
+ void setRealval(double realval);
+```
 
 ```cpp
- void setLine(int lineno);```
+ void setLine(int lineno);
+```
 
 ```cpp
- void setType(DataType* t);```
+ void setType(DataType* t);
+```
 
 ```cpp
- int getLine( ) const;```
+ int getLine( ) const;
+```
 
 ```cpp
- string getString( ) const;```
+ string getString( ) const;
+```
 
 ```cpp
- int getInt( ) const;```
+ int getInt( ) const;
+```
 
 ```cpp
- double getReal( ) const;```
+ double getReal( ) const;
+```
 
 ```cpp
- bool getBool( ) const;```
+ bool getBool( ) const;
+```
 
 ```cpp
- NodeKind kind( ) const;```
+ NodeKind kind( ) const;
+```
 
 ```cpp
- DataType* type( ) const;```
+ DataType* type( ) const;
+```
 
 ```cpp
- void addChild(Node* child);```
+ void addChild(Node* child);
+```
 
 ```cpp
- int numChildren( ) const;```
+ int numChildren( ) const;
+```
 
 ```cpp
- Node* child(int which) const;```
+ Node* child(int which) const;
+```
 
 ```cpp
- void insertSymbol(Symbol sym);```
+ void insertSymbol(Symbol sym);
+```
 
 ```cpp
- Symbol lookupSymbol(string name, int lineno);```
+ Symbol lookupSymbol(string name, int lineno);
+```
 
 ```cpp
- bool hasSymbol(const string& name);```
+ bool hasSymbol(const string& name);
+```
 
 
 
