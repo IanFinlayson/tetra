@@ -69,30 +69,42 @@ This function returns the kind of node this is - the possible values are describ
 ```cpp
  DataType* type( );
 ```
+This function returns the data type of the node - or NULL if it does not have one.
 
 ```cpp
  void addChild(Node* child);
 ```
+This function adds a node as a child of another - this is probably only useful to the
+frontend code itself.
 
 ```cpp
  int numChildren( );
 ```
+This function returns the number of children that a given node has.
 
 ```cpp
  Node* child(int which);
 ```
+This function returns a child of a node.  The which parameter indicates which
+child should be returned.  The first child is 0, the second is 1 and so on.
 
 ```cpp
  void insertSymbol(Symbol sym);
 ```
+This function inserts a Symbol object into the nodes symbol table.  Only NODE_FUNCTION nodes
+have symbol tables.
 
 ```cpp
  Symbol lookupSymbol(string name, int lineno);
 ```
+This function returns a symbol from the nodes symbol table.  If the symbol is not found,
+then this function throws an Error.  The line number parameter is used for the Error
+message.
 
 ```cpp
  bool hasSymbol(const string& name);
 ```
+This function checks to see if a symbol is in the nodes symbol table.
 
 
 
