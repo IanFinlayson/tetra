@@ -50,12 +50,12 @@ obvious which line is associated with each syntax element.
 Data types are handled with the DataType class.  Data types are comprised of
 two elements:
 - The *kind* of type it is.  This is handled with an enumeration:
--- TYPE_INT
--- TYPE_REAL
--- TYPE_STRING
--- TYPE_BOOL
--- TYPE_VOID
--- TYPE_VECTOR
+ -- TYPE_INT
+ -- TYPE_REAL
+ -- TYPE_STRING
+ -- TYPE_BOOL
+ -- TYPE_VOID
+ -- TYPE_VECTOR
 
 
 
