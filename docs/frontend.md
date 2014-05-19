@@ -44,7 +44,23 @@ accurate as they could be - due to the way the parser works, it is not always
 obvious which line is associated with each syntax element.
 
 ### Symbols
+The symbol class represents identifiers used in a function - local variables
+and parameters.  The Symbol class contains the following functions:
 
+```cpp
+Symbol( );
+Symbol(string name, DataType* type, int lineno);
+```
+Constructors used for creating symbols.
+
+```cpp
+int getLine( ) const;
+string getName( ) const;
+DataType* getType( ) const;
+```
+Accessors used for getting the name of the symbol, the line associated with it,
+and the data type.  Parameter symbols get their types from the declarations in
+the code, while local variable symbols get their types computed.
 
 ### Data Types
 Data types are handled with the DataType class.  Data types are comprised of
@@ -80,6 +96,14 @@ DataType* getSub( );
 ```
 Returns the subtype of this type.
 
+Data types also provide the == and != operators for comparing two types for
+equality.
+
+There is also a function
+```cpp
+string typeToString(DataType* t); 
+```
+Which returns a string representation of the given data type.
 
 ### Nodes
 Node objects comprise the parse tree returned from parseFile.  Below, we
@@ -310,6 +334,7 @@ These operators including:
 - NODE_DIVIDE
 - NODE_MODULUS
 - NODE_EXP
+
 Each have two children representing the left and right operands.
 
 ##### NODE_NOT and NODE_BITNOT
