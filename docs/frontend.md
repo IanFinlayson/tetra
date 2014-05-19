@@ -27,17 +27,17 @@ contains the following functions:
 ```cpp
 Error(const string& mesg, int lineno = 0); 
 ```
-The constructor is used when throwing an Error.  The message and line number
+Theructor is used when throwing an Error.  The message and line number
 describe the error.
 
 ```cpp
-string getMessage( ) const;
+string getMessage( );
 ```
 Returns the message reported when the Error was raised.  Some of these need to
 be improved in terms of clarity.
 
 ```cpp
-int getLine( ) const;
+int getLine( );
 ```
 Returns the source line where the Error was detected.  Some of these are not as
 accurate as they could be - due to the way the parser works, it is not always
@@ -54,9 +54,9 @@ Symbol(string name, DataType* type, int lineno);
 Constructors used for creating symbols.
 
 ```cpp
-int getLine( ) const;
-string getName( ) const;
-DataType* getType( ) const;
+int getLine( );
+string getName( );
+DataType* getType( );
 ```
 Accessors used for getting the name of the symbol, the line associated with it,
 and the data type.  Parameter symbols get their types from the declarations in
@@ -79,7 +79,7 @@ Data types have the following functions:
 ```cpp
 DataType(DataTypeKind kind);
 ```
-The constructor takes the kind of type (one of the above enumeration values).
+Theructor takes the kind of type (one of the above enumeration values).
 
 ```cpp
 void setSubType(DataType* subtype);
@@ -115,7 +115,7 @@ nodes produced.
 ```cpp
 Node(NodeKind type);
 ```
-The constructor takes the *kind* of node to be created.  This is an enum whose
+Theructor takes the *kind* of node to be created.  This is an enum whose
 values are described at the end of this document.
 
 ```cpp
@@ -134,7 +134,7 @@ These functions set the string, int, real and bool values associated with
 nodes.
 
 Most types of nodes do not have any of these values associated with them.
-Identifiers, functions and string constants do have string values, and nodes
+Identifiers, functions and stringants do have string values, and nodes
 representing numeric or boolean literals have the appropriate value set.
 
 ```cpp
