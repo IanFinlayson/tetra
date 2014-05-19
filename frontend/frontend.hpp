@@ -86,7 +86,7 @@ class Error {
 ostream& operator<<(ostream& out, const Error& error);
 
 /* the different possibilities a data type can be */
-enum DataTypeType {
+enum DataTypeKind {
   TYPE_INT,
   TYPE_REAL,
   TYPE_STRING,
@@ -99,13 +99,13 @@ enum DataTypeType {
  * currently this is only used for vectors */
 class DataType {
   public:
-    DataType(DataTypeType kind);
+    DataType(DataTypeKind kind);
     void setSubType(DataType* subtype);
-    DataTypeType getKind( ) const;
+    DataTypeKind getKind( ) const;
     DataType* getSub( ) const;
 
   private:
-    DataTypeType kind;
+    DataTypeKind kind;
     DataType* subtype;
 };
 

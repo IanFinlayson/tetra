@@ -32,12 +32,12 @@ string typeToString(DataType* t) {
 }
 
 /* data type functions */
-DataType::DataType(DataTypeType kind) {
+DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
   subtype = NULL;
 }
 
-DataTypeType DataType::getKind( ) const {
+DataTypeKind DataType::getKind( ) const {
   return kind;
 }
 
@@ -50,7 +50,7 @@ void DataType::setSubType(DataType* subtype) {
 }
 
 /* find the base type of a data type */
-DataTypeType baseType(DataType* t) {
+DataTypeKind baseType(DataType* t) {
   if (t->getKind( ) == TYPE_VECTOR)
     return baseType(t->getSub( ));
   else

@@ -56,7 +56,29 @@ two elements:
  - TYPE_BOOL
  - TYPE_VOID
  - TYPE_VECTOR
+- The *subtype* which is only used TYPE_VECTOR types.  The subtype is another
+pointer to a DataType object.
 
+Data types have the following functions:
+```cpp
+DataType(DataTypeKind kind);
+```
+The constructor takes the kind of type (one of the above enumeration values).
+
+```cpp
+void setSubType(DataType* subtype);
+```
+Sets the subtype of the data type (again only done for vectors).
+
+```cpp
+DataTypeKind getKind( );
+```
+Returns the kind of type this is.
+
+```cpp
+DataType* getSub( );
+```
+Returns the subtype of this type.
 
 
 ### Nodes
