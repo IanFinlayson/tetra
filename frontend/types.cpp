@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
-#include "tetra.hpp"
+#include "frontend.hpp"
 #include "parser.gen.hpp"
 
 extern Node* root;

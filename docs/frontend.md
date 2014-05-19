@@ -1,108 +1,169 @@
 # Tetra Frontend Documentation
 
 ### Usage
+The frontend contains a lexical analyzer, a syntax  analyzer, and type
+checking/inference code for Tetra.  To use it, include the main header file:
+
+```cpp
+#include "frontend/frontend.hpp"
+```
+Then link to the "frontend/libfrontend.a" static library when compiling.
+
+The first function to call would be:
+```cpp
+Node* parseFile(const string& fname);
+```
+Which loads code from the file indicated by the file name parameter, lexes it,
+parses it, performs type checking/inference on it, and returns a pointer to the
+root node of the program.
+
+Should anything go wrong with the process, it throws an "Error" object as an
+exception.
+
+### Errors
+Errors are handled with exceptions thrown by the frontend.  The Error class
+contains the following functions:
+
+```cpp
+Error(const string& mesg, int lineno = 0); 
+```
+The constructor is used when throwing an Error.  The message and line number
+describe the error.
+
+```cpp
+string getMessage( ) const;
+```
+Returns the message reported when the Error was raised.  Some of these need to
+be improved in terms of clarity.
+
+```cpp
+int getLine( ) const;
+```
+Returns the source line where the Error was detected.  Some of these are not as
+accurate as they could be - due to the way the parser works, it is not always
+obvious which line is associated with each syntax element.
+
+### Symbols
+
+
+### Data Types
+Data types are handled with the DataType class.  Data types are comprised of
+two elements:
+- The *kind* of type it is.  This is handled with an enumeration:
+-- TYPE_INT
+-- TYPE_REAL
+-- TYPE_STRING
+-- TYPE_BOOL
+-- TYPE_VOID
+-- TYPE_VECTOR
+
 
 
 ### Nodes
-Node objects comprise the parse tree returned from parseFile.
-Below, we describe the member functions of this class along with the
-different kinds of nodes produced.
+Node objects comprise the parse tree returned from parseFile.  Below, we
+describe the member functions of this class along with the different kinds of
+nodes produced.
 
 ##### Member Functions
 
 ```cpp
- Node(NodeKind type);
+Node(NodeKind type);
 ```
-The constructor takes the *kind* of node to be created.  This is an enum whose values
-are described at the end of this document.
+The constructor takes the *kind* of node to be created.  This is an enum whose
+values are described at the end of this document.
 
 ```cpp
- void setDataType(DataType* data_type);
+void setDataType(DataType* data_type);
 ```
-This sets the DataType of the node.  Not all nodes have a data type (such as a node
-representing a while loop), but many do (such as values, operators, etc.)
+This sets the DataType of the node.  Not all nodes have a data type (such as a
+node representing a while loop), but many do (such as values, operators, etc.)
 
 ```cpp
- void setStringval(const string& stringval);
- void setIntval(int intval);
- void setRealval(double realval);
- void setBoolval(bool boolval);
+void setStringval(const string& stringval);
+void setIntval(int intval);
+void setRealval(double realval);
+void setBoolval(bool boolval);
 ```
-These functions set the string, int, real and bool values associated with nodes.
+These functions set the string, int, real and bool values associated with
+nodes.
 
 Most types of nodes do not have any of these values associated with them.
 Identifiers, functions and string constants do have string values, and nodes
 representing numeric or boolean literals have the appropriate value set.
 
 ```cpp
- void setLine(int lineno);
+void setLine(int lineno);
 ```
 This sets the source line number to be associated with this node.
 
 ```cpp
- void setType(DataType* t);
+void setType(DataType* t);
 ```
-This sets the data type to be associated with this node.  Not all nodes have a data type
-(again like a while loop node), but many do.  The frontend tries to infer as many types
-as it can, and sets the types using this function.
+This sets the data type to be associated with this node.  Not all nodes have a
+data type (again like a while loop node), but many do.  The frontend tries to
+infer as many types as it can, and sets the types using this function.
 
 ```cpp
- int getLine( );
+int getLine( );
 ```
-Returns the line number associated with the node - this is used in error reporting.
-The line numbers actually may not be entirely accurate.  The frontend currently does
-not do a very good job of assigning accurate line numbers, but this should be fixed.
+Returns the line number associated with the node - this is used in error
+reporting.  The line numbers actually may not be entirely accurate.  The
+frontend currently does not do a very good job of assigning accurate line
+numbers, but this should be fixed.
 
 ```cpp
- string getString( );
- int getInt( );
- double getReal( );
- bool getBool( );
+string getString( );
+int getInt( );
+double getReal( );
+bool getBool( );
 ```
-Each of these functions returns the value associated with the node as described above.
+Each of these functions returns the value associated with the node as described
+above.
 
 ```cpp
- NodeKind kind( );
+NodeKind kind( );
 ```
-This function returns the kind of node this is - the possible values are described in detail below.
+This function returns the kind of node this is - the possible values are
+described in detail below.
 
 ```cpp
- DataType* type( );
+DataType* type( );
 ```
-This function returns the data type of the node - or NULL if it does not have one.
+This function returns the data type of the node - or NULL if it does not have
+one.
 
 ```cpp
- void addChild(Node* child);
+void addChild(Node* child);
 ```
-This function adds a node as a child of another - this is probably only useful to the
-frontend code itself.
+This function adds a node as a child of another - this is probably only useful
+to the frontend code itself.
 
 ```cpp
- int numChildren( );
+int numChildren( );
 ```
 This function returns the number of children that a given node has.
 
 ```cpp
- Node* child(int which);
+Node* child(int which);
 ```
 This function returns a child of a node.  The which parameter indicates which
 child should be returned.  The first child is 0, the second is 1 and so on.
 
 ```cpp
- void insertSymbol(Symbol sym);
+void insertSymbol(Symbol sym);
 ```
-This function inserts a Symbol object into the nodes symbol table.  Only NODE_FUNCTION nodes
-have symbol tables.
+This function inserts a Symbol object into the nodes symbol table.  Only
+NODE_FUNCTION nodes have symbol tables.
 
 ```cpp
- Symbol lookupSymbol(string name, int lineno);
+Symbol lookupSymbol(string name, int lineno);
 ```
-This function returns a symbol from the nodes symbol table.  If the symbol is not found,
-then this function throws an Error.  The line number parameter is used for the Error
-message.
+This function returns a symbol from the nodes symbol table.  If the symbol is
+not found, then this function throws an Error.  The line number parameter is
+used for the Error message.
 
 ```cpp
- bool hasSymbol(const string& name);
+bool hasSymbol(const string& name);
 ```
 This function checks to see if a symbol is in the nodes symbol table.
 

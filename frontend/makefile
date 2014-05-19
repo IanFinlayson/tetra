@@ -6,38 +6,38 @@ CFLAGS = -W -Wall -g
 all: dump-tree tags frontend.a
 	@echo "All done :)"
 
-frontend.a: parser.gen.o lexer.o types.o tetra.hpp node.o error.o
-	ar rcs libbackend.a parser.gen.o lexer.o types.o tetra.hpp node.o error.o
+frontend.a: parser.gen.o lexer.o types.o frontend.hpp node.o error.o
+	ar rcs libfrontend.a parser.gen.o lexer.o types.o node.o error.o
 
-dump-tree: parser.gen.o lexer.o dump-tree.o types.o tetra.hpp node.o error.o
+dump-tree: parser.gen.o lexer.o dump-tree.o types.o frontend.hpp node.o error.o
 	$(CC) $(CFLAGS) parser.gen.o lexer.o dump-tree.o types.o node.o error.o -o dump-tree
 
-dump-tree.o: dump-tree.cpp tetra.hpp
+dump-tree.o: dump-tree.cpp frontend.hpp
 	$(CC) $(CFLAGS) -c dump-tree.cpp
 
-types.o: types.cpp tetra.hpp
+types.o: types.cpp frontend.hpp
 	$(CC) $(CFLAGS) -c types.cpp
 
-node.o: node.cpp tetra.hpp
+node.o: node.cpp frontend.hpp
 	$(CC) $(CFLAGS) -c node.cpp
 
-error.o: error.cpp tetra.hpp
+error.o: error.cpp frontend.hpp
 	$(CC) $(CFLAGS) -c error.cpp
 
 parser.gen.o: parser.gen.cpp
 	$(CC) $(CFLAGS) -c parser.gen.cpp
 
-parser.gen.cpp: parser.y tetra.hpp
+parser.gen.cpp: parser.y frontend.hpp
 	bison -d -v parser.y -o parser.gen.cpp
 
-lexer.o: lexer.cpp tetra.hpp
+lexer.o: lexer.cpp frontend.hpp
 	$(CC) $(CFLAGS) -c lexer.cpp
 
 .PHONY: clean all
 
 clean:
-	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o tags libbackend.a
+	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o tags libfrontend.a
 
-tags: tetra.hpp types.cpp parser.y lexer.cpp dump-tree.cpp node.cpp error.cpp
+tags: frontend.hpp types.cpp parser.y lexer.cpp dump-tree.cpp node.cpp error.cpp
 	ctags -R *.cpp *.hpp
 

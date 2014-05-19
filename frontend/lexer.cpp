@@ -8,7 +8,7 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "tetra.hpp"
+#include "frontend.hpp"
 #include "parser.gen.hpp"
 
 using namespace std;

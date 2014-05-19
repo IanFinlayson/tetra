@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#include "tetra.hpp"
+#include "frontend.hpp"
 
 extern int yylineno;
 int yylex( );
