@@ -10,26 +10,47 @@ different kinds of nodes produced.
 
 ###### Member Functions
 ```cpp Node(NodeKind type);```
+
 ```cpp void setDataType(DataType* data_type);```
+
 ```cpp void setStringval(const string& stringval);```
+
 ```cpp void setIntval(int intval);```
+
 ```cpp void setBoolval(bool boolval);```
+
 ```cpp void setRealval(double realval);```
+
 ```cpp void setLine(int lineno);```
+
 ```cpp void setType(DataType* t);```
+
 ```cpp int getLine( ) const;```
+
 ```cpp string getString( ) const;```
+
 ```cpp int getInt( ) const;```
+
 ```cpp double getReal( ) const;```
+
 ```cpp bool getBool( ) const;```
+
 ```cpp NodeKind kind( ) const;```
+
 ```cpp DataType* type( ) const;```
+
 ```cpp void addChild(Node* child);```
+
 ```cpp int numChildren( ) const;```
+
 ```cpp Node* child(int which) const;```
+
 ```cpp void insertSymbol(Symbol sym);```
+
 ```cpp Symbol lookupSymbol(string name, int lineno);```
+
 ```cpp bool hasSymbol(const string& name);```
+
 
 
 ###### Kinds
