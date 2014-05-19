@@ -3,8 +3,11 @@
 CC = clang++
 CFLAGS = -W -Wall -g
 
-all: dump-tree tags
+all: dump-tree tags frontend.a
 	@echo "All done :)"
+
+frontend.a: parser.gen.o lexer.o types.o tetra.hpp node.o error.o
+	ar rcs libbackend.a parser.gen.o lexer.o types.o tetra.hpp node.o error.o
 
 dump-tree: parser.gen.o lexer.o dump-tree.o types.o tetra.hpp node.o error.o
 	$(CC) $(CFLAGS) parser.gen.o lexer.o dump-tree.o types.o node.o error.o -o dump-tree
@@ -33,7 +36,7 @@ lexer.o: lexer.cpp tetra.hpp
 .PHONY: clean all
 
 clean:
-	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o tags
+	rm -f parser.gen.cpp parser.gen.hpp parser.gen.output dump-tree *.o tags libbackend.a
 
 tags: tetra.hpp types.cpp parser.y lexer.cpp dump-tree.cpp node.cpp error.cpp
 	ctags -R *.cpp *.hpp

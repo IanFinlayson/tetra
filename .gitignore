@@ -3,4 +3,4 @@ dump-tree
 *.gen.*
 tags
 .*.swp
-
+*.a
