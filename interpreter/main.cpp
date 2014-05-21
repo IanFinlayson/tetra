@@ -5,7 +5,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <map>
 #include "frontend.hpp"
+#include "functionTable.cpp"
 
 using namespace std;
 /*
@@ -35,11 +37,36 @@ void descNode(Node* n) {
 	cout << n->getReal() << endl;
 	cout << n->getBool() << endl;
 	cout << n->kind() << endl;
-	cout << typeToString(n->type()) << endl;
+	//cout << typeToString(n->type()) << endl;
 	cout << n->numChildren() << endl;
+	//cout << "x: " << n->hasSymbol("x") <<endl;
 }
 
+//executes generic statements
+Node* evaluateStatement(Node* node) {
+	return NULL;
+}
 
+//calls a function, returns the return value
+Node* evaluateFunction(Node* node) {
+	return NULL;
+}
+
+//evaluates operations on data types
+Node* evaluateExpression(Node* node) {
+	return NULL;
+}
+
+//evaluates boolean operations
+Node* evaluateCondition(Node* node) {
+	return NULL;
+}
+
+//used to accomodate unsupported features during development. Evaluates children while ignoring the node itself
+Node* skip(Node* node) {
+	return NULL;
+}
+/*
 void buildFunctionTable(Node* tree) {
 	//buildFunctionTable(tree->child(x));
 
@@ -52,7 +79,7 @@ void buildFunctionTable(Node* tree) {
 	}
 	
 }
-
+*/
 int main(int argc, char** argv) {
 	
 	//check that the proper commands were passed
@@ -69,7 +96,9 @@ int main(int argc, char** argv) {
 		cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" <<endl;
 	}
 
-	buildFunctionTable(tree);
+	functionMap funcTable(tree);
+
+	descNode(funcTable.getFunctionNode("for_test")->child(0));
 
 	cout << "Running " << argv[1] << "..." << endl;
 
