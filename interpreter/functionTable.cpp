@@ -1,9 +1,13 @@
+/*
+ * This file builds a function lookup table so that when the interpreter encounters a function call, it can easily find the address of the appropriate node where the called function code resides
+ */
+
 #include<map>
 #include<iostream>
 #include<frontend.hpp>
 #include<string>
 
-using namespace std;
+using std::string;
 
 class functionMap {
 
@@ -18,7 +22,7 @@ public:
 
 private:
 
-	map<string, Node*> lookup;
+	std::map<string, Node*> lookup;
 
 	//Fills the function map given the specified base node
 	void buildFunctionMap(Node* tree) {

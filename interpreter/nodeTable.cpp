@@ -6,7 +6,7 @@
 #include "frontend.hpp"
 #include <cstdlib>
 
-using namespace std;
+using std::string;
 
 /*
  * About the classificaitons:
@@ -27,14 +27,14 @@ enum NodeClassification {
 
 };
 
-using namespace std;
-
 class NodeTable {
 private:
 
-	map<NodeKind, NodeClassification> nodeChart;
+	std::map<NodeKind, NodeClassification> nodeChart;
 
-	static NodeTable* instance;
+	static NodeTable instance;
+
+	//constructor populates the table
 	NodeTable() {
 		nodeChart[NODE_FUNCTION_LIST] = STRUCTURE;
 		nodeChart[NODE_FUNCTION] = STRUCTURE;
@@ -97,16 +97,13 @@ private:
 	}
 
 public:
-	static void initialize() {
-		instance = new NodeTable();
-	}
 
-	//assumes it has been initialized
+	//There is only one NodeTable, and it never changes, so it is static and unaccessible
 	static NodeClassification classifyNode(Node* node) {
-		return instance->getClassification(node);
+		return instance.getClassification(node);
 	}
 
 };
-
-
+//initializes the static table
+NodeTable NodeTable::instance;
 
