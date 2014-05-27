@@ -10,6 +10,11 @@
 #include "functionTable.cpp"
 #include "nodeTable.cpp"
 #include "operationMap.cpp"
+#include "comparisonMap.cpp"
+#include "variableContext.cpp"
+
+//temporary global varTable for testing purposes
+VarTable vars;
 
 using namespace std;
 
@@ -36,7 +41,7 @@ void evaluateStatement(Node* node, void* ret) {
 
 //calls a function, returns the return value
 void evaluateFunction(Node* node, void* ret) {
-//	return NULL;
+	
 }
 
 //evaluates operations on data types
@@ -44,20 +49,16 @@ void evaluateExpression(Node* node, void* ret) {
 
 //	void* ret = NULL;//this is what we will return
 
-	
-	static operationList<int> execInt;
-	//static operationList<double> execReal;
-	static operationList<bool> execBool;
-	static operationList<string> execString;
+	//Static tables containing what actions to perform given which operation node	
+	static OperationList<int> execInt;
+	static OperationList<double> execReal;
+	static OperationList<bool> execBool;
+	static OperationList<string> execString;
 
 //	DataTypeKind retType = (node->type()->getKind());
 
 	switch(node->kind()) {
 		default:
-
-
-			/*This whole switch statement is actually very dangerous at the moment (pointers to local vars, oops), will change
-			 */
 
 			switch(node->child(0)->type()->getKind())
 			{
@@ -78,7 +79,7 @@ void evaluateExpression(Node* node, void* ret) {
 					evaluateNode(node->child(0),&op1);
 					double op2;
 					evaluateNode(node->child(1),&op2);
-					*static_cast<double*>(ret) = execInt.execute(node->kind(),op1,op2);
+					*static_cast<double*>(ret) = execReal.execute(node->kind(),op1,op2);
 				}
 				break;
 				case TYPE_BOOL:
@@ -111,9 +112,145 @@ void evaluateExpression(Node* node, void* ret) {
 
 }
 
+//used to get references to variables (for assignment, and possibly other features in the future)
+void evaluateAddress(Node* node, void* ret) {
+	//Right now, we are assuming that the only type of node for which this will occur is a NODE_IDENTIFIER
+	
+	if(node->kind() == NODE_IDENTIFIER) {
+		switch(node->type()->getKind()) {
+			case TYPE_INT:
+				*static_cast<int**>(ret) = vars.lookupVar<int>(node->getString());
+			break;
+			case TYPE_REAL:
+				*static_cast<double**>(ret) = vars.lookupVar<double>(node->getString());
+			break;
+			case TYPE_BOOL:
+				*static_cast<bool**>(ret) = vars.lookupVar<bool>(node->getString());
+			break;
+			case TYPE_STRING:
+				*static_cast<string**>(ret) = vars.lookupVar<string>(node->getString());
+			break;
+			default:
+				cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered.\nAborting...";
+				exit(EXIT_FAILURE);
+		}
+	}
+
+}
+
+//At the moment, ret will point to whatever value was copied for the assignment
+void performAssignment(Node* node, void* ret) {
+	switch(node->type()->getKind()) {
+		case TYPE_INT:
+		{
+			//fetch operands
+			int* op1_ptr = NULL;//This SHOULD no longer be 0 once the lhs of evaluateNode.
+			evaluateAddress(node->child(0),&op1_ptr);
+			int op2;
+			evaluateNode(node->child(1),&op2);
+			*op1_ptr = op2;
+			*(static_cast<int*>(ret)) = op2;
+		}
+		break;
+		case TYPE_REAL:
+		{
+			//fetch operands
+			double* op1_ptr = NULL;
+			evaluateAddress(node->child(0),&op1_ptr);
+			double op2;
+			evaluateNode(node->child(1),&op2);
+			*op1_ptr = op2;
+			*(static_cast<double*>(ret)) = op2;
+		}
+		break;
+		case TYPE_BOOL:
+		{
+			//fetch operands
+			bool* op1_ptr = NULL;
+			evaluateAddress(node->child(0),&op1_ptr);
+			bool op2;
+			evaluateNode(node->child(1),&op2);
+			*op1_ptr = op2;
+			*(static_cast<bool*>(ret)) = op2;
+		}
+		break;
+		case TYPE_STRING:
+		{
+			//fetch operands
+			string* op1_ptr = NULL;
+			evaluateAddress(node->child(0),op1_ptr);
+			string op2;
+			evaluateNode(node->child(1),&op2);
+			*op1_ptr = op2;
+			*(static_cast<string*>(ret)) = op2;
+		}
+		break;
+		default:
+			cout << "Unknown assignment NodeType: " << node->kind() << " encountered.\nAborting...";
+			exit(EXIT_FAILURE);
+		
+	}
+}
 //evaluates boolean operations
 void evaluateCondition(Node* node, void* ret) {
-//	return NULL;
+
+	//Static tables containing what type of comparison to perform given which operation node	
+	static ComparisonList<int> compInt;
+	static ComparisonList<double> compReal;
+	static ComparisonList<bool> compBool;
+	static ComparisonList<string> compString;
+
+	switch(node->kind()) {
+		default:
+			//Must check the type of the CHILD because this node itself has type bool (since its comparison)
+			switch(node->child(0)->type()->getKind())
+			{
+				case TYPE_INT:
+				{
+					//fetch operands
+					int op1;
+					evaluateNode(node->child(0),&op1);
+					int op2;
+					evaluateNode(node->child(1),&op2);
+					*static_cast<bool*>(ret) = compInt.execute(node->kind(),op1,op2);
+				}
+				break;
+				case TYPE_REAL:
+				{
+					//fetch operands
+					double op1;
+					evaluateNode(node->child(0),&op1);
+					double op2;
+					evaluateNode(node->child(1),&op2);
+					*static_cast<bool*>(ret) = compReal.execute(node->kind(),op1,op2);
+				}
+				break;
+				case TYPE_BOOL:
+				{
+					//fetch operands
+					bool op1;
+					evaluateNode(node->child(0),&op1);
+					bool op2;
+					evaluateNode(node->child(1),&op2);
+					*static_cast<bool*>(ret) = compBool.execute(node->kind(),op1,op2);
+				}
+				break;
+				case TYPE_STRING:
+				{
+					//fetch operands
+					string op1;
+					evaluateNode(node->child(0),&op1);
+					string op2;
+					evaluateNode(node->child(1),&op2);
+					*static_cast<bool*>(ret) = compString.execute(node->kind(),op1,op2);
+				}
+				break;
+				default:
+					cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered when attempting comparison.\nAborting...";
+					exit(EXIT_FAILURE);
+			}
+	}
+
 }
 
 //Evaluates immediate expressions
@@ -121,12 +258,22 @@ void evaluateCondition(Node* node, void* ret) {
 void evaluateImmediate(Node* node, void* ret) {
 
 
-	if(node->kind() == NODE_IDENTIFIER) { //if we need to lookup a variable
+	//if we need to lookup a variable, do so, Note that "lookupVar" handles if we have not seen the string before
+	//However, we must check the type so that we know what to allocate if needed (optimizaiton point for later?)
+	if(node->kind() == NODE_IDENTIFIER) {
 		switch(node->type()->getKind()) {
-		/*	case TYPE_INT:
-				int* ret = new int;
-				*ret = *();
-			break;*/
+			case TYPE_INT:
+				*static_cast<int*>(ret) = *(vars.lookupVar<int>(node->getString()));
+			break;
+			case TYPE_REAL:
+				*static_cast<double*>(ret) = *(vars.lookupVar<double>(node->getString()));
+			break;
+			case TYPE_BOOL:
+				*static_cast<bool*>(ret) = *(vars.lookupVar<bool>(node->getString()));
+			break;
+			case TYPE_STRING:
+				*static_cast<string*>(ret) = *(vars.lookupVar<string>(node->getString()));
+			break;
 			default:
 				cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered.\nAborting...";
 				exit(EXIT_FAILURE);
@@ -173,6 +320,9 @@ void evaluateNode(Node* node, void* ret) {
 		case STRUCTURE:
 			evaluateStatement(node,ret);
 		break;
+		case ASSIGNMENT:
+			performAssignment(node,ret);
+		break;
 		default:
 			cout << "Warnming: unexpected node kind encountered: " << node->kind() << "\n Aborting..." << endl;
 		exit(EXIT_FAILURE);
@@ -209,7 +359,7 @@ int main(int argc, char** argv) {
 	cout << "Running " << argv[1] << "..." << endl;
 
 	runTest();
-
+	cout << "super fin" << endl;
 	return 0;
 }
 
@@ -276,24 +426,37 @@ void runTest() {
 	testAdd.addChild(&testInt);
 
 	Node testAdd2(NODE_PLUS);
-	testAdd2.setDataType(intVal);
-	testAdd2.addChild(&testAdd);
-	testAdd2.addChild(&testInt2);
+	testAdd2.setDataType(realVal);
+	testAdd2.addChild(&testReal);
+	testAdd2.addChild(&testReal);
 
-	int* a = new int;
+	double* a = new double;
 	evaluateNode(&testAdd2,a);
 
-	cout << "Int + Int: " << *a << endl;
+	cout << "double + double: " << *a << endl;
 
-	Node testAddS(NODE_PLUS);
-	testAddS.setDataType(stringVal);
-	testAddS.addChild(&testString);
-	testAddS.addChild(&testString);
+	Node testAddS(NODE_EQ);
+	testAddS.setDataType(intVal);
+	testAddS.addChild(&testInt);
+	testAddS.addChild(&testInt2);
 
-	string* s2 = new string;
+	bool* s2 = new bool;
 	evaluateNode(&testAddS,s2);
 
-	cout << "String + String: " << *s2 << endl;
+	cout << "27 cmp 39: " << *s2 << endl;
 
+	Node varX(NODE_IDENTIFIER);
+	varX.setStringval("X");
+	varX.setDataType(realVal);
+	*(vars.lookupVar<double>("X")) = 15;
 
+	Node assignX(NODE_ASSIGN);
+	assignX.setDataType(realVal);
+	assignX.addChild(&varX);
+	assignX.addChild(&testAdd2);
+
+	evaluateNode(&assignX,a);
+	evaluateNode(&varX,a);
+	cout << "X(?): " << *a << endl;
+	cout << "fin" << endl;
 }

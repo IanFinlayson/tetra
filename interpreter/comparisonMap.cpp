@@ -16,31 +16,31 @@ using std::string;
 //offloaded negation methods
 
 template<typename T>
-bool negator(T a, T b) {
+bool negator(T a) {
 	return !a;
 }
 
 //The string negation will check for an empty string, which is as close to NULL as the language presently becomes
 template<> 
-bool negator<string>(string a, string b) {
+bool negator<string>(string a) {
 	return a != "";
 }
 
 
 template <class T>
-class operationList
+class ComparisonList
 {
 	public:
 		//constructor fills table with all relevant operators
-		operationList() {
-			//functionMap[NODE_] = &operationList<T>::;
-			functionMap[NODE_NOT] = &operationList<T>::logNot;
-			functionMap[NODE_LT] = &operationList<T>::lessThan;
-			functionMap[NODE_LTE] = &operationList<T>::lessThanEq;
-			functionMap[NODE_GT] = &operationList<T>::greaterThan;
-			functionMap[NODE_GTE] = &operationList<T>::greaterThanEq;
-			functionMap[NODE_EQ] = &operationList<T>::equal;
-			functionMap[NODE_NEQ] = &operationList<T>::notEqual;
+		ComparisonList() {
+			//functionMap[NODE_] = &ComparisonList<T>::;
+			functionMap[NODE_NOT] = &ComparisonList<T>::logNot;
+			functionMap[NODE_LT] = &ComparisonList<T>::lessThan;
+			functionMap[NODE_LTE] = &ComparisonList<T>::lessThanEq;
+			functionMap[NODE_GT] = &ComparisonList<T>::greaterThan;
+			functionMap[NODE_GTE] = &ComparisonList<T>::greaterThanEq;
+			functionMap[NODE_EQ] = &ComparisonList<T>::equal;
+			functionMap[NODE_NEQ] = &ComparisonList<T>::notEqual;
 
 		}
 
@@ -51,7 +51,7 @@ class operationList
 
 	private:
 
-		std::map<NodeKind, bool (operationList<T>::*)(T,T)> functionMap;
+		std::map<NodeKind, bool (ComparisonList<T>::*)(T,T)> functionMap;
 
 		//Define all the operations:
 		
@@ -85,3 +85,15 @@ class operationList
 			return a != b;
 		}
 };
+/*
+int main() {
+	ComparisonList<int> opInt;
+	ComparisonList<bool> opBool;
+	ComparisonList<string> opString;
+	ComparisonList<double> opReal;
+
+	std::cout << opInt.execute(NODE_LT,2,2) << std::endl;
+	std::cout << opBool.execute(NODE_GTE, true, true) << std::endl;
+	std::cout << opString.execute(NODE_EQ, "lady","ldy") << std::endl;
+	std::cout << opReal.execute(NODE_NEQ,12,12) << std::endl;
+}*/

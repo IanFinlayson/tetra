@@ -7,18 +7,27 @@
 #include<string>
 
 
-using namespace std;
+using std::string;
 
-class varTable {
+class VarTable {
 
 public:
 	
-	varTable() {
+	VarTable() {
 		//nothing needed at the moment
 	}
 
-	~varTable() {
-		//Must delete everything allocated for the map (coming soon)!
+	//still need to complete
+	~VarTable() {
+		std::cout << "destructor called" << std::endl;
+
+		std::map<string,void*>::iterator iter;
+		for(iter = varMap.begin(); iter != varMap.end(); iter++) {
+			std::cout << iter->first << std::endl;
+			std::cout << iter-> second << std::endl;
+			//delete iter->second;
+			//varMap.erase(iter);
+		}
 	}
 
 
@@ -33,15 +42,39 @@ public:
 			//Althought the container would insert a default void*, we need to allocate memory for the void* to point to!
 
 			ret = new T;
+			varMap[varName] = ret;
 		}
 
 		return static_cast<T*>(varMap[varName]);
 
 	}
 
+	//Test method (unnecessary for functionality)
+	void insertTestValues() {
+		string z = "x";
+		double* x = lookupVar<double>(z);
+		bool* y = lookupVar<bool>("y");
+		*x = 42.4;
+		*y = true;
+
+		double* a = lookupVar<double>(z);
+		bool* b = lookupVar<bool>("y");
+
+		std::cout << *a << std::endl;
+		std::cout << *b << std::endl;
+
+		*lookupVar<double>(z) = 26.2;
+
+		std::cout << *a << std::endl;
+	}
+
 private:
 
-	map<string, void*> varMap;
+	std::map<string, void*> varMap;
 
 };
-
+/*
+int main() {
+	VarTable x;
+	x.insertTestValues();
+}*/

@@ -19,40 +19,88 @@ template<typename T>
 T calculateExponential(T a, T b) {
 	return pow(static_cast<double>(a), static_cast<double>(b));
 }
-
 string calculateExponential(string a, string b) {
 	return "";
 }
 
+//overloaded funcitons for bitwise operators (to make the compiler happy that our templated class might allow for 1.1 << 2.2, etc
+
+template<typename T>
+T bitLeftShift(T a, T b) {
+	return a << b;
+}
+double bitLeftShift(double a, double b) {
+	return 0;
+}
+
+template<typename T>
+T bitRightShift(T a, T b) {
+	return a >> b;
+}
+double bitRightShift(double a, double b) {
+	return 0;
+}
+
+template<typename T>
+T bitwiseOr(T a, T b) {
+	return a | b;
+}
+double bitwiseOr(double a, double b) {
+	return 0;
+}
+
+template<typename T>
+T bitwiseAnd(T a, T b) {
+	return a & b;
+}
+double bitwiseAnd(double a, double b) {
+	return 0;
+}
+
+template<typename T>
+T bitwiseXOr(T a, T b) {
+	return a ^ b;
+}
+double bitwiseXOr(double a, double b) {
+	return 0;
+}
+
+template<typename T>
+T remainderDivision(T a, T b) {
+	return a % b;
+}
+double remainderDivision(double a, double b) {
+	return 0;
+}
 
 template <class T>
-class operationList
+class OperationList
 {
 	public:
 		//constructor fills table with all relevant operators
-		operationList() {
-			//functionMap[NODE_] = &operationList<T>::;
-			functionMap[NODE_PLUS] = &operationList<T>::add;
-			functionMap[NODE_MINUS] = &operationList<T>::subtract;
-			functionMap[NODE_TIMES] = &operationList<T>::multiply;
-			functionMap[NODE_DIVIDE] = &operationList<T>::divide;
-			functionMap[NODE_MODULUS] = &operationList<T>::modulus;
-			functionMap[NODE_EXP] = &operationList<T>::exponential;
-			//functionMap[NODE_NOT] = &operationList<T>::logNot;
-			functionMap[NODE_BITNOT] = &operationList<T>::bitNot;
-			functionMap[NODE_OR] = &operationList<T>::logOr;
-			functionMap[NODE_AND] = &operationList<T>::logAnd;
-			//functionMap[NODE_LT] = &operationList<T>::lessThan;
-			//functionMap[NODE_LTE] = &operationList<T>::lessThanEq;
-			//functionMap[NODE_GT] = &operationList<T>::greaterThan;
-			//functionMap[NODE_GTE] = &operationList<T>::greaterThanEq;
-			//functionMap[NODE_EQ] = &operationList<T>::equal;
-			//functionMap[NODE_NEQ] = &operationList<T>::notEqual;
-			functionMap[NODE_BITXOR] = &operationList<T>::bitXOr;
-			functionMap[NODE_BITAND] = &operationList<T>::bitAnd;
-			functionMap[NODE_BITOR] = &operationList<T>::bitOr;
-			functionMap[NODE_SHIFTL] = &operationList<T>::shiftLeft;
-			functionMap[NODE_SHIFTR] = &operationList<T>::shiftRight;
+		OperationList() {
+			//functionMap[NODE_] = &OperationList<T>::;
+			functionMap[NODE_PLUS] = &OperationList<T>::add;
+			functionMap[NODE_MINUS] = &OperationList<T>::subtract;
+			functionMap[NODE_TIMES] = &OperationList<T>::multiply;
+			functionMap[NODE_DIVIDE] = &OperationList<T>::divide;
+			functionMap[NODE_MODULUS] = &OperationList<T>::modulus;
+			functionMap[NODE_EXP] = &OperationList<T>::exponential;
+			//functionMap[NODE_NOT] = &OperationList<T>::logNot;
+			functionMap[NODE_BITNOT] = &OperationList<T>::bitNot;
+			functionMap[NODE_OR] = &OperationList<T>::logOr;
+			functionMap[NODE_AND] = &OperationList<T>::logAnd;
+			//functionMap[NODE_LT] = &OperationList<T>::lessThan;
+			//functionMap[NODE_LTE] = &OperationList<T>::lessThanEq;
+			//functionMap[NODE_GT] = &OperationList<T>::greaterThan;
+			//functionMap[NODE_GTE] = &OperationList<T>::greaterThanEq;
+			//functionMap[NODE_EQ] = &OperationList<T>::equal;
+			//functionMap[NODE_NEQ] = &OperationList<T>::notEqual;
+			functionMap[NODE_BITXOR] = &OperationList<T>::bitXOr;
+			functionMap[NODE_BITAND] = &OperationList<T>::bitAnd;
+			functionMap[NODE_BITOR] = &OperationList<T>::bitOr;
+			functionMap[NODE_SHIFTL] = &OperationList<T>::shiftLeft;
+			functionMap[NODE_SHIFTR] = &OperationList<T>::shiftRight;
 		}
 
 		//looks up the appropriate option and executes it
@@ -62,7 +110,7 @@ class operationList
 
 	private:
 
-		std::map<NodeKind, T (operationList<T>::*)(T,T)> functionMap;
+		std::map<NodeKind, T (OperationList<T>::*)(T,T)> functionMap;
 
 		//Define all the operations:
 		T add(T a, T b) {
@@ -82,7 +130,7 @@ class operationList
 		}
 
 		T modulus(T a, T b) {
-			return a % b;
+			return remainderDivision(a,b);
 		}
 
 		//offload exponenitation to templated function
@@ -90,7 +138,7 @@ class operationList
 			return calculateExponential(a, b);
 		}
 
-		//LOGical operators
+		//LOGical operators (Yes, these return their own types!
 		T logOr(T a, T b) {
 			return a || b;
 		}
@@ -99,49 +147,18 @@ class operationList
 			return a && b;
 		}
 
-		//for unary operators, a second formal parameter is needed to match the signiture of the other functions. In practice, NULL will be passed as the socnd argument and it will be ignored
-		T logNot(T a, T b) {
-			return !a;
-		}
-/*
-		//These ones will always return booleans, regardless of the types involved
-
-		bool lessThan(T a, T b) {
-			return a < b;
-		}
-
-		bool lessThanEq(T a, T b) {
-			return a <= b;
-		}
-
-		bool greaterThan(T a, T b) {
-			return a > b;
-		}
-
-		bool greaterThanEq(T a, T b) {
-			return a >= b;
-		}
-
-		bool equal(T a, T b) {
-			return a == b;
-		}
-
-		bool notEqual(T a, T b) {
-			return a != b;
-		}
-*/
 		//bit operations
-
+		//because these are not defined for doubles, we must specialize 
 		T bitXOr(T a, T b) {
-			return a ^ b;
+			return bitwiseXOr(a,b);
 		}
 
 		T bitAnd(T a, T b) {
-			return a & b;
+			return bitwiseAnd(a,b);
 		}
 
 		T bitOr(T a, T b) {
-			return a | b;
+			return bitwiseOr(a,b);
 		}
 
 		//Second argument is present to match the signatures of other methods. In practice, the second argument will be ignored
@@ -150,11 +167,11 @@ class operationList
 		}
 
 		T shiftLeft(T a, T b) {
-			return a << b;
+			return bitLeftShift(a,b);
 		}
 
 		T shiftRight(T a, T b) {
-			return a >> b;
+			return bitRightShift(a,b);
 		}
 
 };
@@ -200,10 +217,32 @@ string operator%(string a, string b) {
 	return NULL;
 }
 /*
+//Stubs for double operators that otherwise might be invalid
+//At the moment, these all return 0
+double operator%(double a, double b) {
+	return 0;
+}
+double operator^(double a, double b) {
+	return 0;
+}
+double operator&(double a, double b) {
+	return 0;
+}
+double operator|(double a, double b) {
+	return 0;
+}
+double operator<<(double a, double b) {
+	return 0;
+}
+double operator>>(double a, double b) {
+	return 0;
+}
+*/
+/*
    int main(){
 
-   operationList<int>* x = new operationList<int>();
-   operationList<string>* y = new operationList<string>();
+   OperationList<int>* x = new OperationList<int>();
+   OperationList<string>* y = new OperationList<string>();
 
    cout << x->execute(NODE_PLUS,1,2) << endl;
    cout << y->execute(NODE_PLUS,"Hello ","world") << endl;

@@ -10,20 +10,23 @@ using std::string;
 
 /*
  * About the classificaitons:
- * CONDITION denotes nodes which have as their first child some boolean expression which must be evaluated to true or false.
+ * CONDITION denotes nodes which will always evaluate to a boolean expression regardless of its children
  * CONTROL denotes a node which may change control of the program to a non-adjacant node
  * IMMEDIATE represents a node which itself IS an immediate value or variable whose value can be returned
  * OPERATION refers to a node that requires evaluating and then operating on one or more of its children, eventually returning a value. Note that this differs from an immediate in that the returned value takes additional processing to calculate
- * STRUCTURE represents a node which is used to define the structure of the program. As a rule, their first child contains some value, and their second child contains either a similar STRUCTURE node, or (The last item present in the structure XOR nothing)
+ * STRUCTURE represents a node which is used to define the structure of the program.
+ * ASSIGNMENT denotes an assignment operator. This turns out to be a somewhat special case, so we give it its own classification
  */
 
+//The enumerations (as well as what enumeration goes with which node)  are subject to change until we wade further into the types of nodes we'll need
 enum NodeClassification {
 
 	CONDITION,
 	CONTROL,
 	IMMEDIATE,
 	OPERATION,
-	STRUCTURE
+	STRUCTURE,
+	ASSIGNMENT
 
 };
 
@@ -45,25 +48,25 @@ private:
 		nodeChart[NODE_BREAK] = CONTROL;
 		nodeChart[NODE_CONTINUE] = CONTROL;
 		nodeChart[NODE_RETURN] = CONTROL;
-		nodeChart[NODE_IF] = CONDITION;
-		nodeChart[NODE_ELIF] = CONDITION;
+		nodeChart[NODE_IF] = STRUCTURE;
+		nodeChart[NODE_ELIF] = STRUCTURE;
 		nodeChart[NODE_ELIF_CHAIN] = STRUCTURE;
-		nodeChart[NODE_ELIF_CLAUSE] = CONDITION;
-		nodeChart[NODE_WHILE] = CONDITION;
+		nodeChart[NODE_ELIF_CLAUSE] = STRUCTURE;
+		nodeChart[NODE_WHILE] = STRUCTURE;
 		nodeChart[NODE_FOR] = STRUCTURE;
 		nodeChart[NODE_PARFOR] = STRUCTURE;
 		nodeChart[NODE_PARALLEL] = STRUCTURE;
 		nodeChart[NODE_BACKGROUND] = STRUCTURE;
 		nodeChart[NODE_LOCK] = STRUCTURE;
-		nodeChart[NODE_ASSIGN] = OPERATION;
+		nodeChart[NODE_ASSIGN] = ASSIGNMENT;
 		nodeChart[NODE_OR] = OPERATION;
 		nodeChart[NODE_AND] = OPERATION;
-		nodeChart[NODE_LT] = OPERATION;
-		nodeChart[NODE_LTE] = OPERATION;
-		nodeChart[NODE_GT] = OPERATION;
-		nodeChart[NODE_GTE] = OPERATION;
-		nodeChart[NODE_EQ] = OPERATION;
-		nodeChart[NODE_NEQ] = OPERATION;
+		nodeChart[NODE_LT] = CONDITION;
+		nodeChart[NODE_LTE] = CONDITION;
+		nodeChart[NODE_GT] = CONDITION;
+		nodeChart[NODE_GTE] = CONDITION;
+		nodeChart[NODE_EQ] = CONDITION;
+		nodeChart[NODE_NEQ] = CONDITION;
 		nodeChart[NODE_BITXOR] = OPERATION;
 		nodeChart[NODE_SHIFTL] = OPERATION;
 		nodeChart[NODE_SHIFTR] = OPERATION;
@@ -73,7 +76,7 @@ private:
 		nodeChart[NODE_DIVIDE] = OPERATION;
 		nodeChart[NODE_MODULUS] = OPERATION;
 		nodeChart[NODE_EXP] = OPERATION;
-		nodeChart[NODE_NOT] = OPERATION;
+		nodeChart[NODE_NOT] = CONDITION;
 		nodeChart[NODE_BITNOT] = OPERATION;
 		nodeChart[NODE_VECREF] = STRUCTURE;
 		nodeChart[NODE_INDEX] = STRUCTURE;
