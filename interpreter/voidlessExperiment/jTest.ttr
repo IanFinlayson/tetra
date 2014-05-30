@@ -1,0 +1,5 @@
+def main() int:
+   cally(37, -36, 2)
+
+def cally(spleen int, spleen2 int , spleen3 int) int:
+   zoinks = 2 + spleen + spleen2+spleen3

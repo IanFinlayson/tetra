@@ -6,7 +6,6 @@
 #include<map>
 #include<string>
 
-
 using std::string;
 
 class VarTable {
@@ -64,7 +63,6 @@ public:
 		std::cout << *b << std::endl;
 
 		*lookupVar<double>(z) = 26.2;
-
 		std::cout << *a << std::endl;
 	}
 

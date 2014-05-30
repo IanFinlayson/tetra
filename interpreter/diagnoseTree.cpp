@@ -16,7 +16,7 @@ void descNode(Node* n) {
 	cout << n->getBool() << endl;
 	cout << n->kind() << endl;
 	cout << ((n->type() == NULL)?"No type":typeToString(n->type())) << endl;
-        cout << n->numChildren() << endl;
+        cout << "Children: " << n->numChildren() << endl;
         //cout << "x: " << n->hasSymbol("x") <<endl;
  }
 

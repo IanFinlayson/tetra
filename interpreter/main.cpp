@@ -39,6 +39,12 @@ void evaluateStatement(Node* node, void* ret) {
 //	return NULL;
 }
 
+//Used to initialize the parameters of a funciton call before formally transferring control of the program to the new function
+void pasteArguments(Node* actualArgs, VarTable callerContext, Node* formalArgs, VarTable newContext) {
+
+}
+
+
 //calls a function, returns the return value
 void evaluateFunction(Node* node, void* ret) {
 	
