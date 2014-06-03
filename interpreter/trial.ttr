@@ -1,6 +1,0 @@
-def spleeno(a real) int:
- x = 4 + 2
- y = 7.2 + 6.2
- return 0
-# z = "ab" + "cd"
-

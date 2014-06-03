@@ -1,4 +1,3 @@
-g++ -c -Wall -I../frontend diagnoseTree.cpp
-#echo "compile successful"
-g++ -Wall diagnoseTree.o ../frontend/libfrontend.a
-rm diagnoseTree.o
+g++ -c -I../frontend treeAnalyzer.cpp
+g++ treeAnalyzer.o ../frontend/libfrontend.a
+rm treeAnalyzer.o
