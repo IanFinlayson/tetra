@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <iostream>
+#include "tData.cpp"
 #include "frontend.hpp"
 
 using std::string;
@@ -45,8 +46,8 @@ class ComparisonList
 		}
 
 		//looks up the appropriate option and executes it
-		bool execute(NodeKind n, T a, T b) {
-			return (this->*functionMap[n])(a,b);
+		bool execute(NodeKind n, TData<T>* a, TData<T>* b) {
+			return (this->*functionMap[n])(a->getData(),b->getData());
 		}
 
 	private:

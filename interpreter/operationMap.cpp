@@ -9,6 +9,7 @@
 #include <map>
 #include <iostream>
 #include "frontend.hpp"
+#include "tData.cpp"
 
 using std::string;
 
@@ -104,8 +105,8 @@ class OperationList
 		}
 
 		//looks up the appropriate option and executes it
-		T execute(NodeKind n, T a, T b) {
-			return (this->*functionMap[n])(a,b);
+		T execute(NodeKind n, TData<T>* a, TData<T>* b) {
+			return (this->*functionMap[n])(a->getData(),b->getData());
 		}
 
 	private:

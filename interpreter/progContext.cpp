@@ -8,73 +8,80 @@
 #include <stack>
 #include <iostream>
 #include <string>
-#include "variableContext.cpp"
-#include "libfrontend.a"
+#include "variableContext.h"
+#include "frontend.hpp"
+#include "progContext.h"
+using std::string;
 
-using std string;
 
-//Each context will have a flag as to what action should be taken when control is switched to a looping statement
-enum LoopStatus {
-
-	NORMAL,
-	CONTINUE,
-	BREAK,
-	RETURN
-
+//This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
+TetraScope::TetraScope() {
+	executionStatus = NORMAL;
 }
 
-//This class represents the details of the present runtime environment, including the current VariableContext and loop depth
-class TetraScope {
-
-public:
-	TetraScope() {
-		loopStatus = NORMAL;
-	}
-
-	template <typename T>
-	T* lookupVar(String name) {
-		return varScope.lookupVar<T>(name);
-	}
-
-	//Used by loops and statements to determine if they can proceed, or if they should return
-	//At the moment, I am working under the assumption that only "Statement" and loop nodes will need to check for a loop status, as these are the only nodes that allow execution of further children after returning.
-	LoopStatus queryLoopFlag() {
-		return loopFlag;
-	}
-
-private:
-	VarTable varScope;
-	LoopStatus loopFlag;
+//Used by loops and constrol statements to determine if they can proceed, or if they should return
+ExecutionStatus TetraScope::queryExecutionStatus() {
+	return executionStatus;
 }
+
+void TetraScope::setExecutionStatus(ExecutionStatus status) {
+	executionStatus = status;
+}
+
+
 
 //This class wraps a std stack of TetraScopes
 
-class TetraContext {
-
-public:
-	
-	TetraContext() {
-		//nothing at the moment
-	}
-
-	template<typename T>
-	T* lookupVar(String name) {
-		return progStack.top().lookupVar<T>(name);
-	}
-
-	initializeNewScope() {
-		//To be continued!	
-	}
-
-	//If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
-	~TetraContext() {
-		while(!progStack.empty()) {
-			progStack.pop();
-		}
-	}
-
-private:
-	std::stack<TetraScope> progStack;
+TetraContext::TetraContext() {
+	//nothing at the moment
 }
 
+void TetraContext::initializeNewScope() {
+	TetraScope newScope;
+	progStack.push(newScope);
+}
+
+void TetraContext::exitScope() {
+	progStack.pop();
+}
+
+//If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
+TetraContext::~TetraContext() {
+	while(!progStack.empty()) {
+		progStack.pop();
+	}
+}
+
+TetraScope* TetraContext::getCurrentScope() {
+	 return &progStack.top();
+}
+
+TetraContext& TetraContext::operator=(const TetraContext& other){
+	progStack = other.progStack;
+	return *this;
+}
+
+ExecutionStatus TetraContext::queryExecutionStatus() {
+	return progStack.top().queryExecutionStatus();
+}
+
+void TetraContext::notifyBreak() {
+	progStack.top().setExecutionStatus(BREAK);
+}
+
+void TetraContext::notifyContinue() {
+	progStack.top().setExecutionStatus(CONTINUE);
+}
+
+void TetraContext::notifyReturn() {
+	progStack.top().setExecutionStatus(RETURN);
+}
+
+void TetraContext::notifyElif() {
+	progStack.top().setExecutionStatus(ELIF);
+}
+
+void TetraContext::normalizeStatus() {
+	progStack.top().setExecutionStatus(NORMAL);
+}
 

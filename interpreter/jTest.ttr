@@ -1,0 +1,33 @@
+def main() int:
+   x = 2
+   cally(37, -36, x)
+   cally(2,2,x)
+   ret = -20
+   while x > 0:
+      if x == 0:
+         ret = 20
+      elif x == 1:
+         ret = 40
+      elif x == 2:
+         ret = 60
+      else:
+         ret = 100
+      x -= 1
+      continue
+   return fact(10)
+
+def cally(spleen int, spleen2 int , spleen3 int) int:
+   zoinks = 2 + spleen + spleen2 + spleen3
+   platter = 0
+   x = 47
+   while zoinks <= 8:
+      platter += 2
+      zoinks += 1
+      continue
+      platter += 100
+
+def fact(num int) int:
+   if num <= 1:
+      return 1
+   else:
+      return num * fact(num - 1)
