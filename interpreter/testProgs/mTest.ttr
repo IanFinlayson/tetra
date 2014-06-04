@@ -1,0 +1,21 @@
+def main() int:
+   arga()
+   argb(1)
+   argc(2,2)
+   if false:
+      return 6
+   elif false:
+      return 7
+   elif false:
+      return 8
+
+   return 2
+
+def arga():
+   x=2
+
+def argb(i int):
+   x = 2
+
+def argc(i int, j int):
+   x = 2

@@ -1,0 +1,4 @@
+def main() int:
+   i = 12
+   if i == 12:
+      i = 10

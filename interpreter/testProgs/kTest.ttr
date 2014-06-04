@@ -1,0 +1,9 @@
+def main():
+   x = 3
+
+def main2():
+   x = 2
+
+def main3(x int, y int, s string, q bool, f real, t int):
+   x = 3
+

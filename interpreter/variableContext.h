@@ -38,7 +38,7 @@ T* VarTable::lookupVar(string varName) {
 	if(varMap.find(varName) == varMap.end()) {
 		//Althought the container would insert a default TData, we need to allocate memory for the TData to point to!
 		//T released manually in destructor
-		T* newData_ptr = new T;
+		T* newData_ptr = new T(); //() should zero the memory, even for primitive types
 
 		TData<void*> insertable(newData_ptr);
 		insertable.setDeletableType<T>();

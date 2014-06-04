@@ -1,0 +1,10 @@
+def main() int:
+   x = 4
+   y = 4
+   if x == y:
+      x + y
+      x / y
+      x * y
+      x - y
+      z = x + x
+      x = 24

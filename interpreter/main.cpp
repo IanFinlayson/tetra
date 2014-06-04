@@ -15,6 +15,9 @@
 #include "tData.cpp"
 #include "progContext.h"
 
+//#define NDEBUG
+#include <assert.h>
+
 //temporary global TetraContext for testing purposes
 //TetraContext vars;
 
@@ -48,16 +51,13 @@ void evaluateStatement(Node* node, TData<T>* ret, TetraContext* context) {
 	switch(node->kind()) {
 		case NODE_FUNCTION:
 		{
-			cout <<"here?!?!?" << endl;
 			//If there were arguments, meaning that child(0) contains the body of code and child 1 is empty
 			if(node->child(1) != NULL) {
-				cout << "goin arglist" << endl;
 				evaluateNode<T>(node->child(1),ret,context);
 			} else {
-				cout << "goin noargs" << endl;
 				evaluateNode<T>(node->child(0),ret,context);
 			}
-			cout << "after statement" << endl;
+			
 		}
 		break;
 		case NODE_STATEMENT:
@@ -124,16 +124,21 @@ void evaluateStatement(Node* node, TData<T>* ret, TetraContext* context) {
 		{
 			context->notifyElif();
 
+			cout << context->queryExecutionStatus() << endl;
+
 			//Traverse the first branch
 			evaluateNode<T>(node->child(0),ret,context);
 
+			//present problem
 			ExecutionStatus status = context->queryExecutionStatus();
+
+			cout << "Status? " << status << " =ret? " << ( status == RETURN) << endl;
 
 			//evaluate the if-else chain if the first elif clause was false
 			if(status == ELIF) {
 				evaluateNode<T>(node->child(1),ret,context);
 			}
-
+			
 			//Again, check the flag to see if we need to execute the catchall else statement
 			
 			status = context->queryExecutionStatus();
@@ -174,14 +179,13 @@ void evaluateStatement(Node* node, TData<T>* ret, TetraContext* context) {
 
 void pasteArgList(Node* node1, Node* node2, TetraContext* destinationContext, TetraContext* sourceContext) {
 	//If there are further parameters to pass
-	cout << "pastin arg list" << endl;
 	if(node1->kind() == NODE_FORMAL_PARAM_LIST) { //must have 2 children, as does the corresponding tree of NODE_ACTUAL_PARAM_LIST
 		pasteArgList(node1->child(0),node2->child(0),destinationContext,sourceContext);
 		pasteArgList(node1->child(1),node2->child(1),destinationContext,sourceContext);
 	}
 	else {
-		cout << "Pasting stuff!" << endl;
-		switch(/*node1->type()->getKind()*/TYPE_INT) {
+		assert (node1->type() != NULL);
+		switch(node1->type()->getKind()) {
 			case TYPE_INT:
 				 paste<int>(node1,node2,destinationContext,sourceContext);
 			break;
@@ -205,31 +209,40 @@ void pasteArgList(Node* node1, Node* node2, TetraContext* destinationContext, Te
 template<typename T>
 void evaluateFunction(Node* node, TData<T>* ret, TetraContext* context) {
 	//gets the node where the body of the called funciton begins
-	Node* callNode = FunctionMap::getFunctionNode(node->getString());
+	Node* callNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
+
+	cout << FunctionMap::getFunctionSignature(node) << endl;
+
+	descNode(node);
+	descNode(callNode);	
 
 	//check if there are parameters to be passed, and do so if needed
 	//This call will have arguments if and only if the calling node has children
-cout << "___________________________________________"<< node->numChildren() << endl;	
+	cout << "___________________________________________"<< node->numChildren() << endl;	
+
 	if(node->child(0) != NULL) {
 
-	//When copying arg list, we must have handles to both scopes
-	//Calling scope handle
-	TetraContext sourceContext = *context;
+		//When copying arg list, we must have handles to both scopes
+		//Calling scope handle
+		TetraContext sourceContext = *context;
+	
+		//new scope handle
+		
+		context->initializeNewScope();
+	
+		pasteArgList(callNode->child(0),node->child(0), context, &sourceContext);
+	}
+	else { //if there are no args, we still need to initialize a new scope!
+		context -> initializeNewScope();
+	}
 
-	//new scope handle
-	context->initializeNewScope();
+	//transfer control to the function
+	evaluateNode<T>(callNode,ret,context);
+	
+	
+	//returns to the old scope once the function has finished evaluating
 
-	pasteArgList(callNode->child(0),node->child(0), context, &sourceContext);
-
-}
-
-//transfer control to the function
-evaluateNode<T>(callNode,ret,context);
-
-
-//returns to the old scope once the function has finished evaluating
-
-context->exitScope();
+	context->exitScope();
 }
 
 //evaluates operations on data types
@@ -258,7 +271,10 @@ void evaluateAddress(Node* node, TData<T>* ret, TetraContext* context) {
 
 //Must check type so we can cast the info from lookupVar to the appropriate type
 if(node->kind() == NODE_IDENTIFIER || node->kind() == NODE_FORMAL_PARAM) {
-	switch(/*node->type()->getKind()*/TYPE_INT) {
+
+	assert (node->type() != NULL);
+
+	switch(node->type()->getKind()) {
 		case TYPE_INT:
 			 ret->setData(context->lookupVar<int>(node->getString()));
 		break;
@@ -285,26 +301,27 @@ if(node->kind() == NODE_IDENTIFIER || node->kind() == NODE_FORMAL_PARAM) {
 //Assumes that node1 is a NODE_IDENTIFIER, and node2 is an appropriate value
 template<typename T>
 T paste(Node* node1, Node* node2, TetraContext* context) {
-TData<T*> op1;
-TData<T> op2;
-evaluateAddress<T*>(node1,&op1,context);
-evaluateNode<T>(node2,&op2,context);
-T ret = op2.getData();
-*(op1.getData()) = ret;
-return ret;
+
+	TData<T*> op1;
+	TData<T> op2;
+	evaluateAddress<T*>(node1,&op1,context);
+	evaluateNode<T>(node2,&op2,context);
+	T ret = op2.getData();
+	*(op1.getData()) = ret;
+	return ret;
 }
 
 //This method overloads the basic paste(Node*, Node*, TetraContext*) function, except that it is made for cross-scope assignment (i.e. function calls)
 //node1 is assumed to be a NODE_FORMAL_PARAM while node2 is a NODE_ACTUAL_PARAM
 template<typename T>
 T paste(Node* node1, Node* node2, TetraContext* destinationContext, TetraContext* sourceContext) {
-TData<T*> op1;
-TData<T> op2;
-evaluateAddress<T*>(node1,&op1,destinationContext);
-evaluateNode<T>(node2,&op2,sourceContext);
-T ret = op2.getData();
-*(op1.getData()) = ret;
-return ret;
+	TData<T*> op1;
+	TData<T> op2;
+	evaluateAddress<T*>(node1,&op1,destinationContext);
+	evaluateNode<T>(node2,&op2,sourceContext);
+	T ret = op2.getData();
+	*(op1.getData()) = ret;
+	return ret;
 }
 
 
@@ -312,23 +329,27 @@ return ret;
 template<typename T>
 void performAssignment(Node* node, TData<T>* ret, TetraContext* context) {
 
-//We must typecheck here because parent node does not know what we are trying to assign
-switch(/*node->type()->getKind()*/TYPE_INT) {
-	case TYPE_INT:
-		//Performs the assignment and sets up the return
-		ret->setData(paste<int>(node->child(0), node->child(1), context));
-	break;
-	case TYPE_REAL:
-		ret->setData(paste<double>(node->child(0), node->child(1), context));
-	break;
-	case TYPE_BOOL:
-		ret->setData(paste<bool>(node->child(0), node->child(1), context));
+	cout << "assigning to: " << (node->child(0)->getString())  << endl;
+
+	assert(node->type() != NULL);
+
+	//We must typecheck here because parent node does not know what we are trying to assign
+	switch(node->type()->getKind()) {
+		case TYPE_INT:
+			//Performs the assignment and sets up the return
+			ret->setData(paste<int>(node->child(0), node->child(1), context));
+		break;
+		case TYPE_REAL:
+			ret->setData(paste<double>(node->child(0), node->child(1), context));
+		break;
+		case TYPE_BOOL:
+			ret->setData(paste<bool>(node->child(0), node->child(1), context));
 		break;
 		case TYPE_STRING:
 			ret->setData(paste<string>(node->child(0), node->child(1), context));
 		break;
 		default:
-			cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered.\nAborting...";
+			cout << "Unknown NodeDataType: " << node->child(0)->type()->getKind() << " encountered.\nAborting...";
 			exit(EXIT_FAILURE);
 	}
 	//cout << "After switch" << endl;
@@ -395,8 +416,10 @@ void evaluateCondition(Node* node, TData<T>* ret, TetraContext* context) {
 	static ComparisonList<string> compString;
 
 
+	assert (node->child(0)->type() != NULL);
+
 		//fetch operands, must perform type checking here, as the parent node has absolutely no idea what is being compared
-	switch(/*node->child(0)->type()->getKind()*/TYPE_INT) {
+	switch(node->child(0)->type()->getKind()) {
 		case TYPE_INT:
 		{
 			TData<int> op1;
@@ -434,7 +457,7 @@ void evaluateCondition(Node* node, TData<T>* ret, TetraContext* context) {
 		}
 		break;
 		default:
-			std::cout << "Error: unexpected NODE_DATA_TYPES begin compared" << std::endl;	
+			std::cout << "Error: unexpected NODE_DATA_TYPES being compared" << std::endl;	
 	}
 
 
@@ -487,6 +510,7 @@ void evaluateFlag(Node* node, TData<T>* ret, TetraContext* context) {
 			//Check if returning a value, or nothing
 			if(node->child(0) != NULL) {
 				evaluateNode<T>(node->child(0),ret,context);
+				cout << "Returning: " << ret->getData() << endl;
 			}
 			context->notifyReturn();
 		break;
@@ -555,12 +579,11 @@ int main(int argc, char** argv) {
 	}
 
 
-	//NodeTable.initialize();
 	FunctionMap::build(tree);
 
-	Node* start = FunctionMap::getFunctionNode("main");
-//	descNode(start);
-//	descNode(start->child(0));
+	Node* start = FunctionMap::getFunctionNode("main#");
+
+
 	TData<int> retVal(0);
 
 	cout << "Running " << argv[1] << "..." << endl;
@@ -568,9 +591,9 @@ int main(int argc, char** argv) {
 	TetraContext tContext;
 	tContext.initializeNewScope();
 
-	//vars.initializeNewScope();
+
 	evaluateNode<int>(start, &retVal, &tContext);
-	//vars.exitScope();
+
 	tContext.exitScope();
 	cout << "+------------------------------------------------" << endl;
 	cout << "|Main returned: " << retVal.getData() << endl;
@@ -578,11 +601,11 @@ int main(int argc, char** argv) {
 
 
 	TetraContext testContext;
-	testContext.initializeNewScope();
-	//runTest(&testContext);
-	testContext.exitScope();
-	cout << "super fin" << endl;
-	return 0;
+/*	testContext.initializeNewScope();
+	runTest(&testContext);
+	testContext.exitScope();*/
+	cout << "Finished interpreting" << endl;
+	return retVal.getData();
 }
 
 void runTest(TetraContext* context) {
@@ -675,7 +698,7 @@ void runTest(TetraContext* context) {
 	varX.setDataType(stringVal);
 	*(context->lookupVar<string>("GHRUAAAHHH")) = "oink";
 
-	cout << "here1" << endl;
+	cout << "here" << endl;
 
 	Node assignX(NODE_ASSIGN);
 	assignX.setDataType(stringVal);

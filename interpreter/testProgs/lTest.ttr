@@ -1,0 +1,21 @@
+def main() int:
+   if getNum() == 20:
+      return 1
+   elif getNum(1) == 20:
+      return 2
+   elif getNum(1,1) == 20:
+      return 3
+   else:
+      return 4
+
+def getNum() int:
+   return 10
+
+def getNum(i int) int:
+   return 20
+
+def getNum(i int, j int) int:
+   return 10
+
+def getNum(i int, j int, k int) int:
+   return 40

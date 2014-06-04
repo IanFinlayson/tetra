@@ -49,5 +49,6 @@ VarTable::~VarTable() {
 		}
 		varMap.erase(iter);
 	}
+	std::cout << "Destructor Finished" << std::endl;
 }
 

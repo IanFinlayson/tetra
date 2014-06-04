@@ -11,6 +11,10 @@
 #include "variableContext.h"
 #include "frontend.hpp"
 #include "progContext.h"
+
+//#define NDEBUG
+#include <assert.h>
+
 using std::string;
 
 
@@ -62,6 +66,8 @@ TetraContext& TetraContext::operator=(const TetraContext& other){
 }
 
 ExecutionStatus TetraContext::queryExecutionStatus() {
+	//cout << "Size: " << progStack.size() << endl;
+	assert (progStack.empty() == false);
 	return progStack.top().queryExecutionStatus();
 }
 

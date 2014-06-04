@@ -18,11 +18,13 @@ class FunctionMap {
 private:
 	FunctionMap();
 	std::map<string, Node*> lookup;
-	static FunctionMap instance;	
+	static FunctionMap instance;
+	static void concatSignature(Node*,string&);
 
 public:
 	static Node* getFunctionNode(string functionSignature);
-
+	//Generates a unique function signature based on the name AND the arguments
+	static string getFunctionSignature(Node* node);
 	//Fills the function map given the specified base node
 	static void build(Node* tree);
 };
