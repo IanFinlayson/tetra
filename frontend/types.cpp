@@ -243,6 +243,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
       } else {
         /* it's not there, so we should insert a new one */
         func->insertSymbol(Symbol(expr->child(0)->getString( ), rhs, expr->getLine( )));
+        /* set the node type as well */
+        expr->child(0)->setType(rhs);
       }
 
       /* return the type of the rhs */
@@ -506,11 +508,15 @@ void inferFunction(Node* node) {
     return;
   }
 
-  /* add the parameters into the table */
-  addParams(node->child(0), node);
-
-  /* infer the body of the function */
-  inferBlock(node->child(1), node);
+  /* if there is a block for parameters */
+  if (node->numChildren( ) > 1) {
+    /* add the parameters into the table */
+    addParams(node->child(0), node);
+    inferBlock(node->child(1), node);
+  } else {
+    /* just infer the body of the function */
+    inferBlock(node->child(0), node);
+  }
 }
 
 /* this function does type checking/type inference on a parse tree */
