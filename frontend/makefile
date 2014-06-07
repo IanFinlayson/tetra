@@ -3,10 +3,10 @@
 CC = clang++
 CFLAGS = -W -Wall -g
 
-all: dump-tree tags frontend.a
+all: dump-tree tags libfrontend.a
 	@echo "All done :)"
 
-frontend.a: parser.gen.o lexer.o types.o frontend.hpp node.o error.o
+libfrontend.a: parser.gen.o lexer.o types.o frontend.hpp node.o error.o
 	ar rcs libfrontend.a parser.gen.o lexer.o types.o node.o error.o
 
 dump-tree: parser.gen.o lexer.o dump-tree.o types.o frontend.hpp node.o error.o

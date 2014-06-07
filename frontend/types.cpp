@@ -174,6 +174,16 @@ DataType* inferFuncall(Node* funcall, Node* func) {
   /* find the function node this thing matches */
   Node* f = findFunction(funcall->getString( ), funcall->getLine( ));
 
+  /* if the call has no parameters, make sure the function doesn't expect any */
+  if (funcall->numChildren( ) == 0) {
+    if (f->numChildren( ) > 1) {
+      throw Error("Funcion called with no parameters, but expects some", funcall->getLine( ));
+    }
+
+    /* return from here as the below code expects >= param */
+    return f->type( );
+  }
+
   /* for each param, and also for each expression, make sure they match up */
   Node* formal = f->child(0);
   Node* actual = funcall->child(0);
@@ -240,6 +250,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
         if (*sym.getType( ) != *rhs) {
           throw Error("Assigning '" + expr->child(0)->getString( ) + "' to a new type", expr->getLine( ));
         }
+        /* set the node type as well */
+        expr->child(0)->setType(rhs);
       } else {
         /* it's not there, so we should insert a new one */
         func->insertSymbol(Symbol(expr->child(0)->getString( ), rhs, expr->getLine( )));
