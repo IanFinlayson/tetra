@@ -3,6 +3,15 @@ def print(x string):
     # yeah, about that...
     pass
 
+def func2( ):
+    pass
+
+def func3( ):
+    pass
+
+def func1( ):
+    pass
+
 def doStuff( ):
     background:
         func1( )
@@ -41,8 +50,6 @@ def function(a real, b real) string:
     if a > b:
         print("Yo!")
     return "Hello"
-
-
 
 
 def function(a real, b real) string:

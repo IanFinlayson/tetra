@@ -180,7 +180,7 @@ DataType* inferFuncall(Node* funcall, Node* func) {
       throw Error("Funcion called with no parameters, but expects some", funcall->getLine( ));
     }
 
-    /* return from here as the below code expects >= param */
+    /* return from here as the below code expects >= 1 param */
     return f->type( );
   }
 
@@ -190,17 +190,26 @@ DataType* inferFuncall(Node* funcall, Node* func) {
 
   int p = 1;
   while (formal && actual) {
-    DataType* t;
+    DataType* t1, * t2;
     
     /* it could be a list, or an actual param */
-    if (actual->kind( ) == NODE_ACTUAL_PARAM_LIST) 
-      t = inferExpression(actual->child(0), func);
-    else
-      t = inferExpression(actual, func);
+    if (actual->kind( ) == NODE_ACTUAL_PARAM_LIST)  {
+      t1 = inferExpression(actual->child(0), func);
+    } else {
+      t1 = inferExpression(actual, func);
+    }
 
-    if (*t != *(formal->type( ))) {
+    /* same for formal */
+    if (formal->kind( ) == NODE_FORMAL_PARAM_LIST)  {
+      t2 = formal->child(0)->type( );
+    } else {
+      t2 = formal->type( );
+    }
+
+    /* check for type mismatch */
+    if (*t1 != *t2) {
       throw Error("Function '" + funcall->getString( ) + "' expected " + 
-          typeToString(formal->type( )) + " but was called with " + typeToString(t) + 
+          typeToString(t2) + " but was called with " + typeToString(t1) + 
           " for parameter " + itoa(p), funcall->getLine( ));
     }
     p++;
