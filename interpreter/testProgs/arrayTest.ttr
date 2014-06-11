@@ -1,0 +1,22 @@
+def main() int:
+   val = ["cccc","reghjgh","ab" + "bc","aaaaa"]
+   val[0] = "dfkjghkjghsdgksgsggjk"
+   val[1] = "zzzzzzzzz"
+   val[2] = "ddddddddd"
+   val[3] = "wwwwwwwww"
+   x = val[0]
+   if x != val[1]:
+      val[2] = val[1]
+      z = 2
+   else:
+      val[1] = val[2]
+      y = 4
+
+   for i in val:
+      q = i
+
+   nums = [1,2,3,4]
+   sum = 0
+   for number in nums:
+      sum += number
+   return sum

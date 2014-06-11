@@ -10,6 +10,7 @@
 #include <iostream>
 #include "tData.cpp"
 #include "frontend.hpp"
+#include "tArray.h"
 
 using std::string;
 
@@ -27,6 +28,11 @@ bool negator<string>(string a) {
 	return a != "";
 }
 
+//Specialization for bitwise array negation will someday return negation of every element, but for now will just return null
+template<>
+bool negator<TArray>(TArray a) {
+	return NULL;
+}
 
 template <class T>
 class ComparisonList

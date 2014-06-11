@@ -2,11 +2,11 @@
 
 
 CC = g++
-FLAGS = -Wall
+FLAGS = -Wall -g
 SEARCHPATH = ../frontend
 
-tetra: main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o
-	$(CC) $(FLAGS) main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o $(SEARCHPATH)/libfrontend.a -o tetra
+tetra: main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
+	$(CC) $(FLAGS) main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra
 	#$(CC) $(FLAGS) voidlessMain.o $(SEARCHPATH)/libfrontend.a -o tetra
 	rm *.o
 	@echo
@@ -38,6 +38,9 @@ tDataSpecializations.o: tDataSpecializations.cpp
 
 progContext.o: progContext.h progContext.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c progContext.cpp
+
+tArray.o: tArray.cpp tArray.h
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tArray.cpp
 
 .PHONY clean:
 	rm *.o

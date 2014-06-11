@@ -10,6 +10,7 @@
 #include <iostream>
 #include "frontend.hpp"
 #include "tData.cpp"
+#include "tArray.h"
 
 using std::string;
 
@@ -23,7 +24,9 @@ T calculateExponential(T a, T b) {
 string calculateExponential(string a, string b) {
 	return "";
 }
-
+TArray calculateExponential(TArray& a, TArray& b) {
+	return a;
+}
 //overloaded funcitons for bitwise operators (to make the compiler happy that our templated class might allow for 1.1 << 2.2, etc
 
 template<typename T>

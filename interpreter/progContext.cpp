@@ -8,9 +8,11 @@
 #include <stack>
 #include <iostream>
 #include <string>
-#include "variableContext.h"
 #include "frontend.hpp"
 #include "progContext.h"
+//#include "variableContext.h"
+
+
 
 //#define NDEBUG
 #include <assert.h>

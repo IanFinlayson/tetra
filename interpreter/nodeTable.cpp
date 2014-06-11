@@ -68,7 +68,7 @@ NodeTable::NodeTable() {
 	nodeChart[NODE_BOOLVAL] = IMMEDIATE;
 	nodeChart[NODE_STRINGVAL] = IMMEDIATE;
 	nodeChart[NODE_IDENTIFIER] = IMMEDIATE;
-	nodeChart[NODE_VECVAL] = STRUCTURE;
+	nodeChart[NODE_VECVAL] = IMMEDIATE;
 }
 
 NodeClassification NodeTable::getClassification(Node* node) {

@@ -7,4 +7,8 @@ def main() int:
       x * y
       x - y
       z = x + x
-      x = 24
+      x = 2
+      y = 3
+      x = x + y
+      y = y + x
+   return x * y

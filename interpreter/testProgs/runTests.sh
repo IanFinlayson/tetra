@@ -12,8 +12,13 @@ successFlag=1
 
 prefixes[0]="j";	results[0]=120
 prefixes[1]="k";	results[1]=3
-prefixes[2]="l";	results[2]=2
+#prefixes[2]="l";	results[2]=2 removed temporarily
 prefixes[${#prefixes[*]}]="m";	results[${#results[*]}]=2
+prefixes[${#prefixes[*]}]="n";	results[${#results[*]}]=10
+prefixes[${#prefixes[*]}]="o";	results[${#results[*]}]=2
+prefixes[${#prefixes[*]}]="p";	results[${#results[*]}]=40
+prefixes[${#prefixes[*]}]="array";	results[${#results[*]}]=10
+
 
 for index in $(seq 0 `expr ${#prefixes[*]} - 1`)
 do
