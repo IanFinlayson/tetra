@@ -70,7 +70,7 @@ string stringType(Node* node) {
     /* vectors */
     case NODE_VECREF: return "VECREF";
     case NODE_INDEX: return "INDEX";
-    case NODE_VECVAL: return "VECTOR";
+    case NODE_VECVAL: return "VECVAL";
 
     /* leafs */
     case NODE_INTVAL:

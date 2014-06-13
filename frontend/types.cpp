@@ -387,7 +387,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_VECVAL: {
       DataType* dt = new DataType(TYPE_VECTOR);
       dt->setSubType(inferExpression(expr->child(0), func));
-      /* TODO check that all of the expressions match! */
+
+      /* if there are more than one child, recurse on them too */
+      for (int i = 1; i < expr->numChildren( ); i++) {
+        DataType* other = inferExpression(expr->child(i), func);
+
+        /* check that they match! */
+        if (*other != *dt) {
+          throw Error("Mismatched vector types", expr->getLine( ));
+        }
+      }
+
       return dt;
     }
 
@@ -496,6 +506,9 @@ void inferBlock(Node* block, Node* func) {
 
       /* put the identifier in the func */
       func->insertSymbol(Symbol(block->child(0)->getString( ), expr_type->getSub( ), block->getLine( )));
+
+      /* set the type of the node too */
+      block->child(0)->setDataType(expr_type->getSub( ));
 
       /* check the block under this */
       inferBlock(block->child(2), func);
