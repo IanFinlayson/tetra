@@ -1,0 +1,12 @@
+def main() int:
+   passer = [1,2,3]
+   cally(passer)
+   return passer[0] + passer[1] + passer[2]
+
+def cally(argx [int]):
+   caller(argx)
+
+def caller(argy [int]):
+   argy[0] = 10
+   argy[1] = 20
+   argy[2] = 30

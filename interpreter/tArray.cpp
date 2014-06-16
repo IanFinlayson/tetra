@@ -5,30 +5,46 @@
 #include<iostream>
 #include<string>
 #include<cstdlib>
-#include"tData.cpp"
+#include"tData.h"
 #include"frontend.hpp"
 #include "tArray.h"
 
 using std::string;
 using std::vector;
 
-TArray::TArray() : elements() {
-	//default constructs elements
+TArray::TArray() : elements(){
+
 }
 
-
-TArray::TArray(const TArray& other) : elements() {
+TArray::TArray(const TArray& other) :elements() {
 	elements = other.elements;
-	/*for(unsigned int x = 0; x < other.elements.size(); x++) {
-		cout << "Adding element in copy constructor..." << endl;
-		TData<void*> inserter(other.elementAt(x));
-		addElement(inserter);
-	}*/
 }
 
+//Code for when elements was a pointer
+/*TArray::TArray() {
+	//default constructs elements and initialize vector pointer
+	elements = new vector< TData<void*> >;
+}
+
+
+TArray::TArray(const TArray& other) {
+	//Initialize the pointer, then copy construct the containing vector it
+	elements = new vector< TData<void*> >(other.elements->size());
+	*elements = *other.elements;
+}
+
+TArray& TArray::operator=(const TArray& other) {
+	if(this != &other) {
+		//Release current memory, then copy the underlying vector
+		delete elements;
+		elements = new vector< TData<void*> >(*(other.elements));
+	}
+	return *this;
+}
+*/
 //If the TData objects added to this object are set as deletable, they must be destroyed along with this object
 TArray::~TArray() {
-	cout << "destroying elements of array: " << endl;
+	//cout << "destroying elements of array: " << endl;
 	for(std::vector< TData<void*> >::iterator iter = elements.begin(); iter < elements.end(); iter++) {
 		switch((*iter).getPointedTo().getKind()) {
 			case TYPE_INT:
@@ -78,8 +94,8 @@ TArray& TArray::operator=(const TArray& other) {
 
 TData<void*>& TArray::elementAt(unsigned int index) {
 	//check for out-of-bounds access (note that parameter is unsigned, cannot be < 0
-	cout << &elements << "<<<<<<!!!!!" << endl;
-	cout << "Size: " << elements.size();
+//	cout << &elements << "<<<<<<!!!!!" << endl;
+//	cout << "Size: " << elements.size();
 	if(index < elements.size()) {
 		return elements[index];
 	}
@@ -100,7 +116,7 @@ const TData<void*>& TArray::elementAt(unsigned int index) const {
 
 //NOTE: due to the nature of TData<void*> copy constructor allocating new memory, elements added must have whatever they are pointing at deleted!
 void TArray::addElement(const TData<void*>& pElement) {
-	cout << (&elements) << endl;
+	//cout << (&elements) << endl;
 	elements.push_back(pElement);
 }
 

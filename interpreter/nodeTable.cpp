@@ -48,6 +48,8 @@ NodeTable::NodeTable() {
 	nodeChart[NODE_GTE] = CONDITION;
 	nodeChart[NODE_EQ] = CONDITION;
 	nodeChart[NODE_NEQ] = CONDITION;
+	nodeChart[NODE_BITAND] = OPERATION;
+	nodeChart[NODE_BITOR] = OPERATION;
 	nodeChart[NODE_BITXOR] = OPERATION;
 	nodeChart[NODE_SHIFTL] = OPERATION;
 	nodeChart[NODE_SHIFTR] = OPERATION;
@@ -71,7 +73,7 @@ NodeTable::NodeTable() {
 	nodeChart[NODE_VECVAL] = IMMEDIATE;
 }
 
-NodeClassification NodeTable::getClassification(Node* node) {
+const NodeClassification NodeTable::getClassification(const Node* node) {
 	//this is just present to check that every node is mapped
 	if(nodeChart.find(node->kind()) == nodeChart.end()) {
 		cout << "Node not found in classification table: " << node->kind() << "\nPlease look into this. Aborting." << endl;
@@ -81,7 +83,7 @@ NodeClassification NodeTable::getClassification(Node* node) {
 }
 
 //There is only one NodeTable, and it never changes, so it is static and unaccessible
-NodeClassification NodeTable::classifyNode(Node* node) {
+const NodeClassification NodeTable::classifyNode(const Node* node) {
 	return instance.getClassification(node);
 }
 

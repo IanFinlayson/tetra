@@ -25,6 +25,11 @@ TetraScope::TetraScope() {
 	executionStatus = NORMAL;
 }
 
+//Wraps the varTable::declareReference
+TData<void*>& TetraScope::declareReference(const string varName) {
+	return varScope.declareReference(varName);
+}
+
 //Used by loops and constrol statements to determine if they can proceed, or if they should return
 ExecutionStatus TetraScope::queryExecutionStatus() {
 	return executionStatus;
@@ -47,6 +52,10 @@ void TetraContext::initializeNewScope() {
 	progStack.push(newScope);
 }
 
+void TetraContext::initializeNewScope(TetraScope& newScope) {
+	progStack.push(newScope);
+}
+
 void TetraContext::exitScope() {
 	progStack.pop();
 }
@@ -58,8 +67,13 @@ TetraContext::~TetraContext() {
 	}
 }
 
-TetraScope* TetraContext::getCurrentScope() {
-	 return &progStack.top();
+TData<void*>& TetraContext::declareReference(const string varName) {
+	return progStack.top().declareReference(varName);
+}
+
+
+TetraScope& TetraContext::getCurrentScope() {
+	 return progStack.top();
 }
 
 TetraContext& TetraContext::operator=(const TetraContext& other){

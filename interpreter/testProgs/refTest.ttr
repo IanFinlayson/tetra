@@ -1,0 +1,6 @@
+def main() int:
+   dd = [[[1]]]
+   for i in dd:
+      for j in i:
+         j[0] = 200
+   return dd[0][0][0]

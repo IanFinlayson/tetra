@@ -5,7 +5,7 @@
 #ifndef T_DATA_SPECS_H
 #define T_DATA_SPECS_H
 
-#include "tData.cpp"
+#include "tData.h"
 #include "tArray.h"
 
 //Specialization of copy constructor for types looking at dynamic memory
@@ -48,7 +48,9 @@ TData<void*>::TData(const TData<void*>& other) : pointedTo(other.pointedTo.getKi
 }
 
 
-//Used to actually store data when storing
+//Used to actually store data when using setData
+//The reason these are templated like this is to allow for later definition of what should happen when attempting to assign cross datatypes
+//These can be defined within the language merely by defioning a proper specialization
 template<> template<>
 void TData<int>::setData<int>(const int& pData) {
 	        data = pData;
@@ -98,6 +100,7 @@ void TData<string*>::setData<string*>(string* const &pData) {
 template<> template<>
 void TData<TArray*>::setData<TArray*>(TArray* const &pData) {
 	        data = pData;
+		cout << "ARRAY ASSIGNMENT!!!!!!!" << endl;
 }
 
 //This is used when evaluating TArrays, as the addresses of data need to be assigned to TData<void*> objects
@@ -129,7 +132,6 @@ void TData<void*>::setDeletableType<string>(){
 }
 
 //Denotes array type
-//This should not be used,actually, in favor of the below setDeletableType(DataType)
 template<> template<>
 void TData<void*>::setDeletableType<TArray>(){
 	        pointedTo = DataType(TYPE_VECTOR);
@@ -144,27 +146,38 @@ void TData<void*>::setDeletableType() {
 
 template <>
 TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
+
+	//Check self assignment
+	if(&other == this) {
+		return *this;
+	}
+
 	//if the data points to something, we must perform a deep copy
 	if(other.pointedTo != TYPE_VOID) {
 		//std::cout << " Deep data CC " << std::endl;
 		switch(other.pointedTo.getKind()) {
 			case TYPE_INT:
+				delete static_cast<int*>(data);
 				data = new int;
 				*(static_cast<int*>(data)) = *static_cast<int*>(other.data);
 			break;
 			case TYPE_REAL:
+				delete static_cast<double*>(data);
 				data = new double;
 				*(static_cast<double*>(data)) = *static_cast<double*>(other.data);
 			break;
 			case TYPE_BOOL:
+				delete static_cast<bool*>(data);
 				data = new bool;
 				*(static_cast<bool*>(data)) = *static_cast<bool*>(other.data);
 			break;
 			case TYPE_STRING:
+				delete static_cast<string*>(data);
 				data = new string;
 				*(static_cast<string*>(data)) = *static_cast<string*>(other.data);
 			break;
 			case TYPE_VECTOR:
+				delete static_cast<TArray*>(data);
 				data = new TArray;
 				*(static_cast<TArray*>(data)) = *static_cast<TArray*>(other.data);
 			break;

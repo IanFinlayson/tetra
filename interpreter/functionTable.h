@@ -19,14 +19,14 @@ private:
 	FunctionMap();
 	std::map<string, Node*> lookup;
 	static FunctionMap instance;
-	static void concatSignature(Node*,string&);
+	static void concatSignature(const Node*,string&);
 
 public:
-	static Node* getFunctionNode(string functionSignature);
+	static const Node* getFunctionNode(const string functionSignature);
 	//Generates a unique function signature based on the name AND the arguments
-	static string getFunctionSignature(Node* node);
+	static const string getFunctionSignature(const Node* node);
 	//Fills the function map given the specified base node
-	static void build(Node* tree);
+	static void build(const Node* tree);
 };
 
 #endif

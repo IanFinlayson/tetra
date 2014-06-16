@@ -43,6 +43,8 @@ class TetraScope {
 			return varScope.lookupVar<T>(name);
 		}
 
+		TData<void*>& declareReference(const string varName);
+
 		//Used by loops and constrol statements to determine if they can proceed, or if they should return
 		ExecutionStatus queryExecutionStatus();
 
@@ -68,14 +70,19 @@ public:
 		return progStack.top().lookupVar<T>(name);
 	}
 
+	TData<void*>& declareReference(const string varName);
+
+	//Overloaded function call, one when there is no initial setup for a scope (i.e. a function call with no formal parameters that must be initialized)
+	//The second is for adding a scope which had to have some data preloaded into it, as is the case when calling a function with arguments
 	void initializeNewScope();
+	void initializeNewScope(TetraScope& newScope);
 
 	void exitScope();
 
 	//If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
 	~TetraContext();
 
-	TetraScope* getCurrentScope();
+	TetraScope& getCurrentScope();
 
 	ExecutionStatus queryExecutionStatus();
 

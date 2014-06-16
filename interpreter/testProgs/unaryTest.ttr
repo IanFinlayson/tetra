@@ -1,0 +1,10 @@
+def main() int:
+   q = 100 ^ 50
+   w = 100 & 5
+   e = 222 | 222
+   x = not true
+   y = true
+   if not x:
+      if not x and y:
+         return 10
+   return 20

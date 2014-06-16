@@ -1,5 +1,5 @@
 def main() int:
-   val = ["cccc","reghjgh","ab" + "bc","aaaaa"]
+   val = ["cccc","reghjgh","abbc","aaaaa"]
    val[0] = "dfkjghkjghsdgksgsggjk"
    val[1] = "zzzzzzzzz"
    val[2] = "ddddddddd"

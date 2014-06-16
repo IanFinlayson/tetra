@@ -44,12 +44,12 @@ private:
 	//constructor populates the table
 	NodeTable();	
 	
-	NodeClassification getClassification(Node* node);
+	const NodeClassification getClassification(const Node* node);
 
 public:
 
 	//There is only one NodeTable, and it never changes, so it is static and unaccessible
-	static NodeClassification classifyNode(Node* node);
+	static const NodeClassification classifyNode(const Node* node);
 
 };
 

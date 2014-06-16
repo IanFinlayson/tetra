@@ -19,6 +19,7 @@ Node::Node(NodeKind node_type) {
   intval = 0;
   realval = 0.0;
   boolval = false;
+  symtable = NULL;
   lineno = yylineno;  /* this is often inaccurate! */
 }
  

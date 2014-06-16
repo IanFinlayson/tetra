@@ -1,0 +1,20 @@
+def main() int:
+   vec = ["a","b","c","d","e"]
+   forTest(vec)
+   if vec[0] == "a":
+      return 10
+   elif vec[1] == "b":
+      return 20
+   elif vec[2] == "qq" and vec[4] == "qq":
+      return 30
+   else:
+      return 40
+
+def forTest(par [string]):
+   for i in [0 ... 4]:
+      par[i] = "qq"
+      if i == 2:
+         continue
+      if i > 3:
+         break
+      par[i] = "q"

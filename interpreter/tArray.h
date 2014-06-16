@@ -8,7 +8,7 @@
 #include<iostream>
 #include<string>
 #include<cstdlib>
-#include"tData.cpp"
+#include"tData.h"
 #include"frontend.hpp"
 
 using std::string;
@@ -32,7 +32,7 @@ public:
 	const std::vector< TData<void*> >::const_iterator end() const;
 
 	//Copy assignment operator
-//	TArray& operator=(const TArray& other);
+	//TArray& operator=(const TArray& other);
 
 	//For debugging purposes
 	template<typename T>

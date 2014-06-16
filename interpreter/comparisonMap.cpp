@@ -8,7 +8,7 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include "tData.cpp"
+#include "tData.h"
 #include "frontend.hpp"
 #include "tArray.h"
 
@@ -31,7 +31,7 @@ bool negator<string>(string a) {
 //Specialization for bitwise array negation will someday return negation of every element, but for now will just return null
 template<>
 bool negator<TArray>(TArray a) {
-	return NULL;
+	return false;
 }
 
 template <class T>
@@ -52,8 +52,8 @@ class ComparisonList
 		}
 
 		//looks up the appropriate option and executes it
-		bool execute(NodeKind n, TData<T>* a, TData<T>* b) {
-			return (this->*functionMap[n])(a->getData(),b->getData());
+		bool execute(NodeKind n, TData<T>& a, TData<T>& b) {
+			return (this->*functionMap[n])(a.getData(),b.getData());
 		}
 
 	private:

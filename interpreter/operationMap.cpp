@@ -9,12 +9,52 @@
 #include <map>
 #include <iostream>
 #include "frontend.hpp"
-#include "tData.cpp"
+#include "tData.h"
 #include "tArray.h"
 
 using std::string;
 
 
+//These operators are stubbed so that the operations exist, and can be modified later. also prevents us from having to make too many special cases for strings.
+//By default, all "improper" operations will return null, since any other behavior would be non-intuitive for now.
+
+string operator/(string a, string b) {
+	return "";
+}
+
+string operator*(string a, string b) {
+	return "";
+}
+string operator-(string a, string b) {
+	return "";
+}
+string operator^(string a, string b) {
+	return "";
+}
+string operator||(string a, string b) {
+	return "";
+}
+string operator&&(string a, string b) {
+	return "";
+}
+string operator|(string a, string b) {
+	return "";
+}
+string operator&(string a, string b) {
+	return "";
+}
+string operator<<(string a, string b) {
+	return "";
+}
+string operator>>(string a, string b) {
+	return "";
+}
+string operator!(string a) {
+	return "";
+}
+string operator%(string a, string b) {
+	return "";
+}
 //overloaded calculate exoponential
 
 template<typename T>
@@ -108,8 +148,8 @@ class OperationList
 		}
 
 		//looks up the appropriate option and executes it
-		T execute(NodeKind n, TData<T>* a, TData<T>* b) {
-			return (this->*functionMap[n])(a->getData(),b->getData());
+		T execute(NodeKind n, TData<T>& a, TData<T>& b) {
+			return (this->*functionMap[n])(a.getData(),b.getData());
 		}
 
 	private:
@@ -180,46 +220,7 @@ class OperationList
 
 };
 
-//These operators are stubbed so that the operations exist, and can be modified later. also prevents us from having to make too many special cases for strings.
-//By default, all "improper" operations will return null, since any other behavior would be non-intuitive for now.
 
-string operator/(string a, string b) {
-	return NULL;
-}
-
-string operator*(string a, string b) {
-	return NULL;
-}
-string operator-(string a, string b) {
-	return NULL;
-}
-string operator^(string a, string b) {
-	return NULL;
-}
-string operator||(string a, string b) {
-	return NULL;
-}
-string operator&&(string a, string b) {
-	return NULL;
-}
-string operator|(string a, string b) {
-	return NULL;
-}
-string operator&(string a, string b) {
-	return NULL;
-}
-string operator<<(string a, string b) {
-	return NULL;
-}
-string operator>>(string a, string b) {
-	return NULL;
-}
-string operator!(string a) {
-	return NULL;
-}
-string operator%(string a, string b) {
-	return NULL;
-}
 /*
 //Stubs for double operators that otherwise might be invalid
 //At the moment, these all return 0

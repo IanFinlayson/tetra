@@ -5,10 +5,10 @@
 
 rm log.txt
 echo "LOGFILE:" > log.txt
-cd ..
 
 retVal=-1
 successFlag=1
+tetraPath=..
 
 prefixes[0]="j";	results[0]=120
 prefixes[1]="k";	results[1]=3
@@ -18,13 +18,23 @@ prefixes[${#prefixes[*]}]="n";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="o";	results[${#results[*]}]=2
 prefixes[${#prefixes[*]}]="p";	results[${#results[*]}]=40
 prefixes[${#prefixes[*]}]="array";	results[${#results[*]}]=10
-
+prefixes[${#prefixes[*]}]="a";	results[${#results[*]}]=40
+prefixes[${#prefixes[*]}]="aFor";	results[${#results[*]}]=30
+prefixes[${#prefixes[*]}]="funArray";	results[${#results[*]}]=60
+prefixes[${#prefixes[*]}]="litArray";	results[${#results[*]}]=12
+prefixes[${#prefixes[*]}]="unary";	results[${#results[*]}]=10
+prefixes[${#prefixes[*]}]="2D";	results[${#results[*]}]=2
+prefixes[${#prefixes[*]}]="2DFun";	results[${#results[*]}]=4
+prefixes[${#prefixes[*]}]="ultA";	results[${#results[*]}]=22
+prefixes[${#prefixes[*]}]="forLit";	results[${#results[*]}]=55
+prefixes[${#prefixes[*]}]="ref";	results[${#results[*]}]=200
+prefixes[${#prefixes[*]}]="refref";	results[${#results[*]}]=222
 
 for index in $(seq 0 `expr ${#prefixes[*]} - 1`)
 do
 	echo
 	echo Testing  ${prefixes[ ${index} ]}Test.ttr
-	./tetra testProgs/${prefixes[ ${index} ]}Test.ttr >> log.txt
+	${tetraPath}/tetra ${prefixes[ ${index} ]}Test.ttr >> log.txt
 	retVal=$?
 	if [ $retVal -eq ${results[${index}]} ]
 	then
@@ -44,6 +54,4 @@ then
 	echo 'Tests completed successfully'
 else
 	echo 'Not all tests were completed successfully'
-fi
-
-cd testProgs	
+fi	

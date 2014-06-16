@@ -7,7 +7,7 @@
 #include<iostream>
 #include<map>
 #include<string>
-#include"tData.cpp"
+#include"tData.h"
 
 using std::string;
 
@@ -20,9 +20,12 @@ public:
 	//Release allocated data
 	~VarTable();
 
-	//returns a reference to the storage location of the variable. The interpreter supplies the expected type. At present, this results in a memory leak until we do a little extra design
+	//returns a reference to the storage location of the variable. The interpreter supplies the expected type.
 	template<typename T>
-	T* lookupVar(string varName);
+	T* lookupVar(const string varName);
+
+	//Returns a TData from within varMap containing an invalid reference. The reference can be set to something valid, and that thing will not be deleted when this variableContext goes out of scope
+	TData<void*>& declareReference(const string varName);
 
 private:
 
@@ -32,7 +35,7 @@ private:
 //Returns a reference to the storage location of the variable
 ////defined in the header because it is a template
 template<typename T>
-T* VarTable::lookupVar(string varName) {
+T* VarTable::lookupVar(const string varName) {
 
 	//check whether an entry exists for this variable
 	if(varMap.find(varName) == varMap.end()) {
@@ -49,6 +52,5 @@ T* VarTable::lookupVar(string varName) {
 	return static_cast<T*>(varMap[varName].getData());
 
 }
-
 
 #endif

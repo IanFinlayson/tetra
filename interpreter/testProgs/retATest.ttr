@@ -1,0 +1,10 @@
+def main() int:
+   z = [1,2]
+   x = getArray(z)
+   x[1] += 10
+   return x[1] + z[1]
+
+def getArray(x [int]) [int]:
+   x[0] += 10
+   x[1] += 10
+   return x

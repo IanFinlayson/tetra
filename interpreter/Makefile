@@ -1,8 +1,8 @@
 #At present, because there is no split between the .h and .cpp files, much of this makefile is unnecessary at the moment
 
 
-CC = g++
-FLAGS = -Wall -g
+CC = clang++
+FLAGS = -Wall -g 
 SEARCHPATH = ../frontend
 
 tetra: main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
@@ -12,7 +12,7 @@ tetra: main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataS
 	@echo
 	@echo
 
-main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.cpp progContext.h
+main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
 
 comparisonMap.o: comparisonMap.cpp
@@ -30,8 +30,8 @@ operationMap.o: operationMap.cpp
 variableContext.o: variableContext.cpp variableContext.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c variableContext.cpp
 
-tData.o: tData.cpp
-	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tData.cpp
+tData.o: tData.h
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tData.h
 
 tDataSpecializations.o: tDataSpecializations.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tDataSpecializations.cpp

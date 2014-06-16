@@ -18,13 +18,13 @@ using std::string;
 FunctionMap::FunctionMap() {
 }
 
-Node* FunctionMap::getFunctionNode(string functionSignature) {
+const Node* FunctionMap::getFunctionNode(const string functionSignature) {
 	return instance.lookup[functionSignature];
 }
 
 
 //Fills the function map given the specified base node
-void FunctionMap::build(Node* tree) {
+void FunctionMap::build(const Node* tree) {
 
 	if(tree->kind() == NODE_FUNCTION_LIST) {
 		//by specifications, there MUST be a child
@@ -39,7 +39,7 @@ void FunctionMap::build(Node* tree) {
 }
 
 //Adds the signature of a single argument to the string
-void FunctionMap::concatSignature(Node* node, string& signature) {
+void FunctionMap::concatSignature(const Node* node, string& signature) {
 	 
 	if(node->kind() != NODE_ACTUAL_PARAM_LIST && node->kind() != NODE_FORMAL_PARAM_LIST) {
 
@@ -74,7 +74,7 @@ void FunctionMap::concatSignature(Node* node, string& signature) {
 
 }
 
-string FunctionMap::getFunctionSignature(Node* node) {
+const string FunctionMap::getFunctionSignature(const Node* node) {
 	string ret = node->getString();
 	
 	assert (node->kind() == NODE_FUNCTION || node->kind() == NODE_FUNCALL);

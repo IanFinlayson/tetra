@@ -34,6 +34,7 @@ class TData{
 		TData<T>& operator=(const TData<T>&);
 
 		const T& getData() const;
+		T& getData();
 	private:
 		T data;
 		//used for deleting dynamically allocated data if this object utilizes it;
@@ -85,11 +86,17 @@ const DataType TData<T>::getPointedTo() const {
 template<typename T> template<typename R>
 void TData<T>::setData(const R& pData) {
 	//By default, this should not do anything, but we will specialize the tamplate for the few scenarios where this actually works
+	//Nothing out of the ordinary when this is called
 	std::cout << "Assignment failed" << std::endl;
 }   
 
 template<typename T>
 const T& TData<T>::getData() const {
 	return data;
-}   
+}
+
+template<typename T>
+T& TData<T>::getData() {
+	return data;
+}  
 #endif
