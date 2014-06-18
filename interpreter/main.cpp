@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <string>
 #include <map>
+#include <sstream>
 #include "frontend.hpp"
 #include "tArray.h"
 #include "tData.h"
@@ -61,11 +62,26 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 	if(node->numChildren() == 2){
 		//cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 		//Get the vector pointed to by this index
-		TArray* nextVec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
+		TArray* nextVec;
+		try {
+			nextVec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
+		}
+		catch (Error e) {
+			//If we catch an exception, propogate it after adding info about the line number
+			Error e2(e.getMessage(),node->getLine());
+			throw e2;
+		}
 		evaluateVecVal<T>(node->child(1),nextVec,ret,context);
 	}
 	else { //If we have accounted for all the indeces
-		T value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
+		T value;
+		try {
+			value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
+		}
+		catch (Error e){
+			Error e2(e.getMessage(),node->getLine());
+			throw e2;
+		}
 		ret.setData(value);
 	
 	}
@@ -92,7 +108,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			evaluateNode<T>(node->child(0),ret,context);
 			//did the statement result in a break, continue, return, etc?
 			ExecutionStatus status = context.queryExecutionStatus();
-			if(status != RETURN && status != BREAK && status != CONTINUE) {
+			//Possible optimization, just status != NORMAL
+			if(status != RETURN && status != REF_RETURN && status != BREAK && status != CONTINUE) {
 				evaluateNode<T>(node->child(1),ret,context);
 			}
 		}
@@ -128,7 +145,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 				//Check is any flags are set, and take the appropriate action
 				ExecutionStatus status = context.queryExecutionStatus();
 				//If returning, stop the loop and return
-				if(status == RETURN) {
+				if(status == RETURN || status == REF_RETURN) {
 					break;
 				}
 				//If breaking, notify the TetraContext that we have reached the outside of the loop, then  stop the loop
@@ -235,7 +252,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			ExecutionStatus status = context.queryExecutionStatus();
 
 			//For_each loop with some extra conditions tacked on
-			for(std::vector< TData<void*> >::const_iterator iter = collection.getData()->begin(); iter != collection.getData()->end() && status != BREAK && status != RETURN; iter++) {
+			for(std::vector< TData<void*> >::const_iterator iter = collection.getData()->begin(); iter != collection.getData()->end() && status != BREAK && status != RETURN && status != REF_RETURN; iter++) {
 	//			cout << "Switcheroo" << endl;
 				context.normalizeStatus();
 //				assert (node->child(1)->type()->getSub()->getKind() != NULL);
@@ -275,8 +292,12 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					default:
-						cout << "ERROR: attempting to assign to unknown DATA_TYPE: " << node->child(0)->type()->getKind() << "\n Aborting..." << endl;
-						exit(EXIT_FAILURE);
+						std::stringstream message;
+						message << "Attempting to assign to unknown DataType in for loop. ID: " << node->child(0)->type()->getKind();
+						Error e(message.str(),node->getLine());
+						throw e;
+						//cout << "ERROR: attempting to assign to unknown DATA_TYPE: " << node->child(0)->type()->getKind() << "\n Aborting..." << endl;
+						//exit(EXIT_FAILURE);
 				}
 				//Check the current status flag to see if we have to break out
 				status = context.queryExecutionStatus();
@@ -294,7 +315,10 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			return;
 		break;
 		default:
-			cout << "Unsupported nodekind encountered in statement" << endl;
+			std::stringstream message;
+			message << "Encountered unsupported NodeKind in statement. ID: " << node->kind();
+			Error e(message.str(),node->getLine());
+			//cout << "Unsupported nodekind encountered in statement" << endl;
 	}
 }
 
@@ -364,8 +388,12 @@ void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationC
 				}
 			break;
 			default:
-				cout << "Unknown NodeDataType: " << node1->type()->getKind() << " encountered when attempting to paste arguments.\nAborting...";
-				exit(EXIT_FAILURE);
+				std::stringstream message;
+				message << "Attempting to pass unknown DataType (ID = " << node1->type()->getKind() << ") to function"; 
+				Error e(message.str(),node1->getLine());
+				throw e;
+				//cout << "Unknown NodeDataType: " << node1->type()->getKind() << " encountered when attempting to paste arguments.\nAborting...";
+				//exit(EXIT_FAILURE);
 			}
 	}
 }
@@ -402,6 +430,8 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 	}
 
 	//transfer control to the function
+	//Try catch used to assemble a call stack 
+
 	evaluateNode<T>(callNode,ret,context);
 
 	//area where the ret value is determined but all called function vars still exist	
@@ -439,17 +469,32 @@ void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 	//Check if there are further idecies which must be evaluated
 	if(node->numChildren() == 2){
 		//Get the vector pointed to by this index
-		TArray* nextVec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
+		TArray* nextVec;
+		try {
+			nextVec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
+		}
+		catch (Error e) {
+			//In the case of array oput of boundes, propogate the error after tacking on line number info
+			Error e2(e.getMessage(),node->getLine());
+			throw e2;
+		}
 		evaluateVecRef<T>(node->child(1),nextVec,ret,context);
 	}
 	else { //If we have accounted for all the indeces
-		T value = static_cast<T>(vec->elementAt(indexNum.getData()).getData());
+		T value;
+		try {
+			value = static_cast<T>(vec->elementAt(indexNum.getData()).getData());
+		}
+		catch (Error e) {
+			Error e2(e.getMessage(),node->getLine());
+		}
 		ret.setData(value);
 	}
 	
 }
 
 //used to get references to variables (for assignment, and possibly other features in the future)
+//Expected a pointer type for T
 template<typename T>
 void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 	//Right now, we are assuming that the only type of node for which this will occur is a NODE_IDENTIFIER and NODE_FORMAL_PARAM
@@ -476,8 +521,12 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 				ret.setData(context.lookupVar<TArray>(node->getString()));
 			break;
 			default:
-				cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered.\nAborting...";
-				exit(EXIT_FAILURE);
+				std::stringstream message;
+				message << "Attempting to evaluate reference to unknown DataType ID: " << node->type()->getKind() << endl;
+				Error e(message.str(),node->getLine());
+				throw e;
+				//cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered.\nAborting...";
+				//exit(EXIT_FAILURE);
 		}
 	}
 	else if (node->kind() == NODE_VECREF) {
@@ -526,7 +575,7 @@ T paste(const Node* node1, const Node* node2, TetraScope& destinationContext, Te
 template<typename T>
 void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
 
-	cout << "assigning to: " << (node->child(0)->getString())  << endl;
+	//cout << "assigning to: " << (node->child(0)->getString())  << endl;
 
 	assert(node->type() != NULL);
 
@@ -551,8 +600,12 @@ void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
 			cout << "Enda array assignment" << endl;
 		break;
 		default:
-			cout << "Unknown NodeDataType: " << node->child(0)->type()->getKind() << " encountered.\nAborting...";
-			exit(EXIT_FAILURE);
+			std::stringstream message;
+			message << "Attempting to assign value of unknown DataType ID: " << node->type()->getKind();
+			Error e(message.str(),node->getLine());
+			throw e;
+			//cout << "Unknown NodeDataType: " << node->child(0)->type()->getKind() << " encountered.\nAborting...";
+			//exit(EXIT_FAILURE);
 	}
 
 }
@@ -593,6 +646,7 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 		{
 			TData<bool> op1;
 			evaluateNode<bool>(node->child(0),op1,context);
+
 			TData<bool> op2;
 			if(node->child(1) != NULL) {
 				evaluateNode<bool>(node->child(1),op2,context);
@@ -619,7 +673,10 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 		}
 		break;
 		default:
-			std::cout << "Error: unexpected NODE_DATA_TYPES being compared" << std::endl;	
+			std::stringstream message;
+			message << "Attempting to compare values with unknown DataType ID: " << node->child(0)->type()->getKind();
+			Error e(message.str(),node->getLine());
+			//std::cout << "Error: unexpected NODE_DATA_TYPES being compared" << std::endl;	
 	}
 
 
@@ -706,8 +763,12 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 							evaluateVectorComponent<TArray>(node, context, returnArray);
 						break;
 						default:
-							cout << "Error: Attempting to initialize array with unknown subtype. Aborting..." << endl;
-							exit(EXIT_FAILURE);
+							std::stringstream message;
+							message << "Attempted to initialize array with unknown subtype (ID: " << node->child(0)->type()->getKind() << ")";
+							Error e(message.str(),node->getLine());
+							throw e;
+							//cout << "Error: Attempting to initialize array with unknown subtype. Aborting..." << endl;
+							//exit(EXIT_FAILURE);
 						
 					}
 				}
@@ -719,10 +780,51 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 			}				
 			break;
 			default:
-				cout << "Unknown Immediate NodeType: " << node->kind() << " encountered.\nAborting...";
-				exit(EXIT_FAILURE);
+				std::stringstream message;
+				message << "Attempting to evaluate unknown immediate NodeType (ID: " << node->kind() << ")";
+				Error e(message.str(),node->getLine());
+				throw e;
+				//cout << "Unknown Immediate NodeType: " << node->kind() << " encountered.\nAborting...";
+				//exit(EXIT_FAILURE);
 		}
 			
+	}
+}
+
+template<typename T>
+void evaluateReturn(const Node* node,TData<T>& ret,TetraContext& context) {
+	
+	//Check if returning a value, or nothing
+	if(node->child(0) != NULL) {
+		evaluateNode<T>(node->child(0),ret,context);
+		//cout << "Returning: " << ret->getData() << endl;
+	}
+	context.notifyReturn();
+}
+
+template<>
+void evaluateReturn(const Node* node,TData<TArray>& ret,TetraContext& context) {
+	cout<<"Checking for ret by reference"<<endl;
+	//Check if returning a value, or nothing
+	if(node->child(0) != NULL) {
+		if(node->child(0)->kind() == NODE_IDENTIFIER || node->child(0)->kind() == NODE_VECREF) {
+			cout << "Attampting return by reference" << endl;
+			TData<TArray*> reference;
+			evaluateAddress<TArray*>(node->child(0), reference, context);
+			context.setReturnedRef(reference.getData());
+			cout << "Returning reference to: " << reference.getData() << endl;
+			context.notifyRefReturn();
+		}
+		else {
+			cout << "Attempting return by value" << endl;
+			evaluateNode<TArray>(node->child(0),ret,context);
+			context.notifyReturn();
+		}
+		
+		//cout << "Returning: " << ret->getData() << endl;
+	}
+	else {
+		context.notifyReturn();
 	}
 }
 
@@ -736,6 +838,8 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 			context.notifyContinue();
 		break;
 		case NODE_RETURN:
+			//evaluateReturn(node,ret,context);
+			
 			//Check if returning a value, or nothing
 			if(node->child(0) != NULL) {
 				evaluateNode<T>(node->child(0),ret,context);
@@ -744,8 +848,12 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 			context.notifyReturn();
 		break;
 		default:
-			cout << "Unexpected flag type encountered: " << node->kind() << " Aborting...";
-			exit(EXIT_FAILURE);
+			std::stringstream message;
+			message << "Unexpected flag type encountered: " << static_cast<int>(node->kind());
+			Error e(message.str(), node->getLine()); 
+			throw e;
+			//cout << "Unexpected flag type encountered: " << node->kind() << " Aborting...";
+			//exit(EXIT_FAILURE);
 		break;
 	}
 }
@@ -813,18 +921,28 @@ int main(int argc, char** argv) {
 
 		const Node* start = FunctionMap::getFunctionNode("main#");
 
+		cout << ">>" << start << endl;
+
+		if(start == NULL) {
+			cout << "Error: Attempted to call undefined function: main()" << endl;
+			exit(EXIT_FAILURE);
+		}
 
 		TData<int> retVal(0);
 
 		cout << "Running " << argv[1] << "..." << endl;
-
-		TetraContext tContext;
-		tContext.initializeNewScope();
-
-
-		evaluateNode<int>(start, retVal, tContext);
-
-		tContext.exitScope();
+		
+		try {
+			TetraContext tContext;
+			tContext.initializeNewScope();
+			evaluateNode<int>(start, retVal, tContext);
+			tContext.exitScope();
+		}
+		catch (Error e) {
+			cout << "The following error was encountered while running your program: " << endl;
+			cout << e.getMessage() << endl;
+			cout << "Near Line: " << e.getLine() << endl;
+		}
 		cout << "+------------------------------------------------" << endl;
 		cout << "|Main returned: " << retVal.getData() << endl;
 		cout << "+------------------------------------------------" << endl;

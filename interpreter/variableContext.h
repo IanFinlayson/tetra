@@ -28,7 +28,7 @@ public:
 	TData<void*>& declareReference(const string varName);
 
 private:
-
+	
 	std::map<string, TData<void*> > varMap;
 
 };

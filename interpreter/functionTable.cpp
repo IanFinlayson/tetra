@@ -19,6 +19,7 @@ FunctionMap::FunctionMap() {
 }
 
 const Node* FunctionMap::getFunctionNode(const string functionSignature) {
+	//if function is not there, will return default Node* (i.e. NULL)
 	return instance.lookup[functionSignature];
 }
 

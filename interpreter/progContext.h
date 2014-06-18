@@ -28,8 +28,8 @@ enum ExecutionStatus {
 	ELIF,
 	CONTINUE,
 	BREAK,
-	RETURN
-
+	RETURN,
+	REF_RETURN
 };
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
@@ -50,9 +50,14 @@ class TetraScope {
 
 		void setExecutionStatus(ExecutionStatus status);
 
+		void setReturnedRef(void* const);
+
+		void* getReturnedRef() const;
+
 	private:
 		VarTable varScope;
 		ExecutionStatus executionStatus;
+		void* returnedRef;
 };
 
 
@@ -92,11 +97,17 @@ public:
 
 	void notifyReturn();
 
+	void notifyRefReturn();
+
 	void notifyElif();
 
 	void normalizeStatus();
 
 	TetraContext& operator=(const TetraContext&);
+
+	void setReturnedRef(void* const);
+
+	void* getReturnedRef() const;
 
 private:
 	std::stack<TetraScope> progStack;

@@ -29,6 +29,8 @@ prefixes[${#prefixes[*]}]="ultA";	results[${#results[*]}]=22
 prefixes[${#prefixes[*]}]="forLit";	results[${#results[*]}]=55
 prefixes[${#prefixes[*]}]="ref";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="refref";	results[${#results[*]}]=222
+prefixes[${#prefixes[*]}]="dA";	results[${#results[*]}]=10
+prefixes[${#prefixes[*]}]="retA";	results[${#results[*]}]=44
 
 for index in $(seq 0 `expr ${#prefixes[*]} - 1`)
 do

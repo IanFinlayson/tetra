@@ -74,4 +74,4 @@ TData<void*>& VarTable::declareReference(const string varName) {
         //This returns the copy in the map, as opposed to the local var inserter
         return varMap[varName];
 }
-        
+

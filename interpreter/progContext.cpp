@@ -39,7 +39,13 @@ void TetraScope::setExecutionStatus(ExecutionStatus status) {
 	executionStatus = status;
 }
 
+void TetraScope::setReturnedRef(void* const ref) {
+	returnedRef = ref;
+}
 
+void* TetraScope::getReturnedRef() const {
+	return returnedRef;
+}
 
 //This class wraps a std stack of TetraScopes
 
@@ -99,6 +105,10 @@ void TetraContext::notifyReturn() {
 	progStack.top().setExecutionStatus(RETURN);
 }
 
+void TetraContext::notifyRefReturn() {
+	progStack.top().setExecutionStatus(REF_RETURN);
+}
+
 void TetraContext::notifyElif() {
 	progStack.top().setExecutionStatus(ELIF);
 }
@@ -106,4 +116,13 @@ void TetraContext::notifyElif() {
 void TetraContext::normalizeStatus() {
 	progStack.top().setExecutionStatus(NORMAL);
 }
+
+void TetraContext::setReturnedRef(void* const ref) {
+	 progStack.top().setReturnedRef(ref);
+}
+
+void* TetraContext::getReturnedRef() const {
+	return progStack.top().getReturnedRef();
+}
+
 
