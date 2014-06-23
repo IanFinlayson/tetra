@@ -1,3 +1,10 @@
+/*
+ * This class wraps all data types used in a tetra program.
+ * A note about the comments, an "ordinary case" for using a TData object involves all situations EXCEPT when:
+ * The template for the type is void* and...
+ * the void* is pointing at a dynamically allocated piece of memory for which the TData has ownership
+ */ 
+
 #ifndef VOIDLESS_TDATA_H
 #define VOIDLESS_TDATA_H
 
@@ -5,6 +12,8 @@
 #include <string>
 #include "frontend.hpp"
 
+//#define NDEBUG
+#include <assert.h>
 
 using std::string;
 
@@ -22,14 +31,15 @@ class TData{
 		~TData();
 
 	
-		//If this TData object is storing a pointer to a dynamically allocated variable, it MUST USE THIS METHOD TO INFORM THE OBJECT THAT IT SHOULD DELETE SOMETHING WHEN IT IS DONE		
+		//If this TData object is storing a pointer to a dynamically allocated variable, it MUST USE THIS METHOD TO INFORM THE OBJECT THAT IT SHOULD DELETE SOMETHING WHEN IT IS DONE
+		//In essence, this method notifies the object that it is no longer being used in an ordinary case, but has ownership of some dynamically allocated memory		
 		template<typename R>
 		void setDeletableType();
 
 		const DataType getPointedTo() const;
 
 		template<typename R>
-		void setData(const R& pData);
+		bool setData(const R& pData);
 
 		TData<T>& operator=(const TData<T>&);
 
@@ -41,6 +51,7 @@ class TData{
 		DataType pointedTo;
 };
 
+
 template<typename T>
 TData<T>::TData() : pointedTo(TYPE_VOID) {
 	data = T();
@@ -49,20 +60,20 @@ TData<T>::TData() : pointedTo(TYPE_VOID) {
 template<typename T>
 TData<T>::TData(const T pData) : pointedTo(TYPE_VOID) {
 	data = pData;
-	//pointedTo = DataType(TYPE_VOID);
 }
 
+//Default copy constructor is fine for ordinary case
 template<typename T>
 TData<T>::TData(const TData<T>& other) : pointedTo(other.pointedTo.getKind()) {
 	data = other.data;
-	//pointedTo = other.pointedTo;
 }
 
-//default destructor
+//default destructor, in ordinary cases no cleanup is needed
 template<typename T>
 TData<T>::~TData() {
 }
 
+//Naive copt is adequate under ordinary circumstances
 template <typename T>
 TData<T>& TData<T>::operator=(const TData<T>& other) {
 	//unles we are  working with variables (see TDataspecializations), a naive copy shouild be fine
@@ -71,25 +82,32 @@ TData<T>& TData<T>::operator=(const TData<T>& other) {
 	return *this;
 }
 
-
+//Used to denote that the TData should treat itself as if it had a dynamically allocated member
+//When set, TData will perform deep copies, and delete what it is pointing to when it is done
 //If this TData object is storing a pointer to a dynamically allocated variable, it MUST USE THIS METHOD TO INFORM THE OBJECT THAT IT SHOULD DELETE SOMETHING WHEN IT IS DONE		
+//'Default' behavior occurs when user calls this method with an unexpected variable type. This should bever happen, hence the assertion
 template<typename T> template<typename R>
 void TData<T>::setDeletableType(){
-	cout << "Error, attmepting to set unsupported type as deletable type.\nThis may result in a memory leak." << endl;
-	//do nothing by default, as only in very special circumstances will we need to be able to fiund out what we are pointing to
+	//A non-specialized version of this method should never be called
+	assert(false);
+	//cout << "Error, attmepting to set unsupported type as deletable type.\nThis may result in a memory leak." << endl;
 }
+
 template<typename T>
 const DataType TData<T>::getPointedTo() const {
 	return pointedTo.getKind();
 }
 
 template<typename T> template<typename R>
-void TData<T>::setData(const R& pData) {
+bool TData<T>::setData(const R& pData) {
 	//By default, this should not do anything, but we will specialize the tamplate for the few scenarios where this actually works
-	//Nothing out of the ordinary when this is called
-	std::cout << "Assignment failed" << std::endl;
+	//Note that this is occasionbally called on mismatched types. This is expected behavior for the interpreter.
+	//As an exampole, a statement node may be expecting an int return type, because it was called within a function returning an int,
+	//it then sees s = "abc" which returns a string. The interpreter will call TData<int>::setData<string>(...), and do nothing.
+	return false;
 }   
 
+//Get a reference to what is stored within the object
 template<typename T>
 const T& TData<T>::getData() const {
 	return data;
@@ -98,5 +116,6 @@ const T& TData<T>::getData() const {
 template<typename T>
 T& TData<T>::getData() {
 	return data;
-}  
+}
+
 #endif

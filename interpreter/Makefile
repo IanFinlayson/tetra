@@ -2,7 +2,7 @@
 
 
 CC = clang++
-FLAGS = -Wall -g 
+FLAGS = -Wall -g
 SEARCHPATH = ../frontend
 
 tetra: main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o

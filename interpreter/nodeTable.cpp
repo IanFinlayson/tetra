@@ -6,7 +6,8 @@
 #include "frontend.hpp"
 #include "nodeTable.h"
 #include <cstdlib> //used for exit
-
+//#define NDEBUG
+#include <assert.h>
 using std::string;
 
 /*
@@ -19,6 +20,7 @@ using std::string;
  * ASSIGNMENT denotes an assignment operator. This turns out to be a somewhat special case, so we give it its own classification
  */
 
+//Constructor gives each NodeKind an appropriate classification in the table
 NodeTable::NodeTable() {
 	nodeChart[NODE_FUNCTION_LIST] = STRUCTURE;
 	nodeChart[NODE_FUNCTION] = STRUCTURE;
@@ -73,20 +75,21 @@ NodeTable::NodeTable() {
 	nodeChart[NODE_VECVAL] = IMMEDIATE;
 }
 
+
 const NodeClassification NodeTable::getClassification(const Node* node) {
 	//this is just present to check that every node is mapped
-	if(nodeChart.find(node->kind()) == nodeChart.end()) {
+	assert(nodeChart.find(node->kind()) != nodeChart.end());
+/*	if(nodeChart.find(node->kind()) == nodeChart.end()) {
 		cout << "Node not found in classification table: " << node->kind() << "\nPlease look into this. Aborting." << endl;
 		exit(EXIT_FAILURE);
-	}
+	}*/
 	return nodeChart[node->kind()];
 }
 
-//There is only one NodeTable, and it never changes, so it is static and unaccessible
+//Static function rewturns the classification of the given node
 const NodeClassification NodeTable::classifyNode(const Node* node) {
 	return instance.getClassification(node);
 }
-
 //initializes the static table
 NodeTable NodeTable::instance;
 

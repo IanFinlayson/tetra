@@ -1,4 +1,5 @@
-/*This program hashes nodes such that we can determine what general actions should be taken given which nodes.
+/*This program sorts nodes such that we can determine what general actions should be taken given which nodes.
+ * This is purely a convenience to the programmer of the interpreter, such that different nodes can be handled in different parts of the program. Theoretically, the interpreter could be made to work without this class qith just minor structual modifications
  */
 
 #ifndef NODE_TABLE_H
@@ -44,11 +45,12 @@ private:
 	//constructor populates the table
 	NodeTable();	
 	
+	//Returns the node's classification by checking its NodeType
 	const NodeClassification getClassification(const Node* node);
 
 public:
 
-	//There is only one NodeTable, and it never changes, so it is static and unaccessible
+	//There is only one NodeTable, and it never changes, This is all the interface we need
 	static const NodeClassification classifyNode(const Node* node);
 
 };

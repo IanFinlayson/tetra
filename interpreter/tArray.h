@@ -3,6 +3,7 @@
 
 /*
  * This class wraps an array of tData<void*> used to make arrays and multi-dimensional arrays
+ * 
  */
 
 #include<iostream>
@@ -20,31 +21,25 @@ public:
 
 	TArray();
 	TArray(const TArray&);
-	//When elements are added to the vector, they are allocated with new (as per TData copy constructor), so they must be released when this gets destroyed
 	~TArray();
 
 
 	//gets the element pointed to by
+	//(const and non-const versions)
 	TData<void*>& elementAt(unsigned int);
 	const TData<void*>& elementAt(unsigned int) const;
-	void addElement(const TData<void*>&);	
+
+	//Add an element using copy constructor
+	void addElement(const TData<void*>&);
+	
+	//Utility methods used for iterating over the vector in for (-each) loops, and vector cleanup	
 	const std::vector< TData<void*> >::const_iterator begin() const;
 	const std::vector< TData<void*> >::const_iterator end() const;
 
 	//Copy assignment operator
 	TArray& operator=(const TArray& other);
 
-	//For debugging purposes
-	template<typename T>
-	void outputElements() const{
-		cout << "\n\nOutput:" << endl;
-		for(unsigned int index = 0; index < elements->size(); index++) {
-			cout << "Element" << index << ": " << *static_cast<T*>(elementAt(index).getData()) << endl;
-		}
-	}
-
 	//All operations must be defined (or at least stubbed) to work with our operators!
-
 	TArray operator||(TArray& other) {
 		return *this;
 	}
@@ -103,6 +98,7 @@ public:
 		return *this;
 	}
 	//The specialization for TArray EXP TArray is presently in the operationMap class
+	
 private:
 
 	//Implementation of smart pointer for vector that uses simple reference counting
@@ -111,35 +107,47 @@ private:
 		vec_ptr() {
 			ptr = new vector< TData<void*> >;
 			refCount = new int();//Zero initialized
+			*refCount = 0;
 			addReference();
-			cout << "Ref count: " << *refCount << endl;
 		}
+
+		//Copy constructor aliases this TArray to the other, rather than performing a deep copy
+		//Note that this is largely desired behavior
+		vec_ptr(vec_ptr& other) {
+			ptr = other.ptr;
+			refCount = other.refCount;
+			addReference();	
+		}
+
 		~vec_ptr() {
 			removeReference();
+
+			//Check to see if we must delete the underlying object
 			if(*refCount == 0) {
-				cout << "Deleting in destructor: " << ptr << endl;
 				delete refCount;
 				delete ptr;
-				cout << "Smart pointer deleted array" << endl;
 			}
 		}
-		//Aliases the pointer
+
+		//Assignment operator aliases the pointer
+		//Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
+		//For the purposes of the interpreter, however, this is the desired behavior
 		vec_ptr& operator=(const vec_ptr& other) {
 			if(&other != this) {
 				removeReference();
+				//Check to see if we must delete the vector that this used to point to
 				if(*refCount == 0) {
-					cout << "Deleting: " << ptr << endl;
 					delete refCount;
 					delete ptr;
-					cout << "Smart pointer deletecd array in copy assignment" << endl;
 				}
 				ptr = other.ptr;
 				refCount = other.refCount;
 				addReference();
-				cout << "Ref count: " << *refCount << endl;
 			}
 			return *this;
 		}
+
+		//Methods to simulate pointer functionality
 		vector< TData<void*> >& operator*() const {
 			return *ptr;
 		} 
@@ -159,9 +167,34 @@ private:
 		int* refCount;
 	};
 	
-	//vector< TData<void*> >* elements;
+	//A smart pointer to a vector of void*
 	vec_ptr elements;
 };
+
+
+template<> TData<void*>::TData(const TData<void*>& other);
+template<> TData<void*>::~TData();
+template<> TData<void*>& TData<void*>::operator=(const TData<void*>&);
+template<> template<> void TData<void*>::setDeletableType<TArray>();
+
+//Template specializations for setData and setDeletable type
+//Declared here because TData<TArray> must be defined before all declarations may occur
+template<> template<> bool TData<int>::setData<int>(const int&);
+template<> template<> bool TData<double>::setData<double>(const double&);
+template<> template<> bool TData<bool>::setData<bool>(const bool&);
+template<> template<> bool TData<string>::setData<string>(const string&);
+template<> template<> bool TData<int*>::setData<int*>(int* const &);
+template<> template<> bool TData<double*>::setData<double*>(double* const &);
+template<> template<> bool TData<string*>::setData<string*>(string* const &);
+template<> template<> bool TData<bool*>::setData<bool*>(bool* const &);
+template<> template<> bool TData<TArray*>::setData<TArray*>(TArray*const &);
+template<> template<> bool TData<void*>::setData<void*>(void* const &);
+template<> template<> void TData<void*>::setDeletableType<int>();
+template<> template<> void TData<void*>::setDeletableType<double>();
+template<> template<> void TData<void*>::setDeletableType<bool>();
+template<> template<> void TData<void*>::setDeletableType<string>();
+template<> template<> void TData<void*>::setDeletableType<void>();
+template<> template<> bool TData<TArray>::setData<TArray>(const TArray&);
 
 
 #endif
