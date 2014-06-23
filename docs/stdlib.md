@@ -5,18 +5,11 @@ contains the few functions that would be needed to "bootstrap" the library.
 That is, those functions which could not be written in Tetra itself.
 
 ### IO
+The ```print``` function in Tetra is a special case in that it can be called
+with any number of arguments of any type - unlike any other function in Tetra.
+The frontend compiler has an exception where it will not type check the
+parameters against a functions signature if the function name is ```print```.
 
-The following functions each take one primitive Tetra type and print it to the
-screen.  Eventually Tetra should have overloading of functions which would allow
-these to be collapsed into one function.  Another possibility would be to make
-print a statement level construct a la Python 2.x
-
-```
-print_string(s string)
-print_int(i int)
-print_real(r real)
-print_bool(b bool)
-```
 
 The following functions each read one primitive value from the user and return
 it.
