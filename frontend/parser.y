@@ -124,7 +124,6 @@ stack<int> linenos;
 %type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
 %type <node> background lock_statement index indices vector_value vector_values
 
-
 %type <data_type> return_type type
 
 %error-verbose

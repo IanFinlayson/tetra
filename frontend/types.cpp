@@ -95,8 +95,41 @@ void addParams(Node* params, Node* func) {
   }
 }
 
+
+
+
 /* forward declaration needed as these are mutually-recursive */
 DataType* inferExpression(Node* expr, Node* func);
+
+/* infer the types of a print call */
+void inferPrint(Node* pcall, Node* func) {
+  /* just infer each expression, but we don't care what it is */
+
+  /* get the first arg */
+  Node* arg = pcall->child(0);
+
+  /* while there are arguments */
+  while (arg) {
+    /* if there is a first arg, check it as an expression */
+    if (arg->numChildren( ) >= 1) {
+      inferExpression(arg->child(0), func);
+    }
+
+    /* if the next arg is another arg, move on */
+    if ((arg->numChildren( ) >= 2) && (arg->child(1)->kind( ) == NODE_ACTUAL_PARAM_LIST)) {
+      arg = arg->child(1);
+    }
+
+    /* else just check it and we're done */
+    else if (arg->numChildren( ) >= 2) {
+      inferExpression(arg->child(1), func);
+      arg = NULL;
+    } else {
+      arg = NULL;
+    }
+  }
+}
+
 
 /* count the number of indices used in an index operation */
 int countIndices(Node* idx, Node* func) {
@@ -363,7 +396,12 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
 
     case NODE_FUNCALL:
-      return inferFuncall(expr, func);
+      if (expr->getString( ) == "print") {
+        inferPrint(expr, func);
+        return NULL;
+      } else {
+        return inferFuncall(expr, func);
+      }
     case NODE_ACTUAL_PARAM_LIST:
       throw Error("inferExpression: should not a param list here");
       break;
