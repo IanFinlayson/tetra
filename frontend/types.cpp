@@ -10,6 +10,7 @@
 
 extern Node* root;
 
+
 /* return a string of an int */
 string itoa(int num) {
   stringstream ss;
@@ -102,7 +103,7 @@ void addParams(Node* params, Node* func) {
 DataType* inferExpression(Node* expr, Node* func);
 
 /* infer the types of a print call */
-void inferPrint(Node* pcall, Node* func) {
+DataType* inferPrint(Node* pcall, Node* func) {
   /* just infer each expression, but we don't care what it is */
 
   /* get the first arg */
@@ -128,6 +129,66 @@ void inferPrint(Node* pcall, Node* func) {
       arg = NULL;
     }
   }
+
+  return NULL;
+}
+
+
+DataType* inferLen(Node* funcall, Node* func) {
+  /* check that there is one argument */
+  if (funcall->numChildren( ) != 1) {
+    throw Error("len function expects one argument", funcall->getLine( ));
+  }
+
+  /* infer the argument and capture its type */
+  DataType* t = inferExpression(funcall->child(0), func);
+
+  /* check that it is a vector or a string */
+  if ((t->getKind( ) != TYPE_VECTOR) && (t->getKind( ) != TYPE_STRING)) {
+    throw Error("len function must be called with either a string or a vector", funcall->getLine( ));
+  }
+
+  /* should return an int */
+  return new DataType(TYPE_INT);
+}
+
+
+DataType* inferRead(Node* funcall) {
+  /* make sure there are no parameters */
+  if (funcall->numChildren( ) > 0) {
+    throw Error(funcall->getString( ) + " should not have any parameters", funcall->getLine( ));
+  }
+
+  /* get the return type right */
+  if (funcall->getString( ) == "read_string") return new DataType(TYPE_STRING);
+  if (funcall->getString( ) == "read_int") return new DataType(TYPE_INT);
+  if (funcall->getString( ) == "read_real") return new DataType(TYPE_REAL);
+  if (funcall->getString( ) == "read_bool") return new DataType(TYPE_BOOL);
+
+  throw Error("This should not happen!", funcall->getLine( ));
+}
+
+
+/* this function checks if a function call is part of the standard library and infers it */
+DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
+  is_stdlib = true;
+  if (funcall->getString( ) == "print") {
+    return inferPrint(funcall, func);
+  }
+
+  if (funcall->getString( ) == "len") {
+    return inferLen(funcall, func);
+  }
+
+  if ((funcall->getString( ) == "read_string") ||
+      (funcall->getString( ) == "read_int") ||
+      (funcall->getString( ) == "read_real") ||
+      (funcall->getString( ) == "read_bool")) {
+    return inferRead(funcall);
+  }
+
+  is_stdlib = false;
+  return NULL;
 }
 
 
@@ -203,6 +264,13 @@ Node* findFunction(const string& name, int lineno) {
 
 /* infer the function of a function call and check the types */
 DataType* inferFuncall(Node* funcall, Node* func) {
+
+  /* check for stdlib functions */
+  bool is_stdlib;
+  DataType* t = inferStdlib(funcall, func, is_stdlib);
+  if (is_stdlib) {
+    return t;
+  }
 
   /* find the function node this thing matches */
   Node* f = findFunction(funcall->getString( ), funcall->getLine( ));
@@ -396,12 +464,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
 
     case NODE_FUNCALL:
-      if (expr->getString( ) == "print") {
-        inferPrint(expr, func);
-        return NULL;
-      } else {
         return inferFuncall(expr, func);
-      }
     case NODE_ACTUAL_PARAM_LIST:
       throw Error("inferExpression: should not a param list here");
       break;
