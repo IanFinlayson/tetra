@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>Tetra Resources/icons/appbar.bug.png</file>
+        <file>Tetra Resources/icons/appbar.control.play.png</file>
+        <file>Tetra Resources/icons/appbar.control.stop.png</file>
+        <file>Tetra Resources/icons/appbar.redo.png</file>
+        <file>Tetra Resources/icons/appbar.save.png</file>
+        <file>Tetra Resources/icons/appbar.undo.png</file>
+        <file>Tetra Resources/icons/appbar.printer.text.png</file>
+        <file>Tetra Resources/icons/appbar.protractor.png</file>
+    </qresource>
+    <qresource prefix="/graphics">
+        <file>Tetra Resources/logo.png</file>
+    </qresource>
+</RCC>
