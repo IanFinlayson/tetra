@@ -13,89 +13,32 @@
 using std::string;
 using std::vector;
 
-/*TArray::TArray() : elements(new vector< TData<void*> >){
-
-}
-
-TArray::TArray(const TArray& other) :elements(new vector< TData<void*> >) {
-	*elements = *(other.elements);
-}
-*/
 //Code for when elements was a pointer
 TArray::TArray() {
 	//default constructs elements and initialize vector pointer
 }
 
-
-TArray::TArray(const TArray& other) {
-	//Initialize the pointer, then copy construct the containing vector it
-	//elements = new vector< TData<void*> >(other.elements->size());
+//Because default behavior of arrays in tetra is aliasing, the copy constructor and copy assignment will also alias rather than deep copy
+TArray::TArray(const TArray& other)  {
+	//Initialize the pointer, then alias it
 	elements = other.elements;
 }
 
 TArray& TArray::operator=(const TArray& other) {
 	if(this != &other) {
-		//Release current memory, then copy the underlying vector
-		//delete elements;
 		elements = other.elements;
 	}
 	return *this;
 }
 
-//If the TData objects added to this object are set as deletable, they must be destroyed along with this object
+//Stubbed The only thing that needs to be destructed is the pointerm which is destructed by default
 TArray::~TArray() {
-	//cout << "destroying elements of array: " << endl;
-/*	for(std::vector< TData<void*> >::iterator iter = elements->begin(); iter < elements->end(); iter++) {
-		switch((*iter).getPointedTo().getKind()) {
-			case TYPE_INT:
-				std::cout << "Had value: " << *static_cast<int*>((*iter).getData()) << std::endl;
-				delete static_cast<int*>((*iter).getData());
-				break;
-			case TYPE_REAL:
-				std::cout << "Had value: " << *static_cast<double*>((*iter).getData()) << std::endl;    
-				delete static_cast<double*>((*iter).getData());
-				break;
-			case TYPE_BOOL:
-				std::cout << "Had value: " << *static_cast<bool*>((*iter).getData()) << std::endl;    
-				delete static_cast<bool*>((*iter).getData());
-				break;
-			case TYPE_STRING:
-				std::cout << "Had value: " << *static_cast<string*>((*iter).getData()) << std::endl;    
-				delete static_cast<string*>((*iter).getData());
-				break;
-			case TYPE_VECTOR:
-				std::cout << "Deleting vector...Had values" << endl;
-				delete static_cast<TArray*>((*iter).getData());
-				break;
-			default:
-				std::cout << "nothing deleted, possible mem leak" << std::endl;
-				break;
 
-		}
-	}*/
 }
-/*
-TArray& TArray::operator=(const TArray& other) {
-	elements = vector<TData <void*> >();
-	cout << "!!" << endl;
-	cout << elements.size() << endl;
-	elements = other.elements;
-*//*	for(unsigned int x = 0; x < other.elements.size(); x++) {
-		cout << "Adding element in copy assignment..." << endl;
-		cout << elements.size() << endl;
-		cout << other.elementAt(x).getData() << "<<<<" << endl;
-		TData<void*> inserter(other.elementAt(x));
-		cout << "SUCCESS: " << &elements << endl;
-		addElement(inserter);
-		cout << "Success2" << endl;
-	}*/
-//	return *this;
-//}
 
+//Returns a reference to a TData containing a pointer to the data associated with index. Note that this can be used for reading AND writing
 TData<void*>& TArray::elementAt(unsigned int index) {
 	//check for out-of-bounds access (note that parameter is unsigned, cannot be < 0
-//	cout << &elements << "<<<<<<!!!!!" << endl;
-//	cout << "Size: " << elements.size();
 	if(index < elements->size()) {
 		return (*elements)[index];
 	}
@@ -106,10 +49,9 @@ TData<void*>& TArray::elementAt(unsigned int index) {
 		Error e(message.str(),0);
 		throw e;
 	}
-	//std::cout << "Error, attempted to access an array out of bounds.\nRequested element #" << index << " for array of size " << elements.size() << endl; 
-	//exit(EXIT_FAILURE);
 }
 
+//The const version of elementAt
 const TData<void*>& TArray::elementAt(unsigned int index) const {
 	//check for out-of-bounds access (note that parameter is unsigned, cannot be < 0
 	if(index < elements->size()) {
@@ -122,21 +64,17 @@ const TData<void*>& TArray::elementAt(unsigned int index) const {
 		throw e;
 	
 	}
-	//Print error message and terminate
-	//std::cout << "Error, attempted to access an array out of bounds.\nRequested element #" << index << " for array of size " << elements->size() << endl; 
-	//exit(EXIT_FAILURE);
 }
 
-//NOTE: due to the nature of TData<void*> copy constructor allocating new memory, elements added must have whatever they are pointing at deleted!
+//Adds the giveen element to the end of the array. Note that is it is pointing at allocated memory, it should have had its setDeletableType method called
 void TArray::addElement(const TData<void*>& pElement) {
-	//cout << (&elements) << endl;
 	elements->push_back(pElement);
 }
 
+//Get the start and end iterators to the underlying vector container
 const std::vector< TData<void*> >::const_iterator TArray::begin() const {
 	return elements->begin();
 }
-
 
 const std::vector< TData<void*> >::const_iterator TArray::end() const {
 	return elements->end();

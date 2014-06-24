@@ -22,9 +22,12 @@ private:
 	static void concatSignature(const Node*,string&);
 
 public:
+	//Returns the address of a node containing the function body of the function denoted by functionSignature
 	static const Node* getFunctionNode(const string functionSignature);
+
 	//Generates a unique function signature based on the name AND the arguments
 	static const string getFunctionSignature(const Node* node);
+
 	//Fills the function map given the specified base node
 	static void build(const Node* tree);
 };

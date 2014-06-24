@@ -28,8 +28,7 @@ enum ExecutionStatus {
 	ELIF,
 	CONTINUE,
 	BREAK,
-	RETURN,
-	REF_RETURN
+	RETURN
 };
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
@@ -38,26 +37,26 @@ class TetraScope {
 	public:
 		TetraScope();
 
+		//Returns a pointer to the data referenced by the given variable name 'name', or creates a place for it if it does not yet exist
 		template <typename T>
 		T* lookupVar(string name) {
 			return varScope.lookupVar<T>(name);
 		}
 
+		//Used for aliasing an array
+		//Returns an unitialized pointer that will be associated with varName
+		//The calling program can set this pointer to point to whatever varname should alias.
 		TData<void*>& declareReference(const string varName);
 
 		//Used by loops and constrol statements to determine if they can proceed, or if they should return
 		ExecutionStatus queryExecutionStatus();
 
+		//sets the execution status to the specified value
 		void setExecutionStatus(ExecutionStatus status);
-
-		void setReturnedRef(void* const);
-
-		void* getReturnedRef() const;
 
 	private:
 		VarTable varScope;
 		ExecutionStatus executionStatus;
-		void* returnedRef;
 };
 
 
@@ -67,14 +66,16 @@ class TetraScope {
 class TetraContext {
 
 public:
-	
+	//Note that this constructor does NOT start with a default scope. One must be initialized through initializeNewScope before this can be used	
 	TetraContext();
 
+	//Wraps a call to lookupVar of the current scope
 	template<typename T>
 	T* lookupVar(string name) {
 		return progStack.top().lookupVar<T>(name);
 	}
 
+	//Wraps a call of declareReference for the current scope
 	TData<void*>& declareReference(const string varName);
 
 	//Overloaded function call, one when there is no initial setup for a scope (i.e. a function call with no formal parameters that must be initialized)
@@ -82,32 +83,29 @@ public:
 	void initializeNewScope();
 	void initializeNewScope(TetraScope& newScope);
 
+	//Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
 	void exitScope();
 
 	//If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
 	~TetraContext();
 
+	//Returns a reference to the current scope
 	TetraScope& getCurrentScope();
 
+	//wraps a call to the current scope's queryExecutionStatus
 	ExecutionStatus queryExecutionStatus();
 
+	//Sets the current scope's ExecutionStatus to the appropriate value
 	void notifyBreak();
-
 	void notifyContinue();
-
 	void notifyReturn();
-
-	void notifyRefReturn();
-
 	void notifyElif();
 
+	//Sets the current scope's executionStatus to NORMAL
 	void normalizeStatus();
 
+	//Performs a deep copy of the current context
 	TetraContext& operator=(const TetraContext&);
-
-	void setReturnedRef(void* const);
-
-	void* getReturnedRef() const;
 
 private:
 	std::stack<TetraScope> progStack;

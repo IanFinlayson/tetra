@@ -10,15 +10,11 @@
 #include <string>
 #include "frontend.hpp"
 #include "progContext.h"
-//#include "variableContext.h"
-
-
 
 //#define NDEBUG
 #include <assert.h>
 
 using std::string;
-
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
 TetraScope::TetraScope() {
@@ -35,16 +31,9 @@ ExecutionStatus TetraScope::queryExecutionStatus() {
 	return executionStatus;
 }
 
+//Sets the execution status to the appropriate value
 void TetraScope::setExecutionStatus(ExecutionStatus status) {
 	executionStatus = status;
-}
-
-void TetraScope::setReturnedRef(void* const ref) {
-	returnedRef = ref;
-}
-
-void* TetraScope::getReturnedRef() const {
-	return returnedRef;
 }
 
 //This class wraps a std stack of TetraScopes
@@ -53,15 +42,18 @@ TetraContext::TetraContext() {
 	//nothing at the moment
 }
 
+//Initializes an empty scope and sets that as the current scope
 void TetraContext::initializeNewScope() {
 	TetraScope newScope;
 	progStack.push(newScope);
 }
 
+//Takes the given scope and sets it as the current scope
 void TetraContext::initializeNewScope(TetraScope& newScope) {
 	progStack.push(newScope);
 }
 
+//destroys the current scope, returning to the previously initialized scope
 void TetraContext::exitScope() {
 	progStack.pop();
 }
@@ -77,22 +69,25 @@ TData<void*>& TetraContext::declareReference(const string varName) {
 	return progStack.top().declareReference(varName);
 }
 
-
 TetraScope& TetraContext::getCurrentScope() {
-	 return progStack.top();
+	return progStack.top();
 }
+
 
 TetraContext& TetraContext::operator=(const TetraContext& other){
 	progStack = other.progStack;
 	return *this;
 }
 
+//Wraps a call to hte current scope's queryExecutionStatus()
 ExecutionStatus TetraContext::queryExecutionStatus() {
 	//cout << "Size: " << progStack.size() << endl;
 	assert (progStack.empty() == false);
 	return progStack.top().queryExecutionStatus();
 }
 
+
+//Notify thew program of the given special occurances
 void TetraContext::notifyBreak() {
 	progStack.top().setExecutionStatus(BREAK);
 }
@@ -105,10 +100,6 @@ void TetraContext::notifyReturn() {
 	progStack.top().setExecutionStatus(RETURN);
 }
 
-void TetraContext::notifyRefReturn() {
-	progStack.top().setExecutionStatus(REF_RETURN);
-}
-
 void TetraContext::notifyElif() {
 	progStack.top().setExecutionStatus(ELIF);
 }
@@ -116,13 +107,4 @@ void TetraContext::notifyElif() {
 void TetraContext::normalizeStatus() {
 	progStack.top().setExecutionStatus(NORMAL);
 }
-
-void TetraContext::setReturnedRef(void* const ref) {
-	 progStack.top().setReturnedRef(ref);
-}
-
-void* TetraContext::getReturnedRef() const {
-	return progStack.top().getReturnedRef();
-}
-
 

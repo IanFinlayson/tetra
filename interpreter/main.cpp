@@ -1,5 +1,6 @@
 /*
  * This program interprets a tetra file by getting its tree representation
+ * Takes a single filename containing the Tetra code as a parameter
  */
 
 #include <iostream>
@@ -20,50 +21,45 @@
 //#define NDEBUG
 #include <assert.h>
 
-//temporary global TetraContext for testing purposes
-//TetraContext vars;
-
-using namespace std;
-
+//Forward declarations of certain functions. Refer to the function bodies for comments
 template <typename T>
 T paste(const Node*,const Node*,TetraContext&);
 template <typename T>
 T paste(const Node*,const Node*,TetraScope&,TetraContext&);
 template <typename T>
 void evaluateNode(const Node*,TData<T>&,TetraContext&);
-void runTest(TetraContext&);//function that contains test code
 void aliasArray(const Node*, TArray&, TetraContext&);
 template<typename T>
 void evaluateAddress(const Node*, TData<T>&, TetraContext&);
 
-//used for debugging purposes
+//May be helpful for debugging purposes.
+/*
 void descNode(const Node* n) {
-	cout << "--------" << endl;
-	cout << n->getLine() << endl;
-	cout << n->getString() << endl;
-	cout << n->getInt() << endl;
-	cout << n->getReal() << endl;
-	cout << n->getBool() << endl;
-	cout << n->kind() << endl;
-	cout << ((n->type() == NULL)?"No type":typeToString(n->type())) << endl;
-	cout << n->numChildren() << endl;
-	//cout << "x: " << n->hasSymbol("x") <<endl;
-}
+	std::cout << "--------" << std::endl;
+	std::cout << n->getLine() << std::endl;
+	std::cout << n->getString() << std::endl;
+	std::cout << n->getInt() << std::endl;
+	std::cout << n->getReal() << std::endl;
+	std::cout << n->getBool() << std::endl;
+	std::cout << n->kind() << std::endl;
+	std::cout << ((n->type() == NULL)?"No type":typeToString(n->type())) << std::endl;
+	std::cout << n->numChildren() << std::endl;
+}*/
 
-//Simplifies an indexed vector value
-//Here, T should be 
+//Simplifies an indexed vector value (i.e. x[5][2])
+//T should be the expected return type of evaluating the reference
 template<typename T>
 void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret, TetraContext& context) {
 	TData<int> indexNum;
 	//assuming a node index MUST simplify to an integer
 	evaluateNode<int>(node->child(0),indexNum,context);
 		
-	//Check if there are further idecies which must be evaluated
+	//Check if there are further idecies which must be evaluated (i.e. x[0] v. x[0][0])
 	if(node->numChildren() == 2){
-		//cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 		//Get the vector pointed to by this index
 		TArray* nextVec;
 		try {
+			//elementAt may throw
 			nextVec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
 		}
 		catch (Error e) {
@@ -73,7 +69,7 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 		}
 		evaluateVecVal<T>(node->child(1),nextVec,ret,context);
 	}
-	else { //If we have accounted for all the indeces
+	else { //If we have accounted for all the indeces, set the return value
 		T value;
 		try {
 			value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
@@ -88,10 +84,12 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 	
 }
 
-//executes structural statementsi
+//Executes structural statements
+//i.e. Executes any NodeKind classified as structure
 template<typename T>
 void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 	switch(node->kind()) {
+		//When entering into a function
 		case NODE_FUNCTION:
 		{
 			//If there were arguments, meaning that child(0) contains the body of code and child 1 is empty
@@ -109,7 +107,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			//did the statement result in a break, continue, return, etc?
 			ExecutionStatus status = context.queryExecutionStatus();
 			//Possible optimization, just status != NORMAL
-			if(status != RETURN && status != REF_RETURN && status != BREAK && status != CONTINUE) {
+			if(status != RETURN  && status != BREAK && status != CONTINUE) {
 				evaluateNode<T>(node->child(1),ret,context);
 			}
 		}
@@ -120,11 +118,12 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			//evaluate the condition
 			evaluateNode<bool>(node->child(0),conditional,context);
 
-			//if the condition was found to be true, execute the 2nd branch
+			//if the condition was found to be true, execute the 2nd child (child(1))
 			if(conditional.getData() == true) {
 				evaluateNode<T>(node->child(1),ret,context);
-			} else {
-				//check for else block and execute it if it exists
+			}
+			else {
+				//check for else block and execute it (child(2)) if it exists
 				if(node->child(2) != NULL) {
 					evaluateNode<T>(node->child(2),ret,context);
 				}
@@ -140,12 +139,14 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			//if the condition was found to be true, execute the 2nd branch
 			//Then, reevaluate the condition
 			while(conditional.getData() == true) {
+
+				//Loop body
 				evaluateNode<T>(node->child(1),ret,context);
 
 				//Check is any flags are set, and take the appropriate action
 				ExecutionStatus status = context.queryExecutionStatus();
 				//If returning, stop the loop and return
-				if(status == RETURN || status == REF_RETURN) {
+				if(status == RETURN) {
 					break;
 				}
 				//If breaking, notify the TetraContext that we have reached the outside of the loop, then  stop the loop
@@ -159,7 +160,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 					context.normalizeStatus();
 				}
 
-				//check the condition again
+				//check the condition again, and store the result in 'condiitonal'
 				evaluateNode<bool>(node->child(0),conditional,context);
 			}		
 		}
@@ -168,15 +169,11 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 		{
 			context.notifyElif();
 
-	//		cout << context->queryExecutionStatus() << endl;
-
 			//Traverse the first branch
 			evaluateNode<T>(node->child(0),ret,context);
 
-			//present problem
+			//Check the execution status
 			ExecutionStatus status = context.queryExecutionStatus();
-
-			//cout << "Status? " << status << " =ret? " << ( status == RETURN) << endl;
 
 			//evaluate the if-else chain if the first elif clause was false
 			if(status == ELIF) {
@@ -184,9 +181,9 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			}
 			
 			//Again, check the flag to see if we need to execute the catchall else statement
-			
 			status = context.queryExecutionStatus();
 
+			//Also check if the statement actually exists
 			if(status == ELIF && node->child(2) != NULL) {
 				evaluateNode<T>(node->child(2),ret,context);
 			}
@@ -194,6 +191,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 		break;
 		case NODE_ELIF_CHAIN:
 		{
+			//Try to execute the given case of the ELIF statement
 			evaluateNode<T>(node->child(0),ret,context);
 
 			//After evaluating the clause, check the flag to see if we need to try the next clause
@@ -207,9 +205,11 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 		case NODE_ELIF_CLAUSE:
 		{
 			TData<bool> condition;
+			//evaluate the condition for this ELIF clause
 			evaluateNode<bool>(node->child(0),condition,context);
 			//if condiiton is true ,execute the body
 			if(condition.getData() == true) {
+				//If we have successfully taken a branch, we should notify the interpreter that it no longer needs to check other branches
 				context.normalizeStatus();
 				evaluateNode<T>(node->child(1),ret,context);
 			}
@@ -226,39 +226,35 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 		{
 			//Obtain the list of elements we need to loop over
 			TData<TArray> actualCollection;//If the collection does not exist yet, then we will need to place it in memory
-			TData<TArray*> collection;//This should not be NULL after the next statment
-	//		cout << "Evaluating the collection" << endl;
-	//		cout << &collection.getData() << endl;
+			TData<TArray*> collection;
+	
 			//Check to see if the array can be evaluated by reference, or see if it is a literal that must be evaluated before we can use it
 			if(node->child(1)->kind() == NODE_IDENTIFIER || node->child(1)->kind() == NODE_VECREF) {
-				cout << "Evaluating for collection by reference" << endl;
 				//Put the address of the addressable vector into collection
 				evaluateAddress<TArray*>(node->child(1), collection, context);
 				//aliasArray(node->child(0), collection.getData(), context);
 			}
 			else {
-				//If we must evaluate by value, we need 
-				cout << "Evaluating for collection by value" << endl;
+				//If we must evaluate by value, we need to evaluate what we are iterating over
 				evaluateNode<TArray>(node->child(1),actualCollection,context);
-				//Cast required to acxtually p[erform assignment
+
+				//Set collection to point to where the actual collection is in memory
 				TArray* collection_ptr = &actualCollection.getData();
 				collection.setData<TArray*>(collection_ptr);
 			}
-			//evaluateNode<TArray>(node->child(1),collection,context);
-			cout << "Address of collection: " << collection.getData() << endl;
-	//		cout << "Colleciton evaluated" << endl;
-			//assert(collection != NULL);
+			
+			assert(collection.getData() != NULL);
 
 			ExecutionStatus status = context.queryExecutionStatus();
 
-			//For_each loop with some extra conditions tacked on
-			for(std::vector< TData<void*> >::const_iterator iter = collection.getData()->begin(); iter != collection.getData()->end() && status != BREAK && status != RETURN && status != REF_RETURN; iter++) {
-	//			cout << "Switcheroo" << endl;
+			//For_each loop with some extra conditions tacked on to check whether we are returning or breaking
+			for(std::vector< TData<void*> >::const_iterator iter = collection.getData()->begin(); iter != collection.getData()->end() && status != BREAK && status != RETURN; iter++) {
+
 				context.normalizeStatus();
-//				assert (node->child(1)->type()->getSub()->getKind() != NULL);
+
 				//Give the variable element in the for_each loop the proper value
-				
-				switch(node->child(0)->type()->getKind()/*collection.getData().elementAt(0).getPointedTo().getKind()*/) {
+				//Must perform type checking
+				switch(node->child(0)->type()->getKind()) {
 					case TYPE_INT:
 						*(context.lookupVar<int>(node->child(0)->getString())) = *static_cast<int*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
@@ -272,23 +268,12 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					case TYPE_STRING:
-	//					cout << "Case string" << endl;
 						*(context.lookupVar<string>(node->child(0)->getString())) = *static_cast<string*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					case TYPE_VECTOR:
-						//Alias the array with collection
+						//Alias the array with collection. Note that this means that changes to this array will affect the original array
 						aliasArray(node->child(0), *static_cast<TArray*>((*iter).getData()), context);
-					/*
-						//Check if the array we passed in is already in memory (is an identifier or vector reference). If so, we will pass by reference, else we must pass by value
-						if(node->child(1)->kind() == NODE_IDENTIFIER || node->child(1)->kind() == NODE_VECREF) {
-							cout << "Evaluating for argument by reference" << endl;
-							aliasArray(node->child(0), *static_cast<TArray*>((*iter).getData()), context);
-						}
-						else {
-							cout << "Evaluating for reference by value" << endl;
-							*(context.lookupVar<TArray>(node->child(0)->getString())) = *static_cast<TArray*>((*iter).getData());
-						}*/
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					default:
@@ -296,8 +281,6 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 						message << "Attempting to assign to unknown DataType in for loop. ID: " << node->child(0)->type()->getKind();
 						Error e(message.str(),node->getLine());
 						throw e;
-						//cout << "ERROR: attempting to assign to unknown DATA_TYPE: " << node->child(0)->type()->getKind() << "\n Aborting..." << endl;
-						//exit(EXIT_FAILURE);
 				}
 				//Check the current status flag to see if we have to break out
 				status = context.queryExecutionStatus();
@@ -318,7 +301,6 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			std::stringstream message;
 			message << "Encountered unsupported NodeKind in statement. ID: " << node->kind();
 			Error e(message.str(),node->getLine());
-			//cout << "Unsupported nodekind encountered in statement" << endl;
 	}
 }
 
@@ -326,65 +308,61 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 //Makes it so that the address denoted by Node1 points to the array denoted by arrayArg
 void aliasArray(const Node* node, TArray& arrayArg, TetraContext& context) {
 
+	//Get the identifier used for the alias
 	string formalParamName = node->getString();
-	//cout << "Destinaiton: " << formalParamName << " Source: " << node2->getString() << endl;
 
 	TData<void*>& alias = context.declareReference(formalParamName);
 	//Get a pointer to the TData location of the destination scope
 	
 	//Generics needed so that the method recognizes void* and TArray* as the same data type
-	//cout << "source_context address: " << sourceContext.lookupVar<TArray>(node2->getString()) << endl;;
 	alias.setData<void*>(&arrayArg);
-	cout << ">>>>>>>>>>>>>>>>>>alias points to: " << alias.getData() << endl;
 }
 //Makes it so that the address denoted by Node1 points to the array denoted by node2
 //This version is used for function calls, where the aliasing takes place across scopes
 void aliasArray(const Node* node1, const Node* node2, TetraScope& destinationContext, TetraContext& sourceContext) {
 
+	//Get the name used to reference the alias
 	string formalParamName = node1->getString();
-	//cout << "Destinaiton: " << formalParamName << " Source: " << node2->getString() << endl;
 
 	TData<void*>& alias = destinationContext.declareReference(formalParamName);
 	//Get a pointer to the TData location of the destination scope
 	
-	cout << "source_context address: " << sourceContext.lookupVar<TArray>(node2->getString()) << endl;
-	//evaluateNode<void*>(node2,alias,sourceContext);
+	//Set the alias to point to the original array	
 	alias.setData<void*>(sourceContext.lookupVar<TArray>(node2->getString()));
-	cout << "alias points to: " << alias.getData() << endl;
 }
 
-void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationContext, TetraContext& sourceContext) {
-	//If there are further parameters to pass
+//Takes the values denoted by node2 in the context of the sourceContext,
+//copies them with new names (deifned by node1) into the TetraScope desitnationScope
+//Used for passing arguments between function calls
+void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationScope, TetraContext& sourceContext) {
+	//Check if we are a NODE_FORMAL_PARAM_LIST (structure), or an actual value that must receive an actual value
 	if(node1->kind() == NODE_FORMAL_PARAM_LIST) { //must have 2 children, as does the corresponding tree of NODE_ACTUAL_PARAM_LIST
-		pasteArgList(node1->child(0),node2->child(0),destinationContext,sourceContext);
-		pasteArgList(node1->child(1),node2->child(1),destinationContext,sourceContext);
+		pasteArgList(node1->child(0),node2->child(0),destinationScope,sourceContext);
+		pasteArgList(node1->child(1),node2->child(1),destinationScope,sourceContext);
 	}
 	else {
 		assert (node1->type() != NULL);
+		//Paste the value from the source to the destination
 		switch(node1->type()->getKind()) {
 			case TYPE_INT:
-				 paste<int>(node1,node2,destinationContext,sourceContext);
+				 paste<int>(node1,node2,destinationScope,sourceContext);
 			break;
 			case TYPE_REAL:
-				paste<double>(node1,node2,destinationContext,sourceContext);
+				paste<double>(node1,node2,destinationScope,sourceContext);
 			break;
 			case TYPE_BOOL:
-				paste<bool>(node1,node2,destinationContext,sourceContext);
+				paste<bool>(node1,node2,destinationScope,sourceContext);
 			break;
 			case TYPE_STRING:
-				paste<string>(node1,node2,destinationContext,sourceContext);
+				paste<string>(node1,node2,destinationScope,sourceContext);
 			break;
 			case TYPE_VECTOR:
-				//attempting to pass array
-	//			cout << "Attempting to pass array" << endl;
 				//Check if the array exists in memory by the fact that it has a name. If it was built on the fly (i.e. array literal) then we will have to bind it the old fashioned way
 				if(node2->kind() == NODE_IDENTIFIER) {
-	//				cout << "Pass by reference" << endl;
-					aliasArray(node1,node2,destinationContext,sourceContext);
+					aliasArray(node1,node2,destinationScope,sourceContext);
 				}
 				else {
-	//				cout << "Pass by value" << endl;
-					paste<TArray>(node1,node2,destinationContext,sourceContext);
+					paste<TArray>(node1,node2,destinationScope,sourceContext);
 				}
 			break;
 			default:
@@ -392,8 +370,6 @@ void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationC
 				message << "Attempting to pass unknown DataType (ID = " << node1->type()->getKind() << ") to function"; 
 				Error e(message.str(),node1->getLine());
 				throw e;
-				//cout << "Unknown NodeDataType: " << node1->type()->getKind() << " encountered when attempting to paste arguments.\nAborting...";
-				//exit(EXIT_FAILURE);
 			}
 	}
 }
@@ -401,28 +377,21 @@ void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationC
 //calls a function, returns the return value
 template<typename T>
 void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
-	//gets the node where the body of the called funciton begins
+	//gets the node where the body of the called function begins
 	const Node* callNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
 
-	//cout << FunctionMap::getFunctionSignature(node) << endl;
-
-	//descNode(node);
-	//descNode(callNode);	
-
 	//check if there are parameters to be passed, and do so if needed
-	//This call will have arguments if and only if the calling node has children
-	//cout << "___________________________________________"<< node->numChildren() << endl;	
-
+	//This call will have arguments if and only if the calling node has children	
 	if(node->child(0) != NULL) {
 
 		//When copying arg list, we must have handles to both scopes
 		//Calling scope handle
 		TetraScope destScope;
 	
-		//new scope handle		
-	
+		//Initialize the new scope with the passed parameters
 		pasteArgList(callNode->child(0),node->child(0), destScope, context);
 		
+		//Set the new scope to the scope we created containing all the parameters
 		context.initializeNewScope(destScope);
 	}
 	else { //if there are no args, we still need to initialize a new scope!
@@ -430,12 +399,7 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 	}
 
 	//transfer control to the function
-	//Try catch used to assemble a call stack 
-
 	evaluateNode<T>(callNode,ret,context);
-
-	//area where the ret value is determined but all called function vars still exist	
-	
 
 	//returns to the old scope once the function has finished evaluating
 	context.exitScope();
@@ -451,15 +415,17 @@ void evaluateExpression(const Node* node, TData<T>& ret, TetraContext& context) 
 	TData<T> op1;
 	evaluateNode<T>(node->child(0),op1,context);
 	TData<T> op2;
+	//Check if we have a binary or unary operation
 	if(node->child(1) != NULL) {
 		evaluateNode<T>(node->child(1),op2,context);
 	}
+	//Execute the operation and store the result in ret
 	ret.setData(execData.execute(node->kind(),op1,op2));
 
 }
 
 
-//Simplifies a vector referenct
+//Simplifies a vector reference (i.e. x[1] in "x[1] = 7)
 //Note that T is going to be a pointer type
 template<typename T>
 void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& context) {
@@ -471,10 +437,11 @@ void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 		//Get the vector pointed to by this index
 		TArray* nextVec;
 		try {
+			//elementAt may throw
 			nextVec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
 		}
 		catch (Error e) {
-			//In the case of array oput of boundes, propogate the error after tacking on line number info
+			//In the case of array out of bounds, propogate the error after tacking on line number info
 			Error e2(e.getMessage(),node->getLine());
 			throw e2;
 		}
@@ -487,6 +454,7 @@ void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 		}
 		catch (Error e) {
 			Error e2(e.getMessage(),node->getLine());
+			throw e2;
 		}
 		ret.setData(value);
 	}
@@ -497,7 +465,6 @@ void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 //Expected a pointer type for T
 template<typename T>
 void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
-	//Right now, we are assuming that the only type of node for which this will occur is a NODE_IDENTIFIER and NODE_FORMAL_PARAM
 	//If the node is a Vecref or a possible future type, then we must evaluate the LHS first
 	//Must check type so we can cast the info from lookupVar to the appropriate type
 	if(node->kind() == NODE_IDENTIFIER || node->kind() == NODE_FORMAL_PARAM) {
@@ -525,30 +492,36 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 				message << "Attempting to evaluate reference to unknown DataType ID: " << node->type()->getKind() << endl;
 				Error e(message.str(),node->getLine());
 				throw e;
-				//cout << "Unknown NodeDataType: " << node->type()->getKind() << " encountered.\nAborting...";
-				//exit(EXIT_FAILURE);
 		}
 	}
-	else if (node->kind() == NODE_VECREF) {
+	else if (node->kind() == NODE_VECREF) { //If LHS is an array index (i.e. x[12]), then we must evaluate its address before we can paste to it
 		TArray* vec = context.lookupVar<TArray>(node->child(0)->getString());
 		//Note that node->shild(1) MUST be a NODE_INDEX
-		//cout << "Node veccing" << endl;
 		evaluateVecRef<T>(node->child(1), vec, ret, context);
 	}
-
+	else {
+		std::stringstream message;
+		message << "Attempted to obtain address of unrecognized LHS NodeKind. ID: " << node->kind() << "\n";
+		Error e(message.str(),node->getLine());
+		throw e;
+	}
 }
 
 //puts the value of op2 into the address denoted by op1
 //used for performing assignment
 //Returns the value of the assignment, with an eye towards chaining assignments (x = y = 2)
-//Assumes that node1 is a NODE_IDENTIFIER, and node2 is an appropriate value
+//Assumes that node1 is a NODE_IDENTIFIER or NODE_VECREF, and node2 is an appropriate value
 template<typename T>
 T paste(const Node* node1, const Node* node2, TetraContext& context) {
 
 	TData<T*> op1;
 	TData<T> op2;
+
+	//Evaluate address where the value should be stored, and the value to be stored
 	evaluateAddress<T*>(node1,op1,context);
 	evaluateNode<T>(node2,op2,context);
+
+	//Perform assignment
 	T ret = op2.getData();
 	*(op1.getData()) = ret;
 	return ret;
@@ -558,24 +531,26 @@ T paste(const Node* node1, const Node* node2, TetraContext& context) {
 //node1 is assumed to be a NODE_FORMAL_PARAM while node2 is a NODE_ACTUAL_PARAM
 //Because of this, we don;t have to check for NODE_VECREF or the likes that evaluateAddress provides us with
 template<typename T>
-T paste(const Node* node1, const Node* node2, TetraScope& destinationContext, TetraContext& sourceContext) {
+T paste(const Node* node1, const Node* node2, TetraScope& destinationScope, TetraContext& sourceContext) {
 	TData<T*> op1;
 	TData<T> op2;
-	op1.setData(destinationContext.lookupVar<T>(node1->getString()));
-//	evaluateAddress<T*>(node1,&op1,destinationContext);
+
+	//Get address to store in new scope, and value to paste in
+	op1.setData(destinationScope.lookupVar<T>(node1->getString()));
 	evaluateNode<T>(node2,op2,sourceContext);
-	//cout << "Nodes evaluated" << endl;
+
+	//Performa assignment
 	T ret = op2.getData();
 	*(op1.getData()) = ret;
 	return ret;
 }
 
 
-//At the moment, ret will point to whatever value was copied for the assignment
+//Called when the interpreter encounters a '=' node, as in x = 5
+//Assigns the value of node->child(1) into the address denoted by node->child(0)
+//At the end, ret will point to whatever value was assigned
 template<typename T>
 void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
-
-	//cout << "assigning to: " << (node->child(0)->getString())  << endl;
 
 	assert(node->type() != NULL);
 
@@ -595,21 +570,18 @@ void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
 			ret.setData(paste<string>(node->child(0), node->child(1), context));
 		break;
 		case TYPE_VECTOR:
-			cout << "Assigning an array" << endl;
 			ret.setData(paste<TArray>(node->child(0), node->child(1), context));
-			cout << "Enda array assignment" << endl;
 		break;
 		default:
 			std::stringstream message;
 			message << "Attempting to assign value of unknown DataType ID: " << node->type()->getKind();
 			Error e(message.str(),node->getLine());
 			throw e;
-			//cout << "Unknown NodeDataType: " << node->child(0)->type()->getKind() << " encountered.\nAborting...";
-			//exit(EXIT_FAILURE);
 	}
 
 }
-//evaluates boolean operations
+
+//evaluates conditional statements
 template<typename T>
 void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 
@@ -622,7 +594,7 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 
 	assert (node->child(0)->type() != NULL);
 
-		//fetch operands, must perform type checking here, as the parent node has absolutely no idea what is being compared
+	//fetch operands, must perform type checking here, as the parent node has absolutely no idea what is being compared
 	switch(node->child(0)->type()->getKind()) {
 		case TYPE_INT:
 		{
@@ -630,6 +602,7 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 			evaluateNode<int>(node->child(0),op1,context);
 			TData<int> op2;
 			evaluateNode<int>(node->child(1),op2,context);
+			//actually perform the comparison by calling the appropriate function from the appropriate comparison list
 			ret.setData(compInt.execute(node->kind(),op1,op2));
 		}
 		break;
@@ -648,6 +621,8 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 			evaluateNode<bool>(node->child(0),op1,context);
 
 			TData<bool> op2;
+			//A boolean condiitonal might have only one operand, as in !x where x is a bool.
+			//Tetra at present forbids using ! for a non-bool type in conditions
 			if(node->child(1) != NULL) {
 				evaluateNode<bool>(node->child(1),op2,context);
 			}
@@ -676,7 +651,6 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 			std::stringstream message;
 			message << "Attempting to compare values with unknown DataType ID: " << node->child(0)->type()->getKind();
 			Error e(message.str(),node->getLine());
-			//std::cout << "Error: unexpected NODE_DATA_TYPES being compared" << std::endl;	
 	}
 
 
@@ -684,11 +658,11 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 
 //Takes a reference to a NODE_VECVAL, and adds it to the vector represented by TArray retVal, then recursively adds further NODE_VECVAL nodes if there are any
 //From "evaluate immediate" T should be the subtype of the vector (i.e. the type of data this vector will hold)
+//To summarize, this function constructs a new vector
 template<typename T>
 void evaluateVectorComponent(const Node* node, TetraContext& context, TArray& arrayVal) {
 	//evaluate the first child node, and store its value in this array
 	TData<T> x;
-	//cout << "Evaluating node" << endl;
 	evaluateNode<T>(node->child(0), x, context);
 
 	//Used to insert the data into the array
@@ -697,14 +671,16 @@ void evaluateVectorComponent(const Node* node, TetraContext& context, TArray& ar
 	//Used as a placeholder address to the actual value ret->getData so it can be deep copied
 	//At the moment, this is criminally inefficient
 	T placeHolder = x.getData();
-	//cout << "Placeholder address: " << &placeHolder << endl;	
+
 	//Use of the explicit void* is required to actually paste in the value of the pointer
 	insertValue.setData<void*>(&placeHolder);
+	//Set the deletable type so that it is copied properly when we insert it into the array
 	insertValue.setDeletableType<T>();
-	//cout << "Adding: (" << placeHolder << ") at address " << insertValue.getData()  << endl;
 	arrayVal.addElement(insertValue);
-	//cout << "after add" << endl;
 
+	//because insertValue points to local data, we must re-declare that it must not delete anythiung upon destruction before the object gets destroyed
+	insertValue.setDeletableType<void>();
+	
 	//Check for additional elements, and add them if they exist
 	if(node->numChildren() == 2) {
 		evaluateVectorComponent<T>(node->child(1), context, arrayVal);
@@ -712,7 +688,7 @@ void evaluateVectorComponent(const Node* node, TetraContext& context, TArray& ar
 }
 
 
-//Evaluates immediate expressions
+//Evaluates immediate expressions (i.e. '5' in x = 5)
 template<typename T>
 void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 
@@ -722,7 +698,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 	if(node->kind() == NODE_IDENTIFIER) {
 		ret.setData(*(context.lookupVar<T>(node->getString())));
 	}
-
+	//Check the type we are getting, and get thaat value from the node
 	else {
 		switch(node->kind()) {
 			case NODE_INTVAL:
@@ -739,6 +715,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 			break;
 			case NODE_VECVAL:
 			{
+				//If we have a vector array literal, we must deduce the type it is holding and initialize its elements
 				TArray returnArray;
 				//Check that array is nonempty
 				if(node->numChildren() > 0) {
@@ -767,16 +744,11 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 							message << "Attempted to initialize array with unknown subtype (ID: " << node->child(0)->type()->getKind() << ")";
 							Error e(message.str(),node->getLine());
 							throw e;
-							//cout << "Error: Attempting to initialize array with unknown subtype. Aborting..." << endl;
-							//exit(EXIT_FAILURE);
 						
 					}
 				}
-	//			cout << &returnArray << "<<!<!<!<!<!<!<!<!<" << endl;
-	//			cout << "Switch evaluarted" << endl;
-				//returnArray.outputElements();
+				//Set the return value
 				ret.setData(returnArray);
-	//			cout << "Data set" << endl;
 			}				
 			break;
 			default:
@@ -784,50 +756,12 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 				message << "Attempting to evaluate unknown immediate NodeType (ID: " << node->kind() << ")";
 				Error e(message.str(),node->getLine());
 				throw e;
-				//cout << "Unknown Immediate NodeType: " << node->kind() << " encountered.\nAborting...";
-				//exit(EXIT_FAILURE);
 		}
 			
 	}
 }
 
-template<typename T>
-void evaluateReturn(const Node* node,TData<T>& ret,TetraContext& context) {
-	
-	//Check if returning a value, or nothing
-	if(node->child(0) != NULL) {
-		evaluateNode<T>(node->child(0),ret,context);
-		//cout << "Returning: " << ret->getData() << endl;
-	}
-	context.notifyReturn();
-}
-
-template<>
-void evaluateReturn(const Node* node,TData<TArray>& ret,TetraContext& context) {
-	cout<<"Checking for ret by reference"<<endl;
-	//Check if returning a value, or nothing
-	if(node->child(0) != NULL) {
-		if(node->child(0)->kind() == NODE_IDENTIFIER || node->child(0)->kind() == NODE_VECREF) {
-			cout << "Attampting return by reference" << endl;
-			TData<TArray*> reference;
-			evaluateAddress<TArray*>(node->child(0), reference, context);
-			context.setReturnedRef(reference.getData());
-			cout << "Returning reference to: " << reference.getData() << endl;
-			context.notifyRefReturn();
-		}
-		else {
-			cout << "Attempting return by value" << endl;
-			evaluateNode<TArray>(node->child(0),ret,context);
-			context.notifyReturn();
-		}
-		
-		//cout << "Returning: " << ret->getData() << endl;
-	}
-	else {
-		context.notifyReturn();
-	}
-}
-
+//When the program encounters a flag statement (i.e. break, continue, return), notify the interpreter that such a flag was encountered
 template<typename T>
 void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 	switch(node->kind()) {
@@ -838,12 +772,9 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 			context.notifyContinue();
 		break;
 		case NODE_RETURN:
-			//evaluateReturn(node,ret,context);
-			
 			//Check if returning a value, or nothing
 			if(node->child(0) != NULL) {
 				evaluateNode<T>(node->child(0),ret,context);
-				//cout << "Returning: " << ret->getData() << endl;
 			}
 			context.notifyReturn();
 		break;
@@ -852,8 +783,6 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 			message << "Unexpected flag type encountered: " << static_cast<int>(node->kind());
 			Error e(message.str(), node->getLine()); 
 			throw e;
-			//cout << "Unexpected flag type encountered: " << node->kind() << " Aborting...";
-			//exit(EXIT_FAILURE);
 		break;
 	}
 }
@@ -861,9 +790,8 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 //evaluates generic nodes
 template<typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
-//	cout << "_-_-_-_-_-_-_-_-_-\n";
-//	descNode(node);
-//	cout << "_-_-_-_-_-_-_-_-_-_-" << endl;
+
+	//Call the appropriate function based on the NodeKind of the node
 	switch(NodeTable::classifyNode(node)) {
 		case CONDITION:
 			evaluateCondition<T>(node,ret,context);
@@ -882,14 +810,15 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 		break;
 		case ASSIGNMENT:
 			performAssignment<T>(node,ret,context);
-			//cout << "after assignment evaluation" << endl;
 		break;
 		case FLAG:
 			evaluateFlag<T>(node,ret,context);
 		break;
 		default:
-			cout << "Warnming: unexpected node kind encountered: " << node->kind() << "\n Aborting..." << endl;
-		exit(EXIT_FAILURE);
+			std::stringstream message;
+			message << "Warnminig: unexpected node kind encountered when attempting to classify node: " << node->kind() << endl;
+			Error e(message.str(),node->getLine());
+			throw e;
 	}
 }
 
@@ -897,168 +826,59 @@ int main(int argc, char** argv) {
 	
 	//check that the proper commands were passed
 	if(argc < 2) {
-		cout << "Please pass a file name!" << endl;
-		return 0;
+		std::cout << "Please pass a file name!" << std::endl;
+		exit(EXIT_FAILURE);
 	}
-
-	bool test = false;
 
 	Node* tree;
-	if(string(argv[1]) == "test"){
-		test = true;
-	}
-	else {
-		try {
-			tree = parseFile(argv[1]);
-		} catch(Error e) {
-			cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" <<endl;
-			exit(EXIT_FAILURE);
-		}
+
+	//Parse file, and check for initial errors. Print out and exit if an error was found
+	try {
+		tree = parseFile(argv[1]);
+	} catch(Error e) {
+		std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
+		exit(EXIT_FAILURE);
 	}
 
-	if(!test) {
-		FunctionMap::build(tree);
 
-		const Node* start = FunctionMap::getFunctionNode("main#");
 
-		cout << ">>" << start << endl;
 
-		if(start == NULL) {
-			cout << "Error: Attempted to call undefined function: main()" << endl;
-			exit(EXIT_FAILURE);
-		}
+	//Build function lookup table, find address of main method
+	FunctionMap::build(tree);
+	const Node* start = FunctionMap::getFunctionNode("main#");
 
-		TData<int> retVal(0);
-
-		cout << "Running " << argv[1] << "..." << endl;
-		
-		try {
-			TetraContext tContext;
-			tContext.initializeNewScope();
-			evaluateNode<int>(start, retVal, tContext);
-			tContext.exitScope();
-		}
-		catch (Error e) {
-			cout << "The following error was encountered while running your program: " << endl;
-			cout << e.getMessage() << endl;
-			cout << "Near Line: " << e.getLine() << endl;
-		}
-		cout << "+------------------------------------------------" << endl;
-		cout << "|Main returned: " << retVal.getData() << endl;
-		cout << "+------------------------------------------------" << endl;
-
-		cout << "Finished interpreting" << endl;
-		return retVal.getData();	}
-	else {
-		TetraContext testContext;
-		testContext.initializeNewScope();
-		runTest(testContext);
-		testContext.exitScope();
+	//If Main was not found, print an error
+	if(start == NULL) {
+		std::cout << "Error: Attempted to call undefined function: main()" << std::endl;
+		exit(EXIT_FAILURE);
 	}
+
+	//Will hold value returned to OS. 0 if main does not return an int
+	TData<int> retVal(0);
+
+	std::cout << "Running " << argv[1] << "..." << std::endl;
+
+	try {
+		//Initialize the TetraContext, add a scope, and run!
+		TetraContext tContext;
+		tContext.initializeNewScope();
+		evaluateNode<int>(start, retVal, tContext);
+		tContext.exitScope();
+	}
+	catch (Error e) { //Print out any errors
+		std::cout << "---------------------------------------------------------------" << std::endl;
+		std::cout << "The following error was encountered while running your program: " << std::endl;
+		std::cout << e.getMessage() << std::endl;
+		std::cout << "Near Line: " << e.getLine() << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	//Print return value
+	std::cout << "+------------------------------------------------" << std::endl;
+	std::cout << "|Main returned: " << retVal.getData() << std::endl;
+	std::cout << "+------------------------------------------------" << std::endl;
+
+	return retVal.getData();
+
 
 }
 
-void runTest(TetraContext& context) {
-/* PLEASE DON"T DELETE THIS TEST CODE!
- * it will be modified for further test cases
- */
-
-	cout << "\n Running tests..." << endl;
-
-	DataType* intVal;
-	DataType intV = TYPE_INT;
-	intVal = &intV;
-
-	DataType* realVal;
-	DataType realV = TYPE_REAL; 
-	realVal = &realV;
-
-	DataType* boolVal;
-	DataType boolV = TYPE_BOOL; 
-	boolVal = &boolV;
-
-	DataType* stringVal;
-	DataType stringV = TYPE_STRING; 
-	stringVal = &stringV;
-
-	Node testInt(NODE_INTVAL);
-	testInt.setDataType(intVal);
-	testInt.setIntval(27);
-
-	Node testInt2(NODE_INTVAL);
-	testInt2.setDataType(intVal);
-	testInt2.setIntval(39);
-
-	Node testBool(NODE_BOOLVAL);
-	testBool.setDataType(boolVal);
-	testBool.setBoolval(true);
-
-	Node testReal(NODE_REALVAL);
-	testReal.setDataType(realVal);
-	testReal.setRealval(-13.6);
-
-	Node testString(NODE_STRINGVAL);
-	testString.setDataType(stringVal);	
-	testString.setStringval("It works maybe!");
-
-	TData<int> i(0);
-	evaluateNode<int>(&testInt,i,context);
-
-	TData<string> s("");
-	evaluateNode<string>(&testString,s,context);
-
-	TData<double> d(0);
-	evaluateNode<double>(&testReal,d,context);
-
-	TData<bool> b(false);
-	evaluateNode<bool>(&testBool,b,context);
-	
-	cout << "Bool: " << b.getData() << endl;
-	cout << "Int: " << i.getData() << endl;
-	cout << "Real: " << d.getData() << endl;
-	cout << "String: " << s.getData() << endl;
-
-	Node testAdd(NODE_PLUS);
-	testAdd.setDataType(intVal);
-	testAdd.addChild(&testInt);
-	testAdd.addChild(&testInt);
-
-	Node testAdd2(NODE_PLUS);
-	testAdd2.setDataType(realVal);
-	testAdd2.addChild(&testReal);
-	testAdd2.addChild(&testReal);
-
-	TData<double> a;
-	evaluateNode<double>(&testAdd2,a,context);
-
-	cout << "double + double: " << a.getData() << endl;
-
-	Node testAddS(NODE_EQ);
-	testAddS.setDataType(boolVal);
-	testAddS.addChild(&testInt);
-	testAddS.addChild(&testInt2);
-
-	TData<bool> s2(false);
-	evaluateNode<bool>(&testAddS,s2,context);
-
-	cout << "27 cmp 39: " << s2.getData() << endl;
-
-	Node varX(NODE_IDENTIFIER);
-	varX.setStringval("GHRUAAAHHH");
-	varX.setDataType(stringVal);
-	*(context.lookupVar<string>("GHRUAAAHHH")) = "oink";
-
-	cout << "here" << endl;
-
-	Node assignX(NODE_ASSIGN);
-	assignX.setDataType(stringVal);
-	assignX.addChild(&varX);
-	assignX.addChild(&testString);
-
-	cout << "here2" << endl;
-	
-	evaluateNode<string>(&assignX,s,context);
-	evaluateNode<string>(&varX,s,context);
-	cout << "X(?): " << s.getData() << endl;
-	cout << "fin" << endl;
-}

@@ -32,6 +32,9 @@ prefixes[${#prefixes[*]}]="refref";	results[${#results[*]}]=222
 prefixes[${#prefixes[*]}]="dA";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="retA";	results[${#results[*]}]=44
 
+successes=0
+total=${#prefixes[*]}
+
 for index in $(seq 0 `expr ${#prefixes[*]} - 1`)
 do
 	echo
@@ -41,6 +44,7 @@ do
 	if [ $retVal -eq ${results[${index}]} ]
 	then
 		echo 'Successful return of '${results[$index]}
+		successes=`expr ${successes} + 1`
 	else
 		echo 'Failed: Returned '$retVal' but expected '${results[$index]}
 		successFlag=0
@@ -49,6 +53,7 @@ done
 
 echo
 echo 'Tests complete'
+echo 'Successful in '$successes'/'$total
 echo
 
 if [ $successFlag -eq 1 ]
@@ -57,3 +62,5 @@ then
 else
 	echo 'Not all tests were completed successfully'
 fi	
+echo
+echo

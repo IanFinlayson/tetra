@@ -15,8 +15,8 @@
 using std::string;
 
 
-//offloaded negation methods
-
+//Offloaded negation methods
+//For all types except for which a specialization is declared, classic negation will do
 template<typename T>
 bool negator(T a) {
 	return !a;
@@ -28,7 +28,7 @@ bool negator<string>(string a) {
 	return a != "";
 }
 
-//Specialization for bitwise array negation will someday return negation of every element, but for now will just return null
+//Specialization for bitwise array negation for now will just return null
 template<>
 bool negator<TArray>(TArray a) {
 	return false;
@@ -38,7 +38,7 @@ template <class T>
 class ComparisonList
 {
 	public:
-		//constructor fills table with all relevant operators
+		//constructor fills table with all relevant operators (defined by functions)
 		ComparisonList() {
 			//functionMap[NODE_] = &ComparisonList<T>::;
 			functionMap[NODE_NOT] = &ComparisonList<T>::logNot;
@@ -51,7 +51,7 @@ class ComparisonList
 
 		}
 
-		//looks up the appropriate option and executes it
+		//looks up the appropriate operator according to the given NODE_KIND and executes it
 		bool execute(NodeKind n, TData<T>& a, TData<T>& b) {
 			return (this->*functionMap[n])(a.getData(),b.getData());
 		}
@@ -60,10 +60,10 @@ class ComparisonList
 
 		std::map<NodeKind, bool (ComparisonList<T>::*)(T,T)> functionMap;
 
-		//Define all the operations:
+		//Define all the operations in function form, so they can be dynamically called:
 		
 		//for unary operators, the second argument will alwys be ignored, but exists so that the function signature matches
-		//Since this does not work for strings, we will offload it to a specialized function
+		//Since negaiton does not work for strings or arrays, we will offload it to a specialized function
 		bool logNot(T a, T b) {
 			return negator(a);
 		}
@@ -92,15 +92,3 @@ class ComparisonList
 			return a != b;
 		}
 };
-/*
-int main() {
-	ComparisonList<int> opInt;
-	ComparisonList<bool> opBool;
-	ComparisonList<string> opString;
-	ComparisonList<double> opReal;
-
-	std::cout << opInt.execute(NODE_LT,2,2) << std::endl;
-	std::cout << opBool.execute(NODE_GTE, true, true) << std::endl;
-	std::cout << opString.execute(NODE_EQ, "lady","ldy") << std::endl;
-	std::cout << opReal.execute(NODE_NEQ,12,12) << std::endl;
-}*/
