@@ -3,6 +3,7 @@
 #include "quitdialog.h"
 #include "openappdialog.h"
 #include "syntaxhighlighter.h"
+#include "editor.h"
 #include <QtCore>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -10,10 +11,12 @@
 #include <QPrintDialog>
 #include <QPainter>
 
+
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
     this->setWindowTitle("Tetra");
+
     connect(ui->input->document(), SIGNAL(contentsChanged()),
             this, SLOT(documentWasModified()));
     hideEditor();
@@ -22,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     highlighter = new Highlighter(ui->input->document());
 
 
+/*
 
 
     for(int i = 0; i < MaxRecentFiles; ++i){
@@ -33,7 +37,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     for(int i = 0; i < MaxRecentFiles; ++i){
         ui->menuFile->addAction(recentFileActs[i]);
     }
-    //updateRecentFileActions();
+    updateRecentFileActions();*/
 }
 
 MainWindow::~MainWindow(){
@@ -42,7 +46,6 @@ MainWindow::~MainWindow(){
 
 
 void MainWindow::hideEditor(){
-    ui->logo->hide();
     ui->tetraFileLabel->hide();
     ui->outputLabel->hide();
     ui->input->hide();
@@ -52,9 +55,6 @@ void MainWindow::hideEditor(){
 }
 
 void MainWindow::showEditor(){
-    QPixmap tetraSquares("/Users/Shehan/UMW/Programming/SSI/Tetra/Tetra Resources/logo squares.png");
-    ui->logo->setPixmap(tetraSquares);
-    ui->logo->show();
     ui->tetraFileLabel->show();
     ui->outputLabel->show();
     ui->input->show();
@@ -65,6 +65,10 @@ void MainWindow::showEditor(){
     QFont font = QFont("Monaco");
     font.setFixedPitch(true);
     font.setPointSize(12);
+    const int tabStop = 4;  // 4 characters
+
+    QFontMetrics metrics(font);
+    ui->input->setTabStopWidth(tabStop * metrics.width(' '));
     ui->input->setFont(font);
     ui->output->setFont(font);
 }
@@ -213,12 +217,12 @@ void MainWindow::on_actionSave_triggered(){
 
         ttrFile.flush();
         ttrFile.close();
-        setCurrentFile(openFile);
+        //setCurrentFile(openFile);
     }
     else{
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "../../../..", "Tetra (*.ttr)");
         if(!filename.isEmpty()){
-            setCurrentFile(openFile);
+            //setCurrentFile(openFile);
             on_actionSave_triggered();
         }
     }

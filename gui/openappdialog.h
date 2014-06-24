@@ -16,14 +16,11 @@ class OpenAppDialog : public QDialog
 public:
     explicit OpenAppDialog(QWidget *parent = 0);
     ~OpenAppDialog();
-
     void setMainWindow(MainWindow*);
 
 private slots:
     void on_quitAppButton_clicked();
-
     void on_newProjButton_clicked();
-
     void on_openProjButton_clicked();
 
 private:

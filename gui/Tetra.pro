@@ -16,13 +16,15 @@ SOURCES += main.cpp\
     quitdialog.cpp \
     mainwindow.cpp \
     openappdialog.cpp \
-    syntaxhighlighter.cpp
+    syntaxhighlighter.cpp \
+    editor.cpp
 
 HEADERS  += \
     quitdialog.h \
     mainwindow.h \
     openappdialog.h \
-    syntaxhighlighter.h
+    syntaxhighlighter.h \
+    editor.h
 
 FORMS    += \
     quitdialog.ui \
