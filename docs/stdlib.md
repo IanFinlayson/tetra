@@ -10,7 +10,6 @@ with any number of arguments of any type - unlike any other function in Tetra.
 The frontend compiler has an exception where it will not type check the
 parameters against a functions signature if the function name is ```print```.
 
-
 The following functions each read one primitive value from the user and return
 it.
 
@@ -21,15 +20,8 @@ read_real( ) real
 read_bool( ) bool
 ```
 
-
 ### Vectors and Strings
-The following functions return the number of elements in a vector or string.
-The first will take some thought as currently, there is no way to write or call
-a function that accepts *any* type of vector...
-
-```
-vector_size(v)
-string_size(s string)
-```
+The ```len``` function takes any vector or string as a parameter, and returns the
+number of elements in that vector or string.
 
 
