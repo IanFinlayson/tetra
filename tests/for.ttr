@@ -1,4 +1,5 @@
-def for_test( ):
+def main( ):
     for i in [1 ... 10]:
         print(i)
+
 

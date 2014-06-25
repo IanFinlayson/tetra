@@ -1,5 +1,3 @@
-def print(thing string):
-    pass
 
 def function(a int, b int) string:
     if a > b:

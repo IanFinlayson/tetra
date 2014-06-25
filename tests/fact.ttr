@@ -5,3 +5,10 @@ def fact(x int) int:
         return 1
     else:
         return x * fact(x - 1)
+
+def main( ):
+    print("Enter n: ")
+    n = read_int( )
+    print(n, "! = ", fact(n))
+
+

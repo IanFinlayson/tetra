@@ -4,3 +4,11 @@ def fact(x int) int:
         f *= x
         x -= 1
     return f
+
+def main( ):
+    print("Enter n: ")
+    n = read_int( )
+    print(n, "! = ", fact(n))
+
+
+

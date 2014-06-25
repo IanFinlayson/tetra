@@ -1,8 +1,4 @@
 
-def print(x string):
-    # yeah, about that...
-    pass
-
 def func2( ):
     pass
 
