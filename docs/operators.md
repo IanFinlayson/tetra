@@ -9,7 +9,7 @@ Operator           | Meaning
 << >>              | Bitwise left shift and right shift
 &                  | Bitwise and
 ^                  | Bitwise xor
-or                 | Bitwise or
+&#124;             | Bitwise or
 < <= > >= == !=    | Comparison operators
 and                | Logical and
 or                 | Logical or
