@@ -61,12 +61,12 @@ or                 | Logical or
 <tr><td>string</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>bool</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>vector</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
-<tr><td rowspan="5"><< >></td><td>int</td><td>int</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
+<tr><td rowspan="5">&lt;&lt; &gt;&gt;</td><td>int</td><td>int</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>real</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>string</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>bool</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>vector</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
-<tr><td>&</td><td>int</td><td>int</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
+<tr><td rowspan="5">&amp;</td><td>int</td><td>int</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>real</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>string</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>bool</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
@@ -81,7 +81,7 @@ or                 | Logical or
 <tr><td>string</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>bool</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>vector</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
-<tr><td rowspan="5">< <= > >=</td><td>int</td><td>bool</td><td>bool</td><td>NA</td><td>NA</td><td>NA</td></tr>
+<tr><td rowspan="5">&lt; &lt;= &gt; &gt;=</td><td>int</td><td>bool</td><td>bool</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>real</td><td>bool</td><td>bool</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>string</td><td>NA</td><td>NA</td><td>bool</td><td>NA</td><td>NA</td></tr>
 <tr><td>bool</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
@@ -106,7 +106,6 @@ or                 | Logical or
 <tr><td>string</td><td>NA</td><td>NA</td><td>string</td><td>NA</td><td>NA</td></tr>
 <tr><td>bool</td><td>NA</td><td>NA</td><td>NA</td><td>bool</td><td>NA</td></tr>
 <tr><td>vector</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>vector</td></tr>
-<tr><td>&nbsp;</td><td>int</td><td>real</td><td>string</td><td>bool</td><td>vector</td></tr>
 </table>
 
 
