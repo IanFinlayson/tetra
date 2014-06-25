@@ -17,6 +17,7 @@
 #include "comparisonMap.cpp"
 #include "variableContext.h"
 #include "progContext.h"
+#include "TSL.h"
 
 //#define NDEBUG
 #include <assert.h>
@@ -273,7 +274,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 					break;
 					case TYPE_VECTOR:
 						//Alias the array with collection. Note that this means that changes to this array will affect the original array
-						aliasArray(node->child(0), *static_cast<TArray*>((*iter).getData()), context);
+						//aliasArray(node->child(0), *static_cast<TArray*>((*iter).getData()), context);
+						*(context.lookupVar<TArray>(node->child(0)->getString())) = *static_cast<TArray*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					default:
@@ -303,7 +305,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			Error e(message.str(),node->getLine());
 	}
 }
-
+/*
 //Used for aliasing arrays within the same scope (e.g. for loops)
 //Makes it so that the address denoted by Node1 points to the array denoted by arrayArg
 void aliasArray(const Node* node, TArray& arrayArg, TetraContext& context) {
@@ -316,7 +318,8 @@ void aliasArray(const Node* node, TArray& arrayArg, TetraContext& context) {
 	
 	//Generics needed so that the method recognizes void* and TArray* as the same data type
 	alias.setData<void*>(&arrayArg);
-}
+}*/
+/*
 //Makes it so that the address denoted by Node1 points to the array denoted by node2
 //This version is used for function calls, where the aliasing takes place across scopes
 void aliasArray(const Node* node1, const Node* node2, TetraScope& destinationContext, TetraContext& sourceContext) {
@@ -330,7 +333,7 @@ void aliasArray(const Node* node1, const Node* node2, TetraScope& destinationCon
 	//Set the alias to point to the original array	
 	alias.setData<void*>(sourceContext.lookupVar<TArray>(node2->getString()));
 }
-
+*/
 //Takes the values denoted by node2 in the context of the sourceContext,
 //copies them with new names (deifned by node1) into the TetraScope desitnationScope
 //Used for passing arguments between function calls
@@ -358,12 +361,12 @@ void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationS
 			break;
 			case TYPE_VECTOR:
 				//Check if the array exists in memory by the fact that it has a name. If it was built on the fly (i.e. array literal) then we will have to bind it the old fashioned way
-				if(node2->kind() == NODE_IDENTIFIER) {
+				/*if(node2->kind() == NODE_IDENTIFIER) {
 					aliasArray(node1,node2,destinationScope,sourceContext);
 				}
-				else {
+				else {*/
 					paste<TArray>(node1,node2,destinationScope,sourceContext);
-				}
+				//}
 			break;
 			default:
 				std::stringstream message;
@@ -377,32 +380,77 @@ void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationS
 //calls a function, returns the return value
 template<typename T>
 void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
-	//gets the node where the body of the called function begins
-	const Node* callNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
 
-	//check if there are parameters to be passed, and do so if needed
-	//This call will have arguments if and only if the calling node has children	
-	if(node->child(0) != NULL) {
-
-		//When copying arg list, we must have handles to both scopes
-		//Calling scope handle
-		TetraScope destScope;
-	
-		//Initialize the new scope with the passed parameters
-		pasteArgList(callNode->child(0),node->child(0), destScope, context);
-		
-		//Set the new scope to the scope we created containing all the parameters
-		context.initializeNewScope(destScope);
+	//Check to see if it is a TSL function
+	//This is a point for optimization. We could agree to some similarity of all TSL names to check 1 condiitonal
+	string funcName = node->getString();
+	if(funcName == "print") {
+		if(node->child(0) != NULL) {
+			print(node->child(0),context);
+		}
+		//Each print results in a line break
+		std::cout << endl;
 	}
-	else { //if there are no args, we still need to initialize a new scope!
-		context.initializeNewScope();
+	else if(funcName == "read_int") {
+		ret.setData(readInt());
 	}
+	else if(funcName == "read_real") {
+		ret.setData(readReal());
+	}
+	else if(funcName == "read_string") {
+		ret.setData(readString());
+	}
+	else if(funcName == "read_bool") {
+		ret.setData(readBool());
+	}
+	else if(funcName == "len") {
+		if(node->child(0)->type()->getKind() == TYPE_STRING) {
+			TData<string> value;
+			evaluateNode(node->child(0),value,context);
+			ret.setData(len(value.getData()));
+		}
+		else if(node->child(0)->type()->getKind() == TYPE_VECTOR) {
+			TData<TArray> value;
+			evaluateNode(node->child(0),value,context);
+			ret.setData(len(value.getData()));
+		}
+		else {	//attempting to take length of another type is an error
+			std::stringstream message;
+			message << "Attempted to obtain length of unknown type. ID: " << node->child(0)->type()->getKind();
+			Error e(message.str(),node->getLine());
+		}
+	}
+	else {
+		//gets the node where the body of the called function begins
+		const Node* funcNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
 
-	//transfer control to the function
-	evaluateNode<T>(callNode,ret,context);
+		//check if there are parameters to be passed, and do so if needed
+		//This call will have arguments if and only if the calling node has children	
+		if(node->child(0) != NULL) {
 
-	//returns to the old scope once the function has finished evaluating
-	context.exitScope();
+			//When copying arg list, we must have handles to both scopes
+			//Calling scope handle
+			TetraScope destScope(node);
+
+			//Initialize the new scope with the passed parameters
+			pasteArgList(funcNode->child(0),node->child(0), destScope, context);
+
+			//Set the new scope to the scope we created containing all the parameters
+			context.initializeNewScope(destScope);
+		}
+		else { //if there are no args, we still need to initialize a new scope!
+			context.initializeNewScope(node);
+		}
+
+		//Place this node on the call stack, so it can be printed in the stack trace
+		context.getCurrentScope().setCallNode(node);
+
+		//transfer control to the function
+		evaluateNode<T>(funcNode,ret,context);
+
+		//returns to the old scope once the function has finished evaluating
+		context.exitScope();
+	}
 }
 
 //evaluates operations on data types
@@ -822,25 +870,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 	}
 }
 
-int main(int argc, char** argv) {
-	
-	//check that the proper commands were passed
-	if(argc < 2) {
-		std::cout << "Please pass a file name!" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-
-	Node* tree;
-
-	//Parse file, and check for initial errors. Print out and exit if an error was found
-	try {
-		tree = parseFile(argv[1]);
-	} catch(Error e) {
-		std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
-		exit(EXIT_FAILURE);
-	}
-
-
+int interpret(const Node* tree) {
 
 
 	//Build function lookup table, find address of main method
@@ -850,18 +880,16 @@ int main(int argc, char** argv) {
 	//If Main was not found, print an error
 	if(start == NULL) {
 		std::cout << "Error: Attempted to call undefined function: main()" << std::endl;
-		exit(EXIT_FAILURE);
+		return 1;
 	}
 
 	//Will hold value returned to OS. 0 if main does not return an int
 	TData<int> retVal(0);
 
-	std::cout << "Running " << argv[1] << "..." << std::endl;
-
+	//Initialize the TetraContext, add a scope, and run!
+	TetraContext tContext;
+	tContext.initializeNewScope(start);
 	try {
-		//Initialize the TetraContext, add a scope, and run!
-		TetraContext tContext;
-		tContext.initializeNewScope();
 		evaluateNode<int>(start, retVal, tContext);
 		tContext.exitScope();
 	}
@@ -870,7 +898,9 @@ int main(int argc, char** argv) {
 		std::cout << "The following error was encountered while running your program: " << std::endl;
 		std::cout << e.getMessage() << std::endl;
 		std::cout << "Near Line: " << e.getLine() << std::endl;
-		exit(EXIT_FAILURE);
+		std::cout << "Stack trace: ";
+		tContext.printStackTrace();
+		return 1;
 	}
 	//Print return value
 	std::cout << "+------------------------------------------------" << std::endl;

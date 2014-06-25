@@ -36,6 +36,8 @@ public:
 	const std::vector< TData<void*> >::const_iterator begin() const;
 	const std::vector< TData<void*> >::const_iterator end() const;
 
+	int size() const;
+
 	//Copy assignment operator
 	TArray& operator=(const TArray& other);
 
@@ -113,7 +115,7 @@ private:
 
 		//Copy constructor aliases this TArray to the other, rather than performing a deep copy
 		//Note that this is largely desired behavior
-		vec_ptr(vec_ptr& other) {
+		vec_ptr(const vec_ptr& other) {
 			ptr = other.ptr;
 			refCount = other.refCount;
 			addReference();	
@@ -169,6 +171,9 @@ private:
 	
 	//A smart pointer to a vector of void*
 	vec_ptr elements;
+
+	//Implementation of stream insertion allows for printing of array
+	friend std::ostream& operator<<(std::ostream& outStream, TArray obj);
 };
 
 

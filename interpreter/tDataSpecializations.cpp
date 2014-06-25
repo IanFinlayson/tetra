@@ -7,33 +7,33 @@
 
 #include "tData.h"
 #include "tArray.h"
+#include "frontend.hpp"
+
+//#define NDEBUG
+#include <assert.h>
+
 
 //Specialization of copy constructor for types looking at dynamic memory
 template <>
 TData<void*>::TData(const TData<void*>& other) : pointedTo(other.pointedTo.getKind()) {
 	//if the data points to something, we must perform a deep copy
 	if(other.pointedTo != TYPE_VOID) {
-		//std::cout << " Deep data Copy Constructor " << std::endl;
+		//Check the type so we know how much memory needs to be allocated, and copy the value into the new memory location
 		switch(other.pointedTo.getKind()) {
 			case TYPE_INT:
-				data = new int;
-				*(static_cast<int*>(data)) = *static_cast<int*>(other.data);
+				data = new int(*static_cast<int*>(other.data));
 			break;
 			case TYPE_REAL:
-				data = new double;
-				*(static_cast<double*>(data)) = *static_cast<double*>(other.data);
+				data = new double(*static_cast<double*>(other.data));
 			break;
 			case TYPE_BOOL:
-				data = new bool;
-				*(static_cast<bool*>(data)) = *static_cast<bool*>(other.data);
+				data = new bool(*static_cast<bool*>(other.data));
 			break;
 			case TYPE_STRING:
-				data = new string;
-				*(static_cast<string*>(data)) = *static_cast<string*>(other.data);
+				data = new string(*static_cast<string*>(other.data));
 			break;
 			case TYPE_VECTOR:
-				data = new TArray;
-				*(static_cast<TArray*>(data)) = *static_cast<TArray*>(other.data);
+				data = new TArray(*static_cast<TArray*>(other.data));
 			break;
 			default:
 				std::cout << "Warning, attempted to deep copy unsupported primitive type ID: " << other.pointedTo.getKind() << std::endl;
@@ -43,7 +43,6 @@ TData<void*>::TData(const TData<void*>& other) : pointedTo(other.pointedTo.getKi
 			//If we are not actually working with dynamic memory, ordinary assignment will do
 			data = other.data;
 	}
-	pointedTo = other.pointedTo;
 }
 
 //Destructor for TData<ovid*> with possible ownership of dynamically allocated memory
@@ -180,7 +179,8 @@ void TData<void*>::setDeletableType<void>(){
 }
 
 //Specialization of assignment when data is a pointer type
-
+//Note that the two TData objects must be pointing to the same type
+//It would seem that this object is being called on incomplete TData objects that have ownership of some data but have not had their setDeletableType method set, as this function is used when assigning
 template <>
 TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
 
@@ -191,31 +191,27 @@ TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
 
 	//if the data points to something, we must perform a deep copy
 	if(other.pointedTo != TYPE_VOID) {
+		//Must typecheck to see what we must delete, and what we must allocate
 		switch(other.pointedTo.getKind()) {
 			case TYPE_INT:
 				delete static_cast<int*>(data);
-				data = new int;
-				*(static_cast<int*>(data)) = *static_cast<int*>(other.data);
+				data = new int(*static_cast<int*>(other.data));
 			break;
 			case TYPE_REAL:
 				delete static_cast<double*>(data);
-				data = new double;
-				*(static_cast<double*>(data)) = *static_cast<double*>(other.data);
+				data = new double( *static_cast<double*>(other.data));
 			break;
 			case TYPE_BOOL:
 				delete static_cast<bool*>(data);
-				data = new bool;
-				*(static_cast<bool*>(data)) = *static_cast<bool*>(other.data);
+				data = new bool(*static_cast<bool*>(other.data));
 			break;
 			case TYPE_STRING:
 				delete static_cast<string*>(data);
-				data = new string;
-				*(static_cast<string*>(data)) = *static_cast<string*>(other.data);
+				data = new string(*static_cast<string*>(other.data));
 			break;
 			case TYPE_VECTOR:
 				delete static_cast<TArray*>(data);
-				data = new TArray;
-				*(static_cast<TArray*>(data)) = *static_cast<TArray*>(other.data);
+				data = new TArray(*static_cast<TArray*>(other.data));
 			break;
 			default:
 				std::cout << "Warning, attempted to deep copy unsupported primitive type ID: " << other.pointedTo.getKind() << std::endl;

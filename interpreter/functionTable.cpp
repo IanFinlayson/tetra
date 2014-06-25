@@ -44,13 +44,14 @@ void FunctionMap::build(const Node* tree) {
 //Given a NODE_ACTUAL_PARAM or NODE_FORMAL_PARAM, adds the signature of a single argument to the string
 //Then recursively calls this function until it has assembled the entire signature
 void FunctionMap::concatSignature(const Node* node, string& signature) {
-	 
+ 
 	if(node->kind() != NODE_ACTUAL_PARAM_LIST && node->kind() != NODE_FORMAL_PARAM_LIST) {
 
 		assert(node->type() != NULL);
 
 		//Given the type of the next argument, append the appropriate value to the signature
-		switch(node->type()->getKind()) {
+		DataType* argType = node->type();
+		switch(argType->getKind()) {
 			case TYPE_INT:
 				signature += "_I";
 			break;
@@ -65,6 +66,33 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
 			break;
 			case TYPE_VECTOR:
 				signature += "_V";
+				//Must also fill in subtype information
+				//While loop allows for accounting for vectors containing vectors (containing vectors...)
+				while(argType->getSub() != NULL) {
+					argType = argType->getSub();
+					switch(argType->getKind()) {
+						case TYPE_INT:
+							signature += "I";
+						break;
+						case TYPE_REAL:
+							signature += "R";
+						break;
+						case TYPE_BOOL:
+							signature += "B";
+						break;
+						case TYPE_STRING:
+							signature += "S";
+						break;
+						case TYPE_VECTOR:
+							signature += "V";
+						break;
+						default:
+							std::stringstream message;
+							message << "Error, unknown nodekind encountered in function signature. Aborting..." << std::endl;
+							Error e(message.str(),node->getLine());
+							throw e;
+					}
+				}
 			break;
 			default:
 				std::stringstream message;

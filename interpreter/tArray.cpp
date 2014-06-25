@@ -19,9 +19,7 @@ TArray::TArray() {
 }
 
 //Because default behavior of arrays in tetra is aliasing, the copy constructor and copy assignment will also alias rather than deep copy
-TArray::TArray(const TArray& other)  {
-	//Initialize the pointer, then alias it
-	elements = other.elements;
+TArray::TArray(const TArray& other) : elements(other.elements)  {
 }
 
 TArray& TArray::operator=(const TArray& other) {
@@ -78,4 +76,47 @@ const std::vector< TData<void*> >::const_iterator TArray::begin() const {
 
 const std::vector< TData<void*> >::const_iterator TArray::end() const {
 	return elements->end();
+}
+
+int TArray::size() const {
+	return elements->size();
+}
+
+//Friend function, operator for printing
+std::ostream& operator<<(std::ostream& outStream, const TArray obj) {
+
+	int size = obj.size();
+	outStream << "Len = " << size << " Elements: {";
+	//Print all elements except the last one
+	for(int x = 0; x < size; x++) {
+		const TData<void*>& element = obj.elementAt(x);
+		//as usual, we must typecheck the returned elemntes so we can print them properly
+		switch(element.getPointedTo().getKind()) {
+			case TYPE_INT:
+				outStream << *static_cast<int*>(element.getData());
+			break;
+			case TYPE_REAL:
+				outStream << *static_cast<double*>(element.getData());
+			break;
+			case TYPE_BOOL:
+				outStream << *static_cast<bool*>(element.getData());
+			break;
+			case TYPE_STRING:
+				outStream << *static_cast<string*>(element.getData());
+			break;
+			case TYPE_VECTOR:
+				outStream << *static_cast<TArray*>(element.getData());
+			break;
+			default:
+				outStream << "??";
+		}
+
+		//If this was not the last element, print a comma
+		if(x + 1 != size) {
+			outStream << ", ";
+		}
+	}
+	//close bracket
+	outStream << "}";
+	return outStream;
 }
