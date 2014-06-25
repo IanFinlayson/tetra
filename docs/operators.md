@@ -1,5 +1,8 @@
 ### Operator precedence levels
 
+Below is the chart of operator precedence levels, from highest precedence to
+lowest.
+
 Operator           | Meaning
 -------------------|---------
 **                 | Exponentiation
@@ -17,7 +20,8 @@ or                 | Logical or
 
 ### Operator/Type Chart
 
-
+Below is a table of the types that can be used with each operator, and what type
+results.
 
 <table>
 <tr><th>&nbsp;</th><th>&nbsp;</th><th>int</th><th>real</th><th>string</th><th>bool</th><th>vector</th></tr>
