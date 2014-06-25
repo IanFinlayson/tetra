@@ -9,7 +9,7 @@
 
 OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAppDialog){
     ui->setupUi(this);
-    QPixmap tetraLogo("/Users/Shehan/UMW/Programming/SSI/Tetra/Tetra Resources/logo.png");
+    QPixmap tetraLogo(":/graphics/Tetra Resources/logo.png");
     ui->logo->setPixmap(tetraLogo);
 
     this->setModal(true);
