@@ -10,6 +10,7 @@
 #include <string>
 #include "frontend.hpp"
 #include "progContext.h"
+#include "functionTable.h"
 
 //#define NDEBUG
 #include <assert.h>
@@ -17,8 +18,8 @@
 using std::string;
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
-TetraScope::TetraScope() {
-	executionStatus = NORMAL;
+TetraScope::TetraScope(const Node* pCallNode) : executionStatus(NORMAL), callNode(pCallNode) {
+
 }
 
 //Wraps the varTable::declareReference
@@ -36,6 +37,16 @@ void TetraScope::setExecutionStatus(ExecutionStatus status) {
 	executionStatus = status;
 }
 
+void TetraScope::setCallNode(const Node* node) {
+	callNode = node;
+}
+
+const Node* TetraScope::getCallNode() const {
+	return callNode;
+}
+
+
+//-------------------------------------------------------------
 //This class wraps a std stack of TetraScopes
 
 TetraContext::TetraContext() {
@@ -43,8 +54,8 @@ TetraContext::TetraContext() {
 }
 
 //Initializes an empty scope and sets that as the current scope
-void TetraContext::initializeNewScope() {
-	TetraScope newScope;
+void TetraContext::initializeNewScope(const Node* callNode) {
+	TetraScope newScope(callNode);
 	progStack.push(newScope);
 }
 
@@ -108,3 +119,27 @@ void TetraContext::normalizeStatus() {
 	progStack.top().setExecutionStatus(NORMAL);
 }
 
+//Prints a list of all function calls
+//ToDo: make it so printing the stack trace does not destroy the TetraContext
+void TetraContext::printStackTrace() {
+
+	using namespace std;
+	//Check that callStack currently has something in it
+	if(progStack.size() == 0) {
+		cout << "The interpreter was unable to recover a stack trace" << endl;
+		return;
+	}
+
+	//Print the primary stack frame where the error occurred
+	const Node* stackElement = progStack.top().getCallNode();
+	cout << "Error occurred in " << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
+	exitScope();
+
+	//Print further stack frames if there are any
+	while(progStack.size() > 0) {
+		const Node* element = progStack.top().getCallNode();
+		cout << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
+		exitScope();	
+	}
+
+}
