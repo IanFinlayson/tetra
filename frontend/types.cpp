@@ -111,9 +111,14 @@ DataType* inferPrint(Node* pcall, Node* func) {
 
   /* while there are arguments */
   while (arg) {
-    /* if there is a first arg, check it as an expression */
-    if (arg->numChildren( ) >= 1) {
+
+    /* if this arg is a param, check the child */
+    if ((arg->kind( ) == NODE_ACTUAL_PARAM_LIST) && (arg->numChildren( ) >= 1)) {
       inferExpression(arg->child(0), func);
+    }
+    /* else if it's some other child, check it itself */
+    else {
+      inferExpression(arg, func);
     }
 
     /* if the next arg is another arg, move on */
