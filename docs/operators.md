@@ -1,7 +1,7 @@
 ### Operator precedence levels
 
 Operator           | Meaning
-----------------------------
+-------------------|---------
 **                 | Exponentiation
 + - ~              | Unary plus, unary minus, and unary bitwise not
 % / *              | Modulus, division, multiplication
