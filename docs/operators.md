@@ -15,3 +15,16 @@ and                | Logical and
 or                 | Logical or
 =                  | Assignment (including +=, -= etc)
 
+### Operator/Type Chart
+
+          | RHS
+----------|--------------------
+LHS       | int | real | string
+----------|--------------------
+int       |  x  |  x   |
+real      |  x  |  x   |
+string    |     |      |    x
+
+
+
+
