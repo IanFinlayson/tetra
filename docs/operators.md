@@ -21,91 +21,91 @@ or                 | Logical or
 
 <table>
 <tr><th>&nbsp;</th><th>&nbsp;</th><th>int</th><th>real</th><th>string</th><th>bool</th><th>vector</th></tr>
-<tr><td rowspan="5">**</td><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">Unary + -</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">Unary ~</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">%</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">/</td><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">*</td><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">+</td><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>string</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>vector</td></tr>
-<tr><td rowspan="5">-</td><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">&lt;&lt; &gt;&gt;</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">&amp;</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">^</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">|</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">&lt; &lt;= &gt; &gt;=</td><td>int</td><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>bool</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">!= ==</td><td>int</td><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>bool</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">and</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">or</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">=</td><td>int</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>real</td><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td>string</td><td>-</td><td>-</td><td>string</td><td>-</td><td>-</td></tr>
-<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
-<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>vector</td></tr>
+<tr><th rowspan="5">**</th><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">Unary + -</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">Unary ~</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">%</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">/</th><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">*</th><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">+</th><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>string</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>vector</td></tr>
+<tr><th rowspan="5">-</th><td>int</td><td>int</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">&lt;&lt; &gt;&gt;</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">&amp;</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">^</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">|</th><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">&lt; &lt;= &gt; &gt;=</th><td>int</td><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>bool</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">!= ==</th><td>int</td><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>bool</td><td>bool</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>bool</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">and</th><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">or</th><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th rowspan="5">=</th><td>int</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>real</th><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><th>string</th><td>-</td><td>-</td><td>string</td><td>-</td><td>-</td></tr>
+<tr><th>bool</th><td>-</td><td>-</td><td>-</td><td>bool</td><td>-</td></tr>
+<tr><th>vector</th><td>-</td><td>-</td><td>-</td><td>-</td><td>vector</td></tr>
 </table>
 
 
