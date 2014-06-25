@@ -26,16 +26,16 @@ or                 | Logical or
 <tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
-<tr><td rowspan="5">Unary + -</td><td>int</td><td>int</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>real</td><td>real</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>string</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>bool</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>vector</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td rowspan="5">Unary ~</td><td>int</td><td>int</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>real</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>string</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>bool</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
-<tr><td>vector</td><td>-</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td rowspan="5">Unary + -</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>real</td><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td rowspan="5">Unary ~</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>bool</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>vector</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td rowspan="5">%</td><td>int</td><td>int</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>real</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
 <tr><td>string</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>
