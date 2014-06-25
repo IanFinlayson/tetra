@@ -17,14 +17,85 @@ or                 | Logical or
 
 ### Operator/Type Chart
 
-          | RHS
-----------|--------------------
-LHS       | int | real | string
-----------|--------------------
-int       |  x  |  x   |
-real      |  x  |  x   |
-string    |     |      |    x
 
+
+<table>
+
+
+
+<tr><td rowspan="4">**</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">unary +</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">unary -</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">unary ~</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">%</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">/</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">*</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">+</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">-</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">&lt;&lt; &gt;&gt;</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">&amp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">^</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">&#124;</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">&lt; &lt;= &gt; &gt;=</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">== !=</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">and</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">or</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+<tr><td rowspan="4">=</td><td></td><td></td><td></td><td></td><td></td></tr>
+
+
+
+</table>
 
 
 
