@@ -20,7 +20,7 @@ or                 | Logical or
 
 
 <table>
-<tr><th>&nbsp;</th><th>int</th><th>real</th><th>string</th><th>bool</th><th>vector</th></tr>
+<tr><th>&nbsp;</th><th>&nbsp;</th><th>int</th><th>real</th><th>string</th><th>bool</th><th>vector</th></tr>
 <tr><td rowspan="5">**</td><td>int</td><td>int</td><td>real</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>real</td><td>real</td><td>real</td><td>NA</td><td>NA</td><td>NA</td></tr>
 <tr><td>string</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td><td>NA</td></tr>
