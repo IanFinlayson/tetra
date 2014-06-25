@@ -58,9 +58,5 @@ def function(a real, b real) string:
     return "Hello"
 
 
-def lockTest( ):
-    lock total:
-        total += sum
-
 
 
