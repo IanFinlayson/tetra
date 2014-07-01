@@ -23,21 +23,8 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     setupShortcuts();
 
     highlighter = new Highlighter(ui->input->document());
-
-
-/*
-
-
-    for(int i = 0; i < MaxRecentFiles; ++i){
-        recentFileActs[i] = new QAction(this);
-        recentFileActs[i]->setVisible(false);
-        connect(recentFileActs[i], SIGNAL(triggered()),
-                this, SLOT(openRecentFile()));
-    }
-    for(int i = 0; i < MaxRecentFiles; ++i){
-        ui->menuFile->addAction(recentFileActs[i]);
-    }
-    updateRecentFileActions();*/
+    QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
+    this->setWindowIcon(icon);
 }
 
 MainWindow::~MainWindow(){
@@ -105,65 +92,6 @@ bool MainWindow::openProj(){
     return projectOpened;
 }
 
-void MainWindow::openRecentFile(){
-    QAction *action = qobject_cast<QAction *>(sender());
-    if (action)
-        loadFile(action->data().toString());
-}
-
-
-void MainWindow::loadFile(const QString &fileName){
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Recent Files"), tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
-        return;
-    }
-
-    QTextStream in(&file);
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-    ui->input->setPlainText(in.readAll());
-    QApplication::restoreOverrideCursor();
-
-    setCurrentFile(fileName);
-}
-
-void MainWindow::setCurrentFile(const QString &fileName){
-    openFile = fileName;
-    setWindowFilePath(openFile);
-    ui->tetraFileLabel->setText(strippedName(openFile));
-
-    QSettings settings;
-    QStringList files = settings.value("recentFileList").toStringList();
-    files.removeAll(fileName);
-    files.prepend(fileName);
-    while (files.size() > MaxRecentFiles)
-        files.removeLast();
-
-    settings.setValue("recentFileList", files);
-
-    foreach (QWidget *widget, QApplication::topLevelWidgets()) {
-        MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
-        if (mainWin)
-            mainWin->updateRecentFileActions();
-    }
-}
-void MainWindow::updateRecentFileActions(){
-    QSettings settings;
-    QStringList files = settings.value("recentFileList").toStringList();
-
-    int numRecentFiles = qMin(files.size(), (int)MaxRecentFiles);
-
-    for (int i = 0; i < numRecentFiles; ++i) {
-        QString text = tr("&%1 %2").arg(i + 1).arg(strippedName(files[i]));
-        recentFileActs[i]->setText(text);
-        recentFileActs[i]->setData(files[i]);
-        recentFileActs[i]->setVisible(true);
-    }
-    for (int j = numRecentFiles; j < MaxRecentFiles; ++j)
-        recentFileActs[j]->setVisible(false);
-
-    separatorAct->setVisible(numRecentFiles > 0);
-}
 
 QString MainWindow::strippedName(const QString &fullFileName){
     return QFileInfo(fullFileName).fileName();
@@ -282,7 +210,7 @@ void MainWindow::on_actionPaste_triggered(){
 }
 void MainWindow::on_actionDelete_triggered(){
      QTextCursor textCursor = ui->input->textCursor();
-     textCursor.insertText("");
+     textCursor.removeSelectedText();
 }
 void MainWindow::on_actionSelect_All_triggered(){
     ui->input->selectAll();

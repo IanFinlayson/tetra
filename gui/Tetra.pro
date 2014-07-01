@@ -3,6 +3,9 @@
 # Project created by QtCreator 2014-05-20T12:01:09
 #
 #-------------------------------------------------
+ICON = tetra.icns
+QMAKE_INFO_PLIST = Info.plist
+OTHER_FILES += Info.plist
 
 QT       += core gui
 
