@@ -18,9 +18,15 @@
 #include "variableContext.h"
 #include "progContext.h"
 #include "TSL.h"
+#include "parallel.h"
+#include "threadEnvironment.h"
 
 //#define NDEBUG
 #include <assert.h>
+
+//externally declared functions
+//template <typename T>
+//void evaluateParallel(const Node*, TData<T>&, TetraContext&);
 
 //Forward declarations of certain functions. Refer to the function bodies for comments
 template <typename T>
@@ -384,12 +390,13 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 	//Check to see if it is a TSL function
 	//This is a point for optimization. We could agree to some similarity of all TSL names to check 1 condiitonal
 	string funcName = node->getString();
+
 	if(funcName == "print") {
 		if(node->child(0) != NULL) {
 			print(node->child(0),context);
 		}
-		//Each print results in a line break
-		std::cout << endl;
+		//Each print does NOT end with a line break
+		//std::cout << endl;
 	}
 	else if(funcName == "read_int") {
 		ret.setData(readInt());
@@ -459,7 +466,7 @@ void evaluateExpression(const Node* node, TData<T>& ret, TetraContext& context) 
 
 	//Static tables containing what actions to perform given which operation node	
 	static OperationList<T> execData;
-
+/*
 	TData<T> op1;
 	evaluateNode<T>(node->child(0),op1,context);
 	TData<T> op2;
@@ -469,7 +476,8 @@ void evaluateExpression(const Node* node, TData<T>& ret, TetraContext& context) 
 	}
 	//Execute the operation and store the result in ret
 	ret.setData(execData.execute(node->kind(),op1,op2));
-
+*/
+	ret.setData(execData.execute(node->kind(),node->child(0), node->child(1),context));
 }
 
 
@@ -646,26 +654,27 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 	switch(node->child(0)->type()->getKind()) {
 		case TYPE_INT:
 		{
-			TData<int> op1;
+			/*TData<int> op1;
 			evaluateNode<int>(node->child(0),op1,context);
 			TData<int> op2;
-			evaluateNode<int>(node->child(1),op2,context);
+			evaluateNode<int>(node->child(1),op2,context);*/
 			//actually perform the comparison by calling the appropriate function from the appropriate comparison list
-			ret.setData(compInt.execute(node->kind(),op1,op2));
+			ret.setData(compInt.execute(node->kind(),node->child(0),node->child(1),context));
 		}
 		break;
 		case TYPE_REAL:
-		{
+		{/*
 			TData<double> op1;
 			evaluateNode<double>(node->child(0),op1,context);
 			TData<double> op2;
 			evaluateNode<double>(node->child(1),op2,context);
-			ret.setData(compReal.execute(node->kind(),op1,op2));
+			ret.setData(compReal.execute(node->kind(),op1,op2));*/
+			ret.setData(compReal.execute(node->kind(),node->child(0),node->child(1),context));
 		}
 		break;
 		case TYPE_BOOL:
 		{
-			TData<bool> op1;
+			/*TData<bool> op1;
 			evaluateNode<bool>(node->child(0),op1,context);
 
 			TData<bool> op2;
@@ -674,25 +683,29 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
 			if(node->child(1) != NULL) {
 				evaluateNode<bool>(node->child(1),op2,context);
 			}
-			ret.setData(compBool.execute(node->kind(),op1,op2));
+			ret.setData(compBool.execute(node->kind(),op1,op2));*/
+			ret.setData(compBool.execute(node->kind(),node->child(0),node->child(1),context));
 		}
 		break;
 		case TYPE_STRING:
 		{
-			TData<string> op1;
+			/*TData<string> op1;
 			evaluateNode<string>(node->child(0),op1,context);
 			TData<string> op2;
 			evaluateNode<string>(node->child(1),op2,context);
-			ret.setData(compString.execute(node->kind(),op1,op2));
+			ret.setData(compString.execute(node->kind(),op1,op2));*/
+			ret.setData(compString.execute(node->kind(),node->child(0),node->child(1),context));
 		}
 		break;
 		case TYPE_VECTOR:
 		{
+			/*
 			TData<TArray> op1;
 			evaluateNode<TArray>(node->child(0),op1,context);
 			TData<TArray> op2;
 			evaluateNode<TArray>(node->child(1),op2,context);
-			ret.setData(compList.execute(node->kind(),op1,op2));
+			ret.setData(compList.execute(node->kind(),op1,op2));*/
+			ret.setData(compList.execute(node->kind(),node->child(0),node->child(1),context));
 		}
 		break;
 		default:
@@ -862,6 +875,9 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 		case FLAG:
 			evaluateFlag<T>(node,ret,context);
 		break;
+		case PARALLEL:
+			evaluateParallel<T>(node,ret,context);
+		break;
 		default:
 			std::stringstream message;
 			message << "Warnminig: unexpected node kind encountered when attempting to classify node: " << node->kind() << endl;
@@ -891,7 +907,7 @@ int interpret(const Node* tree) {
 	tContext.initializeNewScope(start);
 	try {
 		evaluateNode<int>(start, retVal, tContext);
-		tContext.exitScope();
+//		tContext.exitScope();
 	}
 	catch (Error e) { //Print out any errors
 		std::cout << "---------------------------------------------------------------" << std::endl;
@@ -900,13 +916,18 @@ int interpret(const Node* tree) {
 		std::cout << "Near Line: " << e.getLine() << std::endl;
 		std::cout << "Stack trace: ";
 		tContext.printStackTrace();
-		return 1;
+		//Set return value to error code
+		retVal.setData(1);
 	}
-	//Print return value
-	std::cout << "+------------------------------------------------" << std::endl;
-	std::cout << "|Main returned: " << retVal.getData() << std::endl;
-	std::cout << "+------------------------------------------------" << std::endl;
 
+	long county = 0;
+	//Wait for all outstanding threads to terminate
+	while(ThreadEnvironment::queryThreads() != 0) {
+		county++;	
+	}
+	cout << "Waited " << county << " cycles" << endl;
+
+	//Return the value from main
 	return retVal.getData();
 
 

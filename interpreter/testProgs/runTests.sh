@@ -31,6 +31,7 @@ prefixes[${#prefixes[*]}]="ref";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="refref";	results[${#results[*]}]=222
 prefixes[${#prefixes[*]}]="dA";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="retA";	results[${#results[*]}]=44
+prefixes[${#prefixes[*]}]="shortCircuit";	results[${#results[*]}]=26
 
 successes=0
 total=${#prefixes[*]}

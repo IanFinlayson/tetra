@@ -61,6 +61,10 @@ class TetraScope {
 		VarTable varScope;
 		ExecutionStatus executionStatus;
 
+		//This boolean denotes that there are multiple threads working in the current scope.
+		//While that is the case, Insertions into the scope's VarTable must be performed in a threadsafe manner
+		bool multiThreaded;
+
 		//By storing the address of the call node, we can print back a call stack to the user if the program terminates unexpectedly
 		const Node* callNode;
 };
@@ -75,10 +79,16 @@ public:
 	//Note that this constructor does NOT start with a default scope. One must be initialized through initializeNewScope before this can be used	
 	TetraContext();
 
+	//This initializer function initializes a new TetraContext object so that its base scope is aliased to the current scope of the currentContext.
+	//This allows threads to share the same scope while not caring where they branch
+	void initializeContextBranch(TetraContext* newContext, TetraContext& currentContext) {
+		newContext->progStack.push( currentContext.progStack.top() );
+	}
+
 	//Wraps a call to lookupVar of the current scope
 	template<typename T>
 	T* lookupVar(string name) {
-		return progStack.top().lookupVar<T>(name);
+		return progStack.top()->lookupVar<T>(name);
 	}
 
 	//Wraps a call of declareReference for the current scope
@@ -114,10 +124,83 @@ public:
 	TetraContext& operator=(const TetraContext&);
 
 	//Prints a stack trace
-	void printStackTrace();
+	void printStackTrace() const;
 
 private:
-	std::stack<TetraScope> progStack;
+	//Class defines a smart pointer to a TetraScope
+	class scope_ptr {
+
+	public:
+                scope_ptr(const Node * callNode) {
+                        ptr = new TetraScope(callNode);
+                        refCount = new int();//Zero initialized
+                        *refCount = 0;
+                        addReference();
+                }
+
+                scope_ptr(TetraScope& newScope) {
+                        ptr = new TetraScope(newScope);
+                        refCount = new int();//Zero initialized
+                        *refCount = 0;
+                        addReference();
+                }
+		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
+                //Note that this is largely desired behavior
+                scope_ptr(const scope_ptr& other) {
+                        ptr = other.ptr;
+                        refCount = other.refCount;
+                        addReference();
+                }
+
+                ~scope_ptr() {
+                        removeReference();
+
+                        //Check to see if we must delete the underlying object
+                        if(*refCount == 0) {
+                                delete refCount;
+                                delete ptr;
+                        }
+                }
+
+                //Assignment operator aliases the pointer
+                //Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
+                //For the purposes of the interpreter, however, this is the desired behavior
+                scope_ptr& operator=(const scope_ptr& other) {
+                        if(&other != this) {
+                                removeReference();
+                                //Check to see if we must delete the vector that this used to point to
+                                if(*refCount == 0) {
+                                        delete refCount;
+                                        delete ptr;
+                                }
+                                ptr = other.ptr;
+                                refCount = other.refCount;
+                                addReference();
+                        }
+                        return *this;
+                }
+
+                //Methods to simulate pointer functionality
+                TetraScope& operator*() const {
+                        return *ptr;
+                }
+                TetraScope* operator->() const {
+                        return ptr;
+                }
+
+        private:
+                void addReference() {
+                        (*refCount)++;
+                }
+                void removeReference() {
+                        (*refCount)--;
+                }
+
+                TetraScope* ptr;
+                int* refCount;
+	};
+	std::stack<scope_ptr> progStack;
 };
+
 
 #endif

@@ -20,6 +20,7 @@ using std::string;
  * STRUCTURE represents a node which is used to define the structure of the program.
  * ASSIGNMENT denotes an assignment operator. This turns out to be a somewhat special case, so we give it its own classification
  * FLAG Denotes a break, continue, or return. These statements notify the program that something exceptional has occurred, and that the program should undertake some aciton
+ * PARALLEL denotes a node that invokes parallelism or a parallelism specific construct (such as LOCK)
  */
 
 //The enumerations (as well as what enumeration goes with which node)  are subject to change until we wade further into the types of nodes we'll need
@@ -31,8 +32,8 @@ enum NodeClassification {
 	OPERATION,
 	STRUCTURE,
 	ASSIGNMENT,
-	FLAG
-
+	FLAG,
+	PARALLEL
 };
 
 class NodeTable {

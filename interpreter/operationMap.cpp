@@ -14,6 +14,11 @@
 
 using std::string;
 
+//External function declaration and required args
+class TetraContext;
+
+template<typename T>
+void evaluateNode(const Node*, TData<T>&, TetraContext&);
 
 //These operators are stubbed so that the operations exist, and can be modified later. also prevents us from having to make too many special cases for strings.
 //By default, all "improper" operations will return a blank string, since any other behavior would be non-intuitive for now.
@@ -120,6 +125,66 @@ double remainderDivision(double a, double b) {
 	return 0;
 }
 
+template<typename T>
+T logicalAnd(T a, T b) {
+	return a && b;
+}
+double logicalAnd(double a, double b) {
+	if(!a) {
+		return false;
+	}
+	else {
+		return b;
+	}
+
+}
+
+template<typename T>
+T logicalAnd(Node* a, Node* b, TetraContext& context) {
+	TData<T> op1;
+	evaluateNode<T>(a, op1, context);
+	TData<T> op2;
+	evaluateNode<T>(b, op2, context);
+	return op1.getData() && op2.getData();
+}
+
+template<>
+bool logicalAnd(Node* a, Node* b, TetraContext& context) {
+	TData<bool> op1;
+	evaluateNode<bool>(a, op1, context);
+	if(!(op1.getData())) {
+		return false;
+	}
+	else {
+		TData<bool> op2;
+		evaluateNode<bool>(b, op2, context);
+		return op2.getData();
+	}
+}
+
+template<typename T>
+T logicalOr(Node* a, Node* b, TetraContext& context) {
+	TData<T> op1;
+	evaluateNode<T>(a, op1, context);
+	TData<T> op2;
+	evaluateNode<T>(b, op2, context);
+	return op1.getData() || op2.getData();
+}
+
+template<>
+bool logicalOr(Node* a, Node* b, TetraContext& context) {
+	TData<bool> op1;
+	evaluateNode<bool>(a, op1, context);
+	if(op1.getData()) {
+		return true;
+	}
+	else {
+		TData<bool> op2;
+		evaluateNode<bool>(b, op2, context);
+		return op2.getData();
+	}
+}
+
 template <class T>
 class OperationList
 {
@@ -127,20 +192,20 @@ class OperationList
 		//constructor fills table with all relevant operators
 		OperationList() {
 			//functionMap[NODE_] = &OperationList<T>::;
-			functionMap[NODE_PLUS] = &OperationList<T>::add;
-			functionMap[NODE_MINUS] = &OperationList<T>::subtract;
-			functionMap[NODE_TIMES] = &OperationList<T>::multiply;
-			functionMap[NODE_DIVIDE] = &OperationList<T>::divide;
-			functionMap[NODE_MODULUS] = &OperationList<T>::modulus;
-			functionMap[NODE_EXP] = &OperationList<T>::exponential;
-			functionMap[NODE_BITNOT] = &OperationList<T>::bitNot;
-			functionMap[NODE_OR] = &OperationList<T>::logOr;
-			functionMap[NODE_AND] = &OperationList<T>::logAnd;
-			functionMap[NODE_BITXOR] = &OperationList<T>::bitXOr;
-			functionMap[NODE_BITAND] = &OperationList<T>::bitAnd;
-			functionMap[NODE_BITOR] = &OperationList<T>::bitOr;
-			functionMap[NODE_SHIFTL] = &OperationList<T>::shiftLeft;
-			functionMap[NODE_SHIFTR] = &OperationList<T>::shiftRight;
+			opMap[NODE_PLUS] = &OperationList<T>::add;
+			opMap[NODE_MINUS] = &OperationList<T>::subtract;
+			opMap[NODE_TIMES] = &OperationList<T>::multiply;
+			opMap[NODE_DIVIDE] = &OperationList<T>::divide;
+			opMap[NODE_MODULUS] = &OperationList<T>::modulus;
+			opMap[NODE_EXP] = &OperationList<T>::exponential;
+			opMap[NODE_BITNOT] = &OperationList<T>::bitNot;
+			opMap[NODE_OR] = &OperationList<T>::logOr;
+			opMap[NODE_AND] = &OperationList<T>::logAnd;
+			opMap[NODE_BITXOR] = &OperationList<T>::bitXOr;
+			opMap[NODE_BITAND] = &OperationList<T>::bitAnd;
+			opMap[NODE_BITOR] = &OperationList<T>::bitOr;
+			opMap[NODE_SHIFTL] = &OperationList<T>::shiftLeft;
+			opMap[NODE_SHIFTR] = &OperationList<T>::shiftRight;
 		}
 
 		//looks up the appropriate operation (via node's NodeKind) and executes it
@@ -148,70 +213,141 @@ class OperationList
 			return (this->*functionMap[n])(a.getData(),b.getData());
 		}
 
+		T execute(NodeKind n, Node* op1, Node* op2, TetraContext& context) {
+			return (this->*opMap[n])(op1,op2,context);
+		}
+
 	private:
 
 		std::map<NodeKind, T (OperationList<T>::*)(T,T)> functionMap;
-
+		std::map<NodeKind, T (OperationList<T>::*)(Node*,Node*,TetraContext&)> opMap;
 		//Define all the operations:
-		T add(T a, T b) {
-			return a + b;
+		//Note that in cases where due consideration should be considered when attempting to perform an operation (i.e. 1.2 << 4.8)
+		//the interpreter defines basic (though not necessarily functional or intuitive) behavior by specializing a function to call
+		//Note also that in all cases (except && and || for bools, where we can use short circuiting), the interpreter will evaluate both arguments regardless of whether the operaiton itself makes any sense
+		//That is, if foo() and bar() return strings, the hypothetical expression foo() % bar() will execute both foo and bar. 
+		T add(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() + op2.getData();
 		}
 
-		T subtract(T a, T b) {
-			return a - b;
+		T subtract(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() - op2.getData();
+		}
+		
+		T multiply(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() * op2.getData();
 		}
 
-		T multiply(T a, T b) {
-			return a * b;
+		T divide(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() / op2.getData();
 		}
 
-		T divide(T a, T b) {
-			return a / b;
+		T modulus(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return remainderDivision(op1.getData(), op2.getData());
 		}
 
-		T modulus(T a, T b) {
-			return remainderDivision(a,b);
+		T exponential(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return calculateExponential(op1.getData(), op2.getData());
+		}
+		//for and and or, the functionality may be offloaded to a boolean specialization which allows for short circuiting
+		T logOr(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			/*TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);*/
+			return logicalOr<T>(a, b, context);
 		}
 
-		//offload exponenitation to templated function, as it only makes sense for certain types
-		T exponential(T a, T b) {
-			return calculateExponential(a, b);
+		T logAnd(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+		/*	TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);*/
+			return logicalAnd<T>(a,b,context);
 		}
 
-		//LOGical operators (Yes, these return their own types!)
-		T logOr(T a, T b) {
-			return a || b;
+		T bitXOr(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return bitwiseXOr(op1.getData(), op2.getData());
 		}
 
-		T logAnd(T a, T b) {
-			return a && b;
+		T bitAnd(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return bitwiseAnd(op1.getData(), op2.getData());
 		}
 
-		//bit operations
-		//because these are not defined for doubles, we must offload these methods so they can be specialized for non-supported types 
-		T bitXOr(T a, T b) {
-			return bitwiseXOr(a,b);
+		T bitOr(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return bitwiseOr(op1.getData(), op2.getData());
 		}
 
-		T bitAnd(T a, T b) {
-			return bitwiseAnd(a,b);
+		T bitNot(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			return !op1.getData();
 		}
-
-		T bitOr(T a, T b) {
-			return bitwiseOr(a,b);
+		
+		T shiftLeft(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return bitLeftShift(op1.getData(), op2.getData());
 		}
-
-		//Second argument is present to match the signatures of other methods. In practice, the second argument will be ignored
-		T bitNot(T a, T b) {
-			return !a;
-		}
-
-		T shiftLeft(T a, T b) {
-			return bitLeftShift(a,b);
-		}
-
-		T shiftRight(T a, T b) {
-			return bitRightShift(a,b);
+		
+		T shiftRight(Node* a, Node* b, TetraContext& context) {
+			//return a + b;
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return bitRightShift(op1.getData(), op2.getData());
 		}
 
 };
