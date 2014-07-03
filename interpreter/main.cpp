@@ -920,12 +920,13 @@ int interpret(const Node* tree) {
 		retVal.setData(1);
 	}
 
-	long county = 0;
 	//Wait for all outstanding threads to terminate
 	while(ThreadEnvironment::queryThreads() != 0) {
-		county++;	
+		pthread_t x = ThreadEnvironment::getNextJoin();
+		pthread_join(x, NULL);
 	}
-	cout << "Waited " << county << " cycles" << endl;
+
+	tContext.exitScope();
 
 	//Return the value from main
 	return retVal.getData();

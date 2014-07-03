@@ -126,20 +126,6 @@ double remainderDivision(double a, double b) {
 }
 
 template<typename T>
-T logicalAnd(T a, T b) {
-	return a && b;
-}
-double logicalAnd(double a, double b) {
-	if(!a) {
-		return false;
-	}
-	else {
-		return b;
-	}
-
-}
-
-template<typename T>
 T logicalAnd(Node* a, Node* b, TetraContext& context) {
 	TData<T> op1;
 	evaluateNode<T>(a, op1, context);

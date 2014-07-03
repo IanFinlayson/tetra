@@ -99,6 +99,10 @@ public:
 	void initializeNewScope(const Node* callNode);
 	void initializeNewScope(TetraScope& newScope);
 
+	//Pushes an alias to the given scope onto the stack
+	//Used for multithreading
+	void branchOff(const TetraContext& baseScope);
+
 	//Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
 	void exitScope();
 
@@ -135,13 +139,16 @@ private:
                         ptr = new TetraScope(callNode);
                         refCount = new int();//Zero initialized
                         *refCount = 0;
+			status = NORMAL;
                         addReference();
                 }
 
+		//Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters
                 scope_ptr(TetraScope& newScope) {
                         ptr = new TetraScope(newScope);
                         refCount = new int();//Zero initialized
                         *refCount = 0;
+			status = NORMAL;
                         addReference();
                 }
 		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
@@ -149,6 +156,7 @@ private:
                 scope_ptr(const scope_ptr& other) {
                         ptr = other.ptr;
                         refCount = other.refCount;
+			status = other.status;
                         addReference();
                 }
 
@@ -175,6 +183,7 @@ private:
                                 }
                                 ptr = other.ptr;
                                 refCount = other.refCount;
+				status = other.status;
                                 addReference();
                         }
                         return *this;
@@ -188,6 +197,14 @@ private:
                         return ptr;
                 }
 
+		//void notifyBreak() {status = BREAK; }
+		//void notifyContinue() {status = CONTINUE; }
+		//void notifyReturn() {status = RETURN; }
+		//void notifyElif() {status = ELIF; }
+		//void normalizeStatus() {status = NORMAL; }
+		void setExecutionStatus(ExecutionStatus pStatus){status = pStatus; }
+		ExecutionStatus queryExecutionStatus() {return status; }
+
         private:
                 void addReference() {
                         (*refCount)++;
@@ -198,6 +215,8 @@ private:
 
                 TetraScope* ptr;
                 int* refCount;
+		//Because different threads my have their own execution statuses, this variable is stored here
+		ExecutionStatus status;
 	};
 	std::stack<scope_ptr> progStack;
 };

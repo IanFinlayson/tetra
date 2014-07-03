@@ -6,3 +6,4 @@ tags
 *.a
 gmon.out
 tetra
+testLog.txt

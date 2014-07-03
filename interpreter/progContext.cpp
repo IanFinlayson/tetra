@@ -33,9 +33,9 @@ ExecutionStatus TetraScope::queryExecutionStatus() {
 }
 
 //Sets the execution status to the appropriate value
-void TetraScope::setExecutionStatus(ExecutionStatus status) {
+/*void TetraScope::setExecutionStatus(ExecutionStatus status) {
 	executionStatus = status;
-}
+}*/
 
 void TetraScope::setCallNode(const Node* node) {
 	callNode = node;
@@ -60,10 +60,19 @@ void TetraContext::initializeNewScope(const Node * callNode) {
 }
 
 //Takes the given scope and sets it as the current scope
+//This allows local data to get passed in
 void TetraContext::initializeNewScope(TetraScope& newScope) {
 	//progStack.push(newScope);
 	scope_ptr newScopePtr(newScope);
 	progStack.push(newScopePtr); 
+}
+
+//This function takes the given TetraScope, and pushes an alias to that scope into this context
+//Used for multithreading, so threads in the same scope can share the base scope,
+//while also being able to branch off into their own call stacks
+void TetraContext::branchOff(const TetraContext& baseContext) {
+	scope_ptr newScopePtr(baseContext.progStack.top());
+	progStack.push(newScopePtr);
 }
 
 //destroys the current scope, returning to the previously initialized scope
@@ -86,7 +95,6 @@ TetraScope& TetraContext::getCurrentScope() {
 	return *(progStack.top());
 }
 
-
 TetraContext& TetraContext::operator=(const TetraContext& other){
 	progStack = other.progStack;
 	return *this;
@@ -96,29 +104,30 @@ TetraContext& TetraContext::operator=(const TetraContext& other){
 ExecutionStatus TetraContext::queryExecutionStatus() {
 	//cout << "Size: " << progStack.size() << endl;
 	assert (progStack.empty() == false);
-	return progStack.top()->queryExecutionStatus();
+	//return progStack.top()->queryExecutionStatus();
+	return progStack.top().queryExecutionStatus();
 }
 
 
 //Notify thew program of the given special occurances
 void TetraContext::notifyBreak() {
-	progStack.top()->setExecutionStatus(BREAK);
+	progStack.top().setExecutionStatus(BREAK);
 }
 
 void TetraContext::notifyContinue() {
-	progStack.top()->setExecutionStatus(CONTINUE);
+	progStack.top().setExecutionStatus(CONTINUE);
 }
 
 void TetraContext::notifyReturn() {
-	progStack.top()->setExecutionStatus(RETURN);
+	progStack.top().setExecutionStatus(RETURN);
 }
 
 void TetraContext::notifyElif() {
-	progStack.top()->setExecutionStatus(ELIF);
+	progStack.top().setExecutionStatus(ELIF);
 }
 
 void TetraContext::normalizeStatus() {
-	progStack.top()->setExecutionStatus(NORMAL);
+	progStack.top().setExecutionStatus(NORMAL);
 }
 
 //Prints a list of all function calls
