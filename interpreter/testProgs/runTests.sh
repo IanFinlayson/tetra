@@ -3,8 +3,8 @@
 #A primitive shell script to run the interpreter with actual programs and check the results
 #For a ttr file postfixed Test.ttr, simply add the prefix to the prefix array, and the expected return value to the results array
 
-rm log.txt
-echo "LOGFILE:" > log.txt
+rm testLog.txt
+echo "LOGFILE:" > testLog.txt
 
 retVal=-1
 successFlag=1
@@ -31,6 +31,9 @@ prefixes[${#prefixes[*]}]="ref";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="refref";	results[${#results[*]}]=222
 prefixes[${#prefixes[*]}]="dA";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="retA";	results[${#results[*]}]=44
+prefixes[${#prefixes[*]}]="shortCircuit";	results[${#results[*]}]=26
+prefixes[${#prefixes[*]}]="bg";	results[${#results[*]}]=10
+prefixes[${#prefixes[*]}]="lock";	results[${#results[*]}]=200
 
 successes=0
 total=${#prefixes[*]}
@@ -39,7 +42,7 @@ for index in $(seq 0 `expr ${#prefixes[*]} - 1`)
 do
 	echo
 	echo Testing  ${prefixes[ ${index} ]}Test.ttr
-	${tetraPath}/tetra ${prefixes[ ${index} ]}Test.ttr >> log.txt
+	${tetraPath}/tetra ${prefixes[ ${index} ]}Test.ttr >> testLog.txt
 	retVal=$?
 	if [ $retVal -eq ${results[${index}]} ]
 	then

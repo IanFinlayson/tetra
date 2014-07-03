@@ -2,7 +2,7 @@
 
 
 CC = clang++
-FLAGS = -Wall -g -pg -pedantic
+FLAGS = -Wall -g -pg -pedantic -pthread
 SEARCHPATH = ../frontend
 
 tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
@@ -15,7 +15,7 @@ tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableCont
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
 
-main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h
+main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h parallel.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
 
 comparisonMap.o: comparisonMap.cpp
@@ -47,7 +47,6 @@ tArray.o: tArray.cpp tArray.h
 
 TSL.o: TSL.cpp TSL.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c TSL.cpp
-
 
 .PHONY clean:
 	rm *.o

@@ -1,0 +1,24 @@
+def main() int:
+   a = true
+   b = false
+   x = [0]
+   c = " and true"
+   d = " or true"
+   if(a and boolTest(x)):
+      x[0] += 2
+      print(a, c)
+   if(a or boolTest(x)):
+      print(a, d)
+      x[0] += 2
+   if(b and boolTest(x)):
+      x[0] += 2
+      print(b,c)
+   if(b or boolTest(x)):
+      x[0] += 2
+      print(b,d)
+
+   return x[0]
+
+def boolTest(z [int]) bool:
+   z[0] += 10
+   return true

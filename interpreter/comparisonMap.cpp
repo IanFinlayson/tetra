@@ -41,13 +41,13 @@ class ComparisonList
 		//constructor fills table with all relevant operators (defined by functions)
 		ComparisonList() {
 			//functionMap[NODE_] = &ComparisonList<T>::;
-			functionMap[NODE_NOT] = &ComparisonList<T>::logNot;
-			functionMap[NODE_LT] = &ComparisonList<T>::lessThan;
-			functionMap[NODE_LTE] = &ComparisonList<T>::lessThanEq;
-			functionMap[NODE_GT] = &ComparisonList<T>::greaterThan;
-			functionMap[NODE_GTE] = &ComparisonList<T>::greaterThanEq;
-			functionMap[NODE_EQ] = &ComparisonList<T>::equal;
-			functionMap[NODE_NEQ] = &ComparisonList<T>::notEqual;
+			compMap[NODE_NOT] = &ComparisonList<T>::logNot;
+			compMap[NODE_LT] = &ComparisonList<T>::lessThan;
+			compMap[NODE_LTE] = &ComparisonList<T>::lessThanEq;
+			compMap[NODE_GT] = &ComparisonList<T>::greaterThan;
+			compMap[NODE_GTE] = &ComparisonList<T>::greaterThanEq;
+			compMap[NODE_EQ] = &ComparisonList<T>::equal;
+			compMap[NODE_NEQ] = &ComparisonList<T>::notEqual;
 
 		}
 
@@ -56,14 +56,72 @@ class ComparisonList
 			return (this->*functionMap[n])(a.getData(),b.getData());
 		}
 
+		bool execute(NodeKind n, Node* a, Node* b, TetraContext& context) {
+			return (this->*compMap[n])(a,b,context);
+		}
+	
 	private:
 
 		std::map<NodeKind, bool (ComparisonList<T>::*)(T,T)> functionMap;
+		std::map<NodeKind, bool (ComparisonList<T>::*)(Node*,Node*,TetraContext&)> compMap;
 
 		//Define all the operations in function form, so they can be dynamically called:
 		
+		bool lessThan(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() < op2.getData();
+		}
+
+		bool lessThanEq(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() <= op2.getData();
+		}
+		
+		bool greaterThan(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() > op2.getData();
+		}
+
+		bool greaterThanEq(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() >= op2.getData();
+		}
+		
+		bool equal(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() == op2.getData();
+		}
+		
+		bool notEqual(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			TData<T> op2;
+			evaluateNode<T>(b,op2,context);
+			return op1.getData() != op2.getData();
+		}		
 		//for unary operators, the second argument will alwys be ignored, but exists so that the function signature matches
 		//Since negaiton does not work for strings or arrays, we will offload it to a specialized function
+		
+		bool logNot(Node* a, Node* b, TetraContext& context) {
+			TData<T> op1;
+			evaluateNode<T>(a,op1,context);
+			return negator(op1.getData());
+		}
 		bool logNot(T a, T b) {
 			return negator(a);
 		}

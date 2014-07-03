@@ -33,9 +33,9 @@ ExecutionStatus TetraScope::queryExecutionStatus() {
 }
 
 //Sets the execution status to the appropriate value
-void TetraScope::setExecutionStatus(ExecutionStatus status) {
+/*void TetraScope::setExecutionStatus(ExecutionStatus status) {
 	executionStatus = status;
-}
+}*/
 
 void TetraScope::setCallNode(const Node* node) {
 	callNode = node;
@@ -54,14 +54,25 @@ TetraContext::TetraContext() {
 }
 
 //Initializes an empty scope and sets that as the current scope
-void TetraContext::initializeNewScope(const Node* callNode) {
-	TetraScope newScope(callNode);
+void TetraContext::initializeNewScope(const Node * callNode) {
+	scope_ptr newScope(callNode);
 	progStack.push(newScope);
 }
 
 //Takes the given scope and sets it as the current scope
+//This allows local data to get passed in
 void TetraContext::initializeNewScope(TetraScope& newScope) {
-	progStack.push(newScope);
+	//progStack.push(newScope);
+	scope_ptr newScopePtr(newScope);
+	progStack.push(newScopePtr); 
+}
+
+//This function takes the given TetraScope, and pushes an alias to that scope into this context
+//Used for multithreading, so threads in the same scope can share the base scope,
+//while also being able to branch off into their own call stacks
+void TetraContext::branchOff(const TetraContext& baseContext) {
+	scope_ptr newScopePtr(baseContext.progStack.top());
+	progStack.push(newScopePtr);
 }
 
 //destroys the current scope, returning to the previously initialized scope
@@ -77,13 +88,12 @@ TetraContext::~TetraContext() {
 }
 
 TData<void*>& TetraContext::declareReference(const string varName) {
-	return progStack.top().declareReference(varName);
+	return progStack.top()->declareReference(varName);
 }
 
 TetraScope& TetraContext::getCurrentScope() {
-	return progStack.top();
+	return *(progStack.top());
 }
-
 
 TetraContext& TetraContext::operator=(const TetraContext& other){
 	progStack = other.progStack;
@@ -94,6 +104,7 @@ TetraContext& TetraContext::operator=(const TetraContext& other){
 ExecutionStatus TetraContext::queryExecutionStatus() {
 	//cout << "Size: " << progStack.size() << endl;
 	assert (progStack.empty() == false);
+	//return progStack.top()->queryExecutionStatus();
 	return progStack.top().queryExecutionStatus();
 }
 
@@ -121,25 +132,27 @@ void TetraContext::normalizeStatus() {
 
 //Prints a list of all function calls
 //ToDo: make it so printing the stack trace does not destroy the TetraContext
-void TetraContext::printStackTrace() {
+void TetraContext::printStackTrace() const {
+
+	TetraContext dummy = *this;
 
 	using namespace std;
 	//Check that callStack currently has something in it
-	if(progStack.size() == 0) {
-		cout << "The interpreter was unable to recover a stack trace" << endl;
+	if(dummy.progStack.size() == 0) {
+		cout << "(The interpreter was unable to recover a stack trace)" << endl;
 		return;
 	}
 
 	//Print the primary stack frame where the error occurred
-	const Node* stackElement = progStack.top().getCallNode();
-	cout << "Error occurred in " << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
-	exitScope();
+	const Node* stackElement = dummy.progStack.top()->getCallNode();
+	cout << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
+	dummy.exitScope();
 
 	//Print further stack frames if there are any
-	while(progStack.size() > 0) {
-		const Node* element = progStack.top().getCallNode();
+	while(dummy.progStack.size() > 0) {
+		const Node* element = dummy.progStack.top()->getCallNode();
 		cout << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
-		exitScope();	
+		dummy.exitScope();	
 	}
 
 }

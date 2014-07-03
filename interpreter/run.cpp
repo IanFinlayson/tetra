@@ -32,5 +32,9 @@ int main(int argc, char** argv) {
 	   
 	int ret = interpret(tree);
 
+	std::cout << "+------------------------------------" << endl;
+	std::cout << "|Main Returned: " << ret << endl;
+	std::cout << "+------------------------------------" << endl;
+
 	return ret;
 }

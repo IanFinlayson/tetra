@@ -1,0 +1,9 @@
+def main() int:
+   x = 0
+   background:
+      x += 10
+   #delaying here virtually assures that the background thread executes
+   for q in [1 ... 100]:
+      pass
+
+   return x
