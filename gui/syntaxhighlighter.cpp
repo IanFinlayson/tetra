@@ -54,7 +54,7 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(QColor(118, 20, 0, 255));
+    singleLineCommentFormat.setForeground(QColor(80, 156, 150, 255));
     rule.pattern = QRegExp("#[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);

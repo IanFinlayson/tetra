@@ -22,7 +22,7 @@ class TData{
 	public:
 		TData();
 
-		TData(const T pData);
+		TData(const T& pData);
 
 		//Copy Constructor
 		TData(const TData<T>& other);
@@ -53,19 +53,16 @@ class TData{
 
 
 template<typename T>
-TData<T>::TData() : pointedTo(TYPE_VOID) {
-	data = T();
+TData<T>::TData() : data(), pointedTo(TYPE_VOID) {
 }
 
 template<typename T>
-TData<T>::TData(const T pData) : pointedTo(TYPE_VOID) {
-	data = pData;
+TData<T>::TData(const T& pData) : data(pData),  pointedTo(TYPE_VOID) {
 }
 
 //Default copy constructor is fine for ordinary case
 template<typename T>
-TData<T>::TData(const TData<T>& other) : pointedTo(other.pointedTo.getKind()) {
-	data = other.data;
+TData<T>::TData(const TData<T>& other) : data(other.data), pointedTo(other.pointedTo.getKind()) {
 }
 
 //default destructor, in ordinary cases no cleanup is needed

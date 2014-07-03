@@ -35,7 +35,7 @@ enum ExecutionStatus {
 class TetraScope {
 
 	public:
-		TetraScope();
+		TetraScope(const Node*);
 
 		//Returns a pointer to the data referenced by the given variable name 'name', or creates a place for it if it does not yet exist
 		template <typename T>
@@ -54,9 +54,15 @@ class TetraScope {
 		//sets the execution status to the specified value
 		void setExecutionStatus(ExecutionStatus status);
 
+		//Used by the TetraContext to obtain a stack trace
+		void setCallNode(const Node*);
+		const Node* getCallNode() const;
 	private:
 		VarTable varScope;
 		ExecutionStatus executionStatus;
+
+		//By storing the address of the call node, we can print back a call stack to the user if the program terminates unexpectedly
+		const Node* callNode;
 };
 
 
@@ -80,7 +86,7 @@ public:
 
 	//Overloaded function call, one when there is no initial setup for a scope (i.e. a function call with no formal parameters that must be initialized)
 	//The second is for adding a scope which had to have some data preloaded into it, as is the case when calling a function with arguments
-	void initializeNewScope();
+	void initializeNewScope(const Node* callNode);
 	void initializeNewScope(TetraScope& newScope);
 
 	//Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
@@ -106,6 +112,9 @@ public:
 
 	//Performs a deep copy of the current context
 	TetraContext& operator=(const TetraContext&);
+
+	//Prints a stack trace
+	void printStackTrace();
 
 private:
 	std::stack<TetraScope> progStack;

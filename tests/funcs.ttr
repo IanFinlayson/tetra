@@ -1,8 +1,4 @@
 
-def print(x string):
-    # yeah, about that...
-    pass
-
 def func2( ):
     pass
 
@@ -57,10 +53,6 @@ def function(a real, b real) string:
         print("Yo!")
     return "Hello"
 
-
-def lockTest( ):
-    lock total:
-        total += sum
 
 
 

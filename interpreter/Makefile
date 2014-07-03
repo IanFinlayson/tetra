@@ -2,17 +2,20 @@
 
 
 CC = clang++
-FLAGS = -Wall -g
+FLAGS = -Wall -g -pg -pedantic
 SEARCHPATH = ../frontend
 
-tetra: main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
-	$(CC) $(FLAGS) main.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra
+tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
+	$(CC) $(FLAGS) run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra
 	#$(CC) $(FLAGS) voidlessMain.o $(SEARCHPATH)/libfrontend.a -o tetra
 	rm *.o
 	@echo
 	@echo
 
-main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h
+run.o: run.cpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
+
+main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
 
 comparisonMap.o: comparisonMap.cpp
@@ -41,6 +44,10 @@ progContext.o: progContext.h progContext.cpp
 
 tArray.o: tArray.cpp tArray.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tArray.cpp
+
+TSL.o: TSL.cpp TSL.h
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c TSL.cpp
+
 
 .PHONY clean:
 	rm *.o
