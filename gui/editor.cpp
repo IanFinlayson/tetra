@@ -1,39 +1,40 @@
 #include "editor.h"
-#include "mainwindow.h"
 #include <QPlainTextEdit>
 Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
+    connect(this, SIGNAL(cursorPositionChanged()),
+         this, SLOT(updateCursorCoordinates()));
 }
 
 void Editor::keyPressEvent(QKeyEvent *e){
-    QTextCursor textCursor = this->textCursor();
+    cursor = this->textCursor();
     if(e->key() == Qt::Key_Tab){
-        int pos = textCursor.positionInBlock();
+        int pos = cursor.positionInBlock();
         if((pos+4)%4 == 0 || getLeadingSpaces() < pos){
-            textCursor.insertText("    ");
+            cursor.insertText("    ");
         }
         else{
             while(pos > 4){
                 pos-=4;
             }
             for(int i = 0; i < pos; i++){
-                textCursor.deletePreviousChar();
+                cursor.deletePreviousChar();
             }
-            textCursor.insertText("    ");
+            cursor.insertText("    ");
         }
     }
     else if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return){
         int leadingSpaces = getLeadingSpaces();
-        if(textCursor.block().text().endsWith(":")){
+        if(cursor.block().text().endsWith(":")){
             leadingSpaces+=4;
         }
-        textCursor.insertText("\n");
+        cursor.insertText("\n");
         for(int i = leadingSpaces; i >= 4; i-=4){
-            textCursor.insertText("    ");
+            cursor.insertText("    ");
         }
     }
     else if(e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete){
         if(isTab("left")){
-            int pos = textCursor.positionInBlock();
+            int pos = cursor.positionInBlock();
             while(pos > 4){
                 pos-=4;
             }
@@ -47,7 +48,7 @@ void Editor::keyPressEvent(QKeyEvent *e){
     }
     else if(e->key() == Qt::Key_Left){
         if(isTab("left")){
-            int pos = textCursor.positionInBlock();
+            int pos = cursor.positionInBlock();
             while(pos > 4){
                 pos-=4;
             }
@@ -75,8 +76,8 @@ void Editor::keyPressEvent(QKeyEvent *e){
 }
 
 int Editor::getLeadingSpaces(){
-    QTextCursor textCursor = this->textCursor();
-    QString line = textCursor.block().text();
+    cursor = this->textCursor();
+    QString line = cursor.block().text();
     int spaces = 0;
     while(line[spaces].isSpace()){
         spaces++;
@@ -85,9 +86,9 @@ int Editor::getLeadingSpaces(){
 }
 
 bool Editor::isTab(QString direction){
-    QTextCursor textCursor = this->textCursor();
-    int pos = textCursor.positionInBlock();
-    QString line = textCursor.block().text();
+    cursor = this->textCursor();
+    int pos = cursor.positionInBlock();
+    QString line = cursor.block().text();
     QString substring;
     bool isTab = false;
     if(direction == "left"){
@@ -101,3 +102,16 @@ bool Editor::isTab(QString direction){
     }
     return isTab;
 }
+
+void Editor::updateCursorCoordinates(){
+    cursor = this->textCursor();
+    QString x = QString::number(cursor.blockNumber()+1);
+    QString y = QString::number(cursor.positionInBlock());
+    coordinates = x + ", " + y;
+}
+
+QString Editor::getCoordinates(){
+    return coordinates;
+}
+
+

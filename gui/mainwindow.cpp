@@ -2,8 +2,6 @@
 #include "ui_mainwindow.h"
 #include "quitdialog.h"
 #include "openappdialog.h"
-#include "syntaxhighlighter.h"
-#include "editor.h"
 #include <QtCore>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -19,6 +17,11 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     connect(ui->input->document(), SIGNAL(contentsChanged()),
             this, SLOT(documentWasModified()));
+    connect(ui->input, SIGNAL(cursorPositionChanged()),
+            this, SLOT(updateCoordinates()));
+    //ui->cursorPosition = ui->input->getCoordinates();
+    //ui->input->getCoordinates() = ui->cursorPosition;
+    ui->cursorPosition->show();
     hideEditor();
     setupShortcuts();
 
@@ -39,6 +42,7 @@ void MainWindow::hideEditor(){
     ui->output->hide();
     ui->lineEdit->hide();
     ui->enterButton->hide();
+    ui->cursorPosition->hide();
 }
 
 void MainWindow::showEditor(){
@@ -48,6 +52,7 @@ void MainWindow::showEditor(){
     ui->output->show();
     ui->lineEdit->show();
     ui->enterButton->show();
+    ui->cursorPosition->show();
 
     QFont font = QFont("Monaco");
     font.setFixedPitch(true);
@@ -58,6 +63,9 @@ void MainWindow::showEditor(){
     ui->input->setTabStopWidth(tabStop * metrics.width(' '));
     ui->input->setFont(font);
     ui->output->setFont(font);
+
+    ui->input->ensureCursorVisible();
+    ui->input->setCenterOnScroll(true);
 }
 
 void MainWindow::setupShortcuts(){
@@ -123,6 +131,10 @@ bool MainWindow::maybeSave(){
 }
 //-------------------------------------//
 
+void MainWindow::updateCoordinates(){
+    ui->cursorPosition->setText(ui->input->getCoordinates());
+}
+
 //-----------Menu Bar/Tool Bar Actions-----------//
 void MainWindow::on_actionNew_triggered(){
     if (maybeSave()){
@@ -135,7 +147,6 @@ void MainWindow::on_actionNew_triggered(){
         }
     }
 }
-
 void MainWindow::on_actionSave_triggered(){
     QFile ttrFile(openFile);
     if(ttrFile.open(QFile::WriteOnly | QFile::Text)){
@@ -155,7 +166,6 @@ void MainWindow::on_actionSave_triggered(){
         }
     }
 }
-
 void MainWindow::on_actionOpen_triggered(){
     if (maybeSave()){
         QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "../../../..", "Tetra (*.ttr)");
@@ -215,4 +225,9 @@ void MainWindow::on_actionDelete_triggered(){
 void MainWindow::on_actionSelect_All_triggered(){
     ui->input->selectAll();
 }
+void MainWindow::on_actionRun_triggered(){
+    ui->output->insertPlainText("...But nothing happened.\n");
+}
 //-----------------------------------------------//
+
+
