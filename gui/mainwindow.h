@@ -19,7 +19,6 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void setText(const QString & text);
     ~MainWindow();
     bool openProj();
     bool newProj();
@@ -37,9 +36,7 @@ private slots:
     void on_actionDelete_triggered();
     void on_actionSelect_All_triggered();
     void on_actionNew_triggered();
-
     void documentWasModified();
-    void openRecentFile();
 
 private:
     Ui::MainWindow *ui;
@@ -50,13 +47,7 @@ private:
 
     Highlighter *highlighter;
 
-    void updateRecentFileActions();
-    void loadFile(const QString &fileName);
-    void setCurrentFile(const QString &fileName);
     QString strippedName(const QString &fullFileName);
-    enum { MaxRecentFiles = 5 };
-    QAction *recentFileActs[MaxRecentFiles];
-    QAction *separatorAct;
 
     bool maybeSave();
 

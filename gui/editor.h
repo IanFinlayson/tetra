@@ -15,7 +15,8 @@ protected:
 public slots:
 
 private:
-    int getLeadingSpaces(QString);
+    int getLeadingSpaces();
+    bool isTab(QString direction);
 
 };
 
