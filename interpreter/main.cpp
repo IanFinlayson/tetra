@@ -110,10 +110,17 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 		break;
 		case NODE_STATEMENT:
 		{
-			evaluateNode<T>(node->child(0),ret,context);
+			//If we are in a parallel block, spawn a thread for this!
+			if(context.queryExecutionStatus() == PARALLEL) {
+				pthread_t newThread = spawnThread(node->child(0),ret,context);
+				context.addThread(newThread);
+			}
+			else {
+				evaluateNode<T>(node->child(0),ret,context);
+			}
 			//did the statement result in a break, continue, return, etc?
 			ExecutionStatus status = context.queryExecutionStatus();
-			//Possible optimization, just status != NORMAL
+			//Possible optimization, just status == NORMAL || == PARALLEL
 			if(status != RETURN  && status != BREAK && status != CONTINUE) {
 				evaluateNode<T>(node->child(1),ret,context);
 			}
@@ -854,28 +861,28 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 	//Call the appropriate function based on the NodeKind of the node
 	switch(NodeTable::classifyNode(node)) {
-		case CONDITION:
+		case CLASS_CONDITION:
 			evaluateCondition<T>(node,ret,context);
 		break;
-		case CONTROL:
+		case CLASS_CONTROL:
 			evaluateFunction<T>(node,ret,context);
 		break;
-		case IMMEDIATE:
+		case CLASS_IMMEDIATE:
 			evaluateImmediate<T>(node,ret,context);
 		break;
-		case OPERATION:
+		case CLASS_OPERATION:
 			evaluateExpression<T>(node,ret,context);
 		break;
-		case STRUCTURE:
+		case CLASS_STRUCTURE:
 			evaluateStatement<T>(node,ret,context);
 		break;
-		case ASSIGNMENT:
+		case CLASS_ASSIGNMENT:
 			performAssignment<T>(node,ret,context);
 		break;
-		case FLAG:
+		case CLASS_FLAG:
 			evaluateFlag<T>(node,ret,context);
 		break;
-		case PARALLEL:
+		case CLASS_PARALLEL:
 			evaluateParallel<T>(node,ret,context);
 		break;
 		default:
@@ -921,10 +928,13 @@ int interpret(const Node* tree) {
 	}
 
 	//Wait for all outstanding threads to terminate
-	while(ThreadEnvironment::queryThreads() != 0) {
+	//This contains a subtle error if a thread removes itself between the conditional and the joini
+/*	while(ThreadEnvironment::queryThreads() != 0) {
 		pthread_t x = ThreadEnvironment::getNextJoin();
 		pthread_join(x, NULL);
-	}
+	}*/
+
+	ThreadEnvironment::joinDetachedThreads();
 
 	tContext.exitScope();
 

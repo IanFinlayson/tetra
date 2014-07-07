@@ -126,12 +126,28 @@ void TetraContext::notifyElif() {
 	progStack.top().setExecutionStatus(ELIF);
 }
 
+void TetraContext::notifyParallel() {
+	progStack.top().setExecutionStatus(PARALLEL);
+}
+
 void TetraContext::normalizeStatus() {
 	progStack.top().setExecutionStatus(NORMAL);
 }
 
+//Parallel setup/end calls
+void TetraContext::addThread(pthread_t val) {
+	progStack.top().addThread(val);
+}
+
+void TetraContext::setupParallel() {
+	progStack.top().setupParallel();
+}
+
+void TetraContext::endParallel() {
+	progStack.top().endParallel();
+}
+
 //Prints a list of all function calls
-//ToDo: make it so printing the stack trace does not destroy the TetraContext
 void TetraContext::printStackTrace() const {
 
 	TetraContext dummy = *this;

@@ -26,14 +26,14 @@ using std::string;
 //The enumerations (as well as what enumeration goes with which node)  are subject to change until we wade further into the types of nodes we'll need
 enum NodeClassification {
 
-	CONDITION,
-	CONTROL,
-	IMMEDIATE,
-	OPERATION,
-	STRUCTURE,
-	ASSIGNMENT,
-	FLAG,
-	PARALLEL
+	CLASS_CONDITION,
+	CLASS_CONTROL,
+	CLASS_IMMEDIATE,
+	CLASS_OPERATION,
+	CLASS_STRUCTURE,
+	CLASS_ASSIGNMENT,
+	CLASS_FLAG,
+	CLASS_PARALLEL
 };
 
 class NodeTable {

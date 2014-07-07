@@ -34,6 +34,7 @@ prefixes[${#prefixes[*]}]="retA";	results[${#results[*]}]=44
 prefixes[${#prefixes[*]}]="shortCircuit";	results[${#results[*]}]=26
 prefixes[${#prefixes[*]}]="bg";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="lock";	results[${#results[*]}]=200
+prefixes[${#prefixes[*]}]="par";	results[${#results[*]}]=3
 
 successes=0
 total=${#prefixes[*]}

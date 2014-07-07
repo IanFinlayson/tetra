@@ -13,6 +13,7 @@
 #include <string>
 #include "variableContext.h"
 #include "frontend.hpp"
+#include "threadEnvironment.h"
 
 using std::string;
 
@@ -22,13 +23,15 @@ using std::string;
 //CONTINUIE: Keep returning until a loop is hit, then reevaluate the loop node
 //BREAK: keep returning until you hit a loop node, then return from that node
 //RETURN: keep returning until you hit a function call, then return from the function call. This takes precedence over breaks and continues
+//PARALLEL: each statement node encountered will result in a new spwned thread. Note that for conditionals and loops, only one thread will be spawned to evaluate the bodies of the conditionals/loops
 enum ExecutionStatus {
 
 	NORMAL,
 	ELIF,
 	CONTINUE,
 	BREAK,
-	RETURN
+	RETURN,
+	PARALLEL
 };
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
@@ -120,12 +123,18 @@ public:
 	void notifyContinue();
 	void notifyReturn();
 	void notifyElif();
+	void notifyParallel();
 
 	//Sets the current scope's executionStatus to NORMAL
 	void normalizeStatus();
 
 	//Performs a deep copy of the current context
 	TetraContext& operator=(const TetraContext&);
+
+	//Methods dealing with parallelism at a contextual level
+	void addThread(pthread_t);
+	void setupParallel();
+	void endParallel();
 
 	//Prints a stack trace
 	void printStackTrace() const;
@@ -140,15 +149,17 @@ private:
                         refCount = new int();//Zero initialized
                         *refCount = 0;
 			status = NORMAL;
+			spawnedThreads = NULL;
                         addReference();
                 }
 
-		//Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters
+		//Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters. Note that scope does not include spawned threads.
                 scope_ptr(TetraScope& newScope) {
                         ptr = new TetraScope(newScope);
                         refCount = new int();//Zero initialized
                         *refCount = 0;
 			status = NORMAL;
+			spawnedThreads = NULL;
                         addReference();
                 }
 		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
@@ -157,12 +168,14 @@ private:
                         ptr = other.ptr;
                         refCount = other.refCount;
 			status = other.status;
+			spawnedThreads = NULL;
                         addReference();
                 }
 
                 ~scope_ptr() {
                         removeReference();
-
+			//Note that if spawnedThreads is null, delete is still valid
+			delete spawnedThreads;
                         //Check to see if we must delete the underlying object
                         if(*refCount == 0) {
                                 delete refCount;
@@ -170,7 +183,7 @@ private:
                         }
                 }
 
-                //Assignment operator aliases the pointer
+                //Assignment operator aliases the pointer to the scope, but stillm ust have its own thread call stack
                 //Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
                 //For the purposes of the interpreter, however, this is the desired behavior
                 scope_ptr& operator=(const scope_ptr& other) {
@@ -184,10 +197,33 @@ private:
                                 ptr = other.ptr;
                                 refCount = other.refCount;
 				status = other.status;
+				spawnedThreads = NULL;
                                 addReference();
                         }
                         return *this;
                 }
+
+		void addThread(pthread_t thread) {
+			spawnedThreads->addThread(thread);
+		}
+
+		void setupParallel() {
+			if(spawnedThreads == NULL) {
+				spawnedThreads = new ThreadPool();
+			}
+			else {
+				//TODO: This should be an error
+				std::cout << "ERROR" << endl;
+			}
+		}
+
+		void endParallel() {
+			spawnedThreads->waitTillEmpty();
+			delete spawnedThreads;
+			spawnedThreads = NULL;
+		}
+
+		
 
                 //Methods to simulate pointer functionality
                 TetraScope& operator*() const {
@@ -217,8 +253,10 @@ private:
                 int* refCount;
 		//Because different threads my have their own execution statuses, this variable is stored here
 		ExecutionStatus status;
+		ThreadPool* spawnedThreads;
 	};
 	std::stack<scope_ptr> progStack;
+	
 };
 
 

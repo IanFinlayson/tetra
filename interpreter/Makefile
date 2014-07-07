@@ -1,21 +1,27 @@
-#At present, because there is no split between the .h and .cpp files, much of this makefile is unnecessary at the moment
+#There is a missing dependancy somewhere in this file.
+#Make will (on rare occasion) complain about multiple definition or some other linker error, which can be fixed by recompiling the whole project.
 
 
 CC = clang++
 FLAGS = -Wall -g -pg -pedantic -pthread
 SEARCHPATH = ../frontend
 
-tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
-	$(CC) $(FLAGS) run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra
-	#$(CC) $(FLAGS) voidlessMain.o $(SEARCHPATH)/libfrontend.a -o tetra
+#tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
+#	$(CC) $(FLAGS) run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra	
+tetra: run.o libbackend.a
+	$(CC) $(FLAGS) run.o libbackend.a $(SEARCHPATH)/libfrontend.a -o tetra
 	rm *.o
 	@echo
 	@echo
 
+#create a linkable library letting other programs call interpret(Node* node)
+libbackend.a: main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
+
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
 
-main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h parallel.h
+main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h parallel.h threadEnvironment.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
 
 comparisonMap.o: comparisonMap.cpp
@@ -47,6 +53,9 @@ tArray.o: tArray.cpp tArray.h
 
 TSL.o: TSL.cpp TSL.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c TSL.cpp
+
+threadEnvironment.o: threadEnvironment.cpp threadEnvironment.h
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c threadEnvironment.cpp
 
 .PHONY clean:
 	rm *.o

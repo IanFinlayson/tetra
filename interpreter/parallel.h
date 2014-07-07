@@ -17,10 +17,9 @@ struct evalArgs {
 	const Node* node;
 	TData<T>& ret;
 	TetraContext& context;
-	pthread_t* thisThread;
 
-	evalArgs(const Node* pNode, TData<T>& pRet, TetraContext& pContext, pthread_t* thready) :
-		node(pNode), ret(pRet), context(pContext), thisThread(thready)
+	evalArgs(const Node* pNode, TData<T>& pRet, TetraContext& pContext) :
+		node(pNode), ret(pRet), context(pContext)
 	{
 		//do nothing
 	}
@@ -29,27 +28,51 @@ struct evalArgs {
 template<typename T>
 void wrapEvaluation(void* args) {
 	evalArgs<T>& argList = *static_cast<evalArgs<T>*>(args);
+
+	//Give the thread its own call stack
 	TetraContext contextCopy;
 	contextCopy.branchOff(argList.context);
-	ThreadEnvironment::addThread(pthread_self());
+	
 	//Temporary error notificaiton
 	try {
 		//Go into execution with a normalized status
 		argList.context.normalizeStatus();	
-		evaluateNode(argList.node, argList.ret, contextCopy);
+		evaluateNode<T>(argList.node, argList.ret, contextCopy);
+	}
+	catch(Error e) {
+		cout << "The following error was encountered while executing a thread:" << endl;
+		cout << e << endl;
+	}
+	catch(std::exception e) {
+		cout << "A standard exception was encountered while executing a thread: " << endl;
+		cout << e.what() << endl; 
 	}
 	catch (...) {
-		cout << "Error encountered" << endl;
+		cout << "Unspecified error encountered in thread execution" << endl;
 	}
 
 	//Although the memory is allocated in a different thread, that thread might terminate before the new thread
 	//As a result, it must be deleted when this thread terminates
 	//This will need to be changed later to handle when this thread terminates unexpectedly
 	
-	ThreadEnvironment::removeThread(pthread_self());
+	//ThreadEnvironment::removeThread(pthread_self());
 
 	delete static_cast< evalArgs<T>* >(args);
 	pthread_exit(NULL);
+}
+
+//Spawns a thread to execute a given node by branching off the given context
+template <typename T>
+pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
+	pthread_t newThread;
+	pthread_attr_t attributes;
+	pthread_attr_init(&attributes);
+
+	evalArgs<T>* args = new evalArgs<T>(node,ret,context);
+	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
+	int success = pthread_create(&newThread, &attributes,(void*(*)(void*))wrapEvaluation<T>,(void*)(args));
+	assert(success == 0);//For now, we will assume that thread creations are correct
+	return newThread;
 }
 
 template <typename T>
@@ -63,20 +86,23 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 		break;
 		case NODE_PARALLEL:
 		{
-			cout << "Parallel" << endl;
+			context.notifyParallel();
+			context.setupParallel();
+			evaluateNode(node->child(0),ret,context);
+
+			//Join with all other threads
+			context.endParallel();
+
+			//Note that it is an error to encounter some type of flag statement within a parallel block
+			//i.e. breaks/continues/returns will be ignored if their change in control would bring them outside the parallel block
+			context.normalizeStatus();
 		}
 		break;
 		case NODE_BACKGROUND:
 		{
-			pthread_t backgroundThread;
-			pthread_attr_t attributes;
-			pthread_attr_init(&attributes);
+			pthread_t newThread = spawnThread(node->child(0), ret, context);
 
-			evalArgs<T>* args = new evalArgs<T>(node->child(0),ret,context, &backgroundThread);
-			pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-			int success = pthread_create(&backgroundThread, &attributes,(void*(*)(void*))wrapEvaluation<T>,(void*)(args));
-			assert(success == 0);//For now, we will assume that thread creations are correct
-
+			ThreadEnvironment::addThread(newThread);
 		}
 		break;
 		case NODE_LOCK:
