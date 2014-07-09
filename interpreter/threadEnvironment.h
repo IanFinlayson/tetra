@@ -64,6 +64,7 @@ private:
 
 	//We may want to change the constructor to an initializer, as pthread_create may return errors
 	ThreadEnvironment();
+	~ThreadEnvironment();
 
 	static ThreadEnvironment instance;
 

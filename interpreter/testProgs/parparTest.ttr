@@ -1,0 +1,21 @@
+
+def main() int:
+   parallel:
+      parallel:
+         w = 0
+      n = 0
+   parallel:
+      if true:
+         x = 0
+         while x < 1000:
+            x+=1
+         lock xl:
+            print("got lock thread","\n")
+            pass
+      parallel:
+         z = 0
+         y = 0
+         lock xl:
+            print("got lock main","\n")
+   return 50
+

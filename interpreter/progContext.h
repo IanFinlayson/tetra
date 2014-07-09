@@ -13,6 +13,7 @@
 #include <string>
 #include "variableContext.h"
 #include "frontend.hpp"
+#include <pthread.h>
 #include "threadEnvironment.h"
 
 using std::string;
@@ -73,6 +74,162 @@ class TetraScope {
 };
 
 
+//Class defines a smart pointer to a TetraScope
+class scope_ptr {
+
+	public:
+		scope_ptr(const Node * callNode) {
+			ptr = new TetraScope(callNode);
+			refCount = new int();//Zero initialized
+			*refCount = 0;
+			status = NORMAL;
+			//spawnedThreads = NULL;
+			refCount_mutex_ptr = new pthread_mutex_t();
+			addReference();
+		}
+
+		//Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters. Note that scope does not include spawned threads.
+		scope_ptr(const TetraScope& newScope) {
+			ptr = new TetraScope(newScope);
+			refCount = new int();//Zero initialized
+			*refCount = 0;
+			status = NORMAL;
+			//spawnedThreads = NULL;
+			refCount_mutex_ptr = new pthread_mutex_t();
+			addReference();
+		}
+		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
+		//Note that this is largely desired behavior
+		scope_ptr(const scope_ptr& other) {
+			other.lockScope();
+			ptr = other.ptr;
+			status = other.status;
+			//spawnedThreads = NULL;
+			refCount_mutex_ptr = other.refCount_mutex_ptr;
+
+			//Note that we are copying the pointer, not the value!
+			//Since the pointer does not change, this assignment is threadsafe
+			refCount = other.refCount;
+
+			(*refCount)++;
+			other.unlockScope();
+			//addReference();
+		}
+
+		~scope_ptr() {
+			removeReference();
+			//Note that if spawnedThreads is null, delete is still valid
+			//delete spawnedThreads;
+			//Check to see if we must delete the underlying object
+
+		}
+
+		//Assignment operator aliases the pointer to the scope, but stillm ust have its own thread call stack
+		//Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
+		//For the purposes of the interpreter, however, this is the desired behavior
+		//This does not appear to ever get called. If that is the case, our thread-safetyness burden eases considerably, as we should only have to lock the reference incrementing/decrememnting
+		scope_ptr& operator=(const scope_ptr& other) {
+			cout << "THIS GETS CALLED\n\n\n\n\n" << endl;
+			if(&other != this) {
+				//release old data
+				removeReference();
+
+				//Copy new data
+				ptr = other.ptr;
+				refCount = other.refCount;
+				status = other.status;
+				//spawnedThreads = NULL;
+				addReference();
+			}
+			return *this;
+		}
+
+		void addThread(pthread_t thread) {
+			//Note that the threadpool implementation of this method is threadsafe
+			spawnedThreads.top()->addThread(thread);
+		}
+
+		void setupParallel() {
+			//Since each scope_ptr gets its own copy of spawnedThreads (even if everything else is an alias), this is threadsafe
+			ThreadPool* newPool = new ThreadPool();
+			spawnedThreads.push(newPool);
+		}
+
+		void endParallel() {
+			spawnedThreads.top()->waitTillEmpty();
+			delete spawnedThreads.top();
+			spawnedThreads.pop();
+		}
+
+
+
+		//Methods to simulate pointer functionality
+		TetraScope& operator*() const {
+			return *ptr;
+		}
+		TetraScope* operator->() const {
+			return ptr;
+		}
+
+		//void notifyBreak() {status = BREAK; }
+		//void notifyContinue() {status = CONTINUE; }
+		//void notifyReturn() {status = RETURN; }
+		//void notifyElif() {status = ELIF; }
+		//void normalizeStatus() {status = NORMAL; }
+		void setExecutionStatus(ExecutionStatus pStatus){status = pStatus; }
+		ExecutionStatus queryExecutionStatus() {return status; }	
+
+	private:
+		//add/removeReference are put under a mutex for thread safety
+		void addReference() {
+			pthread_mutex_lock(refCount_mutex_ptr);
+			(*refCount)++;
+			pthread_mutex_unlock(refCount_mutex_ptr);
+		}
+		//When a reference is removed, check if we must delete it
+		//Note that when the last reference is removed, there are physically NO MORE REFERENCES to the data, so there is nothing ot fear from a threadsafety perspective
+		//This includes the possibility of copy constructing, since if a thread is copy constructing, it is a)holding a reference and b) not deleting that reference
+		void removeReference() {
+
+			pthread_mutex_lock(refCount_mutex_ptr);
+
+			//Bool is used to check if we need to destroy the mutex at the end
+			bool destroyable = false;
+
+			(*refCount)--;
+			if(*refCount == 0) {
+				delete refCount;
+				delete ptr;
+				destroyable = true;
+			}
+
+			pthread_mutex_unlock(refCount_mutex_ptr);
+			if(destroyable) {
+				delete refCount_mutex_ptr;
+			}
+		}
+
+		void lockScope() const {
+			pthread_mutex_lock(refCount_mutex_ptr);
+		}
+
+		void unlockScope() const {
+			pthread_mutex_unlock(refCount_mutex_ptr);
+		}
+
+		TetraScope* ptr;
+		int* refCount;
+		//Because different threads my have their own execution statuses, this variable is stored here
+		ExecutionStatus status;
+
+		//Because each context may spawn its own threads, we need to keep track of spawned threads on a thread-by-thread basis
+		//Becausehe main thread in parallel blocks. we actually have to keep track of a stack of threadpools, in case the main thread encounters another parallel statement in the same scope
+		std::stack<ThreadPool*> spawnedThreads;
+
+		//Because different threads may destroy themselves at arbitrary times, we must lock uses of refCount
+		pthread_mutex_t* refCount_mutex_ptr;
+};
+
 
 //This class wraps a std stack of TetraScopes
 
@@ -84,10 +241,10 @@ public:
 
 	//This initializer function initializes a new TetraContext object so that its base scope is aliased to the current scope of the currentContext.
 	//This allows threads to share the same scope while not caring where they branch
-	void initializeContextBranch(TetraContext* newContext, TetraContext& currentContext) {
+/*	void initializeContextBranch(TetraContext* newContext, TetraContext& currentContext) {
 		newContext->progStack.push( currentContext.progStack.top() );
 	}
-
+*/
 	//Wraps a call to lookupVar of the current scope
 	template<typename T>
 	T* lookupVar(string name) {
@@ -104,7 +261,7 @@ public:
 
 	//Pushes an alias to the given scope onto the stack
 	//Used for multithreading
-	void branchOff(const TetraContext& baseScope);
+	void branchOff(const scope_ptr baseScope);
 
 	//Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
 	void exitScope();
@@ -113,7 +270,10 @@ public:
 	~TetraContext();
 
 	//Returns a reference to the current scope
+	//This may be outdated
 	TetraScope& getCurrentScope();
+
+	scope_ptr& getScopeRef();
 
 	//wraps a call to the current scope's queryExecutionStatus
 	ExecutionStatus queryExecutionStatus();
@@ -138,123 +298,8 @@ public:
 
 	//Prints a stack trace
 	void printStackTrace() const;
-
 private:
-	//Class defines a smart pointer to a TetraScope
-	class scope_ptr {
 
-	public:
-                scope_ptr(const Node * callNode) {
-                        ptr = new TetraScope(callNode);
-                        refCount = new int();//Zero initialized
-                        *refCount = 0;
-			status = NORMAL;
-			spawnedThreads = NULL;
-                        addReference();
-                }
-
-		//Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters. Note that scope does not include spawned threads.
-                scope_ptr(TetraScope& newScope) {
-                        ptr = new TetraScope(newScope);
-                        refCount = new int();//Zero initialized
-                        *refCount = 0;
-			status = NORMAL;
-			spawnedThreads = NULL;
-                        addReference();
-                }
-		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
-                //Note that this is largely desired behavior
-                scope_ptr(const scope_ptr& other) {
-                        ptr = other.ptr;
-                        refCount = other.refCount;
-			status = other.status;
-			spawnedThreads = NULL;
-                        addReference();
-                }
-
-                ~scope_ptr() {
-                        removeReference();
-			//Note that if spawnedThreads is null, delete is still valid
-			delete spawnedThreads;
-                        //Check to see if we must delete the underlying object
-                        if(*refCount == 0) {
-                                delete refCount;
-                                delete ptr;
-                        }
-                }
-
-                //Assignment operator aliases the pointer to the scope, but stillm ust have its own thread call stack
-                //Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
-                //For the purposes of the interpreter, however, this is the desired behavior
-                scope_ptr& operator=(const scope_ptr& other) {
-                        if(&other != this) {
-                                removeReference();
-                                //Check to see if we must delete the vector that this used to point to
-                                if(*refCount == 0) {
-                                        delete refCount;
-                                        delete ptr;
-                                }
-                                ptr = other.ptr;
-                                refCount = other.refCount;
-				status = other.status;
-				spawnedThreads = NULL;
-                                addReference();
-                        }
-                        return *this;
-                }
-
-		void addThread(pthread_t thread) {
-			spawnedThreads->addThread(thread);
-		}
-
-		void setupParallel() {
-			if(spawnedThreads == NULL) {
-				spawnedThreads = new ThreadPool();
-			}
-			else {
-				//TODO: This should be an error
-				std::cout << "ERROR" << endl;
-			}
-		}
-
-		void endParallel() {
-			spawnedThreads->waitTillEmpty();
-			delete spawnedThreads;
-			spawnedThreads = NULL;
-		}
-
-		
-
-                //Methods to simulate pointer functionality
-                TetraScope& operator*() const {
-                        return *ptr;
-                }
-                TetraScope* operator->() const {
-                        return ptr;
-                }
-
-		//void notifyBreak() {status = BREAK; }
-		//void notifyContinue() {status = CONTINUE; }
-		//void notifyReturn() {status = RETURN; }
-		//void notifyElif() {status = ELIF; }
-		//void normalizeStatus() {status = NORMAL; }
-		void setExecutionStatus(ExecutionStatus pStatus){status = pStatus; }
-		ExecutionStatus queryExecutionStatus() {return status; }
-
-        private:
-                void addReference() {
-                        (*refCount)++;
-                }
-                void removeReference() {
-                        (*refCount)--;
-                }
-
-                TetraScope* ptr;
-                int* refCount;
-		//Because different threads my have their own execution statuses, this variable is stored here
-		ExecutionStatus status;
-		ThreadPool* spawnedThreads;
-	};
 	std::stack<scope_ptr> progStack;
 	
 };

@@ -16,10 +16,10 @@ template <typename T>
 struct evalArgs {
 	const Node* node;
 	TData<T>& ret;
-	TetraContext& context;
+	scope_ptr scope;
 
-	evalArgs(const Node* pNode, TData<T>& pRet, TetraContext& pContext) :
-		node(pNode), ret(pRet), context(pContext)
+	evalArgs(const Node* pNode, TData<T>& pRet, scope_ptr pScope) :
+		node(pNode), ret(pRet), scope(pScope)
 	{
 		//do nothing
 	}
@@ -31,16 +31,18 @@ void wrapEvaluation(void* args) {
 
 	//Give the thread its own call stack
 	TetraContext contextCopy;
-	contextCopy.branchOff(argList.context);
+	contextCopy.branchOff(argList.scope);
 	
 	//Temporary error notificaiton
 	try {
 		//Go into execution with a normalized status
-		argList.context.normalizeStatus();	
+		contextCopy.normalizeStatus();	
 		evaluateNode<T>(argList.node, argList.ret, contextCopy);
 	}
 	catch(Error e) {
 		cout << "The following error was encountered while executing a thread:" << endl;
+		contextCopy.printStackTrace();
+		
 		cout << e << endl;
 	}
 	catch(std::exception e) {
@@ -68,7 +70,7 @@ pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
 	pthread_attr_t attributes;
 	pthread_attr_init(&attributes);
 
-	evalArgs<T>* args = new evalArgs<T>(node,ret,context);
+	evalArgs<T>* args = new evalArgs<T>(node,ret,context.getScopeRef());
 	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
 	int success = pthread_create(&newThread, &attributes,(void*(*)(void*))wrapEvaluation<T>,(void*)(args));
 	assert(success == 0);//For now, we will assume that thread creations are correct

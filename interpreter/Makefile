@@ -10,7 +10,6 @@ SEARCHPATH = ../frontend
 #	$(CC) $(FLAGS) run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra	
 tetra: run.o libbackend.a
 	$(CC) $(FLAGS) run.o libbackend.a $(SEARCHPATH)/libfrontend.a -o tetra
-	rm *.o
 	@echo
 	@echo
 
