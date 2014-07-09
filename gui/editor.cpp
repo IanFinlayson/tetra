@@ -1,4 +1,7 @@
 #include "editor.h"
+
+#include "frontend.hpp"
+
 #include <QPlainTextEdit>
 Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
     connect(this, SIGNAL(cursorPositionChanged()),
@@ -111,6 +114,7 @@ void Editor::updateCursorCoordinates(){
 }
 
 QString Editor::getCoordinates(){
+    Error e("Does this work?", 400);
     return coordinates;
 }
 
