@@ -5,6 +5,8 @@
 #include <QPlainTextEdit>
 #include "syntaxhighlighter.h"
 
+class Editor;
+
 QT_BEGIN_NAMESPACE
 class QPrinter;
 QT_END_NAMESPACE
@@ -37,6 +39,8 @@ private slots:
     void on_actionSelect_All_triggered();
     void on_actionNew_triggered();
     void documentWasModified();
+    void on_actionRun_triggered();
+    void updateCoordinates();
 
 private:
     Ui::MainWindow *ui;
@@ -50,8 +54,6 @@ private:
     QString strippedName(const QString &fullFileName);
 
     bool maybeSave();
-
-
 };
 
 #endif // MAINWINDOW_H
