@@ -121,15 +121,15 @@ private:
 		//Copy constructor aliases this TArray to the other, rather than performing a deep copy
 		//Note that this is largely desired behavior
 		vec_ptr(const vec_ptr& other) {
-	//		other.lockArray();
+			other.lockArray();
 			ptr = other.ptr;
 			refCount = other.refCount;
 			array_mutex_ptr = other.array_mutex_ptr;
 			//Note that we already have the mutex needed to change the increment value
-	//		(*refCount)++;
+			(*refCount)++;
 
-	//		other.unlockArray();
-			addReference();	
+			other.unlockArray();
+			//addReference();	
 		}
 
 		~vec_ptr() {
@@ -148,19 +148,16 @@ private:
 				//This may contain a race condition
 				//other may be getting copy assigned as well, leading to corrupted values
 				//TODO: check this out on paper
-	//			other.lockArray();
+				other.lockArray();
 				ptr = other.ptr;
-				if(ptr->size() == 0) {
-					//break!
-				}
 				refCount = other.refCount;
 				array_mutex_ptr = other.array_mutex_ptr;
 
-	//			(*refCount)++;//We already hold the mutex for incrementing this!
+				(*refCount)++;//We already hold the mutex for incrementing this!
 
-	//			other.unlockArray();
+				other.unlockArray();
 
-				addReference();
+				//addReference();
 			}
 			return *this;
 		}

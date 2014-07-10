@@ -43,7 +43,7 @@ private:
 ////defined in the header because it is a template
 template<typename T>
 T* VarTable::lookupVar(const string varName) {
-	pthread_mutex_lock(&table_mutex);
+	//pthread_mutex_lock(&table_mutex);
 	//check whether an entry exists for this variable
 	if(varMap.find(varName) == varMap.end()) {
 		//If the variable does not yet exist, we need to allocate memory for the TData to point to!
@@ -55,13 +55,13 @@ T* VarTable::lookupVar(const string varName) {
 		varMap[varName] = insertable;
 	}
 	   
-	T* ret = static_cast<T*>(varMap[varName].getData());
+	//T* ret = static_cast<T*>(varMap[varName].getData());
 
-	pthread_mutex_unlock(&table_mutex);
+	//pthread_mutex_unlock(&table_mutex);
 
-	//return static_cast<T*>(varMap[varName].getData());
+	return static_cast<T*>(varMap[varName].getData());
 	
-	return ret;
+	//return ret;
 }
 
 #endif

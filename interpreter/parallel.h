@@ -3,6 +3,7 @@
 #include"frontend.hpp"
 #include"tData.h"
 #include"progContext.h"
+#include <time.h>
 
 #include<pthread.h>
 #include"threadEnvironment.h"
@@ -27,6 +28,7 @@ struct evalArgs {
 
 template<typename T>
 void wrapEvaluation(void* args) {
+	cout << "Thread Start time: " << time(0) << endl;
 	evalArgs<T>& argList = *static_cast<evalArgs<T>*>(args);
 
 	//Give the thread its own call stack
@@ -34,6 +36,7 @@ void wrapEvaluation(void* args) {
 	contextCopy.branchOff(argList.scope);
 	
 	//Temporary error notificaiton
+	cout << "Thread starting execution time: " << time(0) << endl;
 	try {
 		//Go into execution with a normalized status
 		contextCopy.normalizeStatus();	
@@ -60,6 +63,7 @@ void wrapEvaluation(void* args) {
 	//ThreadEnvironment::removeThread(pthread_self());
 
 	delete static_cast< evalArgs<T>* >(args);
+	cout << "Thread finished: " << time(0) << endl;
 	pthread_exit(NULL);
 }
 
@@ -84,6 +88,26 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 		case NODE_PARFOR:
 		{
 			cout << "PARFOR" << endl;
+  /*                      //Obtain the list of elements we need to loop over
+                        TData<TArray> actualCollection;//If the collection does not exist yet, then we will need to place it in memory
+                        TData<TArray*> collection;
+
+                        //Check to see if the array can be evaluated by reference, or see if it is a literal that must be evaluated before we can use it
+                        if(node->child(1)->kind() == NODE_IDENTIFIER || node->child(1)->kind() == NODE_VECREF) {
+                                //Put the address of the addressable vector into collection
+                                evaluateAddress<TArray*>(node->child(1), collection, context);
+                                //aliasArray(node->child(0), collection.getData(), context);
+                        }
+                        else {
+                                //If we must evaluate by value, we need to evaluate what we are iterating over
+                                evaluateNode<TArray>(node->child(1),actualCollection,context);
+
+                                //Set collection to point to where the actual collection is in memory
+                                TArray* collection_ptr = &actualCollection.getData();
+                                collection.setData<TArray*>(collection_ptr);
+                        }
+*/
+//			cout << "Have collection of size: " << collection.getData()->size() << endl;
 		}
 		break;
 		case NODE_PARALLEL:

@@ -15,6 +15,7 @@
 #include "frontend.hpp"
 #include <pthread.h>
 #include "threadEnvironment.h"
+#include <time.h>
 
 using std::string;
 
@@ -101,7 +102,9 @@ class scope_ptr {
 		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
 		//Note that this is largely desired behavior
 		scope_ptr(const scope_ptr& other) {
+			//cout << "This gets waited at a few times" << endl;
 			other.lockScope();
+			//cout << "Access gained" << endl;
 			ptr = other.ptr;
 			status = other.status;
 			//spawnedThreads = NULL;
@@ -146,17 +149,23 @@ class scope_ptr {
 
 		void addThread(pthread_t thread) {
 			//Note that the threadpool implementation of this method is threadsafe
+			lockScope();
 			spawnedThreads.top()->addThread(thread);
+			unlockScope();
 		}
 
 		void setupParallel() {
 			//Since each scope_ptr gets its own copy of spawnedThreads (even if everything else is an alias), this is threadsafe
 			ThreadPool* newPool = new ThreadPool();
+			lockScope();
 			spawnedThreads.push(newPool);
+			unlockScope();
 		}
 
 		void endParallel() {
+			cout << "Main finished: " << time(0) << endl;
 			spawnedThreads.top()->waitTillEmpty();
+			cout << "All joined: " << time(0) << endl;
 			delete spawnedThreads.top();
 			spawnedThreads.pop();
 		}

@@ -1,7 +1,8 @@
 def main() int:
-   doWork(1)
-   doWork(2)
-   doWork(3)
+   parallel:
+      doWork(1)
+      doWork(2)
+      doWork(3)
 
 def doWork(id int):
    x = 0
