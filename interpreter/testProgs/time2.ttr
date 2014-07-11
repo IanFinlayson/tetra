@@ -8,5 +8,5 @@ def doWork(id int):
    x = 0
    while x < 7500000:
       x += 1
-      if x % 1000000 == 0:
-         print("Thread: ",id," doing work")
+      if x % 2000000== 0:
+         print("Thread: ",id," doing work\n")
