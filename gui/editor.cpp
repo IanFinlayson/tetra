@@ -1,6 +1,7 @@
 #include "editor.h"
 #include <QPlainTextEdit>
 #include <QtWidgets>
+
 Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
     connect(this, SIGNAL(cursorPositionChanged()),
          this, SLOT(updateCursorCoordinates()));

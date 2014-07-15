@@ -9,11 +9,11 @@
 #include"tArray.h"
 #include"tData.h"
 #include"variableContext.h"
-
+#include<pthread.h>
 using std::string;
 
 VarTable::VarTable() {
-	//nothing needed at the moment
+	pthread_mutex_init(&table_mutex,NULL);
 }
 
 //Release allocated data should be handled by each TData as it is destructed
@@ -28,15 +28,17 @@ VarTable::~VarTable() {
 //Also, the data is not marked as deletable, so the referenced data will not be destroyed when this data goes out of scope
 //Used primarily for passing vectors to functions/for-loops
 //Returns the reference once it creates it, so it can be set to reference the proper thing
-
+/*
 TData<void*>& VarTable::declareReference(const string varName) {
 
         //Sets the data for what we will insert as the location of the actual data being referenced
         TData<void*> inserter;
         //Note that setDeletableType is not called, because this object going out of scope should not result in the data getting deleted
         //Container copy-constructs the TData
+	pthread_mutex_lock(&table_mutex);
         varMap[varName] = inserter;
+	pthread_mutex_unlock(&table_mutex);
         //This returns the copy in the map, as opposed to the local var inserter
         return varMap[varName];
 }
-
+*/

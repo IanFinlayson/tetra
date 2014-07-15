@@ -1,6 +1,7 @@
 /*
  * This file builds a function lookup table so that when the interpreter encounters a function call, it can easily find the address of the appropriate node where the called function code resides
- *Since there is only one funciton table per program (even if using multiple files, the further functions should be addable by calling buildTree for each file's syntax tree) This uses a single object design.
+ *Since there is only one funciton table per program (even if using multiple files, the further functions should be addable by calling buildTree for each file's syntax tree) There can only be one instance.
+ * TODO: For a long time, this class has been a convoluted mix between a singleton and static member class. Must query the design plans of the debugger to see whether this will ever be needed as an object, so we can stick with one or the other
  */
 
 #ifndef FUNCTION_TABLE_H

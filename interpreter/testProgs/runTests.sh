@@ -35,6 +35,8 @@ prefixes[${#prefixes[*]}]="shortCircuit";	results[${#results[*]}]=26
 prefixes[${#prefixes[*]}]="bg";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="lock";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="par";	results[${#results[*]}]=3
+prefixes[${#prefixes[*]}]="parRef";	results[${#results[*]}]=15
+prefixes[${#prefixes[*]}]="parpar";	results[${#results[*]}]=50
 
 successes=0
 total=${#prefixes[*]}

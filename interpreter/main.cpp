@@ -433,7 +433,7 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 			message << "Attempted to obtain length of unknown type. ID: " << node->child(0)->type()->getKind();
 			Error e(message.str(),node->getLine());
 		}
-	}
+	}		//USER DEFINED FUNCTION
 	else {
 		//gets the node where the body of the called function begins
 		const Node* funcNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
@@ -446,10 +446,13 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 			//Calling scope handle
 			TetraScope destScope(node);
 
+			//cout << "Old scope X: " << *(context.lookupVar<TArray>("x")) << endl;
+
 			//Initialize the new scope with the passed parameters
 			pasteArgList(funcNode->child(0),node->child(0), destScope, context);
 
 			//Set the new scope to the scope we created containing all the parameters
+			//cout << "z: " << destScope.lookupVar<TArray>("z")->size() << endl;
 			context.initializeNewScope(destScope);
 		}
 		else { //if there are no args, we still need to initialize a new scope!
@@ -602,7 +605,11 @@ T paste(const Node* node1, const Node* node2, TetraScope& destinationScope, Tetr
 	op1.setData(destinationScope.lookupVar<T>(node1->getString()));
 	evaluateNode<T>(node2,op2,sourceContext);
 
-	//Performa assignment
+	
+	//cout << "Val: " << op2.getData() << endl;
+	//cout << "X: " << *(sourceContext.lookupVar<TArray>("x")) << endl;
+
+	//Perform assignment
 	T ret = op2.getData();
 	*(op1.getData()) = ret;
 	return ret;
@@ -858,31 +865,73 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 //evaluates generic nodes
 template<typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
-
 	//Call the appropriate function based on the NodeKind of the node
-	switch(NodeTable::classifyNode(node)) {
-		case CLASS_CONDITION:
+	switch(node->kind()) {
+		case NODE_LT:
+		case NODE_LTE:
+		case NODE_GT:
+		case NODE_GTE:
+		case NODE_EQ:
+		case NODE_NEQ:
+		case NODE_NOT:
 			evaluateCondition<T>(node,ret,context);
 		break;
-		case CLASS_CONTROL:
+		case NODE_FUNCALL:
 			evaluateFunction<T>(node,ret,context);
 		break;
-		case CLASS_IMMEDIATE:
+		case NODE_FORMAL_PARAM:
+		case NODE_INTVAL:
+		case NODE_REALVAL:
+		case NODE_BOOLVAL:
+		case NODE_STRINGVAL:
+		case NODE_VECVAL:
+		case NODE_IDENTIFIER:
 			evaluateImmediate<T>(node,ret,context);
 		break;
-		case CLASS_OPERATION:
+		case NODE_OR:
+		case NODE_AND:
+		case NODE_BITAND:
+		case NODE_BITOR:
+		case NODE_BITXOR:
+		case NODE_SHIFTL:
+		case NODE_SHIFTR:
+		case NODE_PLUS:
+		case NODE_MINUS:
+		case NODE_TIMES:
+		case NODE_DIVIDE:
+		case NODE_MODULUS:
+		case NODE_EXP:
+		case NODE_BITNOT:
 			evaluateExpression<T>(node,ret,context);
 		break;
-		case CLASS_STRUCTURE:
+		case NODE_FUNCTION_LIST:
+		case NODE_FUNCTION:
+		case NODE_FORMAL_PARAM_LIST:
+		case NODE_STATEMENT:
+		case NODE_PASS:
+		case NODE_IF:
+		case NODE_ELIF:
+		case NODE_ELIF_CHAIN:
+		case NODE_ELIF_CLAUSE:
+		case NODE_WHILE:
+		case NODE_FOR:
+		case NODE_VECREF:
+		case NODE_INDEX:
+		case NODE_ACTUAL_PARAM_LIST:
 			evaluateStatement<T>(node,ret,context);
 		break;
-		case CLASS_ASSIGNMENT:
+		case NODE_ASSIGN:
 			performAssignment<T>(node,ret,context);
 		break;
-		case CLASS_FLAG:
+		case NODE_BREAK:
+		case NODE_CONTINUE:
+		case NODE_RETURN:
 			evaluateFlag<T>(node,ret,context);
 		break;
-		case CLASS_PARALLEL:
+		case NODE_PARFOR:
+		case NODE_PARALLEL:
+		case NODE_BACKGROUND:
+		case NODE_LOCK:
 			evaluateParallel<T>(node,ret,context);
 		break;
 		default:
@@ -891,6 +940,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 			Error e(message.str(),node->getLine());
 			throw e;
 	}
+
 }
 
 int interpret(const Node* tree) {

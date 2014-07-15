@@ -11,6 +11,7 @@
 #include "frontend.hpp"
 #include "progContext.h"
 #include "functionTable.h"
+#include "tArray.h"
 
 //#define NDEBUG
 #include <assert.h>
@@ -21,12 +22,12 @@ using std::string;
 TetraScope::TetraScope(const Node* pCallNode) : executionStatus(NORMAL), callNode(pCallNode) {
 
 }
-
+/*
 //Wraps the varTable::declareReference
 TData<void*>& TetraScope::declareReference(const string varName) {
 	return varScope.declareReference(varName);
 }
-
+*/
 //Used by loops and constrol statements to determine if they can proceed, or if they should return
 ExecutionStatus TetraScope::queryExecutionStatus() {
 	return executionStatus;
@@ -63,6 +64,8 @@ void TetraContext::initializeNewScope(const Node * callNode) {
 //This allows local data to get passed in
 void TetraContext::initializeNewScope(TetraScope& newScope) {
 	//progStack.push(newScope);
+	//cout << "Here we are!" << endl;
+	//cout << "z: " << newScope.lookupVar<TArray>("z")->size() << endl;
 	scope_ptr newScopePtr(newScope);
 	progStack.push(newScopePtr); 
 }
@@ -70,9 +73,13 @@ void TetraContext::initializeNewScope(TetraScope& newScope) {
 //This function takes the given TetraScope, and pushes an alias to that scope into this context
 //Used for multithreading, so threads in the same scope can share the base scope,
 //while also being able to branch off into their own call stacks
-void TetraContext::branchOff(const TetraContext& baseContext) {
-	scope_ptr newScopePtr(baseContext.progStack.top());
+void TetraContext::branchOff(const scope_ptr baseScope) {
+	//cout << "X from base context: " << *(const_cast<scope_ptr&>(baseScope)->lookupVar<TArray>("x")) << endl;
+	scope_ptr newScopePtr(baseScope);
+	//Note that the "branch off" should be the base of as new TetraContext (for a new thread)
+	assert(progStack.size() == 0);
 	progStack.push(newScopePtr);
+	//cout << "X after branch: " <<  *(lookupVar<TArray>("x")) << endl;;
 }
 
 //destroys the current scope, returning to the previously initialized scope
@@ -86,13 +93,17 @@ TetraContext::~TetraContext() {
 		progStack.pop();
 	}
 }
-
+/*
 TData<void*>& TetraContext::declareReference(const string varName) {
 	return progStack.top()->declareReference(varName);
 }
-
+*/
 TetraScope& TetraContext::getCurrentScope() {
 	return *(progStack.top());
+}
+
+scope_ptr& TetraContext::getScopeRef() {
+	return progStack.top();
 }
 
 TetraContext& TetraContext::operator=(const TetraContext& other){
