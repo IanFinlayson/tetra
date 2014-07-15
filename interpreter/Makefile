@@ -1,10 +1,9 @@
 #There is a missing dependancy somewhere in this file.
 #Make will (on rare occasion) complain about multiple definition or some other linker error, which can be fixed by recompiling the whole project.
 
-# -pg 
+# -pg -O3
 CC = clang++
-FLAGS = -Wall -g -O3 -pedantic -pthread
-# -ftemplate-backtrace-limit=1
+FLAGS = -Wall -g -pedantic -pthread -ftemplate-backtrace-limit=1
 SEARCHPATH = ../frontend
 
 #tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o

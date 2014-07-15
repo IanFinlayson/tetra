@@ -10,18 +10,22 @@ echo "LOGFILE:" > testCheckLog.txt
 retVal=-1
 successFlag=1
 tetraPath=..
-
+reps=0
 
 prefixes[${#prefixes[*]}]="bg";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="lock";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="par";	results[${#results[*]}]=3
 prefixes[${#prefixes[*]}]="parRef";	results[${#results[*]}]=15
 prefixes[${#prefixes[*]}]="parpar";	results[${#results[*]}]=50
+prefixes[${#prefixes[*]}]="parFor";	results[${#results[*]}]=10
+prefixes[${#prefixes[*]}]="parFor2";	results[${#results[*]}]=225
 
 total=${#prefixes[*]}
 
 while true
 do
+
+reps=`expr ${reps} + 1`
 
 rm checkTestLog.txt
 
@@ -34,6 +38,7 @@ do
 	if [ $retVal -ne ${results[${index}]} ]
 	then
 		echo Program ${prefixes[ ${index} ]}Test.ttr has a race condition
+		echo found after ${reps} repetitions
 		exit 1
 	fi
 done

@@ -12,6 +12,7 @@
 #include "progContext.h"
 #include "functionTable.h"
 #include "tArray.h"
+#include <list>
 
 //#define NDEBUG
 #include <assert.h>
@@ -28,6 +29,11 @@ TData<void*>& TetraScope::declareReference(const string varName) {
 	return varScope.declareReference(varName);
 }
 */
+
+std::list<std::pair<pthread_t,TData<void*> > >& TetraScope::declareThreadSpecificVariable(const string& name) {
+	return varScope.declareParForVar(name);
+}
+
 //Used by loops and constrol statements to determine if they can proceed, or if they should return
 ExecutionStatus TetraScope::queryExecutionStatus() {
 	return executionStatus;
@@ -88,12 +94,12 @@ void TetraContext::exitScope() {
 }
 
 //If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
-TetraContext::~TetraContext() {
+/*TetraContext::~TetraContext() {
 	while(!progStack.empty()) {
 		progStack.pop();
 	}
 }
-/*
+
 TData<void*>& TetraContext::declareReference(const string varName) {
 	return progStack.top()->declareReference(varName);
 }
@@ -156,6 +162,10 @@ void TetraContext::setupParallel() {
 
 void TetraContext::endParallel() {
 	progStack.top().endParallel();
+}
+
+std::list<std::pair<pthread_t,TData<void*> > >& TetraContext::declareThreadSpecificVariable(const string& name) {
+	return progStack.top()->declareThreadSpecificVariable(name);
 }
 
 //Prints a list of all function calls

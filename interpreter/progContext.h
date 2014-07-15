@@ -16,6 +16,7 @@
 #include <pthread.h>
 #include "threadEnvironment.h"
 #include <time.h>
+#include <list>
 
 using std::string;
 
@@ -53,6 +54,9 @@ class TetraScope {
 		//The calling program can set this pointer to point to whatever varname should alias.
 		TData<void*>& declareReference(const string varName);
 
+		//declare a variable that can hold different values across different threads
+		std::list<std::pair<pthread_t,TData<void*> > >& declareThreadSpecificVariable(const string&);
+
 		//Used by loops and constrol statements to determine if they can proceed, or if they should return
 		ExecutionStatus queryExecutionStatus();
 
@@ -84,7 +88,7 @@ class scope_ptr {
 			refCount = new int();//Zero initialized
 			*refCount = 0;
 			status = NORMAL;
-			//spawnedThreads = NULL;
+			std::stack<ThreadPool*> spawnedThreads;
 			refCount_mutex_ptr = new pthread_mutex_t();
 			addReference();
 		}
@@ -95,19 +99,20 @@ class scope_ptr {
 			refCount = new int();//Zero initialized
 			*refCount = 0;
 			status = NORMAL;
-			//spawnedThreads = NULL;
+			std::stack<ThreadPool*> spawnedThreads;
 			refCount_mutex_ptr = new pthread_mutex_t();
 			addReference();
 		}
 		//Copy constructor aliases this Scope to the other, rather than performing a deep copy
 		//Note that this is largely desired behavior
+		//Note also that each Scope_ptr must have its own threadpool stack!
 		scope_ptr(const scope_ptr& other) {
 			//cout << "This gets waited at a few times" << endl;
 			other.lockScope();
 			//cout << "Access gained" << endl;
 			ptr = other.ptr;
 			status = other.status;
-			//spawnedThreads = NULL;
+			std::stack<ThreadPool*> spawnedThreads;
 			refCount_mutex_ptr = other.refCount_mutex_ptr;
 
 			//Note that we are copying the pointer, not the value!
@@ -157,15 +162,16 @@ class scope_ptr {
 		void setupParallel() {
 			//Since each scope_ptr gets its own copy of spawnedThreads (even if everything else is an alias), this is threadsafe
 			ThreadPool* newPool = new ThreadPool();
+			
 			lockScope();
 			spawnedThreads.push(newPool);
 			unlockScope();
 		}
 
 		void endParallel() {
-			cout << "Main finished: " << time(0) << endl;
+			//cout << "Main finished: " << time(0) << endl;
 			spawnedThreads.top()->waitTillEmpty();
-			cout << "All joined: " << time(0) << endl;
+			//cout << "All joined: " << time(0) << endl;
 			delete spawnedThreads.top();
 			spawnedThreads.pop();
 		}
@@ -276,7 +282,7 @@ public:
 	void exitScope();
 
 	//If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
-	~TetraContext();
+	//~TetraContext();
 
 	//Returns a reference to the current scope
 	//This may be outdated
@@ -296,6 +302,9 @@ public:
 
 	//Sets the current scope's executionStatus to NORMAL
 	void normalizeStatus();
+
+	//Declares  variable that can have different values across different threads
+	std::list<std::pair<pthread_t,TData<void*> > >& declareThreadSpecificVariable(const string&);
 
 	//Performs a deep copy of the current context
 	TetraContext& operator=(const TetraContext&);

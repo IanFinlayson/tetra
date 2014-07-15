@@ -745,6 +745,7 @@ void evaluateVectorComponent(const Node* node, TetraContext& context, TArray& ar
 
 	//Used as a placeholder address to the actual value ret->getData so it can be deep copied
 	//At the moment, this is criminally inefficient
+	//TODO: make this possible without having to copy the data
 	T placeHolder = x.getData();
 
 	//Use of the explicit void* is required to actually paste in the value of the pointer

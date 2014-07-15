@@ -2,8 +2,11 @@
 #include<iostream>
 #include"frontend.hpp"
 #include"tData.h"
+#include"tArray.h"
 #include"progContext.h"
+#include"variableContext.h"
 #include <time.h>
+#include<list>
 
 #include<pthread.h>
 #include"threadEnvironment.h"
@@ -11,6 +14,21 @@
 #include<assert.h>
 
 using namespace std;//This will eventually be removed
+
+/*
+ * This class contains calls to parallel directives.
+ * Although the methods are presently rtemplated, becuase it is an error to return something from a parallel segment
+ * these methods could technically be untemplated and just have an int thrown as the datatype for the basic evaluateNode
+ */
+
+
+//Forward declare evaluateAddress
+template<typename T>
+void evaluateAddress(const Node*, TData<T>&, TetraContext& context);
+
+void dummy(void* args) {
+
+}
 
 //This class wraps the arguments which must be passed to an evaluateNode statment so they can be passed as arguments to spawned threads
 template <typename T>
@@ -26,9 +44,25 @@ struct evalArgs {
 	}
 };
 
+//This class wraps the arguments that must be passed to a worker thread for a parallel for loop
+template <typename T>
+struct evalForArgs {
+	evalArgs<T>* args_ptr;
+	const string* varName_ptr;
+	pthread_mutex_t* count_mutex_ptr;
+	int* countVal_ptr;
+	TArray* values_ptr;
+
+	evalForArgs(evalArgs<T>* pArgs, const string* pName, pthread_mutex_t* pMutex, int* pCount, TArray* pValues) :
+		args_ptr(pArgs), varName_ptr(pName), count_mutex_ptr(pMutex), countVal_ptr(pCount), values_ptr(pValues)
+	{
+		//do nothing
+	}
+};
+
 template<typename T>
 void wrapEvaluation(void* args) {
-	cout << "Thread Start time: " << time(0) << endl;
+	//cout << "Thread Start time: " << time(0) << endl;
 	evalArgs<T>& argList = *static_cast<evalArgs<T>*>(args);
 
 	//Give the thread its own call stack
@@ -36,7 +70,7 @@ void wrapEvaluation(void* args) {
 	contextCopy.branchOff(argList.scope);
 	
 	//Temporary error notificaiton
-	cout << "Thread starting execution time: " << time(0) << endl;
+	//cout << "Thread starting execution time: " << time(0) << endl;
 	try {
 		//Go into execution with a normalized status
 		contextCopy.normalizeStatus();	
@@ -63,8 +97,74 @@ void wrapEvaluation(void* args) {
 	//ThreadEnvironment::removeThread(pthread_self());
 
 	delete static_cast< evalArgs<T>* >(args);
-	cout << "Thread finished: " << time(0) << endl;
-	pthread_exit(NULL);
+	//cout << "Thread finished: " << time(0) << endl;
+	//pthread_exit(NULL);
+}
+
+//This function is executed by parallel for worker threads to repeatedly perform a given task as per a for loop
+template <typename T>
+void wrapMultiEvaluation(void* args) {
+
+	evalForArgs<T>& argList = *static_cast<evalForArgs<T>* >(args);	
+	
+	//int arraySize = argList.values_ptr->size();
+
+	pthread_mutex_lock(argList.count_mutex_ptr);
+
+	//possible optimization: if the array willdefinitely not change size during the parForLoop execution, then we can pre-calculate the size once
+	while(*(argList.countVal_ptr) < /*arraySize*/argList.values_ptr->size()) {
+
+		*(argList.args_ptr->scope->template lookupVar<T>(*(argList.varName_ptr))) = *static_cast<T*>((argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
+
+		(*(argList.countVal_ptr))++;
+
+		pthread_mutex_unlock(argList.count_mutex_ptr);
+
+		TetraContext contextCopy;
+		contextCopy.branchOff(argList.args_ptr->scope);
+	
+		try {
+			//Executes the for loop body
+			//wrapEvaluation<T>(argList.args_ptr);
+			contextCopy.normalizeStatus();	
+			evaluateNode<T>(argList.args_ptr->node, argList.args_ptr->ret, contextCopy);		}
+		catch (Error e) {
+			cout << "Error in parallel for: " << e << endl;
+		}
+		catch (...) {
+			cout << "Unspecified error encountered" << endl;
+		}
+
+		//Lock the mutex before checking the condiiton again and overwriting the value
+		pthread_mutex_lock(argList.count_mutex_ptr);
+	}
+
+	//Release the mutex
+	pthread_mutex_unlock(argList.count_mutex_ptr);
+
+	//Delete the memory allocated for the arguments of this thread
+	//Note that the args needed for execution (argList.args_ptr) get deleted in wrapEvaluation
+	delete argList.args_ptr;
+	delete &argList;
+	//cout << "parfor finished" << endl;
+}
+
+//Spawns a worker thread that iwll work on iterations of a parFor loop
+//The varName must be passed so the thread can initialize its own copy of the variable
+template <typename T>
+pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
+		 const string& varName, TArray* loopValues, int* nextJob, pthread_mutex_t* nextJob_mutex) {
+	pthread_t newThread;
+	pthread_attr_t attributes;
+	pthread_attr_init(&attributes);
+
+	evalArgs<T>* execArgs = new evalArgs<T>(node,ret,context.getScopeRef());
+	evalForArgs<T>* args = new evalForArgs<T>(execArgs, &varName, nextJob_mutex, nextJob, loopValues);
+	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
+
+	int success = pthread_create(&newThread, &attributes,(void*(*)(void*))wrapMultiEvaluation<T>,(void*)(args));
+	assert(success == 0);//For now, we will assume that thread creations are correct
+	return newThread;
 }
 
 //Spawns a thread to execute a given node by branching off the given context
@@ -87,8 +187,7 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 	switch(node->kind()) {
 		case NODE_PARFOR:
 		{
-			cout << "PARFOR" << endl;
-  /*                      //Obtain the list of elements we need to loop over
+                        //Obtain the list of elements we need to loop over
                         TData<TArray> actualCollection;//If the collection does not exist yet, then we will need to place it in memory
                         TData<TArray*> collection;
 
@@ -106,8 +205,65 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
                                 TArray* collection_ptr = &actualCollection.getData();
                                 collection.setData<TArray*>(collection_ptr);
                         }
-*/
-//			cout << "Have collection of size: " << collection.getData()->size() << endl;
+
+			const int NUM_THREADS = 8;
+
+			pthread_t workers[NUM_THREADS];
+
+			//Note that dataqueue is a handle to the actual array in the Variable Table
+			std::list<std::pair<pthread_t, TData<void*> > > dataQueue = context.declareThreadSpecificVariable(node->child(0)->getString());
+
+			int currentIteration = 0;//Used to determine which iteratio nshould be tackled next
+			pthread_mutex_t iter_mutex;
+			pthread_mutex_init(&iter_mutex, NULL);
+
+			for(int x = 0; x < NUM_THREADS && x < collection.getData()->size(); x++) {
+				//cout << "worker before: " << workers[x] << endl;
+				switch(node->child(0)->type()->getKind()) {
+				case TYPE_INT:
+				{
+					TData<int> stub;
+					workers[x] = spawnWorker<int>(node->child(2), stub, context, node->child(0)->getString(), collection.getData(), &currentIteration, &iter_mutex);
+				}
+				break;
+				case TYPE_REAL:
+				{
+					TData<double> stub;
+					workers[x] = spawnWorker<double>(node->child(2), stub, context, node->child(0)->getString(), collection.getData(), &currentIteration, &iter_mutex);
+				}
+				break;
+				case TYPE_BOOL:
+				{
+					TData<bool> stub;
+					workers[x] = spawnWorker<bool>(node->child(2), stub, context, node->child(0)->getString(), collection.getData(), &currentIteration, &iter_mutex);
+				}
+				break;
+				case TYPE_STRING:
+				{
+					TData<std::string> stub;
+					workers[x] = spawnWorker<std::string>(node->child(2), stub, context, node->child(0)->getString(), collection.getData(), &currentIteration, &iter_mutex);
+				}
+				break;
+				case TYPE_VECTOR:
+				{
+					TData<TArray> stub;
+					workers[x] = spawnWorker<TArray>(node->child(2), stub, context, node->child(0)->getString(), collection.getData(), &currentIteration, &iter_mutex);
+				}
+				break;
+				default:
+					std::stringstream message;
+					message << "Error attempting to deduce type for parallel for. ID: " << node->child(0)->type()->getKind();
+					Error e(message.str(),node->getLine());
+					throw e;
+				//cout << "worker after: " << workers[x] << endl;
+				}
+			}
+
+			//Wait for all the worker threads to terminate
+			for(int index = 0; index < NUM_THREADS && index < collection.getData()->size(); index++) {
+				pthread_join(workers[index], NULL);
+			}
+
 		}
 		break;
 		case NODE_PARALLEL:
