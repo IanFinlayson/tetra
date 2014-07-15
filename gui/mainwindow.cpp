@@ -8,7 +8,8 @@
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
-
+#include <QScrollBar>
+#include <QSize>
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
     menuBar()->setNativeMenuBar(true);
@@ -19,15 +20,13 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
             this, SLOT(documentWasModified()));
     connect(ui->input, SIGNAL(cursorPositionChanged()),
             this, SLOT(updateCoordinates()));
-    //ui->cursorPosition = ui->input->getCoordinates();
-    //ui->input->getCoordinates() = ui->cursorPosition;
-    ui->cursorPosition->show();
     hideEditor();
     setupShortcuts();
 
     highlighter = new Highlighter(ui->input->document());
     QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
+
 }
 
 MainWindow::~MainWindow(){
@@ -40,8 +39,6 @@ void MainWindow::hideEditor(){
     ui->outputLabel->hide();
     ui->input->hide();
     ui->output->hide();
-    ui->lineEdit->hide();
-    ui->enterButton->hide();
     ui->cursorPosition->hide();
 }
 
@@ -50,8 +47,6 @@ void MainWindow::showEditor(){
     ui->outputLabel->show();
     ui->input->show();
     ui->output->show();
-    ui->lineEdit->show();
-    ui->enterButton->show();
     ui->cursorPosition->show();
 
     QFont font = QFont("Monaco");
@@ -66,6 +61,9 @@ void MainWindow::showEditor(){
 
     ui->input->ensureCursorVisible();
     ui->input->setCenterOnScroll(true);
+    customizeScrollBar(ui->input->verticalScrollBar());
+    customizeScrollBar(ui->output->verticalScrollBar());
+    ui->cursorPosition->setAlignment(Qt::AlignRight);
 }
 
 void MainWindow::setupShortcuts(){
@@ -79,6 +77,38 @@ void MainWindow::setupShortcuts(){
     ui->actionSave->setShortcuts(QKeySequence::Save);
     ui->actionOpen->setShortcuts(QKeySequence::Open);
     ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
+}
+
+void MainWindow::customizeScrollBar(QScrollBar *scrollBar){
+
+    scrollBar->setStyleSheet("QScrollBar:vertical  {"
+                            "border: 2px solid black;"
+                            "background: qconicalgradient(cx:0, cy:1, angle:109, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
+                            "width: 15px;"
+                            "margin: 22px 0 22px 0;}"
+                        "QScrollBar::handle:vertical  {"
+                            "background: white;"
+                            "min-height: 20px;}"
+                        "QScrollBar::add-line:vertical  {"
+                            "border: 2px solid black;"
+                            "background: qconicalgradient(cx:0, cy:1, angle:109, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
+                            "height: 20px;"
+                            "subcontrol-position: bottom;"
+                            "subcontrol-origin: margin;}"
+                        "QScrollBar::sub-line:vertical  {"
+                            "border: 2px solid black;"
+                            "background: qconicalgradient(cx:0, cy:1, angle:109, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
+                            "height: 20px;"
+                            "subcontrol-position: top;"
+                            "subcontrol-origin: margin;}"
+                        "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical  {"
+                            "width: 0px;"
+                            "height: 0px;}"
+
+                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical  {"
+                            "background: none;}"
+
+                            );
 }
 
 bool MainWindow::newProj(){
@@ -133,6 +163,7 @@ bool MainWindow::maybeSave(){
 
 void MainWindow::updateCoordinates(){
     ui->cursorPosition->setText(ui->input->getCoordinates());
+    ui->input->ensureCursorVisible();
 }
 
 //-----------Menu Bar/Tool Bar Actions-----------//
@@ -225,9 +256,28 @@ void MainWindow::on_actionDelete_triggered(){
 void MainWindow::on_actionSelect_All_triggered(){
     ui->input->selectAll();
 }
-void MainWindow::on_actionRun_triggered(){
-    ui->output->insertPlainText("...But nothing happened.\n");
+void MainWindow::on_actionFind_triggered(){
+  //  ui->input->find();
 }
+void MainWindow::on_actionRun_triggered(){
+    //Error e("hello", 0);
+    ui->output->insertPlainText("...But nothing happened.\n\n");
+}
+
 //-----------------------------------------------//
 
 
+
+
+
+
+
+
+void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
+    if(arg1 == true){
+        ui->input->showLineNumbers(true);
+    }
+    else{
+        ui->input->showLineNumbers(false);
+    }
+}

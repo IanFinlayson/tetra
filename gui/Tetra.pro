@@ -38,3 +38,10 @@ FORMS    += \
 RESOURCES += \
     AppResources.qrc
 
+
+#LIBS+=-L$$PWD/../frontend/ -lfrontend
+
+#INCLUDEPATH+=$$PWD/../frontend
+#DEPENDPATH += $$PWD/../frontend
+
+#PRE_TARGETDEPS += $$PWD/../frontend/libfrontend.a

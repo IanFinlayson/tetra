@@ -42,6 +42,9 @@ private slots:
     void on_actionRun_triggered();
     void updateCoordinates();
 
+    void on_actionFind_triggered();
+    void on_actionLine_Numbers_toggled(bool arg1);
+
 private:
     Ui::MainWindow *ui;
     QString openFile;
@@ -54,6 +57,7 @@ private:
     QString strippedName(const QString &fullFileName);
 
     bool maybeSave();
+    void customizeScrollBar(QScrollBar *);
 };
 
 #endif // MAINWINDOW_H
