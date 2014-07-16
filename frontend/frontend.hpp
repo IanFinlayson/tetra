@@ -192,6 +192,9 @@ class Node {
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node);
 
+/* reset lexer internal state */
+void reset_lexer( );
+
 /* function which parses a file and returns the parse tree */
 Node* parseFile(const string& fname);
 
