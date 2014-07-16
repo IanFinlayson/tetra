@@ -6,9 +6,10 @@
 #include<map>
 #include<string>
 #include"frontend.hpp"
-#include"tArray.h"
-#include"tData.h"
-#include"variableContext.h"
+//#include"tArray.h"
+//#include"tData.h"
+//#include"variableContext.h"
+#include"backend.hpp"
 #include<pthread.h>
 #include<list>
 using std::string;

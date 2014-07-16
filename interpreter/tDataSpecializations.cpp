@@ -5,8 +5,9 @@
 //#ifndef T_DATA_SPECS_H
 //#define T_DATA_SPECS_H
 
-#include "tData.h"
-#include "tArray.h"
+//#include "tData.h"
+//#include "tArray.h"
+#include "backend.hpp"
 #include "frontend.hpp"
 
 //#define NDEBUG
