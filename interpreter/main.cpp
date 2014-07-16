@@ -9,18 +9,20 @@
 #include <map>
 #include <sstream>
 #include "frontend.hpp"
-#include "tArray.h"
+/*#include "tArray.h"
 #include "tData.h"
 #include "functionTable.h"
-#include "nodeTable.h"
+#include "nodeTable.h"*/
 #include "operationMap.cpp"
 #include "comparisonMap.cpp"
-#include "variableContext.h"
+/*#include "variableContext.h"
 #include "progContext.h"
 #include "TSL.h"
 #include "parallel.h"
 #include "threadEnvironment.h"
-
+*/
+#include "parallel.h"
+#include "backend.hpp"
 //#define NDEBUG
 #include <assert.h>
 

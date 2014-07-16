@@ -14,13 +14,13 @@ tetra: run.o libbackend.a
 	@echo
 
 #create a linkable library letting other programs call interpret(Node* node)
-libbackend.a: main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
-	ar rcs libbackend.a main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
+libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
 
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
 
-main.o: main.cpp functionTable.h nodeTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h parallel.h threadEnvironment.h
+main.o: main.cpp functionTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h parallel.h threadEnvironment.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
 
 comparisonMap.o: comparisonMap.cpp
@@ -29,8 +29,8 @@ comparisonMap.o: comparisonMap.cpp
 functionTable.o: functionTable.cpp functionTable.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c functionTable.cpp
 
-nodeTable.o: nodeTable.cpp nodeTable.h
-	$(CC) $(FLAGS) -I$(SEARCHPATH) -c nodeTable.cpp
+#nodeTable.o: nodeTable.cpp nodeTable.h
+#	$(CC) $(FLAGS) -I$(SEARCHPATH) -c nodeTable.cpp
 
 operationMap.o: operationMap.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c operationMap.cpp

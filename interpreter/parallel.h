@@ -1,15 +1,18 @@
 #include<string>
 #include<iostream>
 #include"frontend.hpp"
-#include"tData.h"
+#include"backend.hpp"
+/*#include"tData.h"
 #include"tArray.h"
 #include"progContext.h"
-#include"variableContext.h"
+#include"variableContext.h"*/
 #include <time.h>
 #include<list>
 
 #include<pthread.h>
-#include"threadEnvironment.h"
+//#include"threadEnvironment.h"
+
+
 
 #include<assert.h>
 
