@@ -73,7 +73,7 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 		}
 		catch (Error e) {
 			//If we catch an exception, propogate it after adding info about the line number
-			Error e2(e.getMessage(),node->getLine());
+			RuntimeError e2(e.getMessage(),node->getLine(),context);
 			throw e2;
 		}
 		evaluateVecVal<T>(node->child(1),nextVec,ret,context);
@@ -84,7 +84,7 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 			value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
 		}
 		catch (Error e){
-			Error e2(e.getMessage(),node->getLine());
+			RuntimeError e2(e.getMessage(),node->getLine(),context);
 			throw e2;
 		}
 		ret.setData(value);
@@ -296,7 +296,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 					default:
 						std::stringstream message;
 						message << "Attempting to assign to unknown DataType in for loop. ID: " << node->child(0)->type()->getKind();
-						Error e(message.str(),node->getLine());
+						SystemError e(message.str(),node->getLine(),node);
 						throw e;
 				}
 				//Check the current status flag to see if we have to break out
@@ -386,7 +386,7 @@ void pasteArgList(const Node* node1, const Node* node2, TetraScope& destinationS
 			default:
 				std::stringstream message;
 				message << "Attempting to pass unknown DataType (ID = " << node1->type()->getKind() << ") to function"; 
-				Error e(message.str(),node1->getLine());
+				SystemError e(message.str(),node1->getLine(),node1);
 				throw e;
 			}
 	}
@@ -510,7 +510,7 @@ void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 		}
 		catch (Error e) {
 			//In the case of array out of bounds, propogate the error after tacking on line number info
-			Error e2(e.getMessage(),node->getLine());
+			RuntimeError e2(e.getMessage(),node->getLine(),context);
 			throw e2;
 		}
 		evaluateVecRef<T>(node->child(1),nextVec,ret,context);
@@ -521,7 +521,7 @@ void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret, TetraContext& 
 			value = static_cast<T>(vec->elementAt(indexNum.getData()).getData());
 		}
 		catch (Error e) {
-			Error e2(e.getMessage(),node->getLine());
+			RuntimeError e2(e.getMessage(),node->getLine(),context);
 			throw e2;
 		}
 		ret.setData(value);
@@ -558,7 +558,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 			default:
 				std::stringstream message;
 				message << "Attempting to evaluate reference to unknown DataType ID: " << node->type()->getKind() << endl;
-				Error e(message.str(),node->getLine());
+				SystemError e(message.str(),node->getLine(),node);
 				throw e;
 		}
 	}
@@ -570,7 +570,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 	else {
 		std::stringstream message;
 		message << "Attempted to obtain address of unrecognized LHS NodeKind. ID: " << node->kind() << "\n";
-		Error e(message.str(),node->getLine());
+		SystemError e(message.str(),node->getLine(),node);
 		throw e;
 	}
 }
@@ -647,7 +647,7 @@ void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
 		default:
 			std::stringstream message;
 			message << "Attempting to assign value of unknown DataType ID: " << node->type()->getKind();
-			Error e(message.str(),node->getLine());
+			SystemError e(message.str(),node->getLine(),node);
 			throw e;
 	}
 
@@ -820,7 +820,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 						default:
 							std::stringstream message;
 							message << "Attempted to initialize array with unknown subtype (ID: " << node->child(0)->type()->getKind() << ")";
-							Error e(message.str(),node->getLine());
+							SystemError e(message.str(),node->getLine(),node);
 							throw e;
 						
 					}
@@ -832,7 +832,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 			default:
 				std::stringstream message;
 				message << "Attempting to evaluate unknown immediate NodeType (ID: " << node->kind() << ")";
-				Error e(message.str(),node->getLine());
+				SystemError e(message.str(),node->getLine(),node);
 				throw e;
 		}
 			
@@ -859,7 +859,7 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 		default:
 			std::stringstream message;
 			message << "Unexpected flag type encountered: " << static_cast<int>(node->kind());
-			Error e(message.str(), node->getLine()); 
+			SystemError e(message.str(), node->getLine(),node); 
 			throw e;
 		break;
 	}
@@ -940,13 +940,13 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 		default:
 			std::stringstream message;
 			message << "Warnminig: unexpected node kind encountered when attempting to classify node: " << node->kind() << endl;
-			Error e(message.str(),node->getLine());
+			SystemError e(message.str(),node->getLine(),node);
 			throw e;
 	}
 
 }
 
-int interpret(const Node* tree) {
+int interpret(Node* tree) {
 
 
 	//Build function lookup table, find address of main method
@@ -955,8 +955,11 @@ int interpret(const Node* tree) {
 
 	//If Main was not found, print an error
 	if(start == NULL) {
-		std::cout << "Error: Attempted to call undefined function: main()" << std::endl;
-		return 1;
+		
+		std::stringstream message;
+		message << "Attempted to call undefined function: main()";
+		Error e(message.str(),0);
+		throw e;
 	}
 
 	//Will hold value returned to OS. 0 if main does not return an int
@@ -965,10 +968,10 @@ int interpret(const Node* tree) {
 	//Initialize the TetraContext, add a scope, and run!
 	TetraContext tContext;
 	tContext.initializeNewScope(start);
-	try {
+	//try {
 		evaluateNode<int>(start, retVal, tContext);
 //		tContext.exitScope();
-	}
+	/*}
 	catch (Error e) { //Print out any errors
 		std::cout << "---------------------------------------------------------------" << std::endl;
 		std::cout << "The following error was encountered while running your program: " << std::endl;
@@ -978,7 +981,7 @@ int interpret(const Node* tree) {
 		tContext.printStackTrace();
 		//Set return value to error code
 		retVal.setData(1);
-	}
+	}*/
 
 	//Wait for all outstanding threads to terminate
 	//This contains a subtle error if a thread removes itself between the conditional and the joini

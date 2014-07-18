@@ -9,15 +9,14 @@
 #include <iostream>
 #include <string>
 #include "frontend.hpp"
-#include "progContext.h"
-#include "functionTable.h"
-#include "tArray.h"
+#include "backend.hpp"
+//#include "progContext.h"
+//#include "functionTable.h"
+//#include "tArray.h"
 #include <list>
 
 //#define NDEBUG
 #include <assert.h>
-
-using std::string;
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
 TetraScope::TetraScope(const Node* pCallNode) : executionStatus(NORMAL), callNode(pCallNode) {
@@ -30,7 +29,7 @@ TData<void*>& TetraScope::declareReference(const string varName) {
 }
 */
 
-std::list<std::pair<pthread_t,TData<void*> > >& TetraScope::declareThreadSpecificVariable(const string& name) {
+std::list<std::pair<pthread_t,TData<void*> > >& TetraScope::declareThreadSpecificVariable(const std::string& name) {
 	return varScope.declareParForVar(name);
 }
 
@@ -164,7 +163,7 @@ void TetraContext::endParallel() {
 	progStack.top().endParallel();
 }
 
-std::list<std::pair<pthread_t,TData<void*> > >& TetraContext::declareThreadSpecificVariable(const string& name) {
+std::list<std::pair<pthread_t,TData<void*> > >& TetraContext::declareThreadSpecificVariable(const std::string& name) {
 	return progStack.top()->declareThreadSpecificVariable(name);
 }
 

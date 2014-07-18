@@ -1,5 +1,6 @@
 #There is a missing dependancy somewhere in this file.
 #Make will (on rare occasion) complain about multiple definition or some other linker error, which can be fixed by recompiling the whole project.
+#TODO: find the dependancy if it ever resurfaces
 
 # -pg -O3
 CC = clang++
@@ -14,8 +15,8 @@ tetra: run.o libbackend.a
 	@echo
 
 #create a linkable library letting other programs call interpret(Node* node)
-libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
-	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o
+libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o
 
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
@@ -26,7 +27,7 @@ main.o: main.cpp functionTable.h operationMap.cpp comparisonMap.cpp variableCont
 comparisonMap.o: comparisonMap.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c comparisonMap.cpp
 
-functionTable.o: functionTable.cpp functionTable.h
+functionTable.o: functionTable.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c functionTable.cpp
 
 #nodeTable.o: nodeTable.cpp nodeTable.h
@@ -35,7 +36,7 @@ functionTable.o: functionTable.cpp functionTable.h
 operationMap.o: operationMap.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c operationMap.cpp
 
-variableContext.o: variableContext.cpp variableContext.h
+variableContext.o: variableContext.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c variableContext.cpp
 
 tData.o: tData.h
@@ -44,17 +45,23 @@ tData.o: tData.h
 tDataSpecializations.o: tDataSpecializations.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tDataSpecializations.cpp
 
-progContext.o: progContext.h progContext.cpp
+progContext.o: backend.hpp progContext.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c progContext.cpp
 
-tArray.o: tArray.cpp tArray.h
+tArray.o: tArray.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tArray.cpp
 
-TSL.o: TSL.cpp TSL.h
+TSL.o: TSL.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c TSL.cpp
 
-threadEnvironment.o: threadEnvironment.cpp threadEnvironment.h
+threadEnvironment.o: threadEnvironment.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c threadEnvironment.cpp
+
+runtimeError.o: runtimeError.cpp backend.hpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c runtimeError.cpp
+
+systemError.o: systemError.cpp backend.hpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c systemError.cpp
 
 .PHONY clean:
 	rm *.o

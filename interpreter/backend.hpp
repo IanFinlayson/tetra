@@ -23,6 +23,7 @@
 
 
 //Interpret function from main
+
 int interpret(Node*);
 
 template<typename T>
@@ -902,5 +903,30 @@ bool readBool();
 std::string readString();
 int len(TArray&);
 int len(std::string&);
+
+/*
+ * This class is used in reporting runtime errors
+ */
+
+class RuntimeError: public Error {
+public:
+	RuntimeError(const std::string& pMessage, int pLine, TetraContext& pContext);
+	TetraContext& getContext();
+private:
+	TetraContext context;
+};
+
+/*
+ * These types of errors are thrown when the interpreter enters an invalid state
+ * e.g. the interpreter fails to find information about the types of certain variables
+ */
+
+class SystemError: public Error {
+public:
+	SystemError(const std::string& pMessage, int pLine, const Node* pNode);
+	const Node* getNode();
+private:
+	const Node* node;
+};
 
 #endif

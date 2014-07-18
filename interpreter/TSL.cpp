@@ -3,9 +3,10 @@
 #include<iostream>
 #include"frontend.hpp"
 #include<string.h>
-#include"tArray.h"
-#include"tData.h"
-#include"progContext.h"
+//#include"tArray.h"
+//#include"tData.h"
+//#include"progContext.h"
+#include"backend.hpp"
 
 template <typename T>
 void evaluateNode(const Node*,TData<T>&,TetraContext&);
