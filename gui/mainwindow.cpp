@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "quitdialog.h"
 #include "openappdialog.h"
+#include "editor.h"
 #include <QtCore>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -10,22 +11,27 @@
 #include <QPainter>
 #include <QScrollBar>
 #include <QSize>
+#include <pthread.h>
 
-MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
+int interpret(const Node* tree);
+
+MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow), buildError("No Error", 0){
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
-    this->setWindowTitle("Tetra");
+    setWindowTitle(tr("Tetra"));
 
-    connect(ui->input->document(), SIGNAL(contentsChanged()),
-            this, SLOT(documentWasModified()));
-    connect(ui->input, SIGNAL(cursorPositionChanged()),
-            this, SLOT(updateCoordinates()));
+    connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
+    connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
+    
     hideEditor();
     setupShortcuts();
 
     highlighter = new Highlighter(ui->input->document());
     QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
+
+    //mainValue = 0;
+    //buildSuccessful = true;
 
 }
 
@@ -52,18 +58,17 @@ void MainWindow::showEditor(){
     QFont font = QFont("Monaco");
     font.setFixedPitch(true);
     font.setPointSize(12);
-    const int tabStop = 4;  // 4 characters
+    font.setStyleHint(QFont::TypeWriter);
 
     QFontMetrics metrics(font);
-    ui->input->setTabStopWidth(tabStop * metrics.width(' '));
     ui->input->setFont(font);
     ui->output->setFont(font);
 
     ui->input->ensureCursorVisible();
     ui->input->setCenterOnScroll(true);
-    customizeScrollBar(ui->input->verticalScrollBar());
-    customizeScrollBar(ui->output->verticalScrollBar());
+
     ui->cursorPosition->setAlignment(Qt::AlignRight);
+    //ui->gridLayout->
 }
 
 void MainWindow::setupShortcuts(){
@@ -79,37 +84,24 @@ void MainWindow::setupShortcuts(){
     ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
 }
 
-void MainWindow::customizeScrollBar(QScrollBar *scrollBar){
 
-    scrollBar->setStyleSheet("QScrollBar:vertical  {"
-                            "border: 2px solid black;"
-                            "background: qconicalgradient(cx:0, cy:1, angle:109, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
-                            "width: 15px;"
-                            "margin: 22px 0 22px 0;}"
-                        "QScrollBar::handle:vertical  {"
-                            "background: white;"
-                            "min-height: 20px;}"
-                        "QScrollBar::add-line:vertical  {"
-                            "border: 2px solid black;"
-                            "background: qconicalgradient(cx:0, cy:1, angle:109, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
-                            "height: 20px;"
-                            "subcontrol-position: bottom;"
-                            "subcontrol-origin: margin;}"
-                        "QScrollBar::sub-line:vertical  {"
-                            "border: 2px solid black;"
-                            "background: qconicalgradient(cx:0, cy:1, angle:109, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
-                            "height: 20px;"
-                            "subcontrol-position: top;"
-                            "subcontrol-origin: margin;}"
-                        "QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical  {"
-                            "width: 0px;"
-                            "height: 0px;}"
-
-                        "QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical  {"
-                            "background: none;}"
-
-                            );
+//wrapper function for parseFile and interpret functions
+void* wrapperFunc(void* arg1){
+    MainWindow* tetraProg = static_cast<MainWindow*>(arg1);
+    Node* newNode;
+    try{
+        newNode = parseFile(tetraProg->openFile.toStdString());
+        tetraProg->mainValue = interpret(newNode);
+        tetraProg->buildSuccessful = true;
+    }
+    catch (Error e){
+        tetraProg->buildError = e;
+        tetraProg->buildSuccessful = false;
+    }
+    return NULL;
 }
+
+
 
 bool MainWindow::newProj(){
     bool projectCreated = false;
@@ -164,6 +156,9 @@ bool MainWindow::maybeSave(){
 void MainWindow::updateCoordinates(){
     ui->cursorPosition->setText(ui->input->getCoordinates());
     ui->input->ensureCursorVisible();
+    if(ui->input->checkLineHighlighted){
+        ui->input->unhighlightLine();
+    }
 }
 
 //-----------Menu Bar/Tool Bar Actions-----------//
@@ -175,6 +170,7 @@ void MainWindow::on_actionNew_triggered(){
             openFile = filename;
             on_actionSave_triggered();
             ui->tetraFileLabel->setText(strippedName(openFile));
+            ui->output->setPlainText("");
         }
     }
 }
@@ -187,12 +183,10 @@ void MainWindow::on_actionSave_triggered(){
 
         ttrFile.flush();
         ttrFile.close();
-        //setCurrentFile(openFile);
     }
     else{
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "../../../..", "Tetra (*.ttr)");
         if(!filename.isEmpty()){
-            //setCurrentFile(openFile);
             on_actionSave_triggered();
         }
     }
@@ -210,6 +204,7 @@ void MainWindow::on_actionOpen_triggered(){
 
                 ui->input->setPlainText(fileText);
                 ui->tetraFileLabel->setText(strippedName(openFile));
+                ui->output->clear();
             }
         }
     }
@@ -260,8 +255,34 @@ void MainWindow::on_actionFind_triggered(){
   //  ui->input->find();
 }
 void MainWindow::on_actionRun_triggered(){
-    //Error e("hello", 0);
-    ui->output->insertPlainText("...But nothing happened.\n\n");
+    pthread_t ttrThread;
+    pthread_create(&ttrThread, NULL, (void*(*)(void*))wrapperFunc, this);\
+    pthread_join(ttrThread, NULL);
+
+    if(buildSuccessful){
+        ui->output->insertPlainText(QString::number(mainValue)+ "\n");
+    }
+    else{
+        ui->output->insertPlainText(QString::number(buildError.getLine()) + ": " + QString::fromStdString(buildError.getMessage()) + "\n");
+        ui->input->highlightLine(QColor(Qt::red), buildError.getLine());
+    }
+}
+void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
+    if(arg1 == true){
+        ui->input->showLineNumbers(true);
+    }
+    else{
+        ui->input->showLineNumbers(false);
+    }
+}
+void MainWindow::on_actionMinimize_triggered(){
+    this->showMinimized();
+}
+void MainWindow::on_actionLine_Numbers_triggered(){
+    this->showFullScreen();
+}
+void MainWindow::on_actionClear_Output_triggered(){
+    ui->output->clear();
 }
 
 //-----------------------------------------------//
@@ -273,11 +294,10 @@ void MainWindow::on_actionRun_triggered(){
 
 
 
-void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
-    if(arg1 == true){
-        ui->input->showLineNumbers(true);
-    }
-    else{
-        ui->input->showLineNumbers(false);
-    }
-}
+
+
+
+
+
+
+

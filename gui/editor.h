@@ -24,6 +24,10 @@ public:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
     void showLineNumbers(bool);
+    void highlightLine(QColor, int);
+    void unhighlightLine();
+    bool checkLineHighlighted;
+
 
 private slots:
     void updateCursorCoordinates();
@@ -42,6 +46,7 @@ private:
     QString coordinates;
     QWidget *lineNumberArea;
     bool lineNumbersVisible;
+    bool lineHighlighted;
 };
 
 class LineNumberArea : public QWidget{

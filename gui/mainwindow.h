@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QPlainTextEdit>
 #include "syntaxhighlighter.h"
+#include "../frontend/frontend.hpp"
 
 class Editor;
 
@@ -25,6 +26,9 @@ public:
     bool openProj();
     bool newProj();
     void showEditor();
+    QString getOpenFile();
+    friend void* wrapperFunc(void*);
+
 
 private slots:
     void on_actionCopy_triggered();
@@ -45,6 +49,12 @@ private slots:
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
 
+    void on_actionMinimize_triggered();
+
+    void on_actionLine_Numbers_triggered();
+
+    void on_actionClear_Output_triggered();
+
 private:
     Ui::MainWindow *ui;
     QString openFile;
@@ -57,7 +67,9 @@ private:
     QString strippedName(const QString &fullFileName);
 
     bool maybeSave();
-    void customizeScrollBar(QScrollBar *);
+    int mainValue;
+    bool buildSuccessful;
+    Error buildError;
 };
 
 #endif // MAINWINDOW_H

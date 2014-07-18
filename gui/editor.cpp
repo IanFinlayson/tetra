@@ -13,7 +13,8 @@ Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
 
     updateLineNumberAreaWidth(0);
 
-    lineNumbersVisible = false;
+    lineNumbersVisible = true;
+    lineHighlighted = false;
 }
 
 void Editor::keyPressEvent(QKeyEvent *e){
@@ -195,4 +196,52 @@ void Editor::showLineNumbers(bool arg1){
     else{
         this->lineNumberArea->hide();
     }
+}
+
+void Editor::highlightLine(QColor color, int lineNumberToHighlight)
+{
+    int currentLineNumber = cursor.blockNumber()+1;
+    int moves = lineNumberToHighlight - currentLineNumber;
+    if(moves){
+        if(moves<0){
+            cursor.movePosition(QTextCursor::Up, QTextCursor::MoveAnchor, -moves);
+        }
+        else{
+            cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, moves);
+        }
+        cursor.movePosition(QTextCursor::StartOfLine);
+        setTextCursor(cursor);
+    }
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    if (!isReadOnly()) {
+        QTextEdit::ExtraSelection selection;
+
+        QColor lineColor = color.lighter(160);
+
+        selection.format.setBackground(lineColor);
+        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        selection.cursor = textCursor();
+        selection.cursor.clearSelection();
+        extraSelections.append(selection);
+    }
+    setExtraSelections(extraSelections);
+    lineHighlighted = true;
+}
+
+void Editor::unhighlightLine()
+{
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    if (!isReadOnly()) {
+        QTextEdit::ExtraSelection selection;
+
+        selection.format.setBackground(QColor(0, 0, 0, 0));
+        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        selection.cursor = textCursor();
+        selection.cursor.clearSelection();
+        extraSelections.append(selection);
+    }
+    setExtraSelections(extraSelections);
+    lineHighlighted = false;
 }
