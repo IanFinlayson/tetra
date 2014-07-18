@@ -17,4 +17,6 @@ def main() int:
       pass
    if a + b == c:
       return c
+   print("a: ",a," b: ", b)
+   print("c:",c,"\n")
    return c

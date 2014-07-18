@@ -218,9 +218,9 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
                                 collection.setData<TArray*>(collection_ptr);
                         }
 
-			const int NUM_THREADS = 8;
+			const int NUM_THREADS = TetraEnvironment::getMaxThreads();
 
-			pthread_t workers[NUM_THREADS];
+			std::vector<pthread_t> workers;
 
 			//Note that dataqueue is a handle to the actual array in the Variable Table
 			std::list<std::pair<pthread_t, TData<void*> > > dataQueue = context.declareThreadSpecificVariable(node->child(0)->getString());
@@ -235,6 +235,8 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 			pthread_mutex_lock(&iter_mutex);
 
 			for(int x = 0; x < NUM_THREADS && x < collection.getData()->size(); x++) {
+				pthread_t temp;
+				workers.push_back(temp);
 				//cout << "worker before: " << workers[x] << endl;
 				switch(node->child(0)->type()->getKind()) {
 				case TYPE_INT:
