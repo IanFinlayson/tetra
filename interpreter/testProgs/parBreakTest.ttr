@@ -1,0 +1,14 @@
+#this test is somewhat inexact.
+#The standard behavior is that each other thread will finish up what it is doing when a break is called, 
+#We will assume that whtever is running this has a sufficiently small number of coressuch that it will not execute every single one when "finishing execution"
+
+def main() int:
+        sum = 0
+        parallel for x in [1 ... 1000]:
+                lock ww:
+                        sum += 1
+                if x == 2:
+                        break
+        if sum > 0 and sum < 1000:
+                return 20
+        return 1

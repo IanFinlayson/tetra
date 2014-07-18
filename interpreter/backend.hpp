@@ -391,7 +391,8 @@ public:
 private:
 	
 	std::map<std::string, TData<void*> > varMap;
-	pthread_mutex_t table_mutex;
+	//pthread_mutex_t table_mutex;
+	pthread_rwlock_t table_mutex;
 
 	//This is a std::vector containing pairs associating strings with another vector containing pairs that associate a thread with a TData value
 	//This is used in the context of parallel for loops, where the lookup function can:
@@ -430,10 +431,13 @@ private:
 //TODO: set a single return value for single exit point, and simplify lock/unlock semantics
 template<typename T>
 T* VarTable::lookupVar(const std::string varName) {
-	pthread_mutex_lock(&table_mutex);
+	//pthread_mutex_lock(&table_mutex);
 	
 	//Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
 	std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > >::iterator loc;
+	
+	pthread_rwlock_rdlock(&table_mutex);
+	
 	loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
 	if(loc != parForVars.end()) {
 		std::list< std::pair< pthread_t, TData<void*> > >& varList = (*loc).second;
@@ -442,19 +446,28 @@ T* VarTable::lookupVar(const std::string varName) {
 		if(value != varList.end()) {
 
 			T* ret = static_cast<T*>(value->second.getData());
-			pthread_mutex_unlock(&table_mutex);
+			pthread_rwlock_unlock(&table_mutex);
 			return ret;
 		}
 		else {	//If this thread has not yet registered a value, create it
+			//Unlock the read mutex while we assmeble the data to be inserted, will eventually obtain write privelages
+			pthread_rwlock_unlock(&table_mutex);
+
 			T* newData_ptr = new T();
 			//cout << "New Data: " << newData_ptr << endl;
 			TData<void*> insertable(newData_ptr);
 			//Ensure that insertable gets copied correctly, and deleted correctly when we are done
 			insertable.setDeletableType<T>();
+			//Obtain write privelages
+			pthread_rwlock_wrlock(&table_mutex);
+
+			//Note that since THIS thread can push in a pair with pthread_t equal to pthread_self()
+			//Hence there is no need to check whether the condition is still true or not
+
 			varList.push_back(std::pair<pthread_t,TData<void*> >(pthread_self(), insertable));
 			(varList.rbegin())->second.setDeletableType<T>();
 			T* ret = static_cast<T*>((varList.rbegin())->second.getData());
-			pthread_mutex_unlock(&table_mutex);
+			pthread_rwlock_unlock(&table_mutex);
 			//cout << "Ret: " << ret << endl;
 			return ret;
 		}
@@ -462,18 +475,30 @@ T* VarTable::lookupVar(const std::string varName) {
 	//check whether a normal entry exists for this variable
 	//The find and [] operators are redundant. we can combine them into one search
 	else if(varMap.find(varName) == varMap.end()) {
+		//Release read privelages while we assemble what we need to insert
+		pthread_rwlock_unlock(&table_mutex);
 		//If the variable does not yet exist, we need to allocate memory for the TData to point to!
 		T* newData_ptr = new T(); //() should zero the memory, even for primitive types
 		TData<void*> insertable(newData_ptr);
 		//Must notify TData that it is pointing at dynamically allocated memory
 		insertable.setDeletableType<T>();
 
-		varMap[varName] = insertable;
+		//Obtain write privelages before we insert
+		pthread_rwlock_wrlock(&table_mutex);
+
+		//Note that another thread may have inserted the value while we were waitring for write privelages!
+		//Hence, we must again check that the variable is stillnot in the table
+
+		if(varMap.find(varName) == varMap.end()) {
+			varMap[varName] = insertable;
+		}
+		//else do nothing, as the statement after this block will retrieve the correct value
 	}
 	   
 	T* ret = static_cast<T*>(varMap[varName].getData());
 
-	pthread_mutex_unlock(&table_mutex);
+	//Release whatever lock we happened to have
+	pthread_rwlock_unlock(&table_mutex);
 
 	//return static_cast<T*>(varMap[varName].getData());
 	
