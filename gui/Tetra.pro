@@ -37,3 +37,18 @@ FORMS    += \
 
 RESOURCES += \
     AppResources.qrc
+
+unix:!macx: LIBS += -L$$PWD/../frontend/ -lfrontend
+
+INCLUDEPATH += $$PWD/../frontend
+DEPENDPATH += $$PWD/../frontend
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../frontend/libfrontend.a
+
+
+unix:!macx: LIBS += -L$$PWD/../interpreter/ -lbackend
+
+INCLUDEPATH += $$PWD/../interpreter
+DEPENDPATH += $$PWD/../interpreter
+
+unix:!macx: PRE_TARGETDEPS += $$PWD/../interpreter/libbackend.a

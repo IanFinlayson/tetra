@@ -14,31 +14,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QScrollBar:horizontal  {
-    border: 2px solid grey;
-    background: #32CC99;
-    height: 15px;
-    margin: 0px 20px 0 20px;
-}
-QScrollBar::handle:horizontal  {
-    background: white;
-    min-width: 20px;
-}
-QScrollBar::add-line:horizontal  {
-    border: 2px solid grey;
-    background: #32CC99;
-    width: 20px;
-    subcontrol-position: right;
-    subcontrol-origin: margin;
-}
- 
-QScrollBar::sub-line:horizontal  {
-    border: 2px solid grey;
-    background: #32CC99;
-    width: 20px;
-    subcontrol-position: left;
-    subcontrol-origin: margin;
-}</string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
@@ -47,10 +23,15 @@ QScrollBar::sub-line:horizontal  {
    <layout class="QVBoxLayout" name="verticalLayout_2">
     <item>
      <widget class="QSplitter" name="splitter">
+      <property name="styleSheet">
+       <string notr="true">QSplitter::handle{
+	background-color: white;
+}</string>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
          <widget class="QLabel" name="tetraFileLabel">
@@ -93,47 +74,15 @@ QScrollBar::sub-line:horizontal  {
            <enum>Qt::DefaultContextMenu</enum>
           </property>
           <property name="styleSheet">
-           <string notr="true">  QScrollBar:vertical {
-      border: 2px solid grey;
-      background: #32CC99;
-      width: 15px;
-      margin: 22px 0 22px 0;
-  }
-  QScrollBar::handle:vertical {
-      background: white;
-      min-height: 20px;
-  }
-  QScrollBar::add-line:vertical {
-      border: 2px solid grey;
-      background: #32CC99;
-      height: 20px;
-      subcontrol-position: bottom;
-      subcontrol-origin: margin;
-  }
-
-  QScrollBar::sub-line:vertical {
-      border: 2px solid grey;
-      background: #32CC99;
-      height: 20px;
-      subcontrol-position: top;
-      subcontrol-origin: margin;
-  }
-  QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
-      border: 2px solid grey;
-      width: 3px;
-      height: 3px;
-      background: white;
-  }
-
-  QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-      background: none;
-  }</string>
+           <string notr="true">Editor{
+border: 1px solid grey
+}</string>
           </property>
          </widget>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
          <widget class="QLabel" name="outputLabel">
@@ -154,20 +103,18 @@ QScrollBar::sub-line:horizontal  {
            <bool>false</bool>
           </property>
           <property name="styleSheet">
-           <string notr="true">QScrollBar { border: none; }
-QScrollBar::sub-page:horizontal { background-color: red; }
-QScrollBar::add-page:horizontal { background-color: green; }
-QScrollBar::sub-page:vertical   { background-color: blue; }
-QScrollBar::add-page:vertical   { background-color: yellow; }</string>
+           <string notr="true">QTextEdit{
+border: 1px solid grey;
+}</string>
           </property>
           <property name="frameShadow">
            <enum>QFrame::Plain</enum>
           </property>
           <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
+           <enum>Qt::ScrollBarAsNeeded</enum>
           </property>
           <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
+           <enum>Qt::ScrollBarAsNeeded</enum>
           </property>
           <property name="sizeAdjustPolicy">
            <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
@@ -195,7 +142,7 @@ QScrollBar::add-page:vertical   { background-color: yellow; }</string>
      <x>0</x>
      <y>0</y>
      <width>868</width>
-     <height>22</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -255,6 +202,8 @@ QScrollBar::add-page:vertical   { background-color: yellow; }</string>
     </property>
     <addaction name="actionMinimize"/>
     <addaction name="actionFull_Screen"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_Output"/>
     <addaction name="separator"/>
     <addaction name="actionLine_Numbers"/>
    </widget>
@@ -492,6 +441,11 @@ QScrollBar::add-page:vertical   { background-color: yellow; }</string>
    </property>
    <property name="text">
     <string>Line Numbers</string>
+   </property>
+  </action>
+  <action name="actionClear_Output">
+   <property name="text">
+    <string>Clear Output</string>
    </property>
   </action>
  </widget>
