@@ -175,19 +175,19 @@ void TetraContext::printStackTrace() const {
 	using namespace std;
 	//Check that callStack currently has something in it
 	if(dummy.progStack.size() == 0) {
-		cout << "(The interpreter was unable to recover a stack trace)" << endl;
+		TetraEnvironment::getOutputStream() << "(The interpreter was unable to recover a stack trace)" << endl;
 		return;
 	}
 
 	//Print the primary stack frame where the error occurred
 	const Node* stackElement = dummy.progStack.top()->getCallNode();
-	cout << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
+	TetraEnvironment::getOutputStream() << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
 	dummy.exitScope();
 
 	//Print further stack frames if there are any
 	while(dummy.progStack.size() > 0) {
 		const Node* element = dummy.progStack.top()->getCallNode();
-		cout << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
+		TetraEnvironment::getOutputStream() << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
 		dummy.exitScope();	
 	}
 
