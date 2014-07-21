@@ -134,6 +134,8 @@ class Symbol {
     int lineno;
 };
 
+const int MAX_CHILDREN = 3;
+
 /* the node class represents one element of a parse tree */
 class Node {
   public:
@@ -159,7 +161,15 @@ class Node {
     /* children functions */
     void addChild(Node* child);
     int numChildren( ) const;
-    Node* child(int which) const;
+
+    /* inlined for performance */
+    Node* child(int which) const {
+      if (which < 0 || which >= num_children) {
+        return NULL;
+      } else {
+        return children[which];
+      }
+    }
 
     /* symbol functions */
     void insertSymbol(Symbol sym);
@@ -168,7 +178,8 @@ class Node {
 
   private:
     /* the children nodes of this node */
-    vector<Node*> children;
+    Node* children[MAX_CHILDREN];
+    int num_children;
 
     /* the symbol table used for this Node - currently only function nodes have one */
     map<string, Symbol>* symtable;
