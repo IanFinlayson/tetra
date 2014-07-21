@@ -37,6 +37,12 @@ prefixes[${#prefixes[*]}]="lock";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="par";	results[${#results[*]}]=3
 prefixes[${#prefixes[*]}]="parRef";	results[${#results[*]}]=15
 prefixes[${#prefixes[*]}]="parpar";	results[${#results[*]}]=50
+prefixes[${#prefixes[*]}]="parFor";	results[${#results[*]}]=10
+prefixes[${#prefixes[*]}]="parFor2";	results[${#results[*]}]=225
+prefixes[${#prefixes[*]}]="parVar";	results[${#results[*]}]=2
+prefixes[${#prefixes[*]}]="parForSim";	results[${#results[*]}]=3
+prefixes[${#prefixes[*]}]="parCon";	results[${#results[*]}]=8
+prefixes[${#prefixes[*]}]="parBreak";	results[${#results[*]}]=20
 
 successes=0
 total=${#prefixes[*]}

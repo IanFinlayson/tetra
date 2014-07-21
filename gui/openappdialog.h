@@ -13,6 +13,9 @@ class OpenAppDialog : public QDialog
 {
     Q_OBJECT
 
+protected:
+    virtual void keyPressEvent(QKeyEvent *e);
+
 public:
     explicit OpenAppDialog(QWidget *parent = 0);
     ~OpenAppDialog();

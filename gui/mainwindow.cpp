@@ -2,32 +2,37 @@
 #include "ui_mainwindow.h"
 #include "quitdialog.h"
 #include "openappdialog.h"
+#include "editor.h"
 #include <QtCore>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
+#include <QScrollBar>
+#include <QSize>
+#include <pthread.h>
 
+int interpret(const Node* tree);
 
-MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
+MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow), buildError("No Error", 0){
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
-    this->setWindowTitle("Tetra");
+    setWindowTitle(tr("Tetra"));
 
-    connect(ui->input->document(), SIGNAL(contentsChanged()),
-            this, SLOT(documentWasModified()));
-    connect(ui->input, SIGNAL(cursorPositionChanged()),
-            this, SLOT(updateCoordinates()));
-    //ui->cursorPosition = ui->input->getCoordinates();
-    //ui->input->getCoordinates() = ui->cursorPosition;
-    ui->cursorPosition->show();
+    connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
+    connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
+    
     hideEditor();
     setupShortcuts();
 
     highlighter = new Highlighter(ui->input->document());
     QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
+
+    //mainValue = 0;
+    //buildSuccessful = true;
+
 }
 
 MainWindow::~MainWindow(){
@@ -40,8 +45,6 @@ void MainWindow::hideEditor(){
     ui->outputLabel->hide();
     ui->input->hide();
     ui->output->hide();
-    ui->lineEdit->hide();
-    ui->enterButton->hide();
     ui->cursorPosition->hide();
 }
 
@@ -50,22 +53,22 @@ void MainWindow::showEditor(){
     ui->outputLabel->show();
     ui->input->show();
     ui->output->show();
-    ui->lineEdit->show();
-    ui->enterButton->show();
     ui->cursorPosition->show();
 
     QFont font = QFont("Monaco");
     font.setFixedPitch(true);
     font.setPointSize(12);
-    const int tabStop = 4;  // 4 characters
+    font.setStyleHint(QFont::TypeWriter);
 
     QFontMetrics metrics(font);
-    ui->input->setTabStopWidth(tabStop * metrics.width(' '));
     ui->input->setFont(font);
     ui->output->setFont(font);
 
     ui->input->ensureCursorVisible();
     ui->input->setCenterOnScroll(true);
+
+    ui->cursorPosition->setAlignment(Qt::AlignRight);
+    //ui->gridLayout->
 }
 
 void MainWindow::setupShortcuts(){
@@ -80,6 +83,25 @@ void MainWindow::setupShortcuts(){
     ui->actionOpen->setShortcuts(QKeySequence::Open);
     ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
 }
+
+
+//wrapper function for parseFile and interpret functions
+void* wrapperFunc(void* arg1){
+    MainWindow* tetraProg = static_cast<MainWindow*>(arg1);
+    Node* newNode;
+    try{
+        newNode = parseFile(tetraProg->openFile.toStdString());
+        tetraProg->mainValue = interpret(newNode);
+        tetraProg->buildSuccessful = true;
+    }
+    catch (Error e){
+        tetraProg->buildError = e;
+        tetraProg->buildSuccessful = false;
+    }
+    return NULL;
+}
+
+
 
 bool MainWindow::newProj(){
     bool projectCreated = false;
@@ -133,6 +155,10 @@ bool MainWindow::maybeSave(){
 
 void MainWindow::updateCoordinates(){
     ui->cursorPosition->setText(ui->input->getCoordinates());
+    ui->input->ensureCursorVisible();
+    if(ui->input->checkLineHighlighted){
+        ui->input->unhighlightLine();
+    }
 }
 
 //-----------Menu Bar/Tool Bar Actions-----------//
@@ -144,6 +170,7 @@ void MainWindow::on_actionNew_triggered(){
             openFile = filename;
             on_actionSave_triggered();
             ui->tetraFileLabel->setText(strippedName(openFile));
+            ui->output->setPlainText("");
         }
     }
 }
@@ -156,12 +183,10 @@ void MainWindow::on_actionSave_triggered(){
 
         ttrFile.flush();
         ttrFile.close();
-        //setCurrentFile(openFile);
     }
     else{
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "../../../..", "Tetra (*.ttr)");
         if(!filename.isEmpty()){
-            //setCurrentFile(openFile);
             on_actionSave_triggered();
         }
     }
@@ -179,6 +204,7 @@ void MainWindow::on_actionOpen_triggered(){
 
                 ui->input->setPlainText(fileText);
                 ui->tetraFileLabel->setText(strippedName(openFile));
+                ui->output->clear();
             }
         }
     }
@@ -225,9 +251,53 @@ void MainWindow::on_actionDelete_triggered(){
 void MainWindow::on_actionSelect_All_triggered(){
     ui->input->selectAll();
 }
-void MainWindow::on_actionRun_triggered(){
-    ui->output->insertPlainText("...But nothing happened.\n");
+void MainWindow::on_actionFind_triggered(){
+  //  ui->input->find();
 }
+void MainWindow::on_actionRun_triggered(){
+    pthread_t ttrThread;
+    pthread_create(&ttrThread, NULL, (void*(*)(void*))wrapperFunc, this);\
+    pthread_join(ttrThread, NULL);
+
+    if(buildSuccessful){
+        ui->output->insertPlainText(QString::number(mainValue)+ "\n");
+    }
+    else{
+        ui->output->insertPlainText(QString::number(buildError.getLine()) + ": " + QString::fromStdString(buildError.getMessage()) + "\n");
+        ui->input->highlightLine(QColor(Qt::red), buildError.getLine());
+    }
+}
+void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
+    if(arg1 == true){
+        ui->input->showLineNumbers(true);
+    }
+    else{
+        ui->input->showLineNumbers(false);
+    }
+}
+void MainWindow::on_actionMinimize_triggered(){
+    this->showMinimized();
+}
+void MainWindow::on_actionLine_Numbers_triggered(){
+    this->showFullScreen();
+}
+void MainWindow::on_actionClear_Output_triggered(){
+    ui->output->clear();
+}
+
 //-----------------------------------------------//
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

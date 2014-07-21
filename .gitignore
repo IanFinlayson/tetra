@@ -7,4 +7,7 @@ tags
 gmon.out
 tetra
 testLog.txt
+checkTestLog.txt
+seg.txt
+testCheckLog.txt
 cscope.out

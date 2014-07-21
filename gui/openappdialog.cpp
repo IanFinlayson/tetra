@@ -11,11 +11,11 @@ OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAp
     ui->setupUi(this);
     QPixmap tetraLogo(":/graphics/Tetra Resources/logo.png");
     ui->logo->setPixmap(tetraLogo);
+    ui->logo->setAlignment(Qt::AlignCenter);
 
-    this->setModal(true);
-    this->setWindowTitle("Welcome to Tetra");
-    this->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
-    this->setFixedSize(880, 350);
+    setModal(true);
+    setWindowTitle(tr("Welcome to Tetra"));
+    setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 }
 
 OpenAppDialog::~OpenAppDialog(){
@@ -42,4 +42,9 @@ void OpenAppDialog::on_openProjButton_clicked(){
     if(projectOpened){
         this->close();
     }
+}
+
+void OpenAppDialog::keyPressEvent(QKeyEvent *e){
+    e->ignore();
+    return;
 }

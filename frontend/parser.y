@@ -755,6 +755,8 @@ void yyerror(const char* str) {
 /* parse from a file */
 extern istream* in;
 Node* parseFile(const string& fname) {
+  reset_lexer( );
+  
   /* open the file */
   ifstream file(fname.c_str( ));
 

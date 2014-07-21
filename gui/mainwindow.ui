@@ -20,121 +20,118 @@
    <property name="styleSheet">
     <string notr="true">background: rgb(255, 255, 255)</string>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLabel" name="tetraFileLabel">
-      <property name="text">
-       <string>Tetra File:</string>
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <item>
+     <widget class="QSplitter" name="splitter">
+      <property name="styleSheet">
+       <string notr="true">QSplitter::handle{
+	background-color: white;
+}</string>
       </property>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="Editor" name="input" native="true">
-      <property name="sizeIncrement">
-       <size>
-        <width>1</width>
-        <height>1</height>
-       </size>
-      </property>
-      <property name="mouseTracking">
-       <bool>false</bool>
-      </property>
-      <property name="contextMenuPolicy">
-       <enum>Qt::DefaultContextMenu</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0">
-     <widget class="QLabel" name="outputLabel">
-      <property name="text">
-       <string>Output:</string>
-      </property>
-     </widget>
-    </item>
-    <item row="6" column="0">
-     <widget class="QTextEdit" name="output">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
-     <widget class="QLineEdit" name="lineEdit"/>
-    </item>
-    <item row="7" column="0">
-     <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>13</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="8" column="1">
-     <spacer name="horizontalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeType">
-       <enum>QSizePolicy::Fixed</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>13</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item row="8" column="2">
-     <widget class="QPushButton" name="enterButton">
-      <property name="styleSheet">
-       <string notr="true">QPushButton {
-color: #333;
-border: 2px solid #555;
-border-radius: 11px;
-padding: 5px;
-background: qradialgradient(cx: 0.3, cy: -0.4,
-fx: 0.3, fy: -0.4,
-radius: 1.35, stop: 0 #fff, stop: 1 #888);
-min-width: 75px;
-}
-
-QPushButton:hover {
-background: qradialgradient(cx: 0.3, cy: -0.4,
-fx: 0.3, fy: -0.4,
-radius: 1.35, stop: 0 #fff, stop: 1 #bbb);
-}
-
-QPushButton:pressed {
-background: qradialgradient(cx: 0.4, cy: -0.1,
-fx: 0.4, fy: -0.1,
-radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="tetraFileLabel">
+          <property name="text">
+           <string>Tetra File:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="cursorPosition">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>0, 0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="Editor" name="input" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="sizeIncrement">
+           <size>
+            <width>1</width>
+            <height>1</height>
+           </size>
+          </property>
+          <property name="mouseTracking">
+           <bool>false</bool>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::DefaultContextMenu</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">Editor{
+border: 1px solid grey
 }</string>
-      </property>
-      <property name="text">
-       <string>Enter</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="cursorPosition">
-      <property name="text">
-       <string>0, 0</string>
-      </property>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QLabel" name="outputLabel">
+          <property name="text">
+           <string>Output:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextEdit" name="output">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="autoFillBackground">
+           <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QTextEdit{
+border: 1px solid grey;
+}</string>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Plain</enum>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarAsNeeded</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+          </property>
+          <property name="lineWrapMode">
+           <enum>QTextEdit::WidgetWidth</enum>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="placeholderText">
+           <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -145,7 +142,7 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
      <x>0</x>
      <y>0</y>
      <width>868</width>
-     <height>22</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -154,7 +151,6 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
-    <addaction name="actionOpen_Recent"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
@@ -182,6 +178,8 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
     <addaction name="actionDelete"/>
     <addaction name="separator"/>
     <addaction name="actionSelect_All"/>
+    <addaction name="separator"/>
+    <addaction name="actionFind"/>
    </widget>
    <widget class="QMenu" name="menuBuild">
     <property name="title">
@@ -198,10 +196,22 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
     </property>
     <addaction name="actionDebug"/>
    </widget>
+   <widget class="QMenu" name="menuWindow">
+    <property name="title">
+     <string>Window</string>
+    </property>
+    <addaction name="actionMinimize"/>
+    <addaction name="actionFull_Screen"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_Output"/>
+    <addaction name="separator"/>
+    <addaction name="actionLine_Numbers"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuBuild"/>
    <addaction name="menuDebug"/>
+   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -402,6 +412,40 @@ radius: 1.35, stop: 0 #fff, stop: 1 #ddd);
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="text">
+    <string>Find</string>
+   </property>
+  </action>
+  <action name="actionMinimize">
+   <property name="text">
+    <string>Minimize</string>
+   </property>
+  </action>
+  <action name="actionFull_Screen">
+   <property name="text">
+    <string>Full Screen</string>
+   </property>
+  </action>
+  <action name="actionLine_Numbers">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Line Numbers</string>
+   </property>
+  </action>
+  <action name="actionClear_Output">
+   <property name="text">
+    <string>Clear Output</string>
    </property>
   </action>
  </widget>

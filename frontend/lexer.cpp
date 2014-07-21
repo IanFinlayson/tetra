@@ -28,6 +28,16 @@ int dedents_left = 0;
 /* line number we are at - used for error messages */
 int yylineno = 1;
 
+/* reset the lexer state */
+void reset_lexer( ) {
+	start_of_line = 1;
+	spaces_per_indent = 0;
+	indent_level = 0;
+	dedents_left = 0;
+	yylineno = 1;
+}
+
+
 /* the symbol used to comunicate with bison */
 extern YYSTYPE yylval;
 

@@ -9,6 +9,8 @@
         <file>Tetra Resources/icons/appbar.printer.text.png</file>
         <file>Tetra Resources/icons/appbar.protractor.png</file>
         <file>Tetra Resources/icons/logo_squares.ico</file>
+        <file>Tetra Resources/icons/appbar.arrow.down.png</file>
+        <file>Tetra Resources/icons/appbar.arrow.up.png</file>
     </qresource>
     <qresource prefix="/graphics">
         <file>Tetra Resources/logo.png</file>

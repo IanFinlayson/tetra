@@ -1,0 +1,10 @@
+def main() int:
+        ret = 0
+        parallel for x in [1 ... 10]:
+                if x == 5:
+                        continue
+                if x == 7:
+                        continue
+                lock reg:
+                        ret += 1
+        return ret

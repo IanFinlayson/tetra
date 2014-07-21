@@ -1,0 +1,23 @@
+def main() int:
+   s = 0
+   h = 0.1
+   parallel for x in [1 ... 12]:
+      lock dd:
+         s += x
+   parallel for z in [1.1,2.2,3.3,4.4]:
+      lock prin:
+         h += z
+   qwerty = 0
+   parallel for w in [true,false,true,true]:
+      if w:
+         qwerty += 1
+   parallel for u in ["ab","cd","ef"]:
+      lock prin:
+         print(u,"\n")
+   summer = 0
+   parallel for e in [[1,2],[3,4]]:
+      pass
+      parallel for r in e:
+         lock dd:
+            summer += r
+   return summer

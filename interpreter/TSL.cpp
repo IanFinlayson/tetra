@@ -3,9 +3,10 @@
 #include<iostream>
 #include"frontend.hpp"
 #include<string.h>
-#include"tArray.h"
-#include"tData.h"
-#include"progContext.h"
+//#include"tArray.h"
+//#include"tData.h"
+//#include"progContext.h"
+#include"backend.hpp"
 
 template <typename T>
 void evaluateNode(const Node*,TData<T>&,TetraContext&);
@@ -31,40 +32,40 @@ void print(const Node* args, TetraContext& context) {
 				TData<int> value;
 				evaluateNode<int>(args,value,context);
 				//Prints the value, flushes the buffer WITHOUT a new line
-				std::cout << value.getData() << std::flush;
+				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
 			}
 			break;
 			case TYPE_REAL:
 			{   
 				TData<double> value;
 				evaluateNode<double>(args,value,context);
-				std::cout << value.getData() << std::flush;
+				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
 			} 
 			break;
 			case TYPE_BOOL:
 			{   
 				TData<bool> value;
 				evaluateNode<bool>(args,value,context);
-				std::cout << value.getData() << std::flush;
+				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
 			} 
 			break;
 			case TYPE_STRING:
 			{   
 				TData<string> value;
 				evaluateNode<string>(args,value,context);
-				std::cout << value.getData() << std::flush;
+				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
 			} 
 			break;
 			case TYPE_VECTOR:
 			{   
 				TData<TArray> value;
 				evaluateNode<TArray>(args,value,context);
-				std::cout << value.getData() << std::flush;
+				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
 			} 
 			break;
 			default:
 			//print that we did not recognize whatever it is we are supposed to print
-				std::cout << "??" << std::flush;
+				TetraEnvironment::getOutputStream() << "??" << std::flush;
 		}
 	}
 }

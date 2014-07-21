@@ -3,7 +3,8 @@
  *Since there is only one funciton table per program (even if using multiple files, the further functions should be addable by calling buildTree for each file's syntax tree) This uses a single object design.
  */
 
-#include "functionTable.h"
+//#include "functionTable.h"
+#include "backend.hpp"
 #include <map>
 #include <iostream>
 #include <frontend.hpp>
@@ -88,16 +89,16 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
 						break;
 						default:
 							std::stringstream message;
-							message << "Error, unknown nodekind encountered in function signature. Aborting..." << std::endl;
-							Error e(message.str(),node->getLine());
+							message << "Error, unknown nodekind encountered in function signature." << std::endl;
+							SystemError e(message.str(),node->getLine(),node);
 							throw e;
 					}
 				}
 			break;
 			default:
 				std::stringstream message;
-				message << "Error, unknown nodekind encountered in function signature. Aborting..." << std::endl;
-				Error e(message.str(),node->getLine());
+				message << "Error, unknown nodekind encountered in function signature." << std::endl;
+				SystemError e(message.str(),node->getLine(),node);
 				throw e;
 		}
 	}

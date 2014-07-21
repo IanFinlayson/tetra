@@ -120,6 +120,7 @@ private:
 
 		//Copy constructor aliases this TArray to the other, rather than performing a deep copy
 		//Note that this is largely desired behavior
+		//there is an error here if the array gets deleted whiole it is passed, and before it locks
 		vec_ptr(const vec_ptr& other) {
 			other.lockArray();
 			ptr = other.ptr;

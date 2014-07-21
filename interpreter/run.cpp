@@ -4,11 +4,11 @@
  */
 #include<iostream>
 #include"frontend.hpp"
+#include"backend.hpp"
 #include<cstdlib>
 
 //These are defined in frontend.hpp and main.cpp respectively
-Node* parseFile(const string& fname);
-int interpret(const Node* tree);
+int interpret(Node*);
 
 int main(int argc, char** argv) {
 
@@ -17,6 +17,8 @@ int main(int argc, char** argv) {
 		std::cout << "Please pass a file name!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
+
+	TetraEnvironment::initialize();
 
 	Node* tree;
 
@@ -27,10 +29,28 @@ int main(int argc, char** argv) {
 		std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	
+
 	std::cout << "Running: " << argv[1] << endl;
-	   
-	int ret = interpret(tree);
+	int ret = 0;
+	try {   
+		ret = interpret(tree);
+	}
+	catch (SystemError e) {
+		cout << "The interpreter has entered an undefined state: " << endl;
+		cout << e << endl;
+		exit(EXIT_FAILURE);
+	}
+	catch (RuntimeError e) {
+		cout << "The following error was detected while running your program: " << endl;
+		cout << e << endl;
+		e.getContext().printStackTrace();
+		exit(EXIT_FAILURE);
+	}
+	catch (Error e) {
+		cout << "The following error was detected in your program: " << endl;
+		cout << e << endl;
+		exit(EXIT_FAILURE);
+	}
 
 	std::cout << "+------------------------------------" << endl;
 	std::cout << "|Main Returned: " << ret << endl;

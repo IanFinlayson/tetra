@@ -9,14 +9,14 @@
 #include <iostream>
 #include <string>
 #include "frontend.hpp"
-#include "progContext.h"
-#include "functionTable.h"
-#include "tArray.h"
+#include "backend.hpp"
+//#include "progContext.h"
+//#include "functionTable.h"
+//#include "tArray.h"
+#include <list>
 
 //#define NDEBUG
 #include <assert.h>
-
-using std::string;
 
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
 TetraScope::TetraScope(const Node* pCallNode) : executionStatus(NORMAL), callNode(pCallNode) {
@@ -28,6 +28,11 @@ TData<void*>& TetraScope::declareReference(const string varName) {
 	return varScope.declareReference(varName);
 }
 */
+
+std::list<std::pair<pthread_t,TData<void*> > >& TetraScope::declareThreadSpecificVariable(const std::string& name) {
+	return varScope.declareParForVar(name);
+}
+
 //Used by loops and constrol statements to determine if they can proceed, or if they should return
 ExecutionStatus TetraScope::queryExecutionStatus() {
 	return executionStatus;
@@ -88,12 +93,12 @@ void TetraContext::exitScope() {
 }
 
 //If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
-TetraContext::~TetraContext() {
+/*TetraContext::~TetraContext() {
 	while(!progStack.empty()) {
 		progStack.pop();
 	}
 }
-/*
+
 TData<void*>& TetraContext::declareReference(const string varName) {
 	return progStack.top()->declareReference(varName);
 }
@@ -158,6 +163,10 @@ void TetraContext::endParallel() {
 	progStack.top().endParallel();
 }
 
+std::list<std::pair<pthread_t,TData<void*> > >& TetraContext::declareThreadSpecificVariable(const std::string& name) {
+	return progStack.top()->declareThreadSpecificVariable(name);
+}
+
 //Prints a list of all function calls
 void TetraContext::printStackTrace() const {
 
@@ -166,19 +175,19 @@ void TetraContext::printStackTrace() const {
 	using namespace std;
 	//Check that callStack currently has something in it
 	if(dummy.progStack.size() == 0) {
-		cout << "(The interpreter was unable to recover a stack trace)" << endl;
+		TetraEnvironment::getOutputStream() << "(The interpreter was unable to recover a stack trace)" << endl;
 		return;
 	}
 
 	//Print the primary stack frame where the error occurred
 	const Node* stackElement = dummy.progStack.top()->getCallNode();
-	cout << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
+	TetraEnvironment::getOutputStream() << FunctionMap::getFunctionSignature(stackElement) << " (line " << stackElement->getLine() << ")" << endl;
 	dummy.exitScope();
 
 	//Print further stack frames if there are any
 	while(dummy.progStack.size() > 0) {
 		const Node* element = dummy.progStack.top()->getCallNode();
-		cout << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
+		TetraEnvironment::getOutputStream() << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
 		dummy.exitScope();	
 	}
 

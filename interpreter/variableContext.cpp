@@ -6,23 +6,57 @@
 #include<map>
 #include<string>
 #include"frontend.hpp"
-#include"tArray.h"
-#include"tData.h"
-#include"variableContext.h"
+//#include"tArray.h"
+//#include"tData.h"
+//#include"variableContext.h"
+#include"backend.hpp"
 #include<pthread.h>
+#include<list>
 using std::string;
 
-VarTable::VarTable() {
-	pthread_mutex_init(&table_mutex,NULL);
+VarTable::VarTable() : parForVars(10){
+	//pthread_mutex_init(&table_mutex,NULL);
+	pthread_rwlock_init(&table_mutex,NULL);
 }
 
 //Release allocated data should be handled by each TData as it is destructed
 //This assumes each TData in the table had its setDeletableType method called
 VarTable::~VarTable() {
+	pthread_rwlock_destroy(&table_mutex);
 }
 
+//Declares a variable name that can hold different values across threads
+//Numthreads needed so the container does not attempt to resize itself during
+std::list<std::pair<pthread_t,TData<void*> > >& VarTable::declareParForVar(const string& varName) {
+	//Check to make sure we don;t already have a value declared
+	//This could happen if, say, someone declares a parfor within a loop, in which case we should append to that array
+	if(std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName)) != parForVars.end()) {
+		return std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName))->second;
+	}
 
+	std::list<std::pair<pthread_t,TData<void*> > > array;
+	//Append to the end of the array, so we can return the end
+	
+	//This must be done under the lock of a mutex, in case another thread starts a ParFor in this scope
+	//pthread_mutex_lock(&table_mutex);
+	pthread_rwlock_wrlock(&table_mutex);
 
+	//While we were waiting for the lock, another thread may have pushed this variable into the list!
+	if(std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName)) != parForVars.end()) {
+		//Release the mutex before returning
+		pthread_rwlock_unlock(&table_mutex);
+		return std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName))->second;
+	}
+
+	parForVars.push_back(std::pair<string, std::list<std::pair<pthread_t,TData<void*> > > >(varName, array));
+	//Note that with this syntax, it is illegal to modify the array so as to invalidate this pointer
+	std::list<std::pair<pthread_t,TData<void*> > >* ret_ptr = &parForVars.rbegin()->second;
+	//pthread_mutex_unlock(&table_mutex);
+	pthread_rwlock_unlock(&table_mutex);
+	
+	return *ret_ptr;
+
+}
 //Adds a reference to the table
 //i.e. Adding in the varName does not cause any new objects to be created (unlike lookupVar which creates one if it does not yet exist)
 //Also, the data is not marked as deletable, so the referenced data will not be destroyed when this data goes out of scope
