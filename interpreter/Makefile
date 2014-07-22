@@ -2,7 +2,7 @@
 #Make will (on rare occasion) complain about multiple definition or some other linker error, which can be fixed by recompiling the whole project.
 #TODO: find the dependancy if it ever resurfaces
 
-# -pg -O3
+# -pg -g -O3
 CC = clang++
 FLAGS = -Wall -g -pedantic -pthread -ftemplate-backtrace-limit=1
 SEARCHPATH = ../frontend
@@ -15,13 +15,13 @@ tetra: run.o libbackend.a
 	@echo
 
 #create a linkable library letting other programs call interpret(Node* node)
-libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o
-	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o
+libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o tetraEnvironment.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o tetraEnvironment.o
 
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
 
-main.o: main.cpp functionTable.h operationMap.cpp comparisonMap.cpp variableContext.h tData.h progContext.h TSL.h parallel.h threadEnvironment.h
+main.o: main.cpp operationMap.cpp comparisonMap.cpp parallel.h backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
 
 comparisonMap.o: comparisonMap.cpp
@@ -39,8 +39,8 @@ operationMap.o: operationMap.cpp
 variableContext.o: variableContext.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c variableContext.cpp
 
-tData.o: tData.h
-	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tData.h
+#tData.o: tData.h
+#	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tData.h
 
 tDataSpecializations.o: tDataSpecializations.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tDataSpecializations.cpp
@@ -62,6 +62,9 @@ runtimeError.o: runtimeError.cpp backend.hpp
 
 systemError.o: systemError.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c systemError.cpp
+
+tetraEnvironment.o: tetraEnvironment.cpp backend.hpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tetraEnvironment.cpp
 
 .PHONY clean:
 	rm *.o

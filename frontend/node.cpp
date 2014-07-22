@@ -21,11 +21,13 @@ Node::Node(NodeKind node_type) {
   boolval = false;
   symtable = NULL;
   lineno = yylineno;  /* this is often inaccurate! */
+  num_children = 0;
 }
  
 void Node::addChild(Node* child) {
   if (child) {
-    children.push_back(child);
+    children[num_children] = child;
+    num_children++;
   }
 }
 
@@ -78,14 +80,7 @@ void Node::setType(DataType* t) {
   data_type = t;
 }
 int Node::numChildren( ) const {
-  return children.size( );
-}
-Node* Node::child(int which) const {
-  if (which < 0 || which >= (int)children.size( )) {
-    return NULL;
-  } else {
-    return children[which];
-  }
+  return num_children;
 }
 /* insert a symbol into the symtable */
 void Node::insertSymbol(Symbol sym) {

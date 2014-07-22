@@ -18,6 +18,8 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
+	TetraEnvironment::initialize();
+
 	Node* tree;
 
 	//Parse file, and check for initial errors. Print out and exit if an error was found

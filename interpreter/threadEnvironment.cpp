@@ -150,6 +150,7 @@ pthread_mutex_t* ThreadEnvironment::identifyMutex(string mutexName) {
 		//cout << "Inserting new mutex" << endl;
 		//Mutexes are not copy constructable, so the map will have to store references
 		pthread_mutex_t* lock = new pthread_mutex_t();
+		pthread_mutex_init(lock,NULL);
 		instance.mutexes[mutexName] = lock;
 	}
 

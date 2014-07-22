@@ -119,6 +119,9 @@ void wrapMultiEvaluation(void* args) {
 
 		*(argList.args_ptr->scope->template lookupVar<T>(*(argList.varName_ptr))) = *static_cast<T*>((argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
 
+		//string x = *(argList.varName_ptr
+		//T* temp = argList.args_->ptr->scope->template lookupVar<T>(namer);
+
 		(*(argList.countVal_ptr))++;
 
 		pthread_mutex_unlock(argList.count_mutex_ptr);
@@ -140,6 +143,12 @@ void wrapMultiEvaluation(void* args) {
 
 		//Lock the mutex before checking the condiiton again and overwriting the value
 		pthread_mutex_lock(argList.count_mutex_ptr);
+
+		//If the partallel for loopencountered a break statement, make it so that theother threads will stop on the next go-around
+		if(contextCopy.queryExecutionStatus() == BREAK) {
+			//Now the while condition will be false for all threads
+			*(argList.countVal_ptr) = argList.values_ptr->size();
+		}
 	}
 
 	//Release the mutex
@@ -209,9 +218,9 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
                                 collection.setData<TArray*>(collection_ptr);
                         }
 
-			const int NUM_THREADS = 8;
+			const int NUM_THREADS = TetraEnvironment::getMaxThreads();
 
-			pthread_t workers[NUM_THREADS];
+			std::vector<pthread_t> workers;
 
 			//Note that dataqueue is a handle to the actual array in the Variable Table
 			std::list<std::pair<pthread_t, TData<void*> > > dataQueue = context.declareThreadSpecificVariable(node->child(0)->getString());
@@ -219,8 +228,15 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 			int currentIteration = 0;//Used to determine which iteratio nshould be tackled next
 			pthread_mutex_t iter_mutex;
 			pthread_mutex_init(&iter_mutex, NULL);
+			
+			//Locking this mutex here may in fact be unnecessary
+			//However, helgrind complains if this is not here, and this thread onl;y holds the lock until all the threads are created
+			//TODO: confirm whther this lock is necessary
+			pthread_mutex_lock(&iter_mutex);
 
 			for(int x = 0; x < NUM_THREADS && x < collection.getData()->size(); x++) {
+				pthread_t temp;
+				workers.push_back(temp);
 				//cout << "worker before: " << workers[x] << endl;
 				switch(node->child(0)->type()->getKind()) {
 				case TYPE_INT:
@@ -257,10 +273,13 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 					std::stringstream message;
 					message << "Error attempting to deduce type for parallel for. ID: " << node->child(0)->type()->getKind();
 					Error e(message.str(),node->getLine());
+					pthread_mutex_unlock(&iter_mutex);
 					throw e;
 				//cout << "worker after: " << workers[x] << endl;
 				}
 			}
+
+			pthread_mutex_unlock(&iter_mutex);
 
 			//Wait for all the worker threads to terminate
 			for(int index = 0; index < NUM_THREADS && index < collection.getData()->size(); index++) {

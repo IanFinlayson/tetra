@@ -19,6 +19,8 @@ prefixes[${#prefixes[*]}]="parRef";	results[${#results[*]}]=15
 prefixes[${#prefixes[*]}]="parpar";	results[${#results[*]}]=50
 prefixes[${#prefixes[*]}]="parFor";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="parFor2";	results[${#results[*]}]=225
+prefixes[${#prefixes[*]}]="parVar";	results[${#results[*]}]=2
+prefixes[${#prefixes[*]}]="parForSim";	results[${#results[*]}]=3
 
 total=${#prefixes[*]}
 
@@ -26,7 +28,6 @@ while true
 do
 
 reps=`expr ${reps} + 1`
-
 rm checkTestLog.txt
 
 for index in $(seq 0 `expr ${#prefixes[*]} - 1`)
@@ -41,6 +42,10 @@ do
 		echo found after ${reps} repetitions
 		exit 1
 	fi
-done
 
+done
+	if [ `expr ${reps} % 100` -eq 0 ]
+	then
+		echo At ${reps} repetitions
+	fi
 done
