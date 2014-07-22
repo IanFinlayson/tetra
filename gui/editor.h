@@ -24,9 +24,10 @@ public:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
     void showLineNumbers(bool);
-    void highlightLine(QColor, int);
+    void moveCursor(int);
+    void highlightLine(QColor);
     void unhighlightLine();
-    bool checkLineHighlighted;
+    bool checkLineHighlighted();
 
 
 private slots:

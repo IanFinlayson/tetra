@@ -13,9 +13,8 @@
 #include <QSize>
 #include <pthread.h>
 
-int interpret(const Node* tree);
 
-MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow), buildError("No Error", 0){
+MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
     setWindowTitle(tr("Tetra"));
@@ -30,8 +29,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
 
-    //mainValue = 0;
-    //buildSuccessful = true;
+    mainValue = 0;
 
 }
 
@@ -94,9 +92,17 @@ void* wrapperFunc(void* arg1){
         tetraProg->mainValue = interpret(newNode);
         tetraProg->buildSuccessful = true;
     }
+    catch (RuntimeError e){
+
+    }
+    catch (SystemError e){
+
+    }
     catch (Error e){
-        tetraProg->buildError = e;
-        tetraProg->buildSuccessful = false;
+        //tetraProg->buildError = e;
+        //tetraProg->buildSuccessful = false;
+        //u
+        tetraProg->printError(e);
     }
     return NULL;
 }
@@ -156,7 +162,7 @@ bool MainWindow::maybeSave(){
 void MainWindow::updateCoordinates(){
     ui->cursorPosition->setText(ui->input->getCoordinates());
     ui->input->ensureCursorVisible();
-    if(ui->input->checkLineHighlighted){
+    if(ui->input->checkLineHighlighted()){
         ui->input->unhighlightLine();
     }
 }
@@ -253,18 +259,14 @@ void MainWindow::on_actionSelect_All_triggered(){
 }
 void MainWindow::on_actionFind_triggered(){
   //  ui->input->find();
+    QLabel newLabel("hey");
+    //ui->gridLayout->addItem(newLabel);
 }
 void MainWindow::on_actionRun_triggered(){
     pthread_t ttrThread;
     pthread_create(&ttrThread, NULL, (void*(*)(void*))wrapperFunc, this);\
-    pthread_join(ttrThread, NULL);
-
     if(buildSuccessful){
         ui->output->insertPlainText(QString::number(mainValue)+ "\n");
-    }
-    else{
-        ui->output->insertPlainText(QString::number(buildError.getLine()) + ": " + QString::fromStdString(buildError.getMessage()) + "\n");
-        ui->input->highlightLine(QColor(Qt::red), buildError.getLine());
     }
 }
 void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
@@ -284,20 +286,22 @@ void MainWindow::on_actionLine_Numbers_triggered(){
 void MainWindow::on_actionClear_Output_triggered(){
     ui->output->clear();
 }
-
 //-----------------------------------------------//
 
+void MainWindow::printError(Error e){
+    ui->input->moveCursor(e.getLine());
+    ui->output->insertPlainText(QString::number(e.getLine()) + ": " + QString::fromStdString(e.getMessage()) + "\n");
+    ui->input->highlightLine(QColor(Qt::red));
+}
 
+QGridLayout* MainWindow::getGridLayout(){
+    return ui->gridLayout;
+}
 
+Editor* MainWindow::getEditor(){
+    return ui->input;
+}
 
-
-
-
-
-
-
-
-
-
-
-
+void MainWindow::addThreadWindow(Editor* editor){
+    //threadWindows.insert(threadWindows.size(), *(editor));
+}

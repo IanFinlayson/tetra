@@ -3,8 +3,13 @@
 
 #include <QMainWindow>
 #include <QPlainTextEdit>
+#include <QGridLayout>
+#include <QLayout>
+#include <QMap>
 #include "syntaxhighlighter.h"
 #include "../frontend/frontend.hpp"
+#include "../interpreter/backend.hpp"
+
 
 class Editor;
 
@@ -28,6 +33,10 @@ public:
     void showEditor();
     QString getOpenFile();
     friend void* wrapperFunc(void*);
+    void printError(Error);
+    QGridLayout* getGridLayout();
+    Editor* getEditor();
+    void addThreadWindow(Editor*);
 
 
 private slots:
@@ -45,14 +54,10 @@ private slots:
     void documentWasModified();
     void on_actionRun_triggered();
     void updateCoordinates();
-
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
-
     void on_actionMinimize_triggered();
-
     void on_actionLine_Numbers_triggered();
-
     void on_actionClear_Output_triggered();
 
 private:
@@ -69,7 +74,8 @@ private:
     bool maybeSave();
     int mainValue;
     bool buildSuccessful;
-    Error buildError;
+    //QMap <int, QLayout>;
+    QMap<int, Editor> threadWindows;
 };
 
 #endif // MAINWINDOW_H

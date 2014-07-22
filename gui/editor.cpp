@@ -198,7 +198,8 @@ void Editor::showLineNumbers(bool arg1){
     }
 }
 
-void Editor::highlightLine(QColor color, int lineNumberToHighlight)
+
+void Editor::moveCursor(int lineNumberToHighlight)
 {
     int currentLineNumber = cursor.blockNumber()+1;
     int moves = lineNumberToHighlight - currentLineNumber;
@@ -212,6 +213,8 @@ void Editor::highlightLine(QColor color, int lineNumberToHighlight)
         cursor.movePosition(QTextCursor::StartOfLine);
         setTextCursor(cursor);
     }
+}
+void Editor::highlightLine(QColor color){
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
@@ -229,19 +232,12 @@ void Editor::highlightLine(QColor color, int lineNumberToHighlight)
     lineHighlighted = true;
 }
 
-void Editor::unhighlightLine()
-{
+void Editor::unhighlightLine(){
     QList<QTextEdit::ExtraSelection> extraSelections;
-
-    if (!isReadOnly()) {
-        QTextEdit::ExtraSelection selection;
-
-        selection.format.setBackground(QColor(0, 0, 0, 0));
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = textCursor();
-        selection.cursor.clearSelection();
-        extraSelections.append(selection);
-    }
     setExtraSelections(extraSelections);
     lineHighlighted = false;
+}
+
+bool Editor::checkLineHighlighted(){
+    return lineHighlighted;
 }
