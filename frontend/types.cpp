@@ -465,9 +465,14 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           return checkVector(expr, func);
         case NODE_INDEX:
                           throw Error("inferExpression: should not an index here");
+        case NODE_VECRANGE: {
+                          /* a vecrange can only possibly be a vector of ints */
+                          DataType* t = new DataType(TYPE_VECTOR);
+                          t->setSubType(new DataType(TYPE_INT));
+                          return t;
 
 
-        case NODE_FUNCALL:
+                            } case NODE_FUNCALL:
                           return inferFuncall(expr, func);
         case NODE_ACTUAL_PARAM_LIST:
                           throw Error("inferExpression: should not a param list here");

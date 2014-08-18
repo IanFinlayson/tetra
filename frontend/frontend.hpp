@@ -58,6 +58,7 @@ enum NodeKind {
     NODE_MODULUS,
     NODE_EXP,
     NODE_VECREF,
+    NODE_VECRANGE,
     NODE_INDEX,
 
     /* function call */
