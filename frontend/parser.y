@@ -102,6 +102,8 @@ stack<int> linenos;
 %token TOK_ELLIPSIS
 %token TOK_BACKGROUND
 %token TOK_LOCK
+%token TOK_CONST
+%token TOK_GLOBAL
 
 /* typed tokens */
 %token <intval> TOK_INTVAL
@@ -116,13 +118,13 @@ stack<int> linenos;
 %token TOK_NEWLINE
 
 /* types */
-%type <node> functions function formal_param_list statements statement block formal_params
+%type <node> toplevels function formal_param_list statements statement block formal_params
 %type <node> compound_statement simple_statement pass_statement return_statement break_statement
 %type <node> continue_statement expression if_statement while_statement else_option orterm andterm
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
 %type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-%type <node> background lock_statement index indices vector_value vector_values
+%type <node> background lock_statement index indices vector_value vector_values datadecl
 
 %type <data_type> return_type type
 
@@ -131,7 +133,7 @@ stack<int> linenos;
 %%
 
 /* a program is a list of functions */
-program: functions {
+program: toplevels {
   root = $1;
   /* check and infer the types in the tree */
   inferTypes(root);
@@ -145,13 +147,29 @@ newl_star: TOK_NEWLINE newl_star {}
 newl_plus: TOK_NEWLINE newl_star {}
 
 /* a list of functions */
-functions: newl_star function functions {
-  $$ = new Node(NODE_FUNCTION_LIST);
+toplevels: newl_star function toplevels {
+  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$->setLine(0);
+  $$->addChild($2);
+  $$->addChild($3);
+} | newl_star datadecl toplevels {
+  $$ = new Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
 } | {
   $$ = NULL;
+}
+
+/* a data declaration - either a constant or global */
+datadecl: TOK_CONST identifier TOK_ASSIGN expression {
+  $$ = new Node(NODE_CONST);
+  $$->addChild($2);
+  $$->addChild($4);
+} | TOK_GLOBAL identifier TOK_ASSIGN expression {
+  $$ = new Node(NODE_GLOBAL);
+  $$->addChild($2);
+  $$->addChild($4);
 }
 
 /* a single function */

@@ -10,7 +10,6 @@
 
 extern int yylineno;
 
-
 /* node member functions */
 Node::Node(NodeKind node_type) {
   this->node_type = node_type;

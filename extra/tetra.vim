@@ -10,7 +10,7 @@ endif
 
 " keywords
 syn keyword tetraKeyword if elif else for in parallel while continue break def
-syn keyword tetraKeyword or and not pass return background lock
+syn keyword tetraKeyword or and not pass return background lock constant global
 syn keyword tetraType int real string bool
 
 " comments and TODOs
