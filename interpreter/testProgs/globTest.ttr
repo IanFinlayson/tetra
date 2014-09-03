@@ -1,0 +1,17 @@
+constant gC = 2
+
+
+def help():
+    gC = 2
+
+constant PI = 3.1416
+global sum = PI * 2.0
+
+def main( ):
+    print(PI)
+    arr = [4 ... 8]
+    sum = sum + 1.0
+    print(sum)
+
+def getNum() int:
+    return 27
