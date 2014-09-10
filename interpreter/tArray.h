@@ -1,11 +1,11 @@
-#ifndef T_ARRAY_H
-#define T_ARRAY_H
+//#ifndef T_ARRAY_H
+//#define T_ARRAY_H
 
 /*
  * This class wraps an array of tData<void*> used to make arrays and multi-dimensional arrays
  * 
  */
-
+/*
 #include<iostream>
 #include<string>
 #include<cstdlib>
@@ -253,3 +253,4 @@ template<> template<> bool TData<TArray>::setData<TArray>(const TArray&);
 
 
 #endif
+*/

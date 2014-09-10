@@ -7,11 +7,14 @@ def help():
 constant PI = 3.1416
 global sum = PI * 2.0
 
-def main( ):
-    print(PI)
-    arr = [4 ... 8]
-    sum = sum + 1.0
-    print(sum)
+def main( ) int:
+    sum += 1.0
+    if sum > 5.0 and sum < 7.0:
+        return 1
+    elif sum > 7.0:
+        return 2
+    else:
+        return 3 
 
 def getNum() int:
     return 27

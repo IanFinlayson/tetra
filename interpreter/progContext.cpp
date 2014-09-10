@@ -43,6 +43,10 @@ ExecutionStatus TetraScope::queryExecutionStatus() {
 	executionStatus = status;
 }*/
 
+bool TetraScope::containsVar(std::string varName) const{
+	return varScope.containsVar(varName);
+}
+
 void TetraScope::setCallNode(const Node* node) {
 	callNode = node;
 }
@@ -55,8 +59,32 @@ const Node* TetraScope::getCallNode() const {
 //-------------------------------------------------------------
 //This class wraps a std stack of TetraScopes
 
+//Forward declare evaluateNode for the initialization of global variables
+template <typename T>
+void evaluateNode(const Node*,TData<T>&,TetraContext&);
+
 TetraContext::TetraContext() {
-	//nothing at the moment
+	//Initialize the global scope
+	initializeNewScope(NULL);
+	globalScope = &(progStack.top());
+}
+
+void TetraContext::initializeGlobalVars(const Node * tree) {
+
+	//Traverse the tree
+	if(tree->kind() == NODE_TOPLEVEL_LIST) {
+
+		Node* candidate = tree->child(0);
+		if(candidate->kind() == NODE_GLOBAL || candidate->kind() == NODE_CONST) {
+			//perform assignment at this global scope
+			TData<int> dummy;
+			evaluateNode<int>(candidate, dummy, *this);
+		}
+
+		if(tree->child(1) != NULL) {
+			initializeGlobalVars(tree->child(1));
+		}
+	}
 }
 
 //Initializes an empty scope and sets that as the current scope
@@ -82,7 +110,7 @@ void TetraContext::branchOff(const scope_ptr baseScope) {
 	//cout << "X from base context: " << *(const_cast<scope_ptr&>(baseScope)->lookupVar<TArray>("x")) << endl;
 	scope_ptr newScopePtr(baseScope);
 	//Note that the "branch off" should be the base of as new TetraContext (for a new thread)
-	assert(progStack.size() == 0);
+	//assert(progStack.size() == 0);
 	progStack.push(newScopePtr);
 	//cout << "X after branch: " <<  *(lookupVar<TArray>("x")) << endl;;
 }

@@ -1,5 +1,5 @@
-#ifndef PROG_CONTEXT_H
-#define PROG_CONTEXT_H
+//#ifndef PROG_CONTEXT_H
+//#define PROG_CONTEXT_H
 
 /*
  * The classes contained in this file are used to keep track of certain properties of a program as it is being executed
@@ -7,7 +7,7 @@
  * Although your standard running program utilizes one stack, this stack is represented via an object because if the eventual need for multiple call stacks through multithreading
  */
 
-
+/*
 #include <stack>
 #include <iostream>
 #include <string>
@@ -259,7 +259,7 @@ public:
 /*	void initializeContextBranch(TetraContext* newContext, TetraContext& currentContext) {
 		newContext->progStack.push( currentContext.progStack.top() );
 	}
-*/
+*//*
 	//Wraps a call to lookupVar of the current scope
 	template<typename T>
 	T* lookupVar(string name) {
@@ -324,3 +324,4 @@ private:
 
 
 #endif
+*/

@@ -6,14 +6,16 @@
 //#include"tArray.h"
 //#include"tData.h"
 //#include"progContext.h"
+#include"commandConsole.h"
 #include"backend.hpp"
+
+//const console object to interact with the user
+const CommandConsole console = CommandConsole();
 
 template <typename T>
 void evaluateNode(const Node*,TData<T>&,TetraContext&);
 
-
 //Prints (recursively) the expression(s) denoted by args
-//Presently, this method has a circular dependancy with the evaluateNode() method of main.cpp
 void print(const Node* args, TetraContext& context) {
 	
 	//Check if args is a structual node
@@ -26,53 +28,66 @@ void print(const Node* args, TetraContext& context) {
 	}
 	//If args is an expression, actually print it!
 	else{
+		std::stringstream formattedData;
 		switch(args->type()->getKind()) {
 			case TYPE_INT:
 			{
 				TData<int> value;
 				evaluateNode<int>(args,value,context);
 				//Prints the value, flushes the buffer WITHOUT a new line
-				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				//TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				formattedData << value.getData();
+				console.processStandardOutput(formattedData.str());
 			}
 			break;
 			case TYPE_REAL:
 			{   
 				TData<double> value;
 				evaluateNode<double>(args,value,context);
-				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				//TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				formattedData << value.getData();
+				console.processStandardOutput(formattedData.str());		
 			} 
 			break;
 			case TYPE_BOOL:
 			{   
 				TData<bool> value;
 				evaluateNode<bool>(args,value,context);
-				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				//TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				formattedData << value.getData();
+				console.processStandardOutput(formattedData.str());		
 			} 
 			break;
 			case TYPE_STRING:
 			{   
 				TData<string> value;
 				evaluateNode<string>(args,value,context);
-				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				//TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				formattedData << value.getData();
+				console.processStandardOutput(formattedData.str());		
 			} 
 			break;
 			case TYPE_VECTOR:
 			{   
 				TData<TArray> value;
 				evaluateNode<TArray>(args,value,context);
-				TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				//TetraEnvironment::getOutputStream() << value.getData() << std::flush;
+				formattedData << value.getData();
+				console.processStandardOutput(formattedData.str());		
 			} 
 			break;
 			default:
 			//print that we did not recognize whatever it is we are supposed to print
-				TetraEnvironment::getOutputStream() << "??" << std::flush;
+				//TetraEnvironment::getOutputStream() << "??" << std::flush;
+				console.processStandardOutput("??");
 		}
 	}
 }
 
 int readInt() {
 	int ret = 0;
-	while(!(cin >> ret)) {
+	//while(!(cin >> ret)) {
+	while(!(stringstream(console.receiveStandardInput()) >> ret)) {
 		//Moves down the stream until it finds a readable number
 		cin.clear();
 		cin.ignore();
@@ -82,7 +97,8 @@ int readInt() {
 
 double readReal() {
 	double ret = 0;
-	while(!(cin >> ret)) {
+	//while(!(cin >> ret)) {
+	while(!(stringstream(console.receiveStandardInput()) >> ret)) {
 		//moves along the buffer until it finds a readable value
 		cin.clear();
 		cin.ignore();
@@ -92,8 +108,7 @@ double readReal() {
 
 bool readBool() {
 	//Returns false on some variation of 'false', 'no', or 0
-	string input;
-	cin >> input;
+	std::string input = console.receiveStandardInput();
 	//Compare input against the recognized values for false
 	if(input == "false" || input == "no" || input == "0") {
 		return false;
@@ -102,9 +117,7 @@ bool readBool() {
 }
 
 string readString() {
-	string ret = "";
-	//For now, we will assume that this is always successful
-	cin >> ret;
+	std::string ret = console.receiveStandardInput();
 
 	return ret;
 }

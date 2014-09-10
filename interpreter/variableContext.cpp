@@ -57,6 +57,13 @@ std::list<std::pair<pthread_t,TData<void*> > >& VarTable::declareParForVar(const
 	return *ret_ptr;
 
 }
+
+//Checks to see if varName is in this scope, but does not add it if it does not find it
+bool VarTable::containsVar(std::string varName) const{
+	return varMap.find(varName) != varMap.end();
+}
+
+
 //Adds a reference to the table
 //i.e. Adding in the varName does not cause any new objects to be created (unlike lookupVar which creates one if it does not yet exist)
 //Also, the data is not marked as deletable, so the referenced data will not be destroyed when this data goes out of scope

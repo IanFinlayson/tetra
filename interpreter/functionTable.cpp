@@ -28,18 +28,19 @@ const Node* FunctionMap::getFunctionNode(const string functionSignature) {
 
 //Fills the function map given the specified base node
 void FunctionMap::build(const Node* tree) {
-
-	if(tree->kind() == NODE_FUNCTION_LIST) {
+	
+	if(tree->kind() == NODE_TOPLEVEL_LIST) {
 
 		//by frontend specifications, there MUST be a child to add
 		Node* candidate = tree->child(0);
-		instance.lookup[getFunctionSignature(candidate)] = candidate;
-			
+		if(candidate->kind() == NODE_FUNCTION) {
+			instance.lookup[getFunctionSignature(candidate)] = candidate;
+		}
 		//checks if there are further functions to add
 		if(tree->child(1) != NULL) {
 			build(tree->child(1));
 		}   
-	} 
+	}
 }
 
 //Given a NODE_ACTUAL_PARAM or NODE_FORMAL_PARAM, adds the signature of a single argument to the string

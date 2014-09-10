@@ -384,6 +384,9 @@ public:
 	template<typename T>
 	T* lookupVar(const std::string varName);
 
+	//Checks whether a named variable is in the scope, without actually adding it if it does not exist
+	bool containsVar(const std::string varName) const;
+
 	//Returns a TData from within varMap containing an invalid reference. The reference can be set to something valid, and that thing will not be deleted when this variableContext goes out of scope
 	TData<void*>& declareReference(const std::string varName);
 
@@ -437,7 +440,8 @@ T* VarTable::lookupVar(const std::string varName) {
 	std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > >::iterator loc;
 	
 	pthread_rwlock_rdlock(&table_mutex);
-	
+
+	//Check if variable is a thread-specific variable (e.g. parallel for loop variable)	
 	loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
 	if(loc != parForVars.end()) {
 		std::list< std::pair< pthread_t, TData<void*> > >& varList = (*loc).second;
@@ -474,11 +478,27 @@ T* VarTable::lookupVar(const std::string varName) {
 	}
 	//check whether a normal entry exists for this variable
 	//The find and [] operators are redundant. we can combine them into one search
-	else if(varMap.find(varName) == varMap.end()) {
+	else if(!containsVar(varName)) {
+
+		//This is a legacy portion of code. The check for if something is a global variable is presently in the TetraContext's wrapper call of lookupVar
+		//If the variable is not in the current scope, it might be in the global scope
+/*		scope_ptr& globalScopeRef = context.getGlobalScopeRef();
+
+		if(globalScopeRef->containsVar(varname)) {
+
+			T* ret = globalScopeRef->lookupVar<T>(varName);
+
+			//release read mutex
+			pthread_rwlock_unlock(&table_mutex);
+			return ret;
+		}
+*/
+		//Otherwise, we must insert a new variable into the current scope
+
 		//Release read privelages while we assemble what we need to insert
 		pthread_rwlock_unlock(&table_mutex);
 		//If the variable does not yet exist, we need to allocate memory for the TData to point to!
-		T* newData_ptr = new T(); //() should zero the memory, even for primitive types
+		T* newData_ptr = new T(); //() should zero the memory for primitive types, so that all types have a default value
 		TData<void*> insertable(newData_ptr);
 		//Must notify TData that it is pointing at dynamically allocated memory
 		insertable.setDeletableType<T>();
@@ -659,6 +679,8 @@ class TetraScope {
 
 		//sets the execution status to the specified value
 		void setExecutionStatus(ExecutionStatus status);
+
+		bool containsVar(std::string varName) const;
 
 		//Used by the TetraContext to obtain a stack trace
 		void setCallNode(const Node*);
@@ -848,8 +870,10 @@ class scope_ptr {
 class TetraContext {
 
 public:
-	//Note that this constructor does NOT start with a default scope. One must be initialized through initializeNewScope before this can be used	
+	//Note that this constructor starts with a GLOBAL scope. One must be initialized through initializeNewScope to have it represent local data	
 	TetraContext();
+
+	void initializeGlobalVars(const Node *);
 
 	//This initializer function initializes a new TetraContext object so that its base scope is aliased to the current scope of the currentContext.
 	//This allows threads to share the same scope while not caring where they branch
@@ -857,10 +881,15 @@ public:
 		newContext->progStack.push( currentContext.progStack.top() );
 	}
 */
-	//Wraps a call to lookupVar of the current scope
+	//Wraps a call to lookupVar of the current scope after checking that there are no globals
 	template<typename T>
 	T* lookupVar(std::string name) {
-		return progStack.top()->lookupVar<T>(name);
+		if(getGlobalScopeRef()->containsVar(name)) {
+			return (getGlobalScopeRef()->lookupVar<T>(name));
+		}
+		else {
+			return progStack.top()->lookupVar<T>(name);
+		}
 	}
 
 	//Wraps a call of declareReference for the current scope
@@ -886,6 +915,10 @@ public:
 	TetraScope& getCurrentScope();
 
 	scope_ptr& getScopeRef();
+
+	scope_ptr& getGlobalScopeRef() {
+		return *globalScope;
+	}
 
 	//wraps a call to the current scope's queryExecutionStatus
 	ExecutionStatus queryExecutionStatus();
@@ -916,7 +949,7 @@ public:
 private:
 
 	std::stack<scope_ptr> progStack;
-	
+	scope_ptr* globalScope;	
 };
 
 
@@ -971,6 +1004,15 @@ public:
 private:
 	static int maxThreads;
 	static ostream* outputStream;
+};
+
+class Console {
+
+public:
+	//Used to input standard input. Implementation should return the user input as a string
+	virtual std::string receiveStandardInput() const = 0;
+	//Used for standard output. Argument is a string containing what the Tetra Program is requesting to output.
+	virtual void processStandardOutput(const std::string) const = 0;
 };
 
 #endif

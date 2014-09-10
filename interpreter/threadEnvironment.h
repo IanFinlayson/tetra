@@ -1,5 +1,5 @@
-#ifndef THREAD_ENVIRONMENT_H
-#define THREAD_ENVIRONMENT_H
+//#ifndef THREAD_ENVIRONMENT_H
+//#define THREAD_ENVIRONMENT_H
 
 /*
  * ThreqdEnvironment wraps single global object storing infomration about the states of all threads in the program
@@ -13,9 +13,8 @@
 #include<map>
 #include<algorithm>
 */
-//This will be removed
-using namespace std;
 
+/*
 //This class contains everything needed for a thread of execution to keep track of and join back with all threads that it spawns
 
 class ThreadPool {
@@ -92,3 +91,4 @@ public:
 //ThreadEnvironment ThreadEnvironment::instance;
 
 #endif
+*/

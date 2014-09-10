@@ -624,10 +624,13 @@ T paste(const Node* node1, const Node* node2, TetraScope& destinationScope, Tetr
 template<typename T>
 void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
 
-	assert(node->type() != NULL);
+
+	//cout << "Assigning: " << node->child(0)->getString() << endl;
+
+	assert(node->child(0)->type() != NULL);
 
 	//We must typecheck here because parent node does not know what we are trying to assign
-	switch(node->type()->getKind()) {
+	switch(node->child(0)->type()->getKind()) {
 		case TYPE_INT:
 			//Performs the assignment and sets up the return
 			ret.setData(paste<int>(node->child(0), node->child(1), context));
@@ -791,6 +794,33 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 			case NODE_STRINGVAL:
 				ret.setData(node->getString());
 			break;
+			case NODE_VECRANGE:
+			{
+				TArray returnArray;
+
+				//Evaluate the bounds of the range
+				TData<int> lowerBound;
+				evaluateNode<int>(node->child(0), lowerBound, context);
+				TData<int> upperBound;
+				evaluateNode<int>(node->child(1), upperBound, context);
+
+				//Assembles the array
+				for(int num = lowerBound.getData(); num <= upperBound.getData(); num++) {
+					//Sets up the TData to be properly copied into the array, so that it will exist beyond this scope
+					TData<void*> inserter;
+					inserter.setData<void*>(&num);
+					inserter.setDeletableType<int>();
+
+					//Now, addElement inserts the element as a deep copy
+					returnArray.addElement(inserter);
+
+					//because inserter's data was not dynamically allocated, we must prevent it from being freed on destruction
+					inserter.setDeletableType<void>();
+				}
+
+				ret.setData(returnArray);
+			}
+			break;
 			case NODE_VECVAL:
 			{
 				//If we have a vector array literal, we must deduce the type it is holding and initialize its elements
@@ -887,6 +917,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 		case NODE_REALVAL:
 		case NODE_BOOLVAL:
 		case NODE_STRINGVAL:
+		case NODE_VECRANGE:
 		case NODE_VECVAL:
 		case NODE_IDENTIFIER:
 			evaluateImmediate<T>(node,ret,context);
@@ -907,7 +938,8 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 		case NODE_BITNOT:
 			evaluateExpression<T>(node,ret,context);
 		break;
-		case NODE_FUNCTION_LIST:
+		//case NODE_FUNCTION_LIST:
+		case NODE_TOPLEVEL_LIST:
 		case NODE_FUNCTION:
 		case NODE_FORMAL_PARAM_LIST:
 		case NODE_STATEMENT:
@@ -924,6 +956,8 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 			evaluateStatement<T>(node,ret,context);
 		break;
 		case NODE_ASSIGN:
+		case NODE_GLOBAL:
+		case NODE_CONST:
 			performAssignment<T>(node,ret,context);
 		break;
 		case NODE_BREAK:
@@ -948,6 +982,8 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 int interpret(Node* tree) {
 
+	//Construct a TetraContext (this also initializes the global scope)
+	TetraContext tContext;	
 
 	//Build function lookup table, find address of main method
 	FunctionMap::build(tree);
@@ -962,11 +998,14 @@ int interpret(Node* tree) {
 		throw e;
 	}
 
+	//Initialize global vars
+	tContext.initializeGlobalVars(tree);
+
 	//Will hold value returned to OS. 0 if main does not return an int
 	TData<int> retVal(0);
 
-	//Initialize the TetraContext, add a scope, and run!
-	TetraContext tContext;
+	//Initialize a scope fpr the main method, and run!
+	
 	tContext.initializeNewScope(start);
 	//try {
 		evaluateNode<int>(start, retVal, tContext);
