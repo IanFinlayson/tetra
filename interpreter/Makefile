@@ -17,8 +17,8 @@ tetra: run.o libbackend.a
 	$(CC) $(FLAGS) run.o libbackend.a $(SEARCHPATH)/libfrontend.a -o tetra
 
 #create a linkable library letting other programs call interpret(Node* node)
-libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o tetraEnvironment.o commandConsole.o
-	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o tetraEnvironment.o commandConsole.o
+libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o
 
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
@@ -70,5 +70,9 @@ tetraEnvironment.o: tetraEnvironment.cpp backend.hpp
 
 commandConsole.o: commandConsole.cpp backend.hpp commandConsole.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandConsole.cpp
+
+commandObserver.o: commandObserver.h commandObserver.cpp backend.hpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandObserver.cpp
+
 .PHONY clean:
 	rm *.o

@@ -987,32 +987,42 @@ private:
 	const Node* node;
 };
 
-/*
- * This class stores constants related to the environment where the program is run, including:
- * -number of allowed threads
- * -where to print for print statements
- */ 
-
-class TetraEnvironment {
-public:
-	static void initialize();
-	static int getMaxThreads();
-	static void setMaxThreads(int);
-	static ostream& getOutputStream();
-	static void setOutputStream(ostream&);
-	
-private:
-	static int maxThreads;
-	static ostream* outputStream;
-};
-
-class Console {
+//This class allows other libraries to define how the interpreter should handle I/O
+class VirtualConsole {
 
 public:
 	//Used to input standard input. Implementation should return the user input as a string
 	virtual std::string receiveStandardInput() const = 0;
 	//Used for standard output. Argument is a string containing what the Tetra Program is requesting to output.
 	virtual void processStandardOutput(const std::string) const = 0;
+};
+
+/*
+ * This class stores constants related to the environment where the program is run, including:
+ * -number of allowed threads
+ * -where to print for print statements
+ */ 
+
+#include"commandObserver.h"
+
+class TetraEnvironment {
+public:
+	static void initialize();
+	static void initialize(const VirtualConsole&);
+	static void setConsole(const VirtualConsole&);
+	static const VirtualConsole& getConsole();
+	static int getMaxThreads();
+	static void setMaxThreads(int);
+	static ostream& getOutputStream();
+	static void setOutputStream(ostream&);
+	static CommandObserver& getObserver();
+	static void setObserver(CommandObserver&);
+	
+private:
+	static int maxThreads;
+	static ostream* outputStream;
+	static VirtualConsole const * console_ptr;
+	static CommandObserver observer;
 };
 
 #endif

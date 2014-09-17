@@ -1,6 +1,6 @@
 #include"backend.hpp"
 
-class CommandConsole : public Console {
+class CommandConsole : public VirtualConsole {
 public:
 	std::string receiveStandardInput() const;
 

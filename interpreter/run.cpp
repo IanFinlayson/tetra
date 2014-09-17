@@ -5,6 +5,7 @@
 #include<iostream>
 #include"frontend.hpp"
 #include"backend.hpp"
+#include"commandConsole.h"
 #include<cstdlib>
 
 //These are defined in frontend.hpp and main.cpp respectively
@@ -18,7 +19,13 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	TetraEnvironment::initialize();
+	CommandConsole console;
+	CommandObserver observer;
+
+	//observer.break_E(5);
+
+	TetraEnvironment::initialize(console);
+	TetraEnvironment::setObserver(observer);
 
 	Node* tree;
 

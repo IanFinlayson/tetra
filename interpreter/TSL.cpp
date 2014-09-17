@@ -6,11 +6,7 @@
 //#include"tArray.h"
 //#include"tData.h"
 //#include"progContext.h"
-#include"commandConsole.h"
 #include"backend.hpp"
-
-//const console object to interact with the user
-const CommandConsole console = CommandConsole();
 
 template <typename T>
 void evaluateNode(const Node*,TData<T>&,TetraContext&);
@@ -29,6 +25,7 @@ void print(const Node* args, TetraContext& context) {
 	//If args is an expression, actually print it!
 	else{
 		std::stringstream formattedData;
+		const VirtualConsole& console = TetraEnvironment::getConsole();
 		switch(args->type()->getKind()) {
 			case TYPE_INT:
 			{
@@ -87,7 +84,7 @@ void print(const Node* args, TetraContext& context) {
 int readInt() {
 	int ret = 0;
 	//while(!(cin >> ret)) {
-	while(!(stringstream(console.receiveStandardInput()) >> ret)) {
+	while(!(stringstream(TetraEnvironment::getConsole().receiveStandardInput()) >> ret)) {
 		//Moves down the stream until it finds a readable number
 		cin.clear();
 		cin.ignore();
@@ -98,7 +95,7 @@ int readInt() {
 double readReal() {
 	double ret = 0;
 	//while(!(cin >> ret)) {
-	while(!(stringstream(console.receiveStandardInput()) >> ret)) {
+	while(!(stringstream(TetraEnvironment::getConsole().receiveStandardInput()) >> ret)) {
 		//moves along the buffer until it finds a readable value
 		cin.clear();
 		cin.ignore();
@@ -108,7 +105,7 @@ double readReal() {
 
 bool readBool() {
 	//Returns false on some variation of 'false', 'no', or 0
-	std::string input = console.receiveStandardInput();
+	std::string input = TetraEnvironment::getConsole().receiveStandardInput();
 	//Compare input against the recognized values for false
 	if(input == "false" || input == "no" || input == "0") {
 		return false;
@@ -117,7 +114,7 @@ bool readBool() {
 }
 
 string readString() {
-	std::string ret = console.receiveStandardInput();
+	std::string ret = TetraEnvironment::getConsole().receiveStandardInput();
 
 	return ret;
 }
