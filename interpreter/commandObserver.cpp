@@ -12,10 +12,9 @@ CommandObserver::CommandObserver() {
 //Notifies the observer that a certain node in the program has been reached
 void CommandObserver::notify_E(const Node* foundNode) {
 
-	//If there are no breakpoints, nothing to do
-	if(breakpoints.size() <= 0) {
+	/*if(breakpoints.size() <= 0) {
 		return;
-	}
+	}*/
 	int currentLine = foundNode->getLine();
 	//check if line is a breakpoint
 	//If the current line is the same as the last line we broke at, we should not break, and let the instruction finish
@@ -33,7 +32,7 @@ void CommandObserver::notify_E(const Node* foundNode) {
 
 		msg << "Breakpoint reached at line: " << currentLine << endl;
 		msg << "Stopped at node of kind: " << foundNode->kind() << endl;
-		msg << "Options: (s)tep, (n)ext (c)ontinue" << endl;
+		msg << "Options: (s)tep, (n)ext (c)ontinue (b)reak" << endl;
 
 		console.processStandardOutput(msg.str());
 		std::string ret = " ";
@@ -43,16 +42,30 @@ void CommandObserver::notify_E(const Node* foundNode) {
 	
 			switch (ret[0]) {
 			case 'c':
+			case 'C':
 				continue_E();
 			break;
 			case 'n':
+			case 'N':
 				next_E();
 			break;
 			case 's':
+			case 'S':
 				step_E();
+			break;
+			case 'b':
+			case 'B':
+			{
+				string breakpoint = console.receiveStandardInput();
+				int lineNo = atoi(breakpoint.c_str());
+				break_E(lineNo);
+				//set ret to repeat the input prompt
+				ret = " ";
+			}
 			break;
 			default:
 				console.processStandardOutput("Error, unrecognized command\n");
+				//set ret to repeat the prompt for input
 				ret = " ";
 			}
 		}

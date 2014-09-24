@@ -20,6 +20,7 @@
 //#include<cstdlib>
 #include<algorithm> //for find_if
 #include<sstream>
+#include<vector>
 
 
 //Interpret function from main
@@ -997,13 +998,30 @@ public:
 	virtual void processStandardOutput(const std::string) const = 0;
 };
 
+
+
+class VirtualObserver {
+
+private:
+	//std::vector<int> breakpoints;
+	//int lastLine;
+	//bool stepping;
+	//bool stopAtNext;
+
+public:
+	virtual void notify_E(const Node*)=0;
+	virtual void step_E()=0;
+	virtual void next_E()=0;
+	virtual void break_E(int)=0;
+	virtual void continue_E()=0;
+};
+
+
 /*
  * This class stores constants related to the environment where the program is run, including:
  * -number of allowed threads
  * -where to print for print statements
  */ 
-
-#include"commandObserver.h"
 
 class TetraEnvironment {
 public:
@@ -1015,14 +1033,13 @@ public:
 	static void setMaxThreads(int);
 	static ostream& getOutputStream();
 	static void setOutputStream(ostream&);
-	static CommandObserver& getObserver();
-	static void setObserver(CommandObserver&);
+	static VirtualObserver& getObserver();
+	static void setObserver(VirtualObserver&);
 	
 private:
 	static int maxThreads;
 	static ostream* outputStream;
 	static VirtualConsole const * console_ptr;
-	static CommandObserver observer;
+	static VirtualObserver* observer;
 };
-
 #endif

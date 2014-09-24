@@ -49,15 +49,15 @@ const VirtualConsole& TetraEnvironment::getConsole() {
 	return *console_ptr; 
 }
 
-CommandObserver& TetraEnvironment::getObserver() {
-	return observer;
+VirtualObserver& TetraEnvironment::getObserver() {
+	return *observer;
 }
 
-void TetraEnvironment::setObserver(CommandObserver& pObserver) {
-	observer = pObserver;
+void TetraEnvironment::setObserver(VirtualObserver& pObserver) {
+	observer = &pObserver;
 }
 
 VirtualConsole const * TetraEnvironment::console_ptr = NULL;
 int TetraEnvironment::maxThreads = 8;
 ostream* TetraEnvironment::outputStream = &std::cout;
-CommandObserver TetraEnvironment::observer;
+VirtualObserver* TetraEnvironment::observer = NULL;

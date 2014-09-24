@@ -74,5 +74,13 @@ commandConsole.o: commandConsole.cpp backend.hpp commandConsole.h
 commandObserver.o: commandObserver.h commandObserver.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandObserver.cpp
 
+#fromScratch:
+#	rm *.o
+#	make
+
+#withObserver:
+#	FLAGS+="-D USE_OBSERVER"
+#	make
+
 .PHONY clean:
 	rm *.o

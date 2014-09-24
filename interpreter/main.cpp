@@ -899,8 +899,10 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 template<typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
+#ifdef USE_OBSERVER
 	//Notify the observer that we are about to execute a new node
 	TetraEnvironment::getObserver().notify_E(node);
+#endif
 
 	//Call the appropriate function based on the NodeKind of the node
 	switch(node->kind()) {

@@ -1,19 +1,20 @@
-#ifndef OBSERVER_H
-#define OBSERVER_H
+
 
 #include<vector>
-#include"backend.hpp"
 
-class CommandObserver : public VirtualObserver{
+
+//Forward declarations
+class Node;
+
+class VirtualObserver {
 
 private:
-	std::vector<int> breakpoints;
+	std::vector<int< breakpoints;
 	int lastLine;
 	bool stepping;
 	bool stopAtNext;
 
 public:
-	CommandObserver();
 	void notify_E(const Node*);
 	void step_E();
 	void next_E();
