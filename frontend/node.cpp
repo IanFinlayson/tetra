@@ -98,7 +98,7 @@ void Node::insertSymbol(Symbol sym) {
 }
 
 /* lookup a symbol from a symbol table */
-Symbol Node::lookupSymbol(string name, int lineno) {
+Symbol Node::lookupSymbol(string name, int lineno) const {
   /* if there is no symbol table, it's not found! */
   if (!symtable) {
     throw Error("Symbol '" + name + "' not found!", lineno);

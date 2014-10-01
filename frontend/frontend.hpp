@@ -176,7 +176,7 @@ class Node {
 
         /* symbol functions */
         void insertSymbol(Symbol sym);
-        Symbol lookupSymbol(string name, int lineno);
+        Symbol lookupSymbol(string name, int lineno) const;
         bool hasSymbol(const string& name);
 
     private:
