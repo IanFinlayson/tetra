@@ -6,7 +6,7 @@
 CC = clang++
 FLAGS = -Wall -g -pedantic -pthread -ftemplate-backtrace-limit=1
 SEARCHPATH = ../frontend
-
+DEBUG_MODE = -D USE_OBSERVER
 done: tetra
 	@echo
 	@echo Build Completed
@@ -17,70 +17,94 @@ tetra: run.o libbackend.a
 	$(CC) $(FLAGS) run.o libbackend.a $(SEARCHPATH)/libfrontend.a -o tetra
 
 #create a linkable library letting other programs call interpret(Node* node)
-libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o
-	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o
+libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o virtualObserver.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o virtualObserver.o
+	@echo
 
 run.o: run.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
+	@echo
 
 main.o: main.cpp operationMap.cpp comparisonMap.cpp parallel.h backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c main.cpp
+	@echo
 
 comparisonMap.o: comparisonMap.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c comparisonMap.cpp
+	@echo
 
 functionTable.o: functionTable.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c functionTable.cpp
+	@echo
 
 #nodeTable.o: nodeTable.cpp nodeTable.h
 #	$(CC) $(FLAGS) -I$(SEARCHPATH) -c nodeTable.cpp
 
 operationMap.o: operationMap.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c operationMap.cpp
+	@echo
 
 variableContext.o: variableContext.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c variableContext.cpp
+	@echo
 
 #tData.o: tData.h
 #	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tData.h
 
 tDataSpecializations.o: tDataSpecializations.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tDataSpecializations.cpp
+	@echo
 
 progContext.o: backend.hpp progContext.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c progContext.cpp
+	@echo
 
 tArray.o: tArray.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tArray.cpp
+	@echo
 
 TSL.o: TSL.cpp backend.hpp commandConsole.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c TSL.cpp
+	@echo
 
 threadEnvironment.o: threadEnvironment.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c threadEnvironment.cpp
+	@echo
 
 runtimeError.o: runtimeError.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c runtimeError.cpp
+	@echo
 
 systemError.o: systemError.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c systemError.cpp
+	@echo
 
 tetraEnvironment.o: tetraEnvironment.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c tetraEnvironment.cpp
+	@echo
 
 commandConsole.o: commandConsole.cpp backend.hpp commandConsole.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandConsole.cpp
+	@echo
 
 commandObserver.o: commandObserver.h commandObserver.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandObserver.cpp
+	@echo
 
-#fromScratch:
-#	rm *.o
-#	make
+virtualObserver.o: virtualObserver.cpp backend.hpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c virtualObserver.cpp
+	@echo
 
-#withObserver:
-#	FLAGS+="-D USE_OBSERVER"
-#	make
+#DEBUG:
+#	touch main.cpp
+#	@echo $(DEBUG_MODE)
+#	$(eval FLAGS += $(DEBUG_MODE))
+#	@echo $(FLAGS)
+#
+#N_DEBUG:
+#	touch run.cpp
+#
+
 
 .PHONY clean:
 	rm *.o

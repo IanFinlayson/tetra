@@ -901,7 +901,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 #ifdef USE_OBSERVER
 	//Notify the observer that we are about to execute a new node
-	TetraEnvironment::getObserver().notify_E(node);
+	TetraEnvironment::getObserver().notify_E(node,context);
 #endif
 
 	//Call the appropriate function based on the NodeKind of the node
@@ -983,6 +983,15 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 			SystemError e(message.str(),node->getLine(),node);
 			throw e;
 	}
+
+#ifdef USE_OBSERVER
+	//If we are exiting a scope, (i.e. just completed execution of a NODE_FUNCTION
+	//notify the observer so it can pop its current symbol lookup table
+	if(node->kind() == NODE_FUNCTION) {
+		cout << "Leaving scope" << endl;
+		TetraEnvironment::getObserver().leftScope_E();
+	}
+#endif
 
 }
 

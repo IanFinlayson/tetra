@@ -11,14 +11,15 @@ private:
 	int lastLine;
 	bool stepping;
 	bool stopAtNext;
-
+	std::stack<const Node*> scopes;
 public:
 	CommandObserver();
-	void notify_E(const Node*);
+	void notify_E(const Node*, TetraContext& context);
 	void step_E();
 	void next_E();
 	void break_E(int);
 	void continue_E();
+	void leftScope_E();
 };
 
 #endif

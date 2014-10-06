@@ -10,11 +10,13 @@ CommandObserver::CommandObserver() {
 }
 
 //Notifies the observer that a certain node in the program has been reached
-void CommandObserver::notify_E(const Node* foundNode) {
+void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 
-	/*if(breakpoints.size() <= 0) {
-		return;
-	}*/
+	//Check to see if we entered a new scope
+	if(foundNode->kind() == NODE_FUNCTION) {
+		cout << "Entering scope: " << foundNode->getString() << endl;
+		scopes.push(foundNode);
+	}
 	int currentLine = foundNode->getLine();
 	//check if line is a breakpoint
 	//If the current line is the same as the last line we broke at, we should not break, and let the instruction finish
@@ -32,12 +34,12 @@ void CommandObserver::notify_E(const Node* foundNode) {
 
 		msg << "Breakpoint reached at line: " << currentLine << endl;
 		msg << "Stopped at node of kind: " << foundNode->kind() << endl;
-		msg << "Options: (s)tep, (n)ext (c)ontinue (b)reak" << endl;
-
 		console.processStandardOutput(msg.str());
 		std::string ret = " ";
 
 		while(ret == " ") {
+			console.processStandardOutput("Options: (s)tep, (n)ext (c)ontinue (b)reak (p)rint\n");
+
 			ret = console.receiveStandardInput();
 	
 			switch (ret[0]) {
@@ -56,11 +58,61 @@ void CommandObserver::notify_E(const Node* foundNode) {
 			case 'b':
 			case 'B':
 			{
-				string breakpoint = console.receiveStandardInput();
+				std::string breakpoint = console.receiveStandardInput();
 				int lineNo = atoi(breakpoint.c_str());
 				break_E(lineNo);
+				std::stringstream confirmationMessage;
+				confirmationMessage << "Breakpoint set at line: " << lineNo << "\n";
+				console.processStandardOutput(confirmationMessage.str());
 				//set ret to repeat the input prompt
 				ret = " ";
+			}
+			break;
+			case 'p':
+			case 'P':
+			{
+				std::string varName = console.receiveStandardInput();
+				void* var = fetchVariable(varName,context);
+				if(var != NULL) {
+					std::stringstream message;
+					message << varName;
+					const Node* nodey = scopes.top();
+					Symbol symbolEntry = const_cast<Node*>(nodey)->lookupSymbol(varName,0);
+					switch(symbolEntry.getType()->getKind()) {
+						case TYPE_INT:
+							message << " (int): ";
+							message << *static_cast<int*>(var);
+						break;
+						case TYPE_REAL:
+							message << " (real): ";
+							message << *static_cast<double*>(var);
+						break;
+						case TYPE_STRING:
+							message << " (string): ";
+							message << *static_cast<std::string*>(var);
+						break;
+						case TYPE_BOOL:
+							message << " (bool): ";
+							message << *static_cast<bool*>(var);
+						break;
+
+						case TYPE_VECTOR:
+							message << " (vector): ";
+							message << *static_cast<TArray*>(var);
+						break;
+						case TYPE_VOID:
+							message << " (void): ";
+							message << var;
+						break;
+
+					}
+					message << "\n";
+					console.processStandardOutput(message.str());
+				}
+				else {
+					console.processStandardOutput("The variable " + varName + " either does not exist in the current scope, or has not been initialized\n");
+				}
+				ret = " "; 
 			}
 			break;
 			default:
@@ -86,5 +138,9 @@ void CommandObserver::break_E(int lineNum) {
 
 void CommandObserver::continue_E() {
 	//do nothing at the moment
+}
+
+void CommandObserver::leftScope_E() {
+	scopes.pop();
 }
 
