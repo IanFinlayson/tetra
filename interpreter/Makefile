@@ -95,15 +95,18 @@ virtualObserver.o: virtualObserver.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c virtualObserver.cpp
 	@echo
 
-#DEBUG:
-#	touch main.cpp
-#	@echo $(DEBUG_MODE)
-#	$(eval FLAGS += $(DEBUG_MODE))
-#	@echo $(FLAGS)
-#
-#N_DEBUG:
-#	touch run.cpp
-#
+DEBUG:
+	touch main.cpp
+	@echo $(DEBUG_MODE)
+	$(eval FLAGS += $(DEBUG_MODE))
+	@echo $(FLAGS)
+	$(eval export FLAGS)
+#	make FLAGS="$(FLAGS)"
+	make -e
+
+N_DEBUG:
+	touch main.cpp
+	make
 
 
 .PHONY clean:
