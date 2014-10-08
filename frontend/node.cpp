@@ -114,7 +114,7 @@ Symbol Node::lookupSymbol(string name, int lineno) const {
   return it->second;
 }
 
-bool Node::hasSymbol(const string& name) {
+bool Node::hasSymbol(const string& name) const {
   if (!symtable) {
     return false;
   }
