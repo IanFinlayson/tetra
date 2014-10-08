@@ -3,6 +3,9 @@
 #include"commandObserver.h"
 #include<sstream>
 
+//Global symbol table
+extern std::map<std::string, Symbol> globals;
+
 CommandObserver::CommandObserver() {
 	lastLine = 0;
 	stepping = false;
@@ -99,8 +102,17 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 				if(var != NULL) {
 					std::stringstream message;
 					message << varName;
+					//get the function node which has the local scope's symbol table
 					const Node* nodey = scopes.top();
-					Symbol symbolEntry = nodey->lookupSymbol(varName,0);
+
+					//Determine the datatype of the entry by looking in the local or global symbol table
+					Symbol symbolEntry;
+					if(const_cast<Node*>(nodey)->hasSymbol(varName)) {
+						symbolEntry = nodey->lookupSymbol(varName,0);
+					}
+					else {	//Variable exists in global scope
+						symbolEntry = globals[varName];		
+					}
 					message << " (" << typeToString(symbolEntry.getType()) << "): ";
 					switch(symbolEntry.getType()->getKind()) {
 						case TYPE_INT:
