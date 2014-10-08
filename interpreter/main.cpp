@@ -988,7 +988,6 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 	//If we are exiting a scope, (i.e. just completed execution of a NODE_FUNCTION
 	//notify the observer so it can pop its current symbol lookup table
 	if(node->kind() == NODE_FUNCTION) {
-		cout << "Leaving scope" << endl;
 		TetraEnvironment::getObserver().leftScope_E();
 	}
 #endif

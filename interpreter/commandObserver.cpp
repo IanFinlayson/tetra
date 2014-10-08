@@ -14,7 +14,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 
 	//Check to see if we entered a new scope
 	if(foundNode->kind() == NODE_FUNCTION) {
-		cout << "Entering scope: " << foundNode->getString() << endl;
+		//cout << "Entering scope: " << foundNode->getString() << endl;
 		scopes.push(foundNode);
 	}
 	int currentLine = foundNode->getLine();
@@ -60,9 +60,32 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 			{
 				std::string breakpoint = console.receiveStandardInput();
 				int lineNo = atoi(breakpoint.c_str());
-				break_E(lineNo);
+				bool success = break_E(lineNo);
 				std::stringstream confirmationMessage;
-				confirmationMessage << "Breakpoint set at line: " << lineNo << "\n";
+				if(success) {
+					confirmationMessage << "Breakpoint set at line: " << lineNo << "\n";
+				}
+				else {
+					confirmationMessage << "Breakpoint already exists at line: " << lineNo << "\n";	
+				}
+				console.processStandardOutput(confirmationMessage.str());
+				//set ret to repeat the input prompt
+				ret = " ";
+			}
+			break;
+			case 'r':
+			case 'R':
+			{
+				std::string breakpoint = console.receiveStandardInput();
+				int lineNo = atoi(breakpoint.c_str());
+				bool success = remove_E(lineNo);
+				std::stringstream confirmationMessage;
+				if(success) {
+					confirmationMessage << "Breakpoint removed from line: " << lineNo << "\n";
+				}
+				else {
+					confirmationMessage << "No breakpoint exists at line " << lineNo << "\n";
+				}
 				console.processStandardOutput(confirmationMessage.str());
 				//set ret to repeat the input prompt
 				ret = " ";
@@ -77,31 +100,32 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 					std::stringstream message;
 					message << varName;
 					const Node* nodey = scopes.top();
-					Symbol symbolEntry = const_cast<Node*>(nodey)->lookupSymbol(varName,0);
+					Symbol symbolEntry = nodey->lookupSymbol(varName,0);
+					message << " (" << typeToString(symbolEntry.getType()) << "): ";
 					switch(symbolEntry.getType()->getKind()) {
 						case TYPE_INT:
-							message << " (int): ";
+							//message << " (int): ";
 							message << *static_cast<int*>(var);
 						break;
 						case TYPE_REAL:
-							message << " (real): ";
+							//message << " (real): ";
 							message << *static_cast<double*>(var);
 						break;
 						case TYPE_STRING:
-							message << " (string): ";
+							//message << " (string): ";
 							message << *static_cast<std::string*>(var);
 						break;
 						case TYPE_BOOL:
-							message << " (bool): ";
+							//message << " (bool): ";
 							message << *static_cast<bool*>(var);
 						break;
 
 						case TYPE_VECTOR:
-							message << " (vector): ";
+							//message << " (vector): ";
 							message << *static_cast<TArray*>(var);
 						break;
 						case TYPE_VOID:
-							message << " (void): ";
+							//message << " (void): ";
 							message << var;
 						break;
 
@@ -120,6 +144,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 				//set ret to repeat the prompt for input
 				ret = " ";
 			}
+			//cout << "breakpoints size: " << breakpoints.size() << endl;
 		}
 	}
 }
@@ -132,9 +157,29 @@ void CommandObserver::next_E() {
 	stopAtNext = true;
 }
 
-void CommandObserver::break_E(int lineNum) {
-	breakpoints.push_back(lineNum);
+//Adds a breakpoint associated with the given line number. Returns false if there was already a breakpoint there.
+bool CommandObserver::break_E(int lineNum) {
+	if(std::find(breakpoints.begin(), breakpoints.end(), lineNum) == breakpoints.end()) {
+		breakpoints.push_back(lineNum);
+		return true;
+	}
+	else {
+		return false;
+	}
 }
+
+//Removes a breakpoint from the given line number. Returns false if no breakpoint exists
+bool CommandObserver::remove_E(int lineNum) {
+	std::vector<int>::iterator location = std::find(breakpoints.begin(), breakpoints.end(), lineNum);
+	if(location != breakpoints.end()) {
+		breakpoints.erase(location);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 
 void CommandObserver::continue_E() {
 	//do nothing at the moment

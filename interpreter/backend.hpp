@@ -1013,7 +1013,8 @@ public:
 	virtual void notify_E(const Node*, TetraContext& context)=0;
 	virtual void step_E()=0;
 	virtual void next_E()=0;
-	virtual void break_E(int)=0;
+	virtual bool break_E(int)=0;
+	virtual bool remove_E(int)=0;
 	virtual void continue_E()=0;
 	virtual void leftScope_E()=0;
 	void* fetchVariable(std::string s, TetraContext& context);

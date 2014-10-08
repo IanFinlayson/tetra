@@ -17,9 +17,10 @@ public:
 	void notify_E(const Node*, TetraContext& context);
 	void step_E();
 	void next_E();
-	void break_E(int);
+	bool break_E(int);
 	void continue_E();
 	void leftScope_E();
+	bool remove_E(int);
 };
 
 #endif
