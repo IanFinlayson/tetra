@@ -5,8 +5,8 @@ Tetra is a high-level parallel programming language thatis designed to make
 parallel programs easier to write, visualize, debug, and optimize. Its goals
 are to make parallel programming easier for students and professionals alike.
 
-It combines a friendly, Python-like syntax; static typing; powerful data
-structures; and built-in parallelism. It comes with a graphical development
+It combines a friendly, Python-like syntax, static typing, powerful data
+structures, and built-in parallelism. It comes with a graphical development
 environment with several unique features.
 
 About

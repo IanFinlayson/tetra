@@ -4,7 +4,7 @@
  * The template for the type is void* and...
  * the void* is pointing at a dynamically allocated piece of memory for which the TData has ownership
  */ 
-
+/*
 #ifndef VOIDLESS_TDATA_H
 #define VOIDLESS_TDATA_H
 
@@ -116,3 +116,4 @@ T& TData<T>::getData() {
 }
 
 #endif
+*/

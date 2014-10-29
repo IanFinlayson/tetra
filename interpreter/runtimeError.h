@@ -1,4 +1,4 @@
-#ifndef RUNTIME_ERROR_H
+/*#ifndef RUNTIME_ERROR_H
 #define RUNTIME_ERROR_H
 
 #include "frontend.hpp"
@@ -13,3 +13,4 @@ private:
 };
 
 #endif
+*/

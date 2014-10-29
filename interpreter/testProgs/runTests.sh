@@ -32,6 +32,7 @@ prefixes[${#prefixes[*]}]="refref";	results[${#results[*]}]=222
 prefixes[${#prefixes[*]}]="dA";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="retA";	results[${#results[*]}]=44
 prefixes[${#prefixes[*]}]="shortCircuit";	results[${#results[*]}]=26
+prefixes[${#prefixes[*]}]="glob";	results[${#results[*]}]=2
 prefixes[${#prefixes[*]}]="bg";	results[${#results[*]}]=10
 prefixes[${#prefixes[*]}]="lock";	results[${#results[*]}]=200
 prefixes[${#prefixes[*]}]="par";	results[${#results[*]}]=3

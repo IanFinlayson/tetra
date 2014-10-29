@@ -10,7 +10,6 @@
 
 extern int yylineno;
 
-
 /* node member functions */
 Node::Node(NodeKind node_type) {
   this->node_type = node_type;
@@ -99,7 +98,7 @@ void Node::insertSymbol(Symbol sym) {
 }
 
 /* lookup a symbol from a symbol table */
-Symbol Node::lookupSymbol(string name, int lineno) {
+Symbol Node::lookupSymbol(string name, int lineno) const {
   /* if there is no symbol table, it's not found! */
   if (!symtable) {
     throw Error("Symbol '" + name + "' not found!", lineno);
@@ -115,7 +114,7 @@ Symbol Node::lookupSymbol(string name, int lineno) {
   return it->second;
 }
 
-bool Node::hasSymbol(const string& name) {
+bool Node::hasSymbol(const string& name) const {
   if (!symtable) {
     return false;
   }

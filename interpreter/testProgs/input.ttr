@@ -1,0 +1,18 @@
+def main() int:
+   print("int\n")
+   x = read_int()
+   print("You input: ",x,"\n")
+
+   print("real\n")
+   y = read_real()
+   print("You input: ",y,"\n")
+
+   print("bool\n")
+   z = read_bool()
+   print("You input: ",z,"\n")
+
+   print("string\n")
+   t = read_string()
+   print("You input: ",t,"\n")
+
+   return 0

@@ -1,4 +1,4 @@
-#ifndef SYSTEM_ERROR_H
+/*#ifndef SYSTEM_ERROR_H
 #define SYSTEM_ERROR_H
 
 #include "frontend.hpp"
@@ -13,3 +13,4 @@ private:
 };
 
 #endif
+*/

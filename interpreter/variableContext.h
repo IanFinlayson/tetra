@@ -1,9 +1,9 @@
-#ifndef VARIABLE_CONTEXT_H
-#define VARIABLE_CONTEXT_H
+//#ifndef VARIABLE_CONTEXT_H
+//#define VARIABLE_CONTEXT_H
 /*
  * This class represents the variables present at various scopes within a tetra program
  */
-
+/*
 #include<iostream>
 #include<map>
 #include<string>
@@ -132,3 +132,4 @@ T* VarTable::lookupVar(const string varName) {
 }
 
 #endif
+*/

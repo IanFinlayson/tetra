@@ -5,7 +5,7 @@ def main() int:
                 parallel for y in [0 ... 999]:
                         if determinePrime(x * 1000 + y):
                                 lock sum:
-                                currentPrime += 1
+                                        currentPrime += 1
         return currentPrime
 
 def determinePrime(num int) bool:

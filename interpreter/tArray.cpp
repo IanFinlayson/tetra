@@ -2,13 +2,14 @@
  * This class wraps an array of tData<void*> used to make arrays and multi-dimensional arrays
  */
 
-#include<iostream>
-#include<string>
-#include<cstdlib>
-#include<sstream>
-#include"tData.h"
+//#include<iostream>
+//#include<string>
+//#include<cstdlib>
+//#include<sstream>
+//#include"tData.h"
 #include"frontend.hpp"
-#include "tArray.h"
+#include"backend.hpp"
+//#include "tArray.h"
 
 using std::string;
 using std::vector;

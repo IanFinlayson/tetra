@@ -5,6 +5,8 @@
 #include<iostream>
 #include"frontend.hpp"
 #include"backend.hpp"
+#include"commandConsole.h"
+#include"commandObserver.h"
 #include<cstdlib>
 
 //These are defined in frontend.hpp and main.cpp respectively
@@ -18,7 +20,16 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	TetraEnvironment::initialize();
+	CommandConsole console;
+	CommandObserver observer;
+
+	//observer.break_E(5);
+
+	TetraEnvironment::initialize(console);
+	TetraEnvironment::setObserver(observer);
+
+	//cout << &observer << endl;
+	//cout << &(TetraEnvironment::getObserver()) << endl;
 
 	Node* tree;
 
@@ -29,7 +40,10 @@ int main(int argc, char** argv) {
 		std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
+//#ifdef PROMPT_DEBUG
+	//Make it so that the debug prompt will be started at the very beginning
+	TetraEnvironment::getObserver().step_E();
+//#endif
 	std::cout << "Running: " << argv[1] << endl;
 	int ret = 0;
 	try {   

@@ -102,6 +102,8 @@ stack<int> linenos;
 %token TOK_ELLIPSIS
 %token TOK_BACKGROUND
 %token TOK_LOCK
+%token TOK_CONST
+%token TOK_GLOBAL
 
 /* typed tokens */
 %token <intval> TOK_INTVAL
@@ -116,13 +118,13 @@ stack<int> linenos;
 %token TOK_NEWLINE
 
 /* types */
-%type <node> functions function formal_param_list statements statement block formal_params
+%type <node> toplevels function formal_param_list statements statement block formal_params
 %type <node> compound_statement simple_statement pass_statement return_statement break_statement
 %type <node> continue_statement expression if_statement while_statement else_option orterm andterm
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
 %type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-%type <node> background lock_statement index indices vector_value vector_values
+%type <node> background lock_statement index indices vector_value vector_values datadecl
 
 %type <data_type> return_type type
 
@@ -131,7 +133,7 @@ stack<int> linenos;
 %%
 
 /* a program is a list of functions */
-program: functions {
+program: toplevels {
   root = $1;
   /* check and infer the types in the tree */
   inferTypes(root);
@@ -145,13 +147,29 @@ newl_star: TOK_NEWLINE newl_star {}
 newl_plus: TOK_NEWLINE newl_star {}
 
 /* a list of functions */
-functions: newl_star function functions {
-  $$ = new Node(NODE_FUNCTION_LIST);
+toplevels: newl_star function toplevels {
+  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$->setLine(0);
+  $$->addChild($2);
+  $$->addChild($3);
+} | newl_star datadecl toplevels {
+  $$ = new Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
 } | {
   $$ = NULL;
+}
+
+/* a data declaration - either a constant or global */
+datadecl: TOK_CONST identifier TOK_ASSIGN expression {
+  $$ = new Node(NODE_CONST);
+  $$->addChild($2);
+  $$->addChild($4);
+} | TOK_GLOBAL identifier TOK_ASSIGN expression {
+  $$ = new Node(NODE_GLOBAL);
+  $$->addChild($2);
+  $$->addChild($4);
 }
 
 /* a single function */
@@ -647,31 +665,25 @@ expterm: funcall {
 vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
   /* an empty vector definition */
   $$ = new Node(NODE_VECVAL);
+
 } | TOK_LEFTBRACKET TOK_INTVAL TOK_ELLIPSIS TOK_INTVAL TOK_RIGHTBRACKET {
   /* a vector with elipsis eg [1 .. 5] */
-  $$ = new Node(NODE_VECVAL);
+/* create a range node for these (this code used to build up a chain of VECVAL's manually, but that
+       killed memory when we did [1 ... 100000] */
+  $$ = new Node(NODE_VECRANGE);
 
   /* check that the values are legit */
-  if ($2 >= $4) {
-    throw Error("Left value must be less than right value in a range declaration", yylineno);
+  if ($2 == $4) {
+    throw Error("Cannot have a range of one item", yylineno);
   }
 
-  /* add all of the children in place */
-  Node* parent = $$;
-  for (int i = $2; i <= $4; i++) {
-    /* add in the next number */
-    Node* num = new Node(NODE_INTVAL);
-    num->setIntval(i);
-    parent->addChild(num);
+    Node* a = new Node(NODE_INTVAL);
+    a->setIntval($2);
+    Node* b = new Node(NODE_INTVAL);
+    b->setIntval($4);
 
-    /* if there are more */
-    if (i < $4) {
-      /* add in the rest */
-      Node* next = new Node(NODE_VECVAL);
-      parent->addChild(next);
-      parent = next;
-    }
-  }
+    $$->addChild(a);
+    $$->addChild(b);
 } | TOK_LEFTBRACKET vector_values TOK_RIGHTBRACKET {
   /* a set of one or more vector initializers */
   $$ = $2;
@@ -679,7 +691,7 @@ vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
 
 /* one or more expressions to be made into a vector */
 vector_values: expression TOK_COMMA vector_values {
-  $$ = new Node(NODE_VECVAL);
+             $$ = new Node(NODE_VECVAL);
   $$->addChild($1);
   $$->addChild($3);
 } | expression {
@@ -691,7 +703,7 @@ vector_values: expression TOK_COMMA vector_values {
 
 /* an l-value - any identifier with any number of indexes after it */
 variable: identifier indices {
-  /* if it's a vector reference */
+        /* if it's a vector reference */
   if ($2) {
     $$ = new Node(NODE_VECREF);
     $$->addChild($1);
@@ -704,7 +716,7 @@ variable: identifier indices {
 
 /* any number of indices */
 indices: index indices {
-  $$ = new Node(NODE_INDEX);
+       $$ = new Node(NODE_INDEX);
   $$->addChild($1);
   $$->addChild($2);
 } | {
@@ -713,18 +725,18 @@ indices: index indices {
 
 /* a single index */
 index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
-  $$ = $2;
+     $$ = $2;
 }
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
-  $$ = new Node(NODE_IDENTIFIER);
+          $$ = new Node(NODE_IDENTIFIER);
   $$->setStringval($1);
 }
 
 /* a function call */
 funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
-  $$ = new Node(NODE_FUNCALL);
+       $$ = new Node(NODE_FUNCALL);
   $$->setStringval($1);
 } | TOK_IDENTIFIER TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
   $$ = new Node(NODE_FUNCALL);
@@ -734,7 +746,7 @@ funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
 
 /* a list of at least one parameter */
 actual_param_list: expression TOK_COMMA actual_param_list {
-  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
+                 $$ = new Node(NODE_ACTUAL_PARAM_LIST);
   $$->addChild($1);
   $$->addChild($3);
 } | expression {
@@ -756,22 +768,22 @@ void yyerror(const char* str) {
 extern istream* in;
 Node* parseFile(const string& fname) {
   reset_lexer( );
-  
-  /* open the file */
+
+/* open the file */
   ifstream file(fname.c_str( ));
 
-  /* if it's not open, we failed */
+/* if it's not open, we failed */
   if (!file.is_open( )) {
     throw Error("Could not open file '" + fname + "'");
   }
-  
-  /* set the in stream (defined in lexer.cpp) */
+
+/* set the in stream (defined in lexer.cpp) */
   in = &file;
 
-  /* call yyparse */
+/* call yyparse */
   yyparse( );
 
-  /* return the root of the parse tree */
+/* return the root of the parse tree */
   return root;
 }
 
