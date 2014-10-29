@@ -13,21 +13,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.showMaximized();
 
-
-    //QGridLayout newLayout;
-    Editor* newEditor = w.getEditor();
-    //newLayout.addWidget(newEditor,0,0,1,1,0);
-    QGridLayout* thisLayout = w.getGridLayout();
-    //for(int i = 0; i < 2; i++){
-      //  thisLayout->addWidget(new Editor, 1, 1, 1, 1, 0);
-    //}
-    //thisLayout->addWidget(newEditor, 2, 2, 0, 1,0);
-    OpenAppDialog openappdialog;
-    openappdialog.setMainWindow(&w);
+    OpenAppDialog openappdialog(&w);
     openappdialog.show();
-
-
-
-
     return app.exec();
 }

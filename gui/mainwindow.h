@@ -7,6 +7,7 @@
 #include <QLayout>
 #include <QMap>
 #include "syntaxhighlighter.h"
+#include "rundialog.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
 
@@ -34,9 +35,7 @@ public:
     QString getOpenFile();
     friend void* wrapperFunc(void*);
     void printError(Error);
-    QGridLayout* getGridLayout();
-    Editor* getEditor();
-    void addThreadWindow(Editor*);
+    void printMainValue();
 
 
 private slots:
@@ -51,14 +50,15 @@ private slots:
     void on_actionDelete_triggered();
     void on_actionSelect_All_triggered();
     void on_actionNew_triggered();
-    void documentWasModified();
     void on_actionRun_triggered();
-    void updateCoordinates();
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
     void on_actionMinimize_triggered();
     void on_actionLine_Numbers_triggered();
     void on_actionClear_Output_triggered();
+
+    void documentWasModified();
+    void updateCoordinates();
 
 private:
     Ui::MainWindow *ui;
@@ -66,6 +66,7 @@ private:
 
     void hideEditor();
     void setupShortcuts();
+    void setupThreadWindows();
 
     Highlighter *highlighter;
 
@@ -74,8 +75,9 @@ private:
     bool maybeSave();
     int mainValue;
     bool buildSuccessful;
-    //QMap <int, QLayout>;
-    QMap<int, Editor> threadWindows;
+
+    QString mode;
+    QVector<Editor*> threadWindows;
 };
 
 #endif // MAINWINDOW_H

@@ -12,6 +12,7 @@
 #include <QScrollBar>
 #include <QSize>
 #include <pthread.h>
+#include <QTabWidget>
 
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
@@ -24,8 +25,10 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     
     hideEditor();
     setupShortcuts();
+    setupThreadWindows();
 
     highlighter = new Highlighter(ui->input->document());
+
     QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
 
@@ -66,7 +69,6 @@ void MainWindow::showEditor(){
     ui->input->setCenterOnScroll(true);
 
     ui->cursorPosition->setAlignment(Qt::AlignRight);
-    //ui->gridLayout->
 }
 
 void MainWindow::setupShortcuts(){
@@ -91,6 +93,7 @@ void* wrapperFunc(void* arg1){
         newNode = parseFile(tetraProg->openFile.toStdString());
         tetraProg->mainValue = interpret(newNode);
         tetraProg->buildSuccessful = true;
+        tetraProg->printMainValue();
     }
     catch (RuntimeError e){
 
@@ -99,9 +102,6 @@ void* wrapperFunc(void* arg1){
 
     }
     catch (Error e){
-        //tetraProg->buildError = e;
-        //tetraProg->buildSuccessful = false;
-        //u
         tetraProg->printError(e);
     }
     return NULL;
@@ -118,6 +118,7 @@ bool MainWindow::newProj(){
     }
     return projectCreated;
 }
+
 bool MainWindow::openProj(){
     bool projectOpened = false;
     on_actionOpen_triggered();
@@ -258,16 +259,22 @@ void MainWindow::on_actionSelect_All_triggered(){
     ui->input->selectAll();
 }
 void MainWindow::on_actionFind_triggered(){
-  //  ui->input->find();
-    QLabel newLabel("hey");
-    //ui->gridLayout->addItem(newLabel);
+    /*for(int i = 0; i < 4; i++){
+        threadWindows.at(i)->show();
+    }*/
+    ui->output->insertPlainText(QString::number(threadWindows.size()));
 }
 void MainWindow::on_actionRun_triggered(){
+    maybeSave();
+    ui->input->setReadOnly(true);
+    RunDialog *runDialog = new RunDialog();
+    runDialog->exec();
+
     pthread_t ttrThread;
     pthread_create(&ttrThread, NULL, (void*(*)(void*))wrapperFunc, this);\
-    if(buildSuccessful){
-        ui->output->insertPlainText(QString::number(mainValue)+ "\n");
-    }
+    //pthread_join(&ttrThread);
+    ui->input->setReadOnly(false);
+
 }
 void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
     if(arg1 == true){
@@ -289,19 +296,22 @@ void MainWindow::on_actionClear_Output_triggered(){
 //-----------------------------------------------//
 
 void MainWindow::printError(Error e){
+    buildSuccessful = false;
     ui->input->moveCursor(e.getLine());
     ui->output->insertPlainText(QString::number(e.getLine()) + ": " + QString::fromStdString(e.getMessage()) + "\n");
     ui->input->highlightLine(QColor(Qt::red));
 }
 
-QGridLayout* MainWindow::getGridLayout(){
-    return ui->gridLayout;
+void MainWindow::printMainValue(){
+    ui->output->insertPlainText("Main returned: " + QString::number(mainValue)+ "\n");
 }
 
-Editor* MainWindow::getEditor(){
-    return ui->input;
-}
-
-void MainWindow::addThreadWindow(Editor* editor){
-    //threadWindows.insert(threadWindows.size(), *(editor));
+void MainWindow::setupThreadWindows(){
+    //QTabWidget threadTabs;
+    //ui->gridLayout->addWidget()
+    for(int i = 0; i <8; i++){
+        threadWindows.insert(i, new Editor);
+        //threadWindows[i]->hide();
+        ui->gridLayout->addWidget(threadWindows[i], 1, ui->gridLayout->columnCount(),1,1,0);
+    }
 }

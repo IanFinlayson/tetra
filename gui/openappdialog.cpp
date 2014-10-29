@@ -7,7 +7,8 @@
 #include <QtCore>
 #include <QDesktopWidget>
 
-OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAppDialog){
+OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAppDialog, MainWindow* mainwindow){
+    this->mainwindow = mainwindow;
     ui->setupUi(this);
     QPixmap tetraLogo(":/graphics/Tetra Resources/logo.png");
     ui->logo->setPixmap(tetraLogo);

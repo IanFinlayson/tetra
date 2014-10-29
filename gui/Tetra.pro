@@ -21,19 +21,22 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     openappdialog.cpp \
     syntaxhighlighter.cpp \
-    editor.cpp
+    editor.cpp \
+    rundialog.cpp
 
 HEADERS  += \
     quitdialog.h \
     mainwindow.h \
     openappdialog.h \
     syntaxhighlighter.h \
-    editor.h
+    editor.h \
+    rundialog.h
 
 FORMS    += \
     quitdialog.ui \
     mainwindow.ui \
-    openappdialog.ui
+    openappdialog.ui \
+    rundialog.ui
 
 RESOURCES += \
     AppResources.qrc
