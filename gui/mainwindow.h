@@ -6,13 +6,16 @@
 #include <QGridLayout>
 #include <QLayout>
 #include <QMap>
+#include <QThread>
 #include "syntaxhighlighter.h"
-#include "rundialog.h"
+#include "filerunner.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
 
 
+
 class Editor;
+class FileRunner;
 
 QT_BEGIN_NAMESPACE
 class QPrinter;
@@ -29,14 +32,20 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    bool openProj();
-    bool newProj();
+    bool openProject();
+    bool newProject();
     void showEditor();
     QString getOpenFile();
-    friend void* wrapperFunc(void*);
+    void setMainValue(int);
+    void setBuildSuccessful(bool);
     void printError(Error);
     void printMainValue();
+    void runMode(bool);
+    void debugMode(bool);
 
+
+public slots:
+    void runFile();
 
 private slots:
     void on_actionCopy_triggered();
@@ -56,17 +65,21 @@ private slots:
     void on_actionMinimize_triggered();
     void on_actionLine_Numbers_triggered();
     void on_actionClear_Output_triggered();
+    void on_actionDebug_toggled(bool arg1);
+    void on_actionStop_triggered();
 
     void documentWasModified();
     void updateCoordinates();
+
+
 
 private:
     Ui::MainWindow *ui;
     QString openFile;
 
     void hideEditor();
+    void setupEditor();
     void setupShortcuts();
-    void setupThreadWindows();
 
     Highlighter *highlighter;
 
@@ -77,7 +90,11 @@ private:
     bool buildSuccessful;
 
     QString mode;
-    QVector<Editor*> threadWindows;
+    FileRunner *fileRunner;
+    QThread *tetraThread;
+
+protected:
+    void closeEvent(QCloseEvent *);
 };
 
 #endif // MAINWINDOW_H

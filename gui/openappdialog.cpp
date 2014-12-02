@@ -7,8 +7,8 @@
 #include <QtCore>
 #include <QDesktopWidget>
 
-OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAppDialog, MainWindow* mainwindow){
-    this->mainwindow = mainwindow;
+OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAppDialog){
+    this->mainwindow = NULL;
     ui->setupUi(this);
     QPixmap tetraLogo(":/graphics/Tetra Resources/logo.png");
     ui->logo->setPixmap(tetraLogo);
@@ -33,13 +33,13 @@ void OpenAppDialog::on_quitAppButton_clicked(){
 
 }
 void OpenAppDialog::on_newProjButton_clicked(){
-    bool projectCreated = mainwindow->newProj();
+    bool projectCreated = mainwindow->newProject();
     if(projectCreated){
         this->close();
     }
 }
 void OpenAppDialog::on_openProjButton_clicked(){
-    bool projectOpened = mainwindow->openProj();
+    bool projectOpened = mainwindow->openProject();
     if(projectOpened){
         this->close();
     }

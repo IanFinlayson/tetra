@@ -1,4 +1,4 @@
- #include "mainwindow.h"
+#include "mainwindow.h"
 #include "openappdialog.h"
 #include "editor.h"
 #include <QApplication>
@@ -13,7 +13,8 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.showMaximized();
 
-    OpenAppDialog openappdialog(&w);
+    OpenAppDialog openappdialog;
+    openappdialog.setMainWindow(&w);
     openappdialog.show();
     return app.exec();
 }

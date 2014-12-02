@@ -352,6 +352,9 @@ border: 1px solid grey;
    </property>
   </action>
   <action name="actionRun">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
      <normaloff>:/icons/Tetra Resources/icons/appbar.control.play.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.play.png</iconset>
@@ -364,6 +367,9 @@ border: 1px solid grey;
    </property>
   </action>
   <action name="actionDebug">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
      <normaloff>:/icons/Tetra Resources/icons/appbar.bug.png</normaloff>:/icons/Tetra Resources/icons/appbar.bug.png</iconset>

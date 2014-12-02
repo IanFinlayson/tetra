@@ -13,6 +13,7 @@
 #include <QSize>
 #include <pthread.h>
 #include <QTabWidget>
+#include <QThread>
 
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
@@ -20,26 +21,54 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     ui->setupUi(this);
     setWindowTitle(tr("Tetra"));
 
-    connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
-    connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
-    
-    hideEditor();
+    setupEditor();
     setupShortcuts();
-    setupThreadWindows();
 
     highlighter = new Highlighter(ui->input->document());
 
     QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
 
+    tetraThread = new QThread;
+    fileRunner = new FileRunner(this);
     mainValue = 0;
-
 }
 
 MainWindow::~MainWindow(){
     delete ui;
 }
 
+void MainWindow::setupEditor(){
+    QFont font = QFont("Monaco");
+    font.setFixedPitch(true);
+    font.setPointSize(12);
+    font.setStyleHint(QFont::TypeWriter);
+
+    QFontMetrics metrics(font);
+    ui->input->setFont(font);
+    ui->output->setFont(font);
+
+    ui->input->ensureCursorVisible();
+    ui->input->setCenterOnScroll(true);
+
+    ui->cursorPosition->setAlignment(Qt::AlignRight);
+
+    ui->actionCut->setEnabled(false);
+    ui->actionCopy->setEnabled(false);
+    ui->actionRedo->setEnabled(false);
+    ui->actionUndo->setEnabled(false);
+    ui->actionDelete->setEnabled(false);
+
+    connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy, SLOT(setEnabled(bool)));
+    connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut, SLOT(setEnabled(bool)));
+    connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo, SLOT(setEnabled(bool)));
+    connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo, SLOT(setEnabled(bool)));
+    connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
+    connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
+    connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
+
+    hideEditor();
+}
 
 void MainWindow::hideEditor(){
     ui->tetraFileLabel->hide();
@@ -55,20 +84,6 @@ void MainWindow::showEditor(){
     ui->input->show();
     ui->output->show();
     ui->cursorPosition->show();
-
-    QFont font = QFont("Monaco");
-    font.setFixedPitch(true);
-    font.setPointSize(12);
-    font.setStyleHint(QFont::TypeWriter);
-
-    QFontMetrics metrics(font);
-    ui->input->setFont(font);
-    ui->output->setFont(font);
-
-    ui->input->ensureCursorVisible();
-    ui->input->setCenterOnScroll(true);
-
-    ui->cursorPosition->setAlignment(Qt::AlignRight);
 }
 
 void MainWindow::setupShortcuts(){
@@ -84,32 +99,14 @@ void MainWindow::setupShortcuts(){
     ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
 }
 
-
-//wrapper function for parseFile and interpret functions
-void* wrapperFunc(void* arg1){
-    MainWindow* tetraProg = static_cast<MainWindow*>(arg1);
-    Node* newNode;
-    try{
-        newNode = parseFile(tetraProg->openFile.toStdString());
-        tetraProg->mainValue = interpret(newNode);
-        tetraProg->buildSuccessful = true;
-        tetraProg->printMainValue();
-    }
-    catch (RuntimeError e){
-
-    }
-    catch (SystemError e){
-
-    }
-    catch (Error e){
-        tetraProg->printError(e);
-    }
-    return NULL;
+void MainWindow::closeEvent(QCloseEvent *event){
+    event->ignore();
+    maybeSave();
+    QuitDialog quitdialog;
+    quitdialog.exec();
 }
 
-
-
-bool MainWindow::newProj(){
+bool MainWindow::newProject(){
     bool projectCreated = false;
     on_actionNew_triggered();
     if(openFile != ""){
@@ -119,7 +116,7 @@ bool MainWindow::newProj(){
     return projectCreated;
 }
 
-bool MainWindow::openProj(){
+bool MainWindow::openProject(){
     bool projectOpened = false;
     on_actionOpen_triggered();
     if(openFile != ""){
@@ -148,7 +145,7 @@ bool MainWindow::maybeSave(){
         ret = QMessageBox::warning(this, tr("Application"),
                      tr("The document has been modified.\n"
                         "Do you want to save your changes?"),
-                     QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+                     QMessageBox::Discard | QMessageBox::Save);
         if (ret == QMessageBox::Save){
             on_actionSave_triggered();
             return true;
@@ -259,22 +256,13 @@ void MainWindow::on_actionSelect_All_triggered(){
     ui->input->selectAll();
 }
 void MainWindow::on_actionFind_triggered(){
-    /*for(int i = 0; i < 4; i++){
-        threadWindows.at(i)->show();
-    }*/
-    ui->output->insertPlainText(QString::number(threadWindows.size()));
+
 }
 void MainWindow::on_actionRun_triggered(){
     maybeSave();
-    ui->input->setReadOnly(true);
-    RunDialog *runDialog = new RunDialog();
-    runDialog->exec();
-
-    pthread_t ttrThread;
-    pthread_create(&ttrThread, NULL, (void*(*)(void*))wrapperFunc, this);\
-    //pthread_join(&ttrThread);
-    ui->input->setReadOnly(false);
-
+    fileRunner->moveToThread(tetraThread);
+    tetraThread->start();
+    QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection);
 }
 void MainWindow::on_actionLine_Numbers_toggled(bool arg1){
     if(arg1 == true){
@@ -306,12 +294,55 @@ void MainWindow::printMainValue(){
     ui->output->insertPlainText("Main returned: " + QString::number(mainValue)+ "\n");
 }
 
-void MainWindow::setupThreadWindows(){
-    //QTabWidget threadTabs;
-    //ui->gridLayout->addWidget()
-    for(int i = 0; i <8; i++){
-        threadWindows.insert(i, new Editor);
-        //threadWindows[i]->hide();
-        ui->gridLayout->addWidget(threadWindows[i], 1, ui->gridLayout->columnCount(),1,1,0);
+
+
+void MainWindow::on_actionDebug_toggled(bool arg1)
+{
+    debugMode(arg1);
+}
+
+void MainWindow::runFile(){
+    Node *newNode;
+    runMode(true);
+    try{
+        newNode = parseFile(openFile.toStdString());
+        mainValue = interpret(newNode);
+        buildSuccessful = true;
+        printMainValue();
+        runMode(false);
     }
+
+    catch (RuntimeError e){
+
+    }
+    catch (SystemError e){
+
+    }
+    catch (Error e){
+        runMode(false);
+        printError(e);
+    }
+}
+
+void MainWindow::on_actionStop_triggered(){
+    runMode(false);
+    tetraThread->exit(0);
+}
+
+QString MainWindow::getOpenFile(){
+    return this->openFile;
+}
+void MainWindow::setBuildSuccessful(bool buildSuccessful){
+    this->buildSuccessful = buildSuccessful;
+}
+void MainWindow::setMainValue(int mainValue){
+    this->mainValue = mainValue;
+}
+void MainWindow::runMode(bool value){
+    ui->actionRun->setChecked(value);
+    ui->input->setReadOnly(value);
+}
+
+void MainWindow::debugMode(bool value){
+    ui->input->setVisible(!value);
 }
