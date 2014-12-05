@@ -6,12 +6,16 @@
 #include <QGridLayout>
 #include <QLayout>
 #include <QMap>
+#include <QThread>
 #include "syntaxhighlighter.h"
+#include "filerunner.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
 
 
+
 class Editor;
+class FileRunner;
 
 QT_BEGIN_NAMESPACE
 class QPrinter;
@@ -28,16 +32,20 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-    bool openProj();
-    bool newProj();
+    bool openProject();
+    bool newProject();
     void showEditor();
     QString getOpenFile();
-    friend void* wrapperFunc(void*);
+    void setMainValue(int);
+    void setBuildSuccessful(bool);
     void printError(Error);
-    QGridLayout* getGridLayout();
-    Editor* getEditor();
-    void addThreadWindow(Editor*);
+    void printMainValue();
+    void runMode(bool);
+    void debugMode(bool);
 
+
+public slots:
+    void runFile();
 
 private slots:
     void on_actionCopy_triggered();
@@ -51,20 +59,26 @@ private slots:
     void on_actionDelete_triggered();
     void on_actionSelect_All_triggered();
     void on_actionNew_triggered();
-    void documentWasModified();
     void on_actionRun_triggered();
-    void updateCoordinates();
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
     void on_actionMinimize_triggered();
     void on_actionLine_Numbers_triggered();
     void on_actionClear_Output_triggered();
+    void on_actionDebug_toggled(bool arg1);
+    void on_actionStop_triggered();
+
+    void documentWasModified();
+    void updateCoordinates();
+
+
 
 private:
     Ui::MainWindow *ui;
     QString openFile;
 
     void hideEditor();
+    void setupEditor();
     void setupShortcuts();
 
     Highlighter *highlighter;
@@ -74,8 +88,13 @@ private:
     bool maybeSave();
     int mainValue;
     bool buildSuccessful;
-    //QMap <int, QLayout>;
-    QMap<int, Editor> threadWindows;
+
+    QString mode;
+    FileRunner *fileRunner;
+    QThread *tetraThread;
+
+protected:
+    void closeEvent(QCloseEvent *);
 };
 
 #endif // MAINWINDOW_H

@@ -19,7 +19,7 @@ Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
 
 void Editor::keyPressEvent(QKeyEvent *e){
     cursor = this->textCursor();
-    if(e->key() == Qt::Key_Tab){
+    if(e->key() == Qt::Key_Tab){ //replaces tab key with predetermined amount of spaces
         int pos = cursor.positionInBlock();
         if((pos+4)%4 == 0 || getLeadingSpaces() < pos){
             cursor.insertText("    ");
@@ -34,7 +34,7 @@ void Editor::keyPressEvent(QKeyEvent *e){
             cursor.insertText("    ");
         }
     }
-    else if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return){
+    else if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return){ //when enter key is pressed, auto indents new line
         int leadingSpaces = getLeadingSpaces();
         if(cursor.block().text().endsWith(":")){
             leadingSpaces+=4;
@@ -44,7 +44,7 @@ void Editor::keyPressEvent(QKeyEvent *e){
             cursor.insertText("    ");
         }
     }
-    else if(e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete){
+    else if(e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete){ //"smart" backspace
         if(isTab("left")){
             int pos = cursor.positionInBlock();
             while(pos > 4){
@@ -58,7 +58,7 @@ void Editor::keyPressEvent(QKeyEvent *e){
             QPlainTextEdit::keyPressEvent(e);
         }
     }
-    else if(e->key() == Qt::Key_Left){
+    else if(e->key() == Qt::Key_Left){ //"smart" navigate
         if(isTab("left")){
             int pos = cursor.positionInBlock();
             while(pos > 4){
@@ -156,16 +156,14 @@ void Editor::updateLineNumberArea(const QRect &rect, int dy){
         updateLineNumberAreaWidth(0);
 }
 
-void Editor::resizeEvent(QResizeEvent *e)
-{
+void Editor::resizeEvent(QResizeEvent *e){
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void Editor::lineNumberAreaPaintEvent(QPaintEvent *event)
-{
+void Editor::lineNumberAreaPaintEvent(QPaintEvent *event){
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(), Qt::lightGray);
 
@@ -199,8 +197,7 @@ void Editor::showLineNumbers(bool arg1){
 }
 
 
-void Editor::moveCursor(int lineNumberToHighlight)
-{
+void Editor::moveCursor(int lineNumberToHighlight){
     int currentLineNumber = cursor.blockNumber()+1;
     int moves = lineNumberToHighlight - currentLineNumber;
     if(moves){
