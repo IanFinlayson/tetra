@@ -43,6 +43,41 @@ void FunctionMap::build(const Node* tree) {
 	}
 }
 
+//Fills the numerical field of each variable node to a value referencing where it will be held in the variable scope table
+void optimize(Node* node, std::map<std::string,int>& refer, int& nextNum) {
+
+	//If the node is a variable identifier, give it a numerical value
+	if(node->kind() == NODE_IDENTIFIER || node->kind() == NODE_FORMAL_PARAM) {
+		int possibleRef = refer[node->getString()];
+		//If no numerical value exists, assign it one.
+		//Note that this system wastes the 0th position,
+		//because there is no easy way to differentiate between "0 is the identifier" and "0 was returned when the element was default constructed"
+		if(possibleRef == 0) {
+			possibleRef = nextNum;
+			refer[node->getString()] = possibleRef;
+			nextNum++;
+		}
+		node->setIntval(possibleRef);
+		//cout << node->getString() << ": "<<possibleRef<<endl;
+	}
+
+	for(int index = 0; index < node->numChildren(); index++) {
+		optimize(node->child(index), refer, nextNum);
+	}
+}
+
+//Edits the base tree such that variable ID nodes will have their integer field set
+//This field will allow for immediate lookup of the variable, as opposed to 
+//having to perform string comparison
+void FunctionMap::optimizeLookup() {
+	//typedef std::pair<const std::string, Node*> mapElem;
+	for(std::map<const string, Node*>::iterator searcher = instance.lookup.begin(); searcher != instance.lookup.end(); searcher++) {
+		std::map<std::string,int> refer;
+		int nextNum = 1;
+		optimize(searcher->second, refer, nextNum);
+	}
+}
+
 //Given a NODE_ACTUAL_PARAM or NODE_FORMAL_PARAM, adds the signature of a single argument to the string
 //Then recursively calls this function until it has assembled the entire signature
 void FunctionMap::concatSignature(const Node* node, string& signature) {

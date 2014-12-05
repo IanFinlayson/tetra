@@ -70,5 +70,7 @@ int main(int argc, char** argv) {
 	std::cout << "|Main Returned: " << ret << endl;
 	std::cout << "+------------------------------------" << endl;
 
+	cout << endl << "For vectors: there were " << numAllocs_T << " allocations and " << numDeallocs_T << " Deallocations." << endl;
+
 	return ret;
 }

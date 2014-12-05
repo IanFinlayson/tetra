@@ -1,0 +1,46 @@
+Using standard map
+
+Prime Finder
+real    15m43.959s
+user    15m44.105s
+sys     0m0.324s
+
+Prime finder par
+real	3m46.835s
+user	27m53.966s
+sys	0m2.357
+
+TSP
+real    0m22.494s
+user    0m22.500s
+sys     0m0.008s
+
+TSPpar
+real    0m3.755s
+user    0m26.509s
+sys     0m0.056s
+
+
+Using -O3, std map
+
+primeFinder
+real	3m10.422s
+user	3m10.466s
+sys	0m0.088
+
+primeFinderPar
+real	1m58.608s
+user	14m21.024s
+sys	0m2.357
+
+TSP
+real    0m6.817s
+user    0m6.814s
+sys     0m0.004s
+
+TSPpar
+real    0m1.404s
+user    0m10.177s
+sys     0m0.009s
+
+

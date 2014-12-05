@@ -18,9 +18,14 @@
 //#define NDEBUG
 #include <assert.h>
 
+TetraScope::TetraScope() {
+	callNode = NULL;
+	executionStatus = NORMAL;
+}
 //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
-TetraScope::TetraScope(const Node* pCallNode) : executionStatus(NORMAL), callNode(pCallNode) {
-
+TetraScope::TetraScope(const Node * pCallNode)/* : executionStatus(NORMAL), callNode(pCallNode)*/ {
+	callNode = pCallNode;
+	executionStatus = NORMAL;
 }
 /*
 //Wraps the varTable::declareReference
@@ -45,6 +50,10 @@ ExecutionStatus TetraScope::queryExecutionStatus() {
 
 bool TetraScope::containsVar(std::string varName) const{
 	return varScope.containsVar(varName);
+}
+
+bool TetraScope::containsVar(const Node* varNode) const{
+	return varScope.containsVar(varNode);
 }
 
 void TetraScope::setCallNode(const Node* node) {

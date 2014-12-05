@@ -13,6 +13,7 @@ def main( ) int:
     local = "hello"
     sum += nums
     local2 = "goodbye"
+    print(sum,"\n")
     if sum > 5.0 and sum < 7.0:
         return 1
     elif sum > 7.0:

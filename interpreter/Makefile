@@ -4,9 +4,10 @@
 
 # -pg -O3
 CC = clang++
-FLAGS = -Wall -g -pedantic -pthread -ftemplate-backtrace-limit=1
+FLAGS = -Wall -pedantic -pthread -ftemplate-backtrace-limit=1 -pg
 SEARCHPATH = ../frontend
 DEBUG_MODE = -D USE_OBSERVER
+OPTIMIZE_MODE = -O3
 done: tetra
 	@echo
 	@echo Build Completed
@@ -99,6 +100,15 @@ DEBUG:
 	touch main.cpp
 	@echo $(DEBUG_MODE)
 	$(eval FLAGS += $(DEBUG_MODE))
+	@echo $(FLAGS)
+	$(eval export FLAGS)
+#	make FLAGS="$(FLAGS)"
+	make -e
+
+OPTIMIZED:
+	rm *.o
+	@echo $(OPTIMIZE_MODE)
+	$(eval FLAGS += $(OPTIMIZE_MODE))
 	@echo $(FLAGS)
 	$(eval export FLAGS)
 #	make FLAGS="$(FLAGS)"
