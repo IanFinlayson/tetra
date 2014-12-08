@@ -1,7 +1,6 @@
 #include "openappdialog.h"
 #include "ui_openappdialog.h"
 #include "mainwindow.h"
-#include "quitdialog.h"
 #include <QFileDialog>
 #include <QPushButton>
 #include <QtCore>
@@ -28,9 +27,7 @@ void OpenAppDialog::setMainWindow(MainWindow *mainwindow){
 }
 
 void OpenAppDialog::on_quitAppButton_clicked(){
-    QuitDialog quitdialog;
-    quitdialog.exec();
-
+    this->mainwindow->quit();
 }
 void OpenAppDialog::on_newProjButton_clicked(){
     bool projectCreated = mainwindow->newProject();

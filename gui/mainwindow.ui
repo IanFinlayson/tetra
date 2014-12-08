@@ -33,7 +33,7 @@
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
+        <item row="2" column="0">
          <widget class="Editor" name="input" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -79,6 +79,9 @@ border: 1px solid grey
            <string>0, 0</string>
           </property>
          </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QMdiArea" name="threadMdi"/>
         </item>
        </layout>
       </widget>
@@ -195,6 +198,9 @@ border: 1px solid grey;
      <string>Debug</string>
     </property>
     <addaction name="actionDebug"/>
+    <addaction name="actionResume"/>
+    <addaction name="actionPause"/>
+    <addaction name="actionExit_Debug_Mode"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -216,6 +222,9 @@ border: 1px solid grey;
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="toolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
@@ -235,7 +244,7 @@ border: 1px solid grey;
     </size>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonTextBesideIcon</enum>
+    <enum>Qt::ToolButtonFollowStyle</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -257,6 +266,13 @@ border: 1px solid grey;
    <addaction name="actionStop"/>
    <addaction name="separator"/>
    <addaction name="actionDebug"/>
+   <addaction name="actionExit_Debug_Mode"/>
+   <addaction name="separator"/>
+   <addaction name="actionResume"/>
+   <addaction name="actionPause"/>
+   <addaction name="actionStep_Through"/>
+   <addaction name="actionStep_Over"/>
+   <addaction name="actionStep_Out"/>
   </widget>
   <action name="actionSave">
    <property name="icon">
@@ -290,11 +306,6 @@ border: 1px solid grey;
    </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
-   </property>
-  </action>
-  <action name="actionExit">
-   <property name="text">
-    <string>Exit</string>
    </property>
   </action>
   <action name="actionAbout_Tetra">
@@ -452,6 +463,78 @@ border: 1px solid grey;
   <action name="actionClear_Output">
    <property name="text">
     <string>Clear Output</string>
+   </property>
+  </action>
+  <action name="actionResume">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.control.resume.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.resume.png</iconset>
+   </property>
+   <property name="text">
+    <string>Resume</string>
+   </property>
+  </action>
+  <action name="actionPause">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.control.pause.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.pause.png</iconset>
+   </property>
+   <property name="text">
+    <string>Pause</string>
+   </property>
+  </action>
+  <action name="actionStep_Through">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.into.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.into.png</iconset>
+   </property>
+   <property name="text">
+    <string>Step Through</string>
+   </property>
+  </action>
+  <action name="actionStep_Out">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.out.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.out.png</iconset>
+   </property>
+   <property name="text">
+    <string>Step Out</string>
+   </property>
+  </action>
+  <action name="actionStep_Over">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.over.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.over.png</iconset>
+   </property>
+   <property name="text">
+    <string>Step Over</string>
+   </property>
+  </action>
+  <action name="actionExit_Debug_Mode">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.bug.remove.png</normaloff>:/icons/Tetra Resources/icons/appbar.bug.remove.png</iconset>
+   </property>
+   <property name="text">
+    <string>Exit Debug Mode</string>
    </property>
   </action>
  </widget>

@@ -23,5 +23,6 @@ void FileRunner::runFile(){
     catch (Error e){
         mainWindow->printError(e);
     }
+    emit finished();
 }
 

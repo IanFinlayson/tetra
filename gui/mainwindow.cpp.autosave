@@ -403,7 +403,6 @@ void MainWindow::setActiveSubWindow(QWidget *window){
 
 void MainWindow::on_actionExit_Debug_Mode_triggered()
 {
-    ui->output->insertPlainText("Hey");
     ui->actionDebug->setChecked(true);
     QMessageBox exitDebugBox;
     exitDebugBox.setText("Are you sure you want to stop debugging?");

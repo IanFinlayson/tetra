@@ -15,8 +15,12 @@ public:
 private:
     MainWindow *mainWindow;
 
+signals:
+    void finished();
+
 public slots:
     void runFile();
+
 };
 
 #endif

@@ -7,12 +7,12 @@
 #include <QLayout>
 #include <QMap>
 #include <QThread>
+#include <QSignalMapper>
 #include "syntaxhighlighter.h"
 #include "filerunner.h"
+#include "threadwindow.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
-
-
 
 class Editor;
 class FileRunner;
@@ -42,10 +42,8 @@ public:
     void printMainValue();
     void runMode(bool);
     void debugMode(bool);
-
-
-public slots:
     void runFile();
+    void quit();
 
 private slots:
     void on_actionCopy_triggered();
@@ -59,7 +57,6 @@ private slots:
     void on_actionDelete_triggered();
     void on_actionSelect_All_triggered();
     void on_actionNew_triggered();
-    void on_actionRun_triggered();
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
     void on_actionMinimize_triggered();
@@ -70,17 +67,21 @@ private slots:
 
     void documentWasModified();
     void updateCoordinates();
-
-
+    void exitRunMode();
+    void on_actionRun_triggered(bool checked);
 
 private:
     Ui::MainWindow *ui;
     QString openFile;
 
-    void hideEditor();
+    void hideDisplay();
     void setupEditor();
     void setupShortcuts();
 
+    QSignalMapper *windowMapper;
+    void setupThreadMdi();
+    
+    
     Highlighter *highlighter;
 
     QString strippedName(const QString &fullFileName);
@@ -92,6 +93,11 @@ private:
     QString mode;
     FileRunner *fileRunner;
     QThread *tetraThread;
+private slots:
+    //ThreadWindow *createThreadWindow();
+    //setActiveSubWindow(QWidget *window);
+    
+    void on_actionExit_Debug_Mode_triggered();
 
 protected:
     void closeEvent(QCloseEvent *);
