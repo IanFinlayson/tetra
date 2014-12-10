@@ -2,15 +2,19 @@
 #include "ui_mainwindow.h"
 #include "openappdialog.h"
 #include "editor.h"
+#include <QDesktopWidget>
 #include <QtCore>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QMdiArea>
+#include<QMdiSubWindow>
 #include <QMessageBox>
 #include <QPrinter>
 #include <QPrintDialog>
 #include <QPainter>
 #include <QScrollBar>
+#include <QSignalMapper>
 #include <QSize>
-#include <pthread.h>
 #include <QTabWidget>
 #include <QThread>
 
@@ -33,6 +37,10 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
     mainValue = 0;
 
     connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
+
+    tabWidth = 4;
+    setupThreadMdi();
+
 }
 
 MainWindow::~MainWindow(){
@@ -67,8 +75,16 @@ void MainWindow::setupEditor(){
     connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
     connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
     connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
-
+    //connnect(this, SIGNAL()
     hideDisplay();
+}
+
+void MainWindow::setupThreadMdi(){
+    ui->threadMdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    ui->threadMdi->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    windowMapper = new QSignalMapper;
+    //connect(windowMapper, SIGNAL(mapped(QWidget*)),
+                // this, SLOT(setActiveSubWindow(QWidget*)));
 }
 
 void MainWindow::hideDisplay(){
@@ -110,6 +126,7 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 bool MainWindow::newProject(){
     bool projectCreated = false;
+    on_actionTab_Width_triggered();
     on_actionNew_triggered();
     if(openFile != ""){
         projectCreated = true;
@@ -353,7 +370,6 @@ void MainWindow::exitRunMode(){
 
 void MainWindow::debugMode(bool value){
 
-
     ui->input->setVisible(!value);
     ui->threadMdi->setVisible(value); 
     ui->actionNew->setEnabled(!value);
@@ -373,7 +389,7 @@ void MainWindow::debugMode(bool value){
 }
 
 void MainWindow::on_actionRun_triggered(bool checked){
-    ui->actionClear_Output;
+    on_actionClear_Output_triggered();
     ui->actionRun->setDisabled(true);
     ui->input->setReadOnly(true);
     if(checked){
@@ -384,28 +400,16 @@ void MainWindow::on_actionRun_triggered(bool checked){
     }
 }
 
-/*void MainWindow::setupThreadMdi(){
-    ui->threadMdi->setHorizontalScrollBar(Qt::ScrollBarAsNeeded);
-    ui->threadMdi->setVerticalScrollBar(Qt::ScrollBarAsNeeded);
-    windowMapper = new QSignalMapper(this);
-    connect(windowMapper, SIGNAL(mapped(QWidget*)),
-            this, SLOT(setActive)
-}
+
 
 \
-void MainWindow::setActiveSubWindow(QWidget *window){
-    if(!window){
-        return;
-    }
-    ui->threadMdi(qobject_cast<QMdiSubWindow *>(window));
-}
-*/
+
 
 void MainWindow::on_actionExit_Debug_Mode_triggered()
 {
-    ui->output->insertPlainText("Hey");
     ui->actionDebug->setChecked(true);
     QMessageBox exitDebugBox;
+    exitDebugBox.setWindowTitle("Stop Debugging");
     exitDebugBox.setText("Are you sure you want to stop debugging?");
     exitDebugBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
     exitDebugBox.setDefaultButton(QMessageBox::Ok);
@@ -413,5 +417,48 @@ void MainWindow::on_actionExit_Debug_Mode_triggered()
        ui->actionDebug->setEnabled(true);
        ui->actionDebug->setChecked(false);
        debugMode(false);
+       //ui->threadMdi->closeAllSubWindows();
     }
+}
+
+void MainWindow::setTabWidth(int tabWidth){
+    this->tabWidth = tabWidth;
+    ui->input->setTabWidth(tabWidth);
+}
+
+void MainWindow::on_actionTab_Width_triggered(){
+    bool valueChanged;
+    int tabWidth =  QInputDialog::getInt(this, "Tab Width", "Enter new tab width:", this->tabWidth, 3, 10, 1, &valueChanged);
+    if(valueChanged){
+        this->setTabWidth(tabWidth);
+    }
+}
+
+//--------------------MDI Methods--------------------//
+Editor *MainWindow::newThreadWindow(){
+    Editor *newEditor = new Editor;
+    QMdiSubWindow *subWindow = new QMdiSubWindow;
+    subWindow->setWidget(newEditor);
+    subWindow->resize(QDesktopWidget().availableGeometry(this).size() * 0.2);
+    subWindow->setWindowFlags(Qt::CustomizeWindowHint);
+    ui->threadMdi->addSubWindow(subWindow);
+    subWindow->show();
+}
+Editor *MainWindow::activeThreadWindow()
+{
+    if (QMdiSubWindow *activeThreadWindow = ui->threadMdi->activeSubWindow()){
+        return qobject_cast<Editor *>(activeThreadWindow->widget());
+    }
+    return 0;
+}
+void MainWindow::setActiveSubWindow(QWidget *window){
+    if (!window){
+        return;
+    }
+    ui->threadMdi->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
+}
+
+void MainWindow::on_actionResume_triggered()
+{
+    newThreadWindow();
 }

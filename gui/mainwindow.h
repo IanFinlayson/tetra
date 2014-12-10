@@ -10,7 +10,6 @@
 #include <QSignalMapper>
 #include "syntaxhighlighter.h"
 #include "filerunner.h"
-#include "threadwindow.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
 
@@ -44,6 +43,7 @@ public:
     void debugMode(bool);
     void runFile();
     void quit();
+    void setTabWidth(int tabWidth);
 
 private slots:
     void on_actionCopy_triggered();
@@ -69,6 +69,15 @@ private slots:
     void updateCoordinates();
     void exitRunMode();
     void on_actionRun_triggered(bool checked);
+    void on_actionExit_Debug_Mode_triggered();
+    void on_actionTab_Width_triggered();
+
+    Editor *newThreadWindow();
+    Editor *activeThreadWindow();
+    void setActiveSubWindow(QWidget *window);
+
+
+    void on_actionResume_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -93,14 +102,15 @@ private:
     QString mode;
     FileRunner *fileRunner;
     QThread *tetraThread;
-private slots:
-    //ThreadWindow *createThreadWindow();
-    //setActiveSubWindow(QWidget *window);
+
+    int tabWidth;
+
     
-    void on_actionExit_Debug_Mode_triggered();
+
 
 protected:
     void closeEvent(QCloseEvent *);
+
 };
 
 #endif // MAINWINDOW_H

@@ -21,16 +21,14 @@ SOURCES += main.cpp\
     openappdialog.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
-    filerunner.cpp \
-    threadwindow.cpp
+    filerunner.cpp
 
 HEADERS  += \
     mainwindow.h \
     openappdialog.h \
     syntaxhighlighter.h \
     editor.h \
-    filerunner.h \
-    threadwindow.h
+    filerunner.h
 
 FORMS    += \
     mainwindow.ui \
