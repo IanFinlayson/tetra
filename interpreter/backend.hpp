@@ -22,6 +22,54 @@
 #include<sstream>
 #include<vector>
 
+//This segment, adapted from http://stackoverflow.com/questions/826569/compelling-examples-of-custom-c-allocators,
+//Is used to tes memory allocation for different programs
+//When not using this, can typedef mmap_allocator with a standard allocator
+
+#include<memory>
+#include<stdio.h>
+static int numAllocs_T = 0;
+static int numDeallocs_T = 0;//namespace mmap_allocator_namespace
+
+//{
+template <typename T>
+class mmap_allocator: public std::allocator<T>
+{
+        public:
+                typedef size_t size_type;
+                typedef T* pointer;
+                typedef const T* const_pointer;
+
+
+                template<typename _Tp1>
+                        struct rebind
+                        {
+                                typedef mmap_allocator<_Tp1> other;
+                        };
+
+                pointer allocate(size_type n, const void *hint=0)
+                {
+                        //numAllocs_T++;
+			//cout << "Allocated something! " << numAllocs_T << endl;
+                        //fprintf(stderr, "Alloc %d bytes.\n", n*sizeof(T));
+                        return std::allocator<T>::allocate(n, hint);
+                }
+
+                void deallocate(pointer p, size_type n)
+                {
+                        //numDeallocs_T++;
+                        //fprintf(stderr, "Dealloc %d bytes (%p).\n", n*sizeof(T), p);
+			//cout << "Deallocated something! " << numDeallocs_T << endl;
+                        return std::allocator<T>::deallocate(p, n);
+                }
+
+                mmap_allocator() throw(): std::allocator<T>() { /*fprintf(stderr, "Hello allocator!\n");*/ }
+                mmap_allocator(const mmap_allocator &a) throw(): std::allocator<T>(a) { }
+                template <class U>
+                        mmap_allocator(const mmap_allocator<U> &a) throw(): std::allocator<T>(a) { }
+                ~mmap_allocator() throw() { }
+};
+
 
 //Interpret function from main
 
@@ -149,8 +197,8 @@ public:
 	void addElement(const TData<void*>&);
 	
 	//Utility methods used for iterating over the vector in for (-each) loops, and vector cleanup	
-	const std::vector< TData<void*> >::const_iterator begin() const;
-	const std::vector< TData<void*> >::const_iterator end() const;
+	const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator begin() const;
+	const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator end() const;
 
 	int size() const;
 
@@ -223,7 +271,7 @@ private:
 	class vec_ptr {
 	public:
 		vec_ptr() {
-			ptr = new std::vector< TData<void*> >;
+			ptr = new std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >;
 			refCount = new int();//Zero initialized
 			*refCount = 0;
 			array_mutex_ptr = new pthread_mutex_t();
@@ -277,10 +325,10 @@ private:
 		}
 
 		//Methods to simulate pointer functionality
-		std::vector< TData<void*> >& operator*() const {
+		std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >& operator*() const {
 			return *ptr;
 		} 
-		std::vector< TData<void*> >* operator->() const {
+		std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >* operator->() const {
 			return ptr;
 		}
 		
@@ -323,7 +371,7 @@ private:
 			pthread_mutex_unlock(array_mutex_ptr);
 		}
 
-		std::vector< TData<void*> >* ptr;
+		std::vector< TData<void*>/* , mmap_allocator<TData<void*> >*/ >* ptr;
 		int* refCount;
 
 		//Because threads can be copied in different threads (see, pass by reference to functions)
@@ -364,6 +412,136 @@ template<> template<> void TData<void*>::setDeletableType<std::string>();
 template<> template<> void TData<void*>::setDeletableType<void>();
 template<> template<> bool TData<TArray>::setData<TArray>(const TArray&);
 
+//This class is a bare bones hash table for variable lookup
+
+#include<string>
+#include<iostream>
+
+class VarHash{
+private:
+        typedef std::pair<std::string, TData<void*> > keyVal;
+        //std::pair<std::string, void*>* table;
+       // keyVal* table;
+        keyVal table[30];
+        int hashSize;
+
+	int hashMisses;
+	int hashes;
+	int loops;
+	int vars;
+
+        int hash(const std::string& name) const{
+		//cout << "In hash" << endl;
+	/*	int accum = 0;
+		for(int x = 0; x < name.size(); x++) {
+			accum += static_cast<int>(name[0]) * 33;
+		}
+		return accum % hashSize;*/
+		return 1;
+	}
+
+public:
+	VarHash(int size) {
+		hashSize = 30;// * size;
+		//table = new keyVal[hashSize];
+		keyVal table[30];
+		for(int x = 0; x < hashSize; x++) {
+			table[x] = keyVal("",TData<void*>(NULL));
+		}
+		hashMisses = 0;
+		hashes = 0;
+		loops = 0;
+		vars = 0;
+        }
+
+	~VarHash() {
+		loops -= vars;
+		//cout << "-----------------------------" << endl;
+		//cout << "For this table, there were " << hashes << " hashes" << endl;
+		//cout << "There were " << hashMisses << " misses out of " << vars << " insewrtions" << endl;
+		//cout << "we searched " << loops << " additional times" << endl; 
+	}
+
+	TData<void*>& operator[](int index) {
+		assert(table[index].first == "");
+		return table[index].second;
+	}
+
+        TData<void*>& operator[](const std::string& name) {
+                //Get the hash key for the var name, and the associated pair
+                int hashVal = hash(name);
+		int origVal = hashVal;
+
+
+		hashes++;
+
+		//cout <<"Val: " << hashVal;
+                keyVal* comp = &table[hashVal];
+		//cout << "Out o loop" << endl;
+                //Check that the value in the bucket is actually the pair requested
+                while(comp->first != name) {
+			loops++;
+			//std::cout<<"Hash miss!" << endl;
+
+                        //If the bucket is actually empty, then the requested pair does not exist
+                        //Therefore, we will need to add it, and we can stop looking in the table
+                        if(comp->second.getData() == NULL) {
+                                table[hashVal].first = name;
+				vars ++;
+                                //std::cout << "Emplaced new variable" << std::endl;
+                                comp = &table[hashVal];
+				if(hashVal != origVal) {
+					hashMisses++;
+					//cout << "Inserted value at hash " << hashVal << " instead of " << origHash << endl;
+
+				}
+                        }
+                        //otherwise, continue looking towards the next value in the array
+                        else{
+                                hashVal = (1 + hashVal) % hashSize;
+
+                                comp = &table[hashVal];
+                        }
+                }
+		//cout << "Returned: " << table[hashVal].second.getData()<<endl;
+                return table[hashVal].second;
+        }
+
+
+/*      TData<void*>& operator[](const std::string name) {
+	      cout << "!" << endl;
+              return const_cast<const TData<void*>& >((*this)[name]);
+      }*/
+
+       bool exists(std::string name) const{
+
+                //Get the hash key for the var name, and the associated pair
+                int hashVal = hash(name);
+                keyVal const * comp = &table[hashVal];
+                //Check that the value in the bucket is actually the pair requested
+                while(comp->first != name) {
+                        //If the bucket is actually empty, then the requested pair does not exist
+                        //Therefore, we will need to add it, and we can stop looking in the table
+                        if(comp->second.getData() == NULL) {
+                                return false;
+                        }
+                        //otherwise, continue looking towards the next value in the array
+                        else{
+                                hashVal = (1 + hashVal) % hashSize;
+
+                                comp = &table[hashVal];
+                        }
+                }
+
+                return true;
+        }
+
+	bool exists(const Node* varNode) const{
+		return table[varNode->getInt()].second.getData() != NULL;
+	}
+};
+	
+
 /*
  * This class represents the variables present at various scopes within a tetra program
  */
@@ -383,18 +561,21 @@ public:
 
 	//returns a reference to the storage location of the variable. The interpreter supplies the expected type.
 	template<typename T>
-	T* lookupVar(const std::string varName);
+	T* lookupVar(std::string varName);
+	template<typename T>
+	T* lookupVar(const Node* varNode);
 
 	//Checks whether a named variable is in the scope, without actually adding it if it does not exist
 	bool containsVar(const std::string varName) const;
-
+	bool containsVar(const Node* varNode) const;
 	//Returns a TData from within varMap containing an invalid reference. The reference can be set to something valid, and that thing will not be deleted when this variableContext goes out of scope
 	TData<void*>& declareReference(const std::string varName);
 
 	std::list<std::pair<pthread_t,TData<void*> > >& declareParForVar(const std::string&);
 private:
-	
-	std::map<std::string, TData<void*> > varMap;
+	//std::map<std::string, TData<void*> > varMap;
+	//std::map<std::string, TData<void*>, std::less<std::string>, mmap_allocator<std::pair<const string, TData<void*> > > > varMap;
+	VarHash varMap;
 	//pthread_mutex_t table_mutex;
 	pthread_rwlock_t table_mutex;
 
@@ -430,11 +611,21 @@ private:
 
 
 };
-//Returns a reference to the storage location of the variable
-////defined in the header because it is a template
-//TODO: set a single return value for single exit point, and simplify lock/unlock semantics
+
+//lookupVar for when an optimization may be present
+/*template<typename T>
+T* VarTable::lookupVar(const Node* varNode) {
+	if(varNode->getInt() == 0) {
+		return lookupVar<T>(varNode->getString());
+	}
+}*/
+///////////////Copy of lookupVar in case I badly mess things up////////////
+//
+//
+
 template<typename T>
 T* VarTable::lookupVar(const std::string varName) {
+	cout << varName <<"<<<<<"<<endl;
 	//pthread_mutex_lock(&table_mutex);
 	
 	//Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
@@ -443,6 +634,7 @@ T* VarTable::lookupVar(const std::string varName) {
 	pthread_rwlock_rdlock(&table_mutex);
 
 	//Check if variable is a thread-specific variable (e.g. parallel for loop variable)	
+	//TODO fix this race condition (as of 11/10/14)
 	loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
 	if(loc != parForVars.end()) {
 		std::list< std::pair< pthread_t, TData<void*> > >& varList = (*loc).second;
@@ -482,6 +674,101 @@ T* VarTable::lookupVar(const std::string varName) {
 	else if(!containsVar(varName)) {
 
 		//This is a legacy portion of code. The check for if something is a global variable is presently in the TetraContext's wrapper call of lookupVar
+		
+		//Release read privelages while we assemble what we need to insert
+		pthread_rwlock_unlock(&table_mutex);
+		//If the variable does not yet exist, we need to allocate memory for the TData to point to!
+		T* newData_ptr = new T(); //() should zero the memory for primitive types, so that all types have a default value
+		TData<void*> insertable(newData_ptr);
+		//Must notify TData that it is pointing at dynamically allocated memory
+		insertable.setDeletableType<T>();
+
+		//Obtain write privelages before we insert
+		pthread_rwlock_wrlock(&table_mutex);
+
+		//Note that another thread may have inserted the value while we were waitring for write privelages!
+		//Hence, we must again check that the variable is stillnot in the table
+//TODO check this logic with the new hash table changes
+		//if(varMap.find(varName) == varMap.end()) {
+		if(!varMap.exists(varName)) {
+			varMap[varName] = insertable;
+		}
+		//cout <<"here1"<<endl;
+		//else do nothing, as the statement after this block will retrieve the correct value
+	}
+	//cout <<"Near op" << endl;
+	varMap[varName];
+	T* ret = static_cast<T*>(varMap[varName].getData());
+	//cout <<"here1.5"<<endl;
+	//Release whatever lock we happened to have
+	pthread_rwlock_unlock(&table_mutex);
+
+	//return static_cast<T*>(varMap[varName].getData());
+	//cout << "here2" << endl;
+	//The program should never get to here, because the only reason we should call this for a parallel variable, which should return above
+	assert(false);
+	return ret;
+}
+
+
+
+///////////End cop y of lookup var
+
+	
+//Returns a reference to the storage location of the variable
+////defined in the header because it is a template
+//TODO: set a single return value for single exit point, and simplify lock/unlock semantics
+template<typename T>
+T* VarTable::lookupVar(const Node* varNode) {
+	//pthread_mutex_lock(&table_mutex);
+	std::string varName = varNode->getString();
+	int index = varNode->getInt();
+	//Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
+	std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > >::iterator loc;
+	
+	pthread_rwlock_rdlock(&table_mutex);
+
+	//Check if variable is a thread-specific variable (e.g. parallel for loop variable)	
+	//TODO fix this race condition (as of 11/10/14)
+	loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
+	if(loc != parForVars.end()) {
+		std::list< std::pair< pthread_t, TData<void*> > >& varList = (*loc).second;
+		std::list< std::pair< pthread_t, TData<void*> > >::iterator value;
+		value = std::find_if(varList.begin(), varList.end(), CheckThread(pthread_self()));
+		if(value != varList.end()) {
+
+			T* ret = static_cast<T*>(value->second.getData());
+			pthread_rwlock_unlock(&table_mutex);
+			return ret;
+		}
+		else {	//If this thread has not yet registered a value, create it
+			//Unlock the read mutex while we assmeble the data to be inserted, will eventually obtain write privelages
+			pthread_rwlock_unlock(&table_mutex);
+
+			T* newData_ptr = new T();
+			//cout << "New Data: " << newData_ptr << endl;
+			TData<void*> insertable(newData_ptr);
+			//Ensure that insertable gets copied correctly, and deleted correctly when we are done
+			insertable.setDeletableType<T>();
+			//Obtain write privelages
+			pthread_rwlock_wrlock(&table_mutex);
+
+			//Note that since THIS thread can push in a pair with pthread_t equal to pthread_self()
+			//Hence there is no need to check whether the condition is still true or not
+
+			varList.push_back(std::pair<pthread_t,TData<void*> >(pthread_self(), insertable));
+			(varList.rbegin())->second.setDeletableType<T>();
+			T* ret = static_cast<T*>((varList.rbegin())->second.getData());
+			pthread_rwlock_unlock(&table_mutex);
+			//cout << "Ret: " << ret << endl;
+			return ret;
+		}
+	}
+	//check whether a normal entry exists for this variable
+	//The find and [] operators are redundant. we can combine them into one search
+	else if(varMap[index].getData() == NULL) {
+
+		//This is a legacy portion of code. The check for if something is a global variable is presently in the TetraContext's wrapper call of lookupVar
 		//If the variable is not in the current scope, it might be in the global scope
 /*		scope_ptr& globalScopeRef = context.getGlobalScopeRef();
 
@@ -500,29 +787,38 @@ T* VarTable::lookupVar(const std::string varName) {
 		pthread_rwlock_unlock(&table_mutex);
 		//If the variable does not yet exist, we need to allocate memory for the TData to point to!
 		T* newData_ptr = new T(); //() should zero the memory for primitive types, so that all types have a default value
-		TData<void*> insertable(newData_ptr);
+	//!!	TData<void*> insertable(newData_ptr);
 		//Must notify TData that it is pointing at dynamically allocated memory
-		insertable.setDeletableType<T>();
+	//!!	insertable.setDeletableType<T>();
 
 		//Obtain write privelages before we insert
 		pthread_rwlock_wrlock(&table_mutex);
 
 		//Note that another thread may have inserted the value while we were waitring for write privelages!
 		//Hence, we must again check that the variable is stillnot in the table
-
-		if(varMap.find(varName) == varMap.end()) {
-			varMap[varName] = insertable;
+//TODO check this logic with the new hash table changes
+		if(varMap[index].getData() == NULL) {
+		//if(!varMap.exists(varName)) {
+			//cout <<"Inserting: " << varName << " with index "<<index<< " at address " <</*(&insertable)*/"..." << endl;
+	//!!		varMap[index] = insertable;
+	
+			//Note that it is important that these two statements remain seperate.
+			//Attempting to assemble the TData object before insertion will lead to either an extra allocation and object copy or a memory leak
+			varMap[index] = TData<void*>(newData_ptr);
+			varMap[index].setDeletableType<T>();
 		}
+		//cout <<"here1"<<endl;
 		//else do nothing, as the statement after this block will retrieve the correct value
 	}
-	   
-	T* ret = static_cast<T*>(varMap[varName].getData());
-
+	//cout <<"Near op" << endl;
+	//varMap[varName];
+	T* ret = static_cast<T*>(varMap[index].getData());
 	//Release whatever lock we happened to have
 	pthread_rwlock_unlock(&table_mutex);
 
 	//return static_cast<T*>(varMap[varName].getData());
-	
+	//cout << "here2" << endl;
+//	cout <<"Ret: " << ret << endl;
 	return ret;
 }
 
@@ -577,7 +873,7 @@ private:
 
 	//This vector holds each MUTEX lock created by the program
 	//By putting them all in one global location, we allow threads to query whether a particular mutex has been created or not
-	std::map<std::string, pthread_mutex_t*> mutexes;
+	std::map<std::string, pthread_mutex_t* /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/ > mutexes;
 	pthread_mutex_t map_mutex;
 
 	//We may want to change the constructor to an initializer, as pthread_create may return errors
@@ -610,7 +906,7 @@ public:
 /*
  * This file builds a function lookup table so that when the interpreter encounters a function     call, it can easily find the address of the appropriate node where the called function code res    ides
  *Since there is only one funciton table per program (even if using multiple files, the further     functions should be addable by calling buildTree for each file's syntax tree) There can only b    e one instance.
- * TODO: For a long time, this class has been a convoluted mix between a singleton and static m    ember class. Must query the design plans of the debugger to see whether this will ever be neede    d as an object, so we can stick with one or the other
+ * TODO: For a long time, this class has been a convoluted mix between a singleton and static member class. Must query the design plans of the debugger to see whether this will ever be needed as an object, so we can stick with one or the other
  */
 class FunctionMap {
 
@@ -629,6 +925,9 @@ public:
 
 	//Fills the function map given the specified base node
 	static void build(const Node* tree);
+
+	//does some pre-work to optimize variable lookup
+	static void optimizeLookup();
 };
 
 /*
@@ -640,7 +939,7 @@ public:
 
 //Each context will have a flag as to what action should be taken when control reaches a structure Node
 //NORMAL: continue as usual
-//ELIF: Denotes that program control is in an elif chain. Keep evaluating condiitons while this is true. Break, continue, and return take precendece
+//ELIF: Denotes that program control is in an elif chain. Keep evaluating condiitons while this is true. Note that if the program ever needs to change to any other mode, it means that some condition was true (and hence no longer has an ELIF execution status).
 //CONTINUIE: Keep returning until a loop is hit, then reevaluate the loop node
 //BREAK: keep returning until you hit a loop node, then return from that node
 //RETURN: keep returning until you hit a function call, then return from the function call. This takes precedence over breaks and continues
@@ -659,15 +958,19 @@ enum ExecutionStatus {
 class TetraScope {
 
 	public:
+		TetraScope();
 		TetraScope(const Node*);
 
 		//Returns a pointer to the data referenced by the given variable name 'name', or creates a place for it if it does not yet exist
 		template <typename T>
-		T* lookupVar(std::string name) {
+		T* lookupVar(/*std::string*/const Node* name) {
 			return varScope.lookupVar<T>(name);
 		}
 
-		//Used for aliasing an array
+		template <typename T>
+		T* lookupVar(std::string name) {
+			return varScope.lookupVar<T>(name);
+		}		//Used for aliasing an array
 		//Returns an unitialized pointer that will be associated with varName
 		//The calling program can set this pointer to point to whatever varname should alias.
 		TData<void*>& declareReference(const std::string varName);
@@ -682,6 +985,7 @@ class TetraScope {
 		void setExecutionStatus(ExecutionStatus status);
 
 		bool containsVar(std::string varName) const;
+		bool containsVar(const Node* varNode) const;
 
 		//Used by the TetraContext to obtain a stack trace
 		void setCallNode(const Node*);
@@ -884,7 +1188,7 @@ public:
 */
 	//Wraps a call to lookupVar of the current scope after checking that there are no globals
 	template<typename T>
-	T* lookupVar(std::string name) {
+	T* lookupVar(/*std::string*/const Node* name) {
 		if(getGlobalScopeRef()->containsVar(name)) {
 			return (getGlobalScopeRef()->lookupVar<T>(name));
 		}
@@ -893,6 +1197,15 @@ public:
 		}
 	}
 
+	template<typename T>
+	T* lookupVar(std::string name) {
+		if(getGlobalScopeRef()->containsVar(name)) {
+			return (getGlobalScopeRef()->lookupVar<T>(name));
+		}
+		else {
+			return progStack.top()->lookupVar<T>(name);
+		}
+	}
 	//Wraps a call of declareReference for the current scope
 	TData<void*>& declareReference(const std::string varName);
 
@@ -1008,15 +1321,19 @@ private:
 	//bool stepping;
 	//bool stopAtNext;
 	//std::stack<Node*> scopes;
+	
 
 public:
+
 	virtual void notify_E(const Node*, TetraContext& context)=0;
 	virtual void step_E()=0;
 	virtual void next_E()=0;
-	virtual bool break_E(int)=0;
-	virtual bool remove_E(int)=0;
+	//virtual bool break_E(std::pair<int,pthread_t>)=0;
+	//virtual bool remove_E(std::pair<int,pthread_t>)=0;
 	virtual void continue_E()=0;
 	virtual void leftScope_E()=0;
+	virtual bool break_E(int)=0;
+	virtual bool remove_E(int)=0;
 	void* fetchVariable(std::string s, TetraContext& context);
 };
 

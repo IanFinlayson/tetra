@@ -14,7 +14,7 @@
 #include<list>
 using std::string;
 
-VarTable::VarTable() : parForVars(10){
+VarTable::VarTable() : varMap(30),  parForVars(3){
 	//pthread_mutex_init(&table_mutex,NULL);
 	pthread_rwlock_init(&table_mutex,NULL);
 }
@@ -28,11 +28,25 @@ VarTable::~VarTable() {
 //Declares a variable name that can hold different values across threads
 //Numthreads needed so the container does not attempt to resize itself during
 std::list<std::pair<pthread_t,TData<void*> > >& VarTable::declareParForVar(const string& varName) {
+	
+	//We will check if the variable already exists. To do so, we must obtain a read lock
+	pthread_rwlock_rdlock(&table_mutex);
+
 	//Check to make sure we don;t already have a value declared
 	//This could happen if, say, someone declares a parfor within a loop, in which case we should append to that array
 	if(std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName)) != parForVars.end()) {
-		return std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName))->second;
+		//return std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName))->second;
+		//Assemble the return value, so we can release the lock before returning
+
+		std::list<std::pair<pthread_t,TData<void*> > >& ret = std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName))->second;
+
+		pthread_rwlock_unlock(&table_mutex);
+
+		return ret;
 	}
+
+	//If not found, we will have to release the mutex anyways before trying to obtain write privelages
+	pthread_rwlock_unlock(&table_mutex);
 
 	std::list<std::pair<pthread_t,TData<void*> > > array;
 	//Append to the end of the array, so we can return the end
@@ -60,7 +74,12 @@ std::list<std::pair<pthread_t,TData<void*> > >& VarTable::declareParForVar(const
 
 //Checks to see if varName is in this scope, but does not add it if it does not find it
 bool VarTable::containsVar(std::string varName) const{
-	return varMap.find(varName) != varMap.end();
+	//return varMap.find(varName) != varMap.end();
+	return varMap.exists(varName);
+}
+
+bool VarTable::containsVar(const Node* varNode) const{
+	return varMap.exists(varNode);
 }
 
 

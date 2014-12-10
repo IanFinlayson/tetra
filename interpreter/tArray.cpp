@@ -71,11 +71,11 @@ void TArray::addElement(const TData<void*>& pElement) {
 }
 
 //Get the start and end iterators to the underlying vector container
-const std::vector< TData<void*> >::const_iterator TArray::begin() const {
+const std::vector< TData<void*>/* ,mmap_allocator<TData<void*> >*/ >::const_iterator TArray::begin() const {
 	return elements->begin();
 }
 
-const std::vector< TData<void*> >::const_iterator TArray::end() const {
+const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator TArray::end() const {
 	return elements->end();
 }
 

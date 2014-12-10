@@ -234,7 +234,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 		case NODE_VECREF:
 		{
 			//Here, T should be the type that needs to be returned, if not, then we really didn;t need it anyways
-			TArray* lookupArray = context.lookupVar<TArray>(node->child(0)->getString());
+			TArray* lookupArray = context.lookupVar<TArray>(node->child(0)/*->getString()*/);
 			evaluateVecVal<T>(node->child(1),lookupArray,ret,context);
 		}
 		break;
@@ -264,7 +264,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			ExecutionStatus status = context.queryExecutionStatus();
 
 			//For_each loop with some extra conditions tacked on to check whether we are returning or breaking
-			for(std::vector< TData<void*> >::const_iterator iter = collection.getData()->begin(); iter != collection.getData()->end() && status != BREAK && status != RETURN; iter++) {
+			for(std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator iter = collection.getData()->begin(); iter != collection.getData()->end() && status != BREAK && status != RETURN; iter++) {
 
 				context.normalizeStatus();
 
@@ -272,25 +272,25 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 				//Must perform type checking
 				switch(node->child(0)->type()->getKind()) {
 					case TYPE_INT:
-						*(context.lookupVar<int>(node->child(0)->getString())) = *static_cast<int*>((*iter).getData());
+						*(context.lookupVar<int>(node->child(0)/*->getString()*/)) = *static_cast<int*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					case TYPE_REAL:
-						*(context.lookupVar<double>(node->child(0)->getString())) = *static_cast<double*>((*iter).getData());
+						*(context.lookupVar<double>(node->child(0)/*->getString()*/)) = *static_cast<double*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					case TYPE_BOOL:
-						*(context.lookupVar<bool>(node->child(0)->getString())) = *static_cast<bool*>((*iter).getData());
+						*(context.lookupVar<bool>(node->child(0)/*->getString()*/)) = *static_cast<bool*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					case TYPE_STRING:
-						*(context.lookupVar<string>(node->child(0)->getString())) = *static_cast<string*>((*iter).getData());
+						*(context.lookupVar<string>(node->child(0)/*->getString()*/)) = *static_cast<string*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					case TYPE_VECTOR:
 						//Alias the array with collection. Note that this means that changes to this array will affect the original array
 						//aliasArray(node->child(0), *static_cast<TArray*>((*iter).getData()), context);
-						*(context.lookupVar<TArray>(node->child(0)->getString())) = *static_cast<TArray*>((*iter).getData());
+						*(context.lookupVar<TArray>(node->child(0)/*->getString()*/)) = *static_cast<TArray*>((*iter).getData());
 						evaluateNode<T>(node->child(2), ret, context);
 					break;
 					default:
@@ -454,7 +454,7 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 			pasteArgList(funcNode->child(0),node->child(0), destScope, context);
 
 			//Set the new scope to the scope we created containing all the parameters
-			//cout << "z: " << destScope.lookupVar<TArray>("z")->size() << endl;
+			//cout << "x: " << destScope.lookupVar<int>("x") << endl;
 			context.initializeNewScope(destScope);
 		}
 		else { //if there are no args, we still need to initialize a new scope!
@@ -541,19 +541,19 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 
 		switch(node->type()->getKind()) {
 			case TYPE_INT:
-				ret.setData(context.lookupVar<int>(node->getString()));
+				ret.setData(context.lookupVar<int>(node/*->getString()*/));
 			break;
 			case TYPE_REAL:
-				ret.setData(context.lookupVar<double>(node->getString()));
+				ret.setData(context.lookupVar<double>(node/*->getString()*/));
 			break;
 			case TYPE_BOOL:
-				ret.setData(context.lookupVar<bool>(node->getString()));
+				ret.setData(context.lookupVar<bool>(node/*->getString()*/));
 			break;
 			case TYPE_STRING:
-				ret.setData(context.lookupVar<string>(node->getString()));
+				ret.setData(context.lookupVar<string>(node/*->getString()*/));
 			break;
 			case TYPE_VECTOR:
-				ret.setData(context.lookupVar<TArray>(node->getString()));
+				ret.setData(context.lookupVar<TArray>(node/*->getString()*/));
 			break;
 			default:
 				std::stringstream message;
@@ -563,7 +563,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 		}
 	}
 	else if (node->kind() == NODE_VECREF) { //If LHS is an array index (i.e. x[12]), then we must evaluate its address before we can paste to it
-		TArray* vec = context.lookupVar<TArray>(node->child(0)->getString());
+		TArray* vec = context.lookupVar<TArray>(node->child(0)/*->getString()*/);
 		//Note that node->shild(1) MUST be a NODE_INDEX
 		evaluateVecRef<T>(node->child(1), vec, ret, context);
 	}
@@ -584,7 +584,7 @@ T paste(const Node* node1, const Node* node2, TetraContext& context) {
 
 	TData<T*> op1;
 	TData<T> op2;
-
+	//cout <<"Paste1"<<endl;
 	//Evaluate address where the value should be stored, and the value to be stored
 	evaluateAddress<T*>(node1,op1,context);
 	evaluateNode<T>(node2,op2,context);
@@ -602,18 +602,19 @@ template<typename T>
 T paste(const Node* node1, const Node* node2, TetraScope& destinationScope, TetraContext& sourceContext) {
 	TData<T*> op1;
 	TData<T> op2;
-
+	//cout <<"Paste2"<<endl;
 	//Get address to store in new scope, and value to paste in
-	op1.setData(destinationScope.lookupVar<T>(node1->getString()));
+
 	evaluateNode<T>(node2,op2,sourceContext);
 
-	
-	//cout << "Val: " << op2.getData() << endl;
-	//cout << "X: " << *(sourceContext.lookupVar<TArray>("x")) << endl;
-
+	//cout <<op1.getData()<<endl;
+	//cout << "Val: " << node1->getString() << endl;
+	//cout << "Address: " << (sourceContext.lookupVar<T>(node1)) << endl;
+	op1.setData(destinationScope.lookupVar<T>(node1/*->getString()*/));
 	//Perform assignment
 	T ret = op2.getData();
 	*(op1.getData()) = ret;
+	//cout <<"End val: " << *(op1.getData()) <<" at "<<op1.getData()<<endl;
 	return ret;
 }
 
@@ -777,7 +778,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
 	//if we need to lookup a variable, do so, Note that "lookupVar" handles if we have not seen the string before
 	//However, we must check the type so that we know what to allocate if needed (optimizaiton point for later?)
 	if(node->kind() == NODE_IDENTIFIER) {
-		ret.setData(*(context.lookupVar<T>(node->getString())));
+		ret.setData(*(context.lookupVar<T>(node/*->getString()*/)));
 	}
 	//Check the type we are getting, and get thaat value from the node
 	else {
@@ -998,9 +999,10 @@ int interpret(Node* tree) {
 
 	//Construct a TetraContext (this also initializes the global scope)
 	TetraContext tContext;	
-
 	//Build function lookup table, find address of main method
 	FunctionMap::build(tree);
+	FunctionMap::optimizeLookup();
+	cout << "Optimization successful" << endl;
 	const Node* start = FunctionMap::getFunctionNode("main#");
 
 	//If Main was not found, print an error

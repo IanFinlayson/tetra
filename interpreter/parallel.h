@@ -63,6 +63,7 @@ struct evalForArgs {
 	}
 };
 
+//New thread executes a tetra statement
 template<typename T>
 void wrapEvaluation(void* args) {
 	//cout << "Thread Start time: " << time(0) << endl;
@@ -109,6 +110,14 @@ template <typename T>
 void wrapMultiEvaluation(void* args) {
 
 	evalForArgs<T>& argList = *static_cast<evalForArgs<T>* >(args);	
+
+
+	//Initializes a call stack for this thread, having as its base a pointer
+	//to the current call stack 
+	//(i.e. the stack frame that initialized this thread)
+	TetraContext contextCopy;
+	contextCopy.branchOff(argList.args_ptr->scope);	
+	
 	
 	//int arraySize = argList.values_ptr->size();
 
@@ -117,18 +126,24 @@ void wrapMultiEvaluation(void* args) {
 	//possible optimization: if the array willdefinitely not change size during the parForLoop execution, then we can pre-calculate the size once
 	while(*(argList.countVal_ptr) < /*arraySize*/argList.values_ptr->size()) {
 
+
+		//TODO fix race condition as of 11/10/14
+		//This is expected t be a arallel variable
 		*(argList.args_ptr->scope->template lookupVar<T>(*(argList.varName_ptr))) = *static_cast<T*>((argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
 
 		//string x = *(argList.varName_ptr
 		//T* temp = argList.args_->ptr->scope->template lookupVar<T>(namer);
 
+		
 		(*(argList.countVal_ptr))++;
 
+		//cout << "Thread Val: " << *argList.countVal_ptr << endl;
+		
+		//TODO put this back in
 		pthread_mutex_unlock(argList.count_mutex_ptr);
 
-		TetraContext contextCopy;
-		contextCopy.branchOff(argList.args_ptr->scope);
 	
+
 		try {
 			//Executes the for loop body
 			//wrapEvaluation<T>(argList.args_ptr);
@@ -142,6 +157,7 @@ void wrapMultiEvaluation(void* args) {
 		}
 
 		//Lock the mutex before checking the condiiton again and overwriting the value
+		////TODO put this back in
 		pthread_mutex_lock(argList.count_mutex_ptr);
 
 		//If the partallel for loopencountered a break statement, make it so that theother threads will stop on the next go-around
@@ -151,7 +167,7 @@ void wrapMultiEvaluation(void* args) {
 		}
 	}
 
-	//Release the mutex
+	//Release the mutex obtained in the while loop
 	pthread_mutex_unlock(argList.count_mutex_ptr);
 
 	//Delete the memory allocated for the arguments of this thread

@@ -1,6 +1,6 @@
 def main() int:
    x = [0]
-   #Test ability to handle many ass by references
+   #Test ability to handle many pass by references
    parallel:
       inc(x)
       inc(x)

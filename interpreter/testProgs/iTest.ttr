@@ -1,0 +1,9 @@
+def main() int:
+   return fact(3)
+
+def fact(x int) int:
+   #print(x,"\n")
+   if x == 0:
+      return 1
+   else:
+      return fact(x-1)*x
