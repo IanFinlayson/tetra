@@ -464,7 +464,13 @@ public:
 
 	TData<void*>& operator[](int index) {
 		assert(table[index].first == "");
-		return table[index].second;
+		//index could be negative if using global scope
+		//cout << "index: " << abs(index) << endl;
+		return table[abs(index)].second;
+		//TData<void*> ret = table[abs(index)].second;
+		//cout <<"Retrieved" <<endl;
+		//cout << ret.getData() <<endl;
+		//return table[abs(index)].second;
 	}
 
         TData<void*>& operator[](const std::string& name) {
@@ -537,7 +543,8 @@ public:
         }
 
 	bool exists(const Node* varNode) const{
-		return table[varNode->getInt()].second.getData() != NULL;
+		//index could be negative if using global scope
+		return table[abs(varNode->getInt())].second.getData() != NULL;
 	}
 };
 	
@@ -625,7 +632,7 @@ T* VarTable::lookupVar(const Node* varNode) {
 
 template<typename T>
 T* VarTable::lookupVar(const std::string varName) {
-	cout << varName <<"<<<<<"<<endl;
+	//cout << varName <<"<<<<<"<<endl;
 	//pthread_mutex_lock(&table_mutex);
 	
 	//Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
@@ -722,7 +729,8 @@ template<typename T>
 T* VarTable::lookupVar(const Node* varNode) {
 	//pthread_mutex_lock(&table_mutex);
 	std::string varName = varNode->getString();
-	int index = varNode->getInt();
+	//Index may be negative if a global variable is being referenced
+	int index = abs(varNode->getInt());
 	//Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
 	std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > >::iterator loc;
 	
@@ -927,7 +935,7 @@ public:
 	static void build(const Node* tree);
 
 	//does some pre-work to optimize variable lookup
-	static void optimizeLookup();
+	static void optimizeLookup(const Node*);
 };
 
 /*
@@ -1188,12 +1196,17 @@ public:
 */
 	//Wraps a call to lookupVar of the current scope after checking that there are no globals
 	template<typename T>
-	T* lookupVar(/*std::string*/const Node* name) {
-		if(getGlobalScopeRef()->containsVar(name)) {
-			return (getGlobalScopeRef()->lookupVar<T>(name));
+	T* lookupVar(/*std::string*/const Node* varNode) {
+		//cout << "VarNode: " <<varNode << endl;
+		if(/*getGlobalScopeRef()->containsVar(varNode)*/varNode->getInt() < 0) {
+			//cout <<"Looking for: " << varNode->getString() << endl;
+			return (getGlobalScopeRef()->lookupVar<T>(varNode));
+			//T* ret = (getGlobalScopeRef()->lookupVar<T>(varNode));
+			//cout << "Found: " << ret << endl;
+			//return ret;
 		}
 		else {
-			return progStack.top()->lookupVar<T>(name);
+			return progStack.top()->lookupVar<T>(varNode);
 		}
 	}
 

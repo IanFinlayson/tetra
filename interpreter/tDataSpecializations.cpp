@@ -19,6 +19,7 @@ template <>
 TData<void*>::TData(const TData<void*>& other) : pointedTo(other.pointedTo.getKind()) {
 	//if the data points to something, we must perform a deep copy
 	if(other.pointedTo != TYPE_VOID) {
+		//cout <<"Utilizing new" << endl;
 		//Check the type so we know how much memory needs to be allocated, and copy the value into the new memory location
 		switch(other.pointedTo.getKind()) {
 			case TYPE_INT:

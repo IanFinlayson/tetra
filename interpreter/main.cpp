@@ -997,11 +997,14 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 int interpret(Node* tree) {
 
+	cout <<"Interpreting..."<<endl;
 	//Construct a TetraContext (this also initializes the global scope)
 	TetraContext tContext;	
+	cout <<"Starting context initialized"<<endl;
 	//Build function lookup table, find address of main method
 	FunctionMap::build(tree);
-	FunctionMap::optimizeLookup();
+	cout << "Function tree built " <<endl;
+	FunctionMap::optimizeLookup(tree);
 	cout << "Optimization successful" << endl;
 	const Node* start = FunctionMap::getFunctionNode("main#");
 

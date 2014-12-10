@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 		std::cout << "Please pass a file name!" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-
+	cout <<"here"<<endl;
 	CommandConsole console;
 	CommandObserver observer;
 
@@ -40,10 +40,10 @@ int main(int argc, char** argv) {
 		std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
 		exit(EXIT_FAILURE);
 	}
-//#ifdef PROMPT_DEBUG
+#ifdef USE_OBSERVER
 	//Make it so that the debug prompt will be started at the very beginning
 	TetraEnvironment::getObserver().step_E();
-//#endif
+#endif
 	std::cout << "Running: " << argv[1] << endl;
 	int ret = 0;
 	try {   

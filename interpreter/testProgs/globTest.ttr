@@ -11,8 +11,10 @@ constant nums = 1.0
 
 def main( ) int:
     local = "hello"
+    print(local,"\n")
     sum += nums
     local2 = "goodbye"
+    print(local2,"\n")
     print(sum,"\n")
     if sum > 5.0 and sum < 7.0:
         return 1

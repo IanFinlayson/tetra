@@ -1,5 +1,11 @@
+global g = 10
+constant y = 10
+constant z = 11111
+
 def main() int:
-   return fact(3)
+   #fact(3)
+   g = 2 * g
+   return g
 
 def fact(x int) int:
    #print(x,"\n")
