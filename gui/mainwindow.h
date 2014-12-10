@@ -10,12 +10,13 @@
 #include <QSignalMapper>
 #include "syntaxhighlighter.h"
 #include "filerunner.h"
+#include "debugger.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
 
 class Editor;
 class FileRunner;
-
+class Debugger;
 QT_BEGIN_NAMESPACE
 class QPrinter;
 QT_END_NAMESPACE
@@ -44,6 +45,9 @@ public:
     void runFile();
     void quit();
     void setTabWidth(int tabWidth);
+
+    void printOutput(QString);
+    std::string getUserInput();
 
 private slots:
     void on_actionCopy_triggered();
@@ -101,16 +105,32 @@ private:
 
     QString mode;
     FileRunner *fileRunner;
+    Debugger *debugger;
     QThread *tetraThread;
 
     int tabWidth;
 
-    
 
 
 protected:
     void closeEvent(QCloseEvent *);
 
+};
+
+class Console: public VirtualConsole{
+private:
+   MainWindow *mainWindow;
+
+public:
+    Console(MainWindow *mainWindow) : VirtualConsole(){
+        this->mainWindow = mainWindow;
+    }
+    std::string receiveStandardInput() const{
+        return mainWindow->getUserInput();
+    }
+    void processStandardOutput(const std::string text) const{
+        mainWindow->printOutput(QString::fromStdString(text));
+    }
 };
 
 #endif // MAINWINDOW_H

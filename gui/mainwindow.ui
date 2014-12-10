@@ -141,6 +141,16 @@ border: 1px solid grey;
       </widget>
      </widget>
     </item>
+    <item>
+     <widget class="QPlainTextEdit" name="userInput"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Enter</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">

@@ -34,12 +34,14 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     tetraThread = new QThread;
     fileRunner = new FileRunner(this);
+    debugger = new Debugger(this);
     mainValue = 0;
 
     connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
 
     tabWidth = 4;
     setupThreadMdi();
+
 
 }
 
@@ -325,6 +327,11 @@ void MainWindow::on_actionDebug_toggled(bool arg1)
     debugMode(arg1);
     ui->actionDebug->setEnabled(!arg1);
     ui->actionExit_Debug_Mode->setEnabled(arg1);
+    if(arg1){
+        debugger->moveToThread(tetraThread);
+        tetraThread->start();
+        QMetaObject::invokeMethod(debugger, "debugFile", Qt::QueuedConnection);
+    }
 }
 
 void MainWindow::runFile(){
@@ -369,7 +376,6 @@ void MainWindow::exitRunMode(){
 }
 
 void MainWindow::debugMode(bool value){
-
     ui->input->setVisible(!value);
     ui->threadMdi->setVisible(value); 
     ui->actionNew->setEnabled(!value);
@@ -461,4 +467,13 @@ void MainWindow::setActiveSubWindow(QWidget *window){
 void MainWindow::on_actionResume_triggered()
 {
     newThreadWindow();
+}
+
+void MainWindow::printOutput(QString string){
+    ui->output->insertPlainText(string);
+}
+
+std::string MainWindow::getUserInput(){
+    QString input = ui->userInput->toPlainText();
+    return input.toStdString();
 }
