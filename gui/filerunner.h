@@ -2,6 +2,7 @@
 #define FILERUNNER_H
 
 #include "mainwindow.h"
+#include "backend.hpp"
 #include <sys/types.h>
 #include <QObject>
 
@@ -15,9 +16,15 @@ public:
 private:
     MainWindow *mainWindow;
 
+signals:
+    void finished();
+
 public slots:
     void runFile();
+
 };
+
+
 
 #endif
 

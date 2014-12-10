@@ -28,6 +28,8 @@ public:
     void highlightLine(QColor);
     void unhighlightLine();
     bool checkLineHighlighted();
+    void setTabWidth(int width);
+
 
 
 private slots:
@@ -48,6 +50,7 @@ private:
     QWidget *lineNumberArea;
     bool lineNumbersVisible;
     bool lineHighlighted;
+    int tabWidth;
 };
 
 class LineNumberArea : public QWidget{

@@ -17,23 +17,22 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    quitdialog.cpp \
     mainwindow.cpp \
     openappdialog.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
-    filerunner.cpp
+    filerunner.cpp \
+    debugger.cpp
 
 HEADERS  += \
-    quitdialog.h \
     mainwindow.h \
     openappdialog.h \
     syntaxhighlighter.h \
     editor.h \
-    filerunner.h
+    filerunner.h \
+    debugger.h
 
 FORMS    += \
-    quitdialog.ui \
     mainwindow.ui \
     openappdialog.ui
 

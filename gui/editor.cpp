@@ -15,40 +15,47 @@ Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
 
     lineNumbersVisible = true;
     lineHighlighted = false;
+    tabWidth = 4;
 }
 
 void Editor::keyPressEvent(QKeyEvent *e){
     cursor = this->textCursor();
     if(e->key() == Qt::Key_Tab){ //replaces tab key with predetermined amount of spaces
         int pos = cursor.positionInBlock();
-        if((pos+4)%4 == 0 || getLeadingSpaces() < pos){
-            cursor.insertText("    ");
+        if((pos+tabWidth)%tabWidth == 0 || getLeadingSpaces() < pos){
+            for(int i = 0; i < tabWidth; i++){
+                cursor.insertText(" ");
+            }
         }
         else{
-            while(pos > 4){
-                pos-=4;
+            while(pos > tabWidth){
+                pos-=tabWidth;
             }
             for(int i = 0; i < pos; i++){
                 cursor.deletePreviousChar();
             }
-            cursor.insertText("    ");
+            for(int i = 0; i < tabWidth; i++){
+                cursor.insertText(" ");
+            }
         }
     }
     else if(e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return){ //when enter key is pressed, auto indents new line
         int leadingSpaces = getLeadingSpaces();
         if(cursor.block().text().endsWith(":")){
-            leadingSpaces+=4;
+            leadingSpaces+=tabWidth;
         }
         cursor.insertText("\n");
-        for(int i = leadingSpaces; i >= 4; i-=4){
-            cursor.insertText("    ");
+        for(int i = leadingSpaces; i >= tabWidth; i-=tabWidth){
+            for(int i = 0; i < tabWidth; i++){
+                cursor.insertText(" ");
+            }
         }
     }
     else if(e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete){ //"smart" backspace
         if(isTab("left")){
             int pos = cursor.positionInBlock();
-            while(pos > 4){
-                pos-=4;
+            while(pos > tabWidth){
+                pos-=tabWidth;
             }
             for(int i=0; i < pos; i++){
                 QPlainTextEdit::keyPressEvent(e);
@@ -61,8 +68,8 @@ void Editor::keyPressEvent(QKeyEvent *e){
     else if(e->key() == Qt::Key_Left){ //"smart" navigate
         if(isTab("left")){
             int pos = cursor.positionInBlock();
-            while(pos > 4){
-                pos-=4;
+            while(pos > tabWidth){
+                pos-=tabWidth;
             }
             for(int i=0; i < pos; i++){
                 QPlainTextEdit::keyPressEvent(e);
@@ -74,7 +81,7 @@ void Editor::keyPressEvent(QKeyEvent *e){
     }
     else if(e->key() == Qt::Key_Right){
         if(isTab("right")){
-            for(int i=0; i < 4; i++){
+            for(int i=0; i < tabWidth; i++){
                 QPlainTextEdit::keyPressEvent(e);
             }
         }
@@ -104,12 +111,13 @@ bool Editor::isTab(QString direction){
     QString substring;
     bool isTab = false;
     if(direction == "left"){
-        substring = line.mid(pos-4, 4);
+        substring = line.mid(pos-tabWidth, tabWidth);
     }
     else{
-        substring = line.mid(pos, 4);
+        substring = line.mid(pos, tabWidth);
     }
-    if(substring == "    "){
+    QString tab(tabWidth, ' ');
+    if(substring == tab){
         isTab = true;
     }
     return isTab;
@@ -237,4 +245,9 @@ void Editor::unhighlightLine(){
 
 bool Editor::checkLineHighlighted(){
     return lineHighlighted;
+}
+
+
+void Editor::setTabWidth(int tabWidth){
+    this->tabWidth = tabWidth;
 }

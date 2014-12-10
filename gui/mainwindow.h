@@ -7,16 +7,16 @@
 #include <QLayout>
 #include <QMap>
 #include <QThread>
+#include <QSignalMapper>
 #include "syntaxhighlighter.h"
 #include "filerunner.h"
+#include "debugger.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
 
-
-
 class Editor;
 class FileRunner;
-
+class Debugger;
 QT_BEGIN_NAMESPACE
 class QPrinter;
 QT_END_NAMESPACE
@@ -42,10 +42,12 @@ public:
     void printMainValue();
     void runMode(bool);
     void debugMode(bool);
-
-
-public slots:
     void runFile();
+    void quit();
+    void setTabWidth(int tabWidth);
+
+    void printOutput(QString);
+    std::string getUserInput();
 
 private slots:
     void on_actionCopy_triggered();
@@ -59,7 +61,6 @@ private slots:
     void on_actionDelete_triggered();
     void on_actionSelect_All_triggered();
     void on_actionNew_triggered();
-    void on_actionRun_triggered();
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
     void on_actionMinimize_triggered();
@@ -70,17 +71,30 @@ private slots:
 
     void documentWasModified();
     void updateCoordinates();
+    void exitRunMode();
+    void on_actionRun_triggered(bool checked);
+    void on_actionExit_Debug_Mode_triggered();
+    void on_actionTab_Width_triggered();
+
+    Editor *newThreadWindow();
+    Editor *activeThreadWindow();
+    void setActiveSubWindow(QWidget *window);
 
 
+    void on_actionResume_triggered();
 
 private:
     Ui::MainWindow *ui;
     QString openFile;
 
-    void hideEditor();
+    void hideDisplay();
     void setupEditor();
     void setupShortcuts();
 
+    QSignalMapper *windowMapper;
+    void setupThreadMdi();
+    
+    
     Highlighter *highlighter;
 
     QString strippedName(const QString &fullFileName);
@@ -91,10 +105,32 @@ private:
 
     QString mode;
     FileRunner *fileRunner;
+    Debugger *debugger;
     QThread *tetraThread;
+
+    int tabWidth;
+
+
 
 protected:
     void closeEvent(QCloseEvent *);
+
+};
+
+class Console: public VirtualConsole{
+private:
+   MainWindow *mainWindow;
+
+public:
+    Console(MainWindow *mainWindow) : VirtualConsole(){
+        this->mainWindow = mainWindow;
+    }
+    std::string receiveStandardInput() const{
+        return mainWindow->getUserInput();
+    }
+    void processStandardOutput(const std::string text) const{
+        mainWindow->printOutput(QString::fromStdString(text));
+    }
 };
 
 #endif // MAINWINDOW_H
