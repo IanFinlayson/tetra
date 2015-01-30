@@ -2,7 +2,7 @@
 
 //Returns an untyped pointer to a given variable
 //Returns NULL if not found
-void* VirtualObserver::fetchVariable(std::string s, TetraContext& context) {
+void* VirtualObserver::fetchVariable(std::string s, TetraContext& context) const {
 	//Check global scope
 	if(context.getGlobalScopeRef()->containsVar(s)) {
 		return context.getGlobalScopeRef()->lookupVar<void*>(s);

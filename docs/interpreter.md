@@ -9,10 +9,26 @@ For clarity, whenever this documentation uses "the program", it refers to the te
 
 ```cpp
 static void initialize()
+static void initialize(const VirtualConsole&)
 ```
 
-sets up the environment with default values. Any program utilizing the interpreter should call this method.
+sets up the environment with default values. Any program utilizing the interpreter should call this method. The second version also sets the given console for the environment (For more on Consoles, see the VirtualConsole documentation).
 
+```cpp
+static void setConsole(const virtualConsole&)
+static const VirtualConsole& getConsole()
+```
+
+These methods explicitely get and set the console for the TetraEnvironment.
+
+```cpp
+static void setObserver(const virtualObserver&)
+static VirtualObserver& getObserver()
+```
+
+Gets and sets the observer for the TetraEnvironment (for more on observers, see the VirtualObserver documentation).
+
+These methods explicitely get and set the console for the TetraEnvironment.
 ```cpp
 static int getMaxThreads()
 static void setMaxThreads(int)
@@ -21,11 +37,8 @@ static void setMaxThreads(int)
 gets and sets the number of threads that should be started when a parallel for-loop is initialized.
 
 ```cpp
-static ostream& getOutputStream()
-static void setOutputStream(ostream&)
-```
+static void 
 
-gets and sets the output stream to which the print() methods will write.
 
 ###TData<T>
 	The TData class is a templated class used to handle all data for the program. In pracice, T may be int, double, bool, string, TArray, pointers to any of the preceding types, and void*. Note that although a TData<T> may contain a pointer to dynamically allocated memory, the TData<T> will neither allocate nor deallocate the memory unless its deletable type has been set (see setDeletableType<T>()).
@@ -112,8 +125,29 @@ which is used to print the contents of a TArray.
 The class also contains many stubbed operators for type TArray. At present, all logical operators return false, and all other operators return the first operand.
 
 ###VarTable
-As mentioned above, each scope has a VarTable. The VarTable class contains two methods: lookupVar and declareReference. The interface for a VarTable is identical to that of a TetraScope (the TetraScope interface merely calls the same method as the VarTable it contains). Refer to that class for documentation on what those methods do.
 
+As mentioned above, each scope has a VarTable. The VarTable class contains two methods: lookupVar and containsVar. The interface for a VarTable is identical to that of a TetraScope (the TetraScope interface merely calls the same method as the VarTable it contains). Refer to that class for documentation on what those methods do. The VarTable, in addition to some minor housekeeping for threading, contains an instance of the VarHash class to manage data storage.
+
+###VarHash
+
+The VarHash class merely provides a bare-bones interface to store pointers to data values for a given scope. Presently, the interface facilitates only mild inconvenience between switching between this implementation, and stl data structures. It is constructed via
+
+```cpp
+VarHash(int size)
+```
+where size specifies the number of entries the table can hold. As of 1/20/15 however, the size will be 30 regardless of the specified size.
+
+```cpp
+TData<void*>& operator[](int index)
+```
+
+This method returns a reference to the pointer specified by index. Note that all the pointers contained within the VarHash are initialized to NULL, so make sure that you have initialized the pointer before using it.
+
+```cpp
+bool exists(const Node* varNode) const
+```
+
+This method checks whether or not the variable (i.e. pointer to a variable) denoted by the given node is a NULL pointer (returns false), or if it has some non-NULL value (returns true).
 
 ###TetraScope
 
@@ -123,9 +157,17 @@ To lookup local variables in the context, use
 
 ```cpp
 template <typename T>
-T* lookupVar(string varName);
+T* lookupVar(string varName)
+T* lookupVar(const Node* varNode)
 ```
-to get the pointer to the variable referenced by varName. If no such variable exists in the current scope, it will be created and initialized to a default value of 0, false, "", or [] depending on the type. Note that you must supply the type of the variable you are referencing. This can usually be obtained by getting the DataType of the node which the interpreter is examining.
+to get the pointer to the variable referenced by varName, or the variable enumerated by the given node (which should be of type NODE_IDENTIFIER). If no such variable exists in the current scope, it will be created and initialized to a default value of 0, false, "", or [] depending on the type. Note that you must supply the type of the variable you are referencing. This can usually be obtained by getting the DataType of the node which the interpreter is examining.
+
+```cpp
+bool conatinsVar(const std::string varname) const
+bool containsVar(const Node*varNode) const
+```
+
+These methods state whether or not the scope contains the variable denoted by the string/node is contained within this scope.
 
 The TetraScope class uses an enumeration ExecutionStatus to keep track of special conditions the interpreter must account for when executing the program.
 
@@ -151,17 +193,28 @@ This value denotes that a NODE_RETURN (i.e. 'return' statement) was encountered,
 
 ###TetraContext
 
-The TetraContext class wraps a stack of TetraScopes (explained below). A tetra program changes scope whenever it calls a function. It does not change scope when the program executes other blocks, such as if statements and while loops. There should exist exactly one TetraContext per executing thread of the program.
+The TetraContext class wraps a stack of TetraScopes (explained below), and a TetraScope representing the global scope. A tetra program changes scope whenever it calls a function. It does not change scope when the program executes other blocks, such as if statements and while loops. There should exist exactly one TetraContext per executing thread of the program.
+
+The TetraContext only has a default constructor.
+
+Once the Tetra Context has been default-constructed, you can call the method
+
+```cpp
+initializeGlobalVars(const Node* tree)
+```
+
+to initialize the global variables and constants for the program. "tree" should be the base of the abstract syntax tree which the interpreter is executing.
+
 The method
 ```cpp
-void initializeNewScope(Node*);
+void initializeNewScope(Node*)
 void initializeNewScope(TetraScope&)
 ```
 pushes a new scope onto the stack initialized with the given information.
 
 When exiting a scope, the method
 ```cpp
-void exitScope();
+void exitScope()
 ```
 pops the scope off the stack, essentially reverting the program to the state it was at before initializeNewScope() was last called.
 
@@ -175,7 +228,7 @@ will initialize a new scope that is an alias to the scope pointed to by scope_pt
 
 The method
 ```cpp
-TetraScope* getCurrentScope();
+TetraScope* getCurrentScope()
 scope_ptr& getScopeRef()
 ```
 returns a reference to the present scope/scope_ptr of the class.
@@ -184,16 +237,18 @@ To lookup a variable, use
 
 ```cpp
 template <typename T>
-T* lookupVar(string varName);
+T* lookupVar(string varName)
+T* lookupVar(const Node* varNode)
 ```
-to get the pointer to the variable referenced by varName. This essentially calls the lookupVar<T>(string) function of the current scope. The pointer can be dereferenced to get the value of the variable, or to modify the actual contents of the variable.
-
+to get the pointer to the variable referenced by varName, or denoted by the given Node. This will first check the global scope for the variable, and failing finding the variable there, looks in the current scope. The pointer can be dereferenced to get the value of the variable, or to modify the actual contents of the variable.
+<!--
 In certain cases such as array passing, it is required that two names reference the same element. To facilitate this, you use
 
 ```cpp
 TData<void*>& declareReference(const string varname)
 ```
 This method returns a blank reference to which varname will match when calling lookupVar(varname). The reference created does not allocate any new memory, and will not flag the scope to delete the memory it is pointed to when it is destroyed. It is up to the caller to specify where the reference should point by using the returned object's setData<void*> function. MAKE SURE TO SPECIFY THE VOID* EXPLICITELY, ELSE THE ASSIGNMENT MAY SILENTLY FAIL.
+-->
 
 In the case of parallel-for loops, it is necessary to declare a variable name that means different things depending on which thread is querying the name. To declare such a variable, use
 
@@ -203,25 +258,25 @@ void declareThreadSpecificVariable(std::string&)
 
 The methods
 ```cpp
-void notifyElif();
+void notifyElif()
 
-void notifyBreak();
+void notifyBreak()
 
-void notifyContinue();
+void notifyContinue()
 
-void notifyReturn();
+void notifyReturn()
 ```
 all set the current scope's execution flag to the specific value. The method
 
 ```cpp
-void normalizeStatus();
+void normalizeStatus()
 ```
 
 clears the execution flag to the normal value.
 
 To find what the current state of the execution flag is, use
 ```cpp
-ExecutionStatus queryExecutionStatus();
+ExecutionStatus queryExecutionStatus()
 ```
 
 To manage threads, the class uses the methods:
@@ -232,7 +287,7 @@ void addThread(pthread_t)
 void endParallel()
 ```
 
-to initialize a ThreadPool, add threads to the pool, and join with the threads in the ThreadPool. ThreadPools started with startParallel are destroyrd via endParallel on a FIFO basis.
+to initialize a ThreadPool, add threads to the pool, and join with the threads in the ThreadPool. ThreadPools started with startParallel are destroyrd via endParallel on a LIFO basis.
 
 Lastly, the class provides the method
 
@@ -289,13 +344,13 @@ This enters all functions in the tree into the function table. Although untested
 To lookup a tetra function, use the function 
 
 ```cpp
-static const Node* getFunctionNode(const string functionSignature) const;
+static const Node* getFunctionNode(const string functionSignature) const
 ```
 
 to get the NODE_FUNCTION node of the called function. To get the function signature of a called function, use
 
 ```cpp
-static const Node* getFunctionSugnature(const Node* node) const;
+static const Node* getFunctionSugnature(const Node* node) const
 ```
 
 to extract the function signature from a NODE_FUNCALL node.
@@ -403,6 +458,44 @@ The node can be accessed by calling
 ```cpp
 Node* getNode()
 ```
+
+###VirtualConsole
+
+The VirtualConsole class is an abstract class that defines how the interpreter should handle basic I/O (i.e. read and print statements). Environments utilizing this interpreter must create a class extending and overriding the methods of this class, then setting an instance of that class as the observer via the TetraEnvironment's static method setObserver(). For the most basic implementation, the interpreter utilizes an instance of CommandConsole. This is viewable in the interpreter folder.
+
+```cpp
+virtual std::string receiveStandardInput() const = 0
+```
+
+This method is called whenever the interpreter is expecting input from the user. The method should obtain and return whatever the user input as a string (e.g. return some value obtained via cin). The interpreter takes care of converting it into an appropriate data type.
+
+```cpp
+virtual void processStandardOutput(const std::string output) const = 0
+```
+
+This method is called whenever the interpreter wishes to print information on the screen. The interpreter passes the information to this method, which should do something to make it visible to the user (e.g. cout the string).
+
+###VirtualObserver
+
+The VirtualObserver class provides a basic framework to debug Tetra programs. As the interpreter is running, it will make calls to the VirtualObserver, which is given great lattitude to do practically whatever it pleases. To utilize the dubugger, use the static setObserver() method in the TetraEnvironment class, then "make" the interpreter with the DEBUG target. The current basic implementation is the CommandObserver, which can be viewed in the interpreter folder. The observer presently exhibits default behavior for multithreaded programs, and depends partially on the Nodes haviing the correct associated line numbers.
+
+```cpp
+virtual void notify_E(const Node* node, TetraContext& context) = 0
+```
+
+The interpreter calls this function immediately before it executes node. It passes the current context as well. note that the context is not const.
+
+```cpp
+virtual void leftScope_E() = 0
+```
+
+The interpreter calls this method immediately after exiting a scope (i.e. returning from a function), but before calling notify_E for the next node. Some implementations of a debugger may not need this functionality, in which case the method can be stubbed.
+
+```cpp
+void* fetchVariable(std::string name, TetraContext& context) const
+```
+
+This method is implemented in VirtualObserver as a convenience. The method checks the current scope and global scope for a variable with name "name". If such a variable exists, it returns a pointer to its value. If it does not exist or has not been initialized, it returns NULL. Note that this method does not provide the type of the variable, so some other way will need to be used to get its type.
 
 #####A Word About the testProgs Directory
 The interpreter folder contains a series of tetra programs, and a shell script that executes each program and tests its return value against a list of expected return values. Going to this directory and executing "sh runTests.sh" will execute all the test programs, and give information about the successfailure of each program. This can be used as a quick check to insure that changes to the interpreter did not break previous functionality. To add additional tests, create a file called [*]Test.ttr, copy and paste one of the lines in the shell script defining the test cases, and fill in the values of [*] for the name and the expected return value.

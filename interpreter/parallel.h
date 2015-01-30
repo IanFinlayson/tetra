@@ -204,6 +204,7 @@ pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
 
 	evalArgs<T>* args = new evalArgs<T>(node,ret,context.getScopeRef());
 	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
+	cout <<"!!\n"<<endl;
 	int success = pthread_create(&newThread, &attributes,(void*(*)(void*))wrapEvaluation<T>,(void*)(args));
 	assert(success == 0);//For now, we will assume that thread creations are correct
 	return newThread;

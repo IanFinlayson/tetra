@@ -576,7 +576,7 @@ public:
 	bool containsVar(const std::string varName) const;
 	bool containsVar(const Node* varNode) const;
 	//Returns a TData from within varMap containing an invalid reference. The reference can be set to something valid, and that thing will not be deleted when this variableContext goes out of scope
-	TData<void*>& declareReference(const std::string varName);
+	//TData<void*>& declareReference(const std::string varName);
 
 	std::list<std::pair<pthread_t,TData<void*> > >& declareParForVar(const std::string&);
 private:
@@ -1220,7 +1220,7 @@ public:
 		}
 	}
 	//Wraps a call of declareReference for the current scope
-	TData<void*>& declareReference(const std::string varName);
+	//TData<void*>& declareReference(const std::string varName);
 
 	//Overloaded function call, one when there is no initial setup for a scope (i.e. a function call with no formal parameters that must be initialized)
 	//The second is for adding a scope which had to have some data preloaded into it, as is the case when calling a function with arguments
@@ -1339,15 +1339,15 @@ private:
 public:
 
 	virtual void notify_E(const Node*, TetraContext& context)=0;
-	virtual void step_E()=0;
-	virtual void next_E()=0;
+	//virtual void step_E()=0;
+	//virtual void next_E()=0;
 	//virtual bool break_E(std::pair<int,pthread_t>)=0;
 	//virtual bool remove_E(std::pair<int,pthread_t>)=0;
-	virtual void continue_E()=0;
+	//virtual void continue_E()=0;
 	virtual void leftScope_E()=0;
-	virtual bool break_E(int)=0;
-	virtual bool remove_E(int)=0;
-	void* fetchVariable(std::string s, TetraContext& context);
+	//virtual bool break_E(int)=0;
+	//virtual bool remove_E(int)=0;
+	void* fetchVariable(std::string s, TetraContext& context) const;
 };
 
 
