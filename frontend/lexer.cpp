@@ -99,8 +99,41 @@ int lexNumber(int start) {
     string number;
     number.push_back((char) start);
 
-    while (isdigit(in->peek( )) || in->peek( ) == '.') {
-        number.push_back(in->get( ));
+    /* have we seen a decimal point yet? */
+    bool seendot = (start == '.');
+
+    /* scan forward */
+    while (true) {
+      char next = in->peek( );
+      
+      if (isdigit(next)) {
+        number.push_back(next);
+        in->get( );
+        continue;
+      }
+
+      if (next == '.' && seendot) {
+        break;
+      }
+
+      if (next == '.') {
+        /* hesitantly read the . */
+        next = in->get( );
+
+        /* check if next is dot too */
+        if (in->peek( ) == '.') {
+          /* put the . back and bail */
+          in->putback(next);
+          break;
+        } else {
+          number.push_back(next);
+          seendot = true;
+          continue;
+        }
+      }
+
+      /* it is not a number or dot, just break! */
+      break;      
     }
 
     /* if there's no decimal its an int */

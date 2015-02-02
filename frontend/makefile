@@ -1,7 +1,7 @@
 # makefile for the Tetra parser
 
 CC = clang++
-CFLAGS = -W -Wall -g -O3
+CFLAGS = -W -Wall -g
 
 all: dump-tree tags libfrontend.a
 	@echo "All done :)"
