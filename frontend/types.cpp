@@ -453,8 +453,15 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               throw Error("In binary operator, the types " + typeToString(lhs) + " and " +
                                       typeToString(rhs) + " are not compatible", expr->getLine( ));
                           }
+
                           if ((lhs->getKind( ) != TYPE_INT) && (rhs->getKind( ) != TYPE_REAL)) {
+                            /* special case: adding strings and vectors is OK */
+                            if ((expr->kind( ) == NODE_PLUS) &&
+                                ((lhs->getKind( ) == TYPE_STRING) || (lhs->getKind( ) == TYPE_VECTOR))) {
+                              /* s'alright */
+                            } else {
                               throw Error("Numeric type required", expr->getLine( ));
+                            }
                           }
 
                           /* return the same type back */
