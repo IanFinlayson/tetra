@@ -22,7 +22,7 @@ Node::Node(NodeKind node_type) {
   lineno = yylineno;  /* this is often inaccurate! */
   num_children = 0;
 }
- 
+
 void Node::addChild(Node* child) {
   if (child) {
     children[num_children] = child;
