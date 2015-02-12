@@ -398,14 +398,114 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 
 	//Check to see if it is a TSL function
 	//This is a point for optimization. We could agree to some similarity of all TSL names to check 1 condiitonal
-	string funcName = node->getString();
+	//std::string funcName = node->getString();
 
-	if(funcName == "print") {
-		if(node->child(0) != NULL) {
-			print(node->child(0),context);
+	int functionID = node->getInt();
+	if(functionID < TSL_FUNCS) {
+		switch(functionID){
+			case 0:
+			{
+				if(node->child(0) != NULL) {
+					print(node->child(0),context);
+				}
+				//Each print does NOT end with a line break
+				//std::cout << endl;
+			}
+			break;
+			case 1:
+			{
+				ret.setData(readInt());
+			}
+			break;
+			case 2:
+			{
+				ret.setData(readReal());
+			}
+			break;
+			case 3:
+			{
+				ret.setData(readString());
+			}
+			break;
+			case 4:
+			{
+				ret.setData(readBool());
+			}
+			break;
+			case 5:
+			{
+				if(node->child(0)->type()->getKind() == TYPE_STRING) {
+					TData<string> value;
+					evaluateNode(node->child(0),value,context);
+					ret.setData(len(value.getData()));
+				}
+				else if(node->child(0)->type()->getKind() == TYPE_VECTOR) {
+					TData<TArray> value;
+					evaluateNode(node->child(0),value,context);
+					ret.setData(len(value.getData()));
+				}
+				else {	//attempting to take length of another type is an error
+					std::stringstream message;
+					message << "Attempted to obtain length of unknown type. ID: " << node->child(0)->type()->getKind();
+					SystemError e(message.str(),node->getLine(),node);
+					throw e;
+				}
+			}
+			break;
+			default:
+			{
+				std::stringstream message;
+				message << "Unexpected functionID when attempting to resolve function call to " << node->getString() << "\nFound ID: " << functionID;
+				SystemError e(message.str(),node->getLine(),node);
+				throw e;
+			}
+			break;
 		}
-		//Each print does NOT end with a line break
-		//std::cout << endl;
+	}
+	//USER DEFINED FUNCTION
+	else {
+		//gets the node where the body of the called function begins
+		///////////////	//const Node* funcNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
+
+		const Node* funcNode = FunctionMap::getFunctionNode(node);
+
+		//check if there are parameters to be passed, and do so if needed
+		//This call will have arguments if and only if the calling node has children	
+		if(node->child(0) != NULL) {
+
+			//When copying arg list, we must have handles to both scopes
+			//Calling scope handle
+			TetraScope destScope(node);
+
+			//cout << "Old scope X: " << *(context.lookupVar<TArray>("x")) << endl;
+
+			//Initialize the new scope with the passed parameters
+			pasteArgList(funcNode->child(0),node->child(0), destScope, context);
+
+			//Set the new scope to the scope we created containing all the parameters
+			//cout << "x: " << destScope.lookupVar<int>("x") << endl;
+			context.initializeNewScope(destScope);
+		}
+		else { //if there are no args, we still need to initialize a new scope!
+			context.initializeNewScope(node);
+		}
+
+		//Place this node on the call stack, so it can be printed in the stack trace
+		context.getCurrentScope().setCallNode(node);
+
+		//transfer control to the function
+		evaluateNode<T>(funcNode,ret,context);
+
+		//returns to the old scope once the function has finished evaluating
+		context.exitScope();
+	}
+	/*
+	   if(funcName == "print") {
+	if(node->child(0) != NULL) {
+		print(node->child(0),context);
+	}
+	//Each print does NOT end with a line break
+	//std::cout << endl;
 	}
 	else if(funcName == "read_int") {
 		ret.setData(readInt());
@@ -438,7 +538,9 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 	}		//USER DEFINED FUNCTION
 	else {
 		//gets the node where the body of the called function begins
-		const Node* funcNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
+///////////////	//const Node* funcNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
+
+		const Node* funcNode = FunctionMap::getFunctionNode(node);
 
 		//check if there are parameters to be passed, and do so if needed
 		//This call will have arguments if and only if the calling node has children	
@@ -469,7 +571,7 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 
 		//returns to the old scope once the function has finished evaluating
 		context.exitScope();
-	}
+	}*/
 }
 
 //evaluates operations on data types
@@ -1005,6 +1107,7 @@ int interpret(Node* tree) {
 	FunctionMap::build(tree);
 	cout << "Function tree built " <<endl;
 	FunctionMap::optimizeLookup(tree);
+	FunctionMap::optimizeFunctionLookup(tree);
 	cout << "Optimization successful" << endl;
 	const Node* start = FunctionMap::getFunctionNode("main#");
 

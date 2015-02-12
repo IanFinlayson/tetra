@@ -25,10 +25,18 @@ const Node* FunctionMap::getFunctionNode(const string functionSignature) {
 	return instance.lookup[functionSignature];
 }
 
+//Calls the appropriate function based on the number identifier attached to the node
+const Node* FunctionMap::getFunctionNode(const Node* callNode) {
+	//TSL functions are given the low numbers, but functionLookup only contains user defined functions
+	//Thus we must subtract the offset TSL_FUNCS (number of TSL functions) to get the proper index in this array
+	return instance.functionLookup[callNode->getInt() - TSL_FUNCS];
+}
+
 
 //Fills the function map given the specified base node
+//TODO: this function is comprised of old functionality followed by new changes to accomadate constant time lookup. This function can potentially bwe rewritten to both search for functions and assign them values at the same time
 void FunctionMap::build(const Node* tree) {
-	
+	cout << "HERE" << endl;	
 	if(tree->kind() == NODE_TOPLEVEL_LIST) {
 
 		//by frontend specifications, there MUST be a child to add
@@ -41,6 +49,65 @@ void FunctionMap::build(const Node* tree) {
 			build(tree->child(1));
 		}   
 	}
+
+}
+
+void optimizeFunction(Node* base, Node** funcs, std::map<std::string, Node*>& lookup) {
+		
+	if(base->kind() == NODE_FUNCALL) {
+		cout<< "Here1" <<endl;
+		for(int index = 0; index < lookup.size(); index++) {
+			cout <<"here2"<<endl;
+			std::string name = base->getString();
+			//These if statements provide optimization for TSL built in functions
+			//These assigned values are matched in the evaluateFunction method of the interpreter
+			if(name == "print") {
+				base->setIntval(0);
+			}
+			else if(name == "read_int") {
+				base->setIntval(1);
+			}
+			else if(name == "read_real") {
+				base->setIntval(2);
+			}
+			else if(name == "read_string") {
+				base->setIntval(3);
+			}
+			else if(name == "read_bool") {
+				base->setIntval(4);
+			}
+			else if(name == "len") {
+				base->setIntval(5);
+			}
+			else if(lookup[FunctionMap::getFunctionSignature(base)] == funcs[index]) {
+				//The earliest numbers are reserved for Tetra Standard Library Functions
+				//Integers for user-defined functions will start with the number after the last TSL number
+				base->setIntval(index + TSL_FUNCS);
+				cout << "Name: " << base->getString() << " Val: " << index << endl;
+			}
+			cout <<"Sizey: "<<lookup.size()<<endl;
+		}
+	}
+
+	for(int index = 0; index < base->numChildren(); index++) {
+		optimizeFunction(base->child(index), funcs,lookup);
+	}
+}
+
+void FunctionMap::optimizeFunctionLookup(Node* start) {
+	//Now that all of the functions have been found, we can assign them numbers
+	int numFuncs = instance.lookup.size();
+	instance.functionLookup = new Node*[numFuncs];
+	int count = 0;
+	for(std::map<std::string, Node*>::iterator iter = instance.lookup.begin(); iter != instance.lookup.end(); iter++) {
+		instance.functionLookup[count] = iter->second;
+		cout << "Adding: " << iter->first << "->"<<iter->second << endl;
+		count++;
+	}
+	cout <<"Count: " <<count<<endl;
+	cout <<"Size: "<<instance.lookup.size()<<endl;
+	optimizeFunction(start, instance.functionLookup, instance.lookup);
+	//Then we will go through again and assign numbers to all the function call nodes 
 }
 
 //Fills the numerical field of each variable node to a value referencing where it will be held in the variable scope table
@@ -200,6 +267,10 @@ const string FunctionMap::getFunctionSignature(const Node* node) {
 	return ret;
 }
 
+//Delete the functionLookup table
+void FunctionMap::cleanup() {
+	delete[] instance.functionLookup;
+}
 	
 
 //initializes single static function map instance

@@ -921,12 +921,15 @@ class FunctionMap {
 private:
 	FunctionMap();
 	std::map<std::string, Node*> lookup;
+	Node** functionLookup;
 	static FunctionMap instance;
 	static void concatSignature(const Node*,std::string&);
 
 public:
 	//Returns the address of a node containing the function body of the function denoted by functionSignature
 	static const Node* getFunctionNode(const std::string functionSignature);
+
+	static const Node* getFunctionNode(const Node* callNode);
 
 	//Generates a unique function signature based on the name AND the arguments
 	static const std::string getFunctionSignature(const Node* node);
@@ -936,6 +939,10 @@ public:
 
 	//does some pre-work to optimize variable lookup
 	static void optimizeLookup(const Node*);
+	static void optimizeFunctionLookup(Node*);
+
+	//Release allocated resources from the instance
+	static void cleanup();
 };
 
 /*
@@ -1281,11 +1288,13 @@ private:
 
 
 //Header for Tetra Standard Library
+#define TSL_FUNCS 6
 void print(const Node*,TetraContext&);
 int readInt();
 double readReal();
 bool readBool();
 std::string readString();
+//All len functions count as a single function for TSL_FUNCS
 int len(TArray&);
 int len(std::string&);
 
@@ -1339,7 +1348,7 @@ private:
 public:
 
 	virtual void notify_E(const Node*, TetraContext& context)=0;
-	//virtual void step_E()=0;
+	virtual void step_E()=0;
 	//virtual void next_E()=0;
 	//virtual bool break_E(std::pair<int,pthread_t>)=0;
 	//virtual bool remove_E(std::pair<int,pthread_t>)=0;
