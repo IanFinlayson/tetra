@@ -1099,18 +1099,17 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 int interpret(Node* tree) {
 
-	cout <<"Interpreting..."<<endl;
 	//Construct a TetraContext (this also initializes the global scope)
 	TetraContext tContext;	
-	cout <<"Starting context initialized"<<endl;
+	std::cout <<"Starting context initialized"<<std::endl;
 	//Build function lookup table, find address of main method
 	FunctionMap::build(tree);
-	cout << "Function tree built " <<endl;
+	std::cout << "Function tree built " <<std::endl;
 	FunctionMap::optimizeLookup(tree);
 	FunctionMap::optimizeFunctionLookup(tree);
-	cout << "Optimization successful" << endl;
+	std::cout << "Optimization successful" << std::endl;
 	const Node* start = FunctionMap::getFunctionNode("main#");
-
+	
 	//If Main was not found, print an error
 	if(start == NULL) {
 		
@@ -1129,6 +1128,9 @@ int interpret(Node* tree) {
 	//Initialize a scope fpr the main method, and run!
 	
 	tContext.initializeNewScope(start);
+
+	std::cout <<"Interpreting..."<<std::endl;
+
 	//try {
 		evaluateNode<int>(start, retVal, tContext);
 //		tContext.exitScope();
@@ -1154,6 +1156,9 @@ int interpret(Node* tree) {
 	ThreadEnvironment::joinDetachedThreads();
 
 	tContext.exitScope();
+
+	//cleanup
+	FunctionMap::cleanup();
 
 	//Return the value from main
 	return retVal.getData();

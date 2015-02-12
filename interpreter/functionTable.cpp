@@ -36,7 +36,6 @@ const Node* FunctionMap::getFunctionNode(const Node* callNode) {
 //Fills the function map given the specified base node
 //TODO: this function is comprised of old functionality followed by new changes to accomadate constant time lookup. This function can potentially bwe rewritten to both search for functions and assign them values at the same time
 void FunctionMap::build(const Node* tree) {
-	cout << "HERE" << endl;	
 	if(tree->kind() == NODE_TOPLEVEL_LIST) {
 
 		//by frontend specifications, there MUST be a child to add
@@ -55,9 +54,9 @@ void FunctionMap::build(const Node* tree) {
 void optimizeFunction(Node* base, Node** funcs, std::map<std::string, Node*>& lookup) {
 		
 	if(base->kind() == NODE_FUNCALL) {
-		cout<< "Here1" <<endl;
+		
 		for(int index = 0; index < lookup.size(); index++) {
-			cout <<"here2"<<endl;
+			
 			std::string name = base->getString();
 			//These if statements provide optimization for TSL built in functions
 			//These assigned values are matched in the evaluateFunction method of the interpreter
@@ -83,9 +82,8 @@ void optimizeFunction(Node* base, Node** funcs, std::map<std::string, Node*>& lo
 				//The earliest numbers are reserved for Tetra Standard Library Functions
 				//Integers for user-defined functions will start with the number after the last TSL number
 				base->setIntval(index + TSL_FUNCS);
-				cout << "Name: " << base->getString() << " Val: " << index << endl;
 			}
-			cout <<"Sizey: "<<lookup.size()<<endl;
+			
 		}
 	}
 
@@ -101,11 +99,9 @@ void FunctionMap::optimizeFunctionLookup(Node* start) {
 	int count = 0;
 	for(std::map<std::string, Node*>::iterator iter = instance.lookup.begin(); iter != instance.lookup.end(); iter++) {
 		instance.functionLookup[count] = iter->second;
-		cout << "Adding: " << iter->first << "->"<<iter->second << endl;
 		count++;
 	}
-	cout <<"Count: " <<count<<endl;
-	cout <<"Size: "<<instance.lookup.size()<<endl;
+	
 	optimizeFunction(start, instance.functionLookup, instance.lookup);
 	//Then we will go through again and assign numbers to all the function call nodes 
 }
