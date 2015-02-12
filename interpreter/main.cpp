@@ -991,7 +991,7 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 		break;
 		default:
 			std::stringstream message;
-			message << "Unexpected flag type encountered: " << static_cast<int>(node->kind());
+			message << "Unexpected execution flag type encountered: " << static_cast<int>(node->kind());
 			SystemError e(message.str(), node->getLine(),node); 
 			throw e;
 		break;
@@ -1002,10 +1002,12 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 template<typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
-#ifdef USE_OBSERVER
+if(TetraEnvironment::isDebugMode()) {
+//#ifdef USE_OBSERVER
 	//Notify the observer that we are about to execute a new node
 	TetraEnvironment::getObserver().notify_E(node,context);
-#endif
+//#endif
+}
 
 	//Call the appropriate function based on the NodeKind of the node
 	switch(node->kind()) {
@@ -1087,17 +1089,28 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 			throw e;
 	}
 
-#ifdef USE_OBSERVER
+if(TetraEnvironment::isDebugMode()){
+//#ifdef USE_OBSERVER
 	//If we are exiting a scope, (i.e. just completed execution of a NODE_FUNCTION
 	//notify the observer so it can pop its current symbol lookup table
 	if(node->kind() == NODE_FUNCTION) {
 		TetraEnvironment::getObserver().leftScope_E();
 	}
-#endif
+//#endif
+}
 
 }
 
-int interpret(Node* tree) {
+//Equivilant of main for the interpreter module
+int interpret(Node* tree, string* flags = NULL, int flagCount = 0) {
+
+	//Parse flags
+	std::string flagErrors = TetraEnvironment::parseFlags(flags,flagCount);
+
+	if(flagErrors != "") {
+		Error e(flagErrors,0);
+		throw e;
+	}
 
 	//Construct a TetraContext (this also initializes the global scope)
 	TetraContext tContext;	
@@ -1165,4 +1178,11 @@ int interpret(Node* tree) {
 
 
 }
+
+
+//Convenience call with no flags
+int interpret(Node* tree) {
+	return interpret(tree,NULL,0);
+}
+
 

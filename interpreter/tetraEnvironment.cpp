@@ -57,7 +57,40 @@ void TetraEnvironment::setObserver(VirtualObserver& pObserver) {
 	observer = &pObserver;
 }
 
+//Determines whether the interpreter should be executing in debug mode or not
+void TetraEnvironment::setDebug(bool toggle) {
+	debugMode = toggle;
+}
+
+bool TetraEnvironment::isDebugMode() {
+	return debugMode;
+}
+
+//Sets options based on the flags that get passed in.
+//Returns "" on successful parsing, otherwise returns an error message
+std::string TetraEnvironment::parseFlags(std::string* flags, int flagCount) {
+	if(flags==NULL||flagCount == 0) {
+		return "";
+	}
+
+	std::string ret = "";
+
+	for(int index = 0; index < flagCount; index++) {
+		//For the time being, these will be case sensitive
+		std::string arg = flags[index];
+		if(arg == "-debug" || arg == "-d") {
+			setDebug(true);
+		}
+		else {
+			ret += "Failed to recognize option: " + arg + "\n";
+		}
+	}
+
+	return ret;
+}
+
 VirtualConsole const * TetraEnvironment::console_ptr = NULL;
 int TetraEnvironment::maxThreads = 8;
+bool TetraEnvironment::debugMode = false;
 ostream* TetraEnvironment::outputStream = &std::cout;
 VirtualObserver* TetraEnvironment::observer = NULL;

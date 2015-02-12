@@ -11,6 +11,7 @@
 
 //These are defined in frontend.hpp and main.cpp respectively
 int interpret(Node*);
+int interpret(Node*,std::string*,int);
 
 int main(int argc, char** argv) {
 
@@ -31,11 +32,21 @@ int main(int argc, char** argv) {
 	//cout << &observer << endl;
 	//cout << &(TetraEnvironment::getObserver()) << endl;
 
+	//Parse flags
+	int numFlags = argc - 2; //number of flags - prog name and file name
+	std::string* flags = new string[numFlags];
+	for(int index = 0; index < numFlags; index++) {
+		//index+1 to get past program argument
+		flags[index] = std::string(argv[index+1]);
+	}
+
+
 	Node* tree;
 
 	//Parse file, and check for initial errors. Print out and exit if an error was found
 	try {
-		tree = parseFile(argv[1]);
+		//File is last parameter
+		tree = parseFile(argv[argc-1]);
 	} catch(Error e) {
 		std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
 		exit(EXIT_FAILURE);
@@ -44,10 +55,10 @@ int main(int argc, char** argv) {
 	//Make it so that the debug prompt will be started at the very beginning
 	TetraEnvironment::getObserver().step_E();
 #endif
-	std::cout << "Running: " << argv[1] << endl;
+	std::cout << "Running: " << argv[argc-1] << endl;
 	int ret = 0;
 	try {   
-		ret = interpret(tree);
+		ret = interpret(tree,flags,numFlags);
 	}
 	catch (SystemError e) {
 		cout << "The interpreter has entered an undefined state: " << endl;

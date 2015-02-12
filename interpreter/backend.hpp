@@ -1378,11 +1378,15 @@ public:
 	static void setOutputStream(ostream&);
 	static VirtualObserver& getObserver();
 	static void setObserver(VirtualObserver&);
+	static std::string parseFlags(std::string*,int);
+	static void setDebug(bool);
+	static bool isDebugMode();
 	
 private:
 	static int maxThreads;
 	static ostream* outputStream;
 	static VirtualConsole const * console_ptr;
 	static VirtualObserver* observer;
+	static bool debugMode;
 };
 #endif
