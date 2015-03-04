@@ -74,6 +74,7 @@ class mmap_allocator: public std::allocator<T>
 //Interpret function from main
 
 int interpret(Node*);
+int interpret(Node*,std::string*,int);
 
 template<typename T>
 class TData{
@@ -1338,7 +1339,10 @@ public:
 class VirtualObserver {
 
 private:
-	//std::vector<int> breakpoints;
+	//Reference table linking variable names to their integer abstractions
+	//Used so th debugger supports fetchVariable
+	std::stack<std::map<std::string, int> > refTables;
+	std::map<std::string, int> globRefTable;
 	//int lastLine;
 	//bool stepping;
 	//bool stopAtNext;
@@ -1357,6 +1361,11 @@ public:
 	//virtual bool break_E(int)=0;
 	//virtual bool remove_E(int)=0;
 	void* fetchVariable(std::string s, TetraContext& context) const;
+	void updateVarReferenceTable(const Node*);
+	void popReferenceTable();
+
+	//Where the global variable cross reference list will be initialized
+	friend void FunctionMap::optimizeLookup(const Node* start);
 };
 
 

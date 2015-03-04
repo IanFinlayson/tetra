@@ -101,7 +101,7 @@ void wrapEvaluation(void* args) {
 	//ThreadEnvironment::removeThread(pthread_self());
 
 	delete static_cast< evalArgs<T>* >(args);
-	//cout << "Thread finished: " << time(0) << endl;
+	cout << "Thread finished: " << time(0) << endl;
 	//pthread_exit(NULL);
 }
 
@@ -128,7 +128,7 @@ void wrapMultiEvaluation(void* args) {
 
 
 		//TODO fix race condition as of 11/10/14
-		//This is expected t be a arallel variable
+		//This is expected to be a parallel variable
 		*(argList.args_ptr->scope->template lookupVar<T>(*(argList.varName_ptr))) = *static_cast<T*>((argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
 
 		//string x = *(argList.varName_ptr

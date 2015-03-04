@@ -115,6 +115,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			//If we are in a parallel block, spawn a thread for this!
 			if(context.queryExecutionStatus() == PARALLEL) {
 				pthread_t newThread = spawnThread(node->child(0),ret,context);
+				std::cout << ">>>>>>>>>>>>>>>>>" << newThread << std::endl;
 				context.addThread(newThread);
 			}
 			else {
@@ -1004,6 +1005,8 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 if(TetraEnvironment::isDebugMode()) {
 //#ifdef USE_OBSERVER
+	//If we have encountered a new variable or new scope, debugger should know
+	TetraEnvironment::getObserver().updateVarReferenceTable(node);
 	//Notify the observer that we are about to execute a new node
 	TetraEnvironment::getObserver().notify_E(node,context);
 //#endif
@@ -1095,6 +1098,7 @@ if(TetraEnvironment::isDebugMode()){
 	//notify the observer so it can pop its current symbol lookup table
 	if(node->kind() == NODE_FUNCTION) {
 		TetraEnvironment::getObserver().leftScope_E();
+		TetraEnvironment::getObserver().popReferenceTable();
 	}
 //#endif
 }
@@ -1102,7 +1106,7 @@ if(TetraEnvironment::isDebugMode()){
 }
 
 //Equivilant of main for the interpreter module
-int interpret(Node* tree, string* flags = NULL, int flagCount = 0) {
+int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 
 	//Parse flags
 	std::string flagErrors = TetraEnvironment::parseFlags(flags,flagCount);
@@ -1143,6 +1147,11 @@ int interpret(Node* tree, string* flags = NULL, int flagCount = 0) {
 	tContext.initializeNewScope(start);
 
 	std::cout <<"Interpreting..."<<std::endl;
+
+	//If debugging is on, set the breakpoint for the start. Don;t do it any earlier, because the preprocessor needs to 'evaluate nodes' which can improperly trigger the debugger
+	if(TetraEnvironment::isDebugMode()) {
+		TetraEnvironment::getObserver().step_E();
+	}
 
 	//try {
 		evaluateNode<int>(start, retVal, tContext);

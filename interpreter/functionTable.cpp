@@ -157,6 +157,13 @@ void FunctionMap::optimizeLookup(const Node* start) {
 			//cout << cand->getString() << ":: " << nextGlob << endl;
 			cand->setIntval(nextGlob);
 			globRef[cand->getString()] = nextGlob;
+			//If debugging is on, register the global variable for the debugger
+			if(TetraEnvironment::isDebugMode()) {
+				//This function is a friend function of the TetraEnvironment
+				cout << "Registered global: " << cand->getString() <<" at " <<nextGlob << endl;
+				TetraEnvironment::getObserver().globRefTable[cand->getString()] = nextGlob;
+				
+			}
 			nextGlob++;
 			//We must check the whole tree now for references to other global vars
 			optimize(start->child(0),globRef,nextGlob,globRef);

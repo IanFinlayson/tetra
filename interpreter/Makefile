@@ -4,10 +4,11 @@
 
 # -pg -O3
 CC = clang++
-FLAGS = -Wall -pedantic -pthread -ftemplate-backtrace-limit=1 -pg
+FLAGS = -Wall -pedantic -pthread -ftemplate-backtrace-limit=1 -g
 SEARCHPATH = ../frontend
 DEBUG_MODE = -D USE_OBSERVER
-OPTIMIZE_MODE = -O3
+OPTIMIZE_MODE = -O1
+
 done: tetra
 	@echo
 	@echo Build Completed

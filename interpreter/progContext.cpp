@@ -211,7 +211,7 @@ void TetraContext::printStackTrace() const {
 
 	using namespace std;
 	//Check that callStack currently has something in it
-	if(dummy.progStack.size() == 0) {
+	if(dummy.progStack.size() <= 1) {
 		TetraEnvironment::getOutputStream() << "(The interpreter was unable to recover a stack trace)" << endl;
 		return;
 	}
@@ -222,7 +222,8 @@ void TetraContext::printStackTrace() const {
 	dummy.exitScope();
 
 	//Print further stack frames if there are any
-	while(dummy.progStack.size() > 0) {
+	//Note that the first scope on the stack is the global vars
+	while(dummy.progStack.size() > 1) {
 		const Node* element = dummy.progStack.top()->getCallNode();
 		TetraEnvironment::getOutputStream() << "Called from " << FunctionMap::getFunctionSignature(element) << " (line " << element->getLine() << ")" << endl;
 		dummy.exitScope();	

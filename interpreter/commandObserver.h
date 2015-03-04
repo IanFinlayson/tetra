@@ -4,11 +4,23 @@
 #include<vector>
 #include"backend.hpp"
 
+struct BreakPoint {
+        int lineNo;
+        std::string threadLabel;
+        bool stable;
+
+};
+
+typedef struct BreakPoint Breakpoint;
+
+//Overload == operator for use in std::find. Only care if lineNo is the same
+bool operator==(Breakpoint a, Breakpoint b);
+
 class CommandObserver : public VirtualObserver{
 
 private:
-	std::vector<int> breakpoints;
-	int lastLine;
+	std::vector<Breakpoint> breakpoints;
+	Breakpoint lastLine;
 	bool stepping;
 	bool stopAtNext;
 	std::stack<const Node*> scopes;

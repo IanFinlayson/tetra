@@ -6,10 +6,19 @@
 //Global symbol table
 extern std::map<std::string, Symbol> globals;
 
+
 CommandObserver::CommandObserver() {
-	lastLine = 0;
+	lastLine.lineNo = 0;
 	stepping = false;
-	stopAtNext = true;
+	stopAtNext = false;
+}
+
+bool operator==(Breakpoint a, Breakpoint b) {
+	return a.lineNo == b.lineNo;
+}
+
+bool operator!=(Breakpoint a, Breakpoint b) {
+	return a.lineNo != b.lineNo;
 }
 
 //Notifies the observer that a certain node in the program has been reached
@@ -17,19 +26,23 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 
 	//Check to see if we entered a new scope
 	if(foundNode->kind() == NODE_FUNCTION) {
-		//cout << "Entering scope: " << foundNode->getString() << endl;
+		cout << "Entering scope: " << foundNode->getString() << endl;
 		scopes.push(foundNode);
 	}
+
 	int currentLine = foundNode->getLine();
+	
+	Breakpoint linecomp;
+	linecomp.lineNo = currentLine;
 	//check if line is a breakpoint
 	//If the current line is the same as the last line we broke at, we should not break, and let the instruction finish
 	//This is unless we are stepping
-	if((std::find(breakpoints.begin(), breakpoints.end(),currentLine) != breakpoints.end()
-		&& currentLine != lastLine) || (currentLine != lastLine && stopAtNext == true) || stepping == true) {
+	if((std::find(breakpoints.begin(), breakpoints.end(),linecomp) != breakpoints.end()
+		&& currentLine != lastLine.lineNo) || (currentLine != lastLine.lineNo && stopAtNext == true) || stepping == true) {
 
 		stepping = false;
 		stopAtNext = false;
-		lastLine = currentLine;
+		lastLine.lineNo = currentLine;
 		//break, and wait for input
 		const VirtualConsole& console = TetraEnvironment::getConsole();
 
@@ -41,7 +54,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 		std::string ret = " ";
 
 		while(ret == " ") {
-			console.processStandardOutput("Options: (s)tep, (n)ext (c)ontinue (b)reak (p)rint\n");
+			console.processStandardOutput("Options: (s)tep, (n)ext (c)ontinue (b)reak (r)emove (p)rint\n");
 
 			ret = console.receiveStandardInput();
 	
@@ -61,8 +74,8 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 			case 'b':
 			case 'B':
 			{
-				std::string breakpoint = console.receiveStandardInput();
-				int lineNo = atoi(breakpoint.c_str());
+				std::string breakP = console.receiveStandardInput();
+				int lineNo = atoi(breakP.c_str());
 				bool success = break_E(lineNo);
 				std::stringstream confirmationMessage;
 				if(success) {
@@ -79,8 +92,8 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 			case 'r':
 			case 'R':
 			{
-				std::string breakpoint = console.receiveStandardInput();
-				int lineNo = atoi(breakpoint.c_str());
+				std::string breakP = console.receiveStandardInput();
+				int lineNo = atoi(breakP.c_str());
 				bool success = remove_E(lineNo);
 				std::stringstream confirmationMessage;
 				if(success) {
@@ -171,8 +184,11 @@ void CommandObserver::next_E() {
 
 //Adds a breakpoint associated with the given line number. Returns false if there was already a breakpoint there.
 bool CommandObserver::break_E(int lineNum) {
-	if(std::find(breakpoints.begin(), breakpoints.end(), lineNum) == breakpoints.end()) {
-		breakpoints.push_back(lineNum);
+	Breakpoint toPush;
+	toPush.lineNo = lineNum;
+
+	if(std::find(breakpoints.begin(), breakpoints.end(), toPush) == breakpoints.end()) {
+		breakpoints.push_back(toPush);
 		return true;
 	}
 	else {
@@ -182,7 +198,9 @@ bool CommandObserver::break_E(int lineNum) {
 
 //Removes a breakpoint from the given line number. Returns false if no breakpoint exists
 bool CommandObserver::remove_E(int lineNum) {
-	std::vector<int>::iterator location = std::find(breakpoints.begin(), breakpoints.end(), lineNum);
+	Breakpoint toPop;
+	toPop.lineNo = lineNum;
+	std::vector<Breakpoint>::iterator location = std::find(breakpoints.begin(), breakpoints.end(), toPop);
 	if(location != breakpoints.end()) {
 		breakpoints.erase(location);
 		return true;
@@ -200,4 +218,3 @@ void CommandObserver::continue_E() {
 void CommandObserver::leftScope_E() {
 	scopes.pop();
 }
-
