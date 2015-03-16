@@ -1005,8 +1005,8 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
 if(TetraEnvironment::isDebugMode()) {
 //#ifdef USE_OBSERVER
-	//If we have encountered a new variable or new scope, debugger should know
-	TetraEnvironment::getObserver().updateVarReferenceTable(node);
+	//If we have encountered a new variable or new scope, context should be expolicitely notified here
+	context.updateVarReferenceTable(node);
 	//Notify the observer that we are about to execute a new node
 	TetraEnvironment::getObserver().notify_E(node,context);
 //#endif
@@ -1095,10 +1095,10 @@ if(TetraEnvironment::isDebugMode()) {
 if(TetraEnvironment::isDebugMode()){
 //#ifdef USE_OBSERVER
 	//If we are exiting a scope, (i.e. just completed execution of a NODE_FUNCTION
-	//notify the observer so it can pop its current symbol lookup table
+	//notify the context so it can pop its current symbol lookup table
 	if(node->kind() == NODE_FUNCTION) {
 		TetraEnvironment::getObserver().leftScope_E();
-		TetraEnvironment::getObserver().popReferenceTable();
+		context.popReferenceTable();
 	}
 //#endif
 }
@@ -1117,7 +1117,7 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 	}
 
 	//Construct a TetraContext (this also initializes the global scope)
-	TetraContext tContext;	
+	TetraContext tContext(TetraEnvironment::obtainNewThreadID());	
 	std::cout <<"Starting context initialized"<<std::endl;
 	//Build function lookup table, find address of main method
 	FunctionMap::build(tree);
@@ -1150,7 +1150,8 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 
 	//If debugging is on, set the breakpoint for the start. Don;t do it any earlier, because the preprocessor needs to 'evaluate nodes' which can improperly trigger the debugger
 	if(TetraEnvironment::isDebugMode()) {
-		TetraEnvironment::getObserver().step_E();
+		//TetraEnvironment::getObserver().step_E();
+		tContext.setStopAtNext(true);
 	}
 
 	//try {

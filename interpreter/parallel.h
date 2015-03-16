@@ -70,9 +70,9 @@ void wrapEvaluation(void* args) {
 	evalArgs<T>& argList = *static_cast<evalArgs<T>*>(args);
 
 	//Give the thread its own call stack
-	TetraContext contextCopy;
+	TetraContext contextCopy(TetraEnvironment::obtainNewThreadID());
 	contextCopy.branchOff(argList.scope);
-	
+	cout << "One time thread start: " << contextCopy.getThreadID();	
 	//Temporary error notificaiton
 	//cout << "Thread starting execution time: " << time(0) << endl;
 	try {
@@ -115,8 +115,9 @@ void wrapMultiEvaluation(void* args) {
 	//Initializes a call stack for this thread, having as its base a pointer
 	//to the current call stack 
 	//(i.e. the stack frame that initialized this thread)
-	TetraContext contextCopy;
+	TetraContext contextCopy(TetraEnvironment::obtainNewThreadID());
 	contextCopy.branchOff(argList.args_ptr->scope);	
+	cout << "One time thread start: " << contextCopy.getThreadID();
 	
 	
 	//int arraySize = argList.values_ptr->size();

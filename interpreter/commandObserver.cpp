@@ -8,17 +8,35 @@ extern std::map<std::string, Symbol> globals;
 
 
 CommandObserver::CommandObserver() {
-	lastLine.lineNo = 0;
-	stepping = false;
-	stopAtNext = false;
+	//lastLine.lineNo = 0;
+	//stepping = false;
+	//stopAtNext = false;
+
+	int success = pthread_mutex_init(&prompt_mutex,NULL);
+	//TODO revise so asserts are no longer used here
+	assert(success==0);
+
+	success = pthread_mutex_init(&threadList_mutex,NULL);
+	assert(success == 0);
+
+	success = pthread_mutex_init(&breakList_mutex,NULL);
+
+	success = pthread_cond_init(&prompt_condition,NULL);
+	assert(success == 0);
+
+	success = pthread_mutex_init(&contextMutex,NULL);
+	assert(success == 0);
+
+	allowedThread = -1;//-1 means any thread may trip the debugger
 }
 
+//Breakpoints are equal if they have the same line number, and they have the same line number, and they have the same thread ID or either has the universal threadID (-1)
 bool operator==(Breakpoint a, Breakpoint b) {
-	return a.lineNo == b.lineNo;
+	return (a.lineNo == b.lineNo) && (a.threadLabel == b.threadLabel || a.threadLabel == -1 || b.threadLabel == -1);
 }
 
 bool operator!=(Breakpoint a, Breakpoint b) {
-	return a.lineNo != b.lineNo;
+	return !(a == b);
 }
 
 //Notifies the observer that a certain node in the program has been reached
@@ -26,7 +44,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 
 	//Check to see if we entered a new scope
 	if(foundNode->kind() == NODE_FUNCTION) {
-		cout << "Entering scope: " << foundNode->getString() << endl;
+		//cout << "Entering scope: " << foundNode->getString() << endl;
 		scopes.push(foundNode);
 	}
 
@@ -34,180 +52,317 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 	
 	Breakpoint linecomp;
 	linecomp.lineNo = currentLine;
+	linecomp.threadLabel = context.getThreadID();
 	//check if line is a breakpoint
 	//If the current line is the same as the last line we broke at, we should not break, and let the instruction finish
 	//This is unless we are stepping
-	if((std::find(breakpoints.begin(), breakpoints.end(),linecomp) != breakpoints.end()
-		&& currentLine != lastLine.lineNo) || (currentLine != lastLine.lineNo && stopAtNext == true) || stepping == true) {
+	bool willBreak = false;
+	pthread_mutex_lock(&breakList_mutex);
+	{
+		//std::cout << ">>>>>>" << foundNode->getLine() << std::endl;
+		 willBreak = (std::find(breakpoints.begin(), breakpoints.end(),linecomp) != breakpoints.end() 
+		&& currentLine != context.getLastLineNo())
+		|| (currentLine != context.getLastLineNo() && context.getStopAtNext() == true) 
+		|| context.getStepping() == true;
+	}
+	pthread_mutex_unlock(&breakList_mutex);
 
-		stepping = false;
-		stopAtNext = false;
-		lastLine.lineNo = currentLine;
-		//break, and wait for input
+	//std::cout << "WILLBREAK: " << (currentLine != context.getLastLineNo())  << std::endl;
+	
+	//Regardless of whether we break or not, we chould note that we have moved to a new line number
+	context.setLastLineNo(currentLine);
+
+	//This variable keeps track of whether a hread will be allowed to continue on or not
+	//When set to true, will break out of the debugging loop. The thread should stay in this loop, however, until it is explicitely told to continue
+	context.setResume(false);
+	while(willBreak && context.getResume() == false) {
+
+		//These variables are only valid for 1 instruction, so reset them
+		context.setStepping(false);
+		context.setStopAtNext(false);
+		//Denotes whether or not the thread should reset the wait queue for entering into the interactive part of the debugger
+		bool willBroadcast = true;
+
 		const VirtualConsole& console = TetraEnvironment::getConsole();
 
-		std::stringstream msg;
+		pthread_mutex_lock(&threadList_mutex);
+		{
 
-		msg << "Breakpoint reached at line: " << currentLine << endl;
-		msg << "Stopped at node of kind: " << foundNode->kind() << endl;
-		console.processStandardOutput(msg.str());
-		std::string ret = " ";
+			if(std::find(waitingThreads.begin(), waitingThreads.end(), context.getThreadID()) == waitingThreads.end()) {
+				std::stringstream msg;
 
-		while(ret == " ") {
-			console.processStandardOutput("Options: (s)tep, (n)ext (c)ontinue (b)reak (r)emove (p)rint\n");
+				msg << "\nThread " << context.getThreadID() << ":" << endl;
+				msg << "Breakpoint reached at line: " << currentLine << endl;
+				msg << "Stopped at node of kind: " << foundNode->kind() << endl;
+				console.processStandardOutput(msg.str());
+				waitingThreads.push_back(context.getThreadID());
+			}
+		}
+		pthread_mutex_unlock(&threadList_mutex);
 
-			ret = console.receiveStandardInput();
+		pthread_mutex_lock(&prompt_mutex);
+
+		if(allowedThread == -1 || allowedThread == context.getThreadID()) {
+			std::string ret = " ";
+
+			//Now that the thread will have some console time, it can resume executing once it is done here
+			context.setResume(true);
+
+			//B default, a different thread will be allowed to access the debugger once this thread is done
+			//If this thread needs to keep its affinity for this console (such as if stepping), the it must re-set allowedThread
+			allowedThread = -1;
+
+			while(ret == " ") {
+				std::stringstream infoStr;
+				pthread_mutex_lock(&threadList_mutex);//As a courtesy, insure that the directions are not cut off by an incoming thread
+				{
+					infoStr << "Thread: " << context.getThreadID();
+					console.processStandardOutput(infoStr.str());
+					console.processStandardOutput("\nOptions: (s)tep, (n)ext (c)ontinue (b)reak (r)emove (p)rint\n");
+				}
+				pthread_mutex_unlock(&threadList_mutex);
+				ret = console.receiveStandardInput();
+
+				switch (ret[0]) {
+					case 'c'://continue
+					case 'C':
+						continue_E();
+					break;
+					case 'n'://next
+					case 'N':
+						next_E(context);
+						//context.setStopAtNext(true);
+					break;
+					case 's'://step
+					case 'S':
+						step_E(context);
+						//context.setStepping(true);
+					break;
+					case 'y'://yield
+					case 'Y':
+					{
+						int threadNo = 0;
+						bool givePrompt = true;
+						std::string threadArg = console.receiveStandardInput();
+						//Validate that it is a valid thread, and a currently waiting thread
+						while(givePrompt) {
+							givePrompt = false;
+							threadNo = atoi(threadArg.c_str());
+							if(threadNo == 0 && threadArg != "0") {
+								console.processStandardOutput("Please reenter the thread to yield to\n");
+								givePrompt = true;
+							}
+							else if (std::find(waitingThreads.begin(), waitingThreads.end(), threadNo) == waitingThreads.end()){
+								console.processStandardOutput("The requested thread either does not exist, or is not currently blocked\n");
+								givePrompt = true;
+							}
+							if(givePrompt) {
+								threadArg = console.receiveStandardInput();
+							}
 	
-			switch (ret[0]) {
-			case 'c':
-			case 'C':
-				continue_E();
-			break;
-			case 'n':
-			case 'N':
-				next_E();
-			break;
-			case 's':
-			case 'S':
-				step_E();
-			break;
-			case 'b':
-			case 'B':
-			{
-				std::string breakP = console.receiveStandardInput();
-				int lineNo = atoi(breakP.c_str());
-				bool success = break_E(lineNo);
-				std::stringstream confirmationMessage;
-				if(success) {
-					confirmationMessage << "Breakpoint set at line: " << lineNo << "\n";
-				}
-				else {
-					confirmationMessage << "Breakpoint already exists at line: " << lineNo << "\n";	
-				}
-				console.processStandardOutput(confirmationMessage.str());
-				//set ret to repeat the input prompt
-				ret = " ";
-			}
-			break;
-			case 'r':
-			case 'R':
-			{
-				std::string breakP = console.receiveStandardInput();
-				int lineNo = atoi(breakP.c_str());
-				bool success = remove_E(lineNo);
-				std::stringstream confirmationMessage;
-				if(success) {
-					confirmationMessage << "Breakpoint removed from line: " << lineNo << "\n";
-				}
-				else {
-					confirmationMessage << "No breakpoint exists at line " << lineNo << "\n";
-				}
-				console.processStandardOutput(confirmationMessage.str());
-				//set ret to repeat the input prompt
-				ret = " ";
-			}
-			break;
-			case 'p':
-			case 'P':
-			{
-				std::string varName = console.receiveStandardInput();
-				void* var = fetchVariable(varName,context);
-				if(var != NULL) {
-					std::stringstream message;
-					message << varName;
-					//get the function node which has the local scope's symbol table
-					const Node* nodey = scopes.top();
-
-					//Determine the datatype of the entry by looking in the local or global symbol table
-					Symbol symbolEntry;
-					if(const_cast<Node*>(nodey)->hasSymbol(varName)) {
-						symbolEntry = nodey->lookupSymbol(varName,0);
+						}
+						//This thread should return to the wait queue
+						context.setResume(false);
+						allowedThread = threadNo;
 					}
-					else {	//Variable exists in global scope
-						symbolEntry = globals[varName];		
+					break;
+					case 'b'://break
+					case 'B':
+					{
+						std::string breakP = console.receiveStandardInput();
+						int lineNo =  0;
+						while(lineNo == 0) {
+							lineNo = atoi(breakP.c_str());
+							if(lineNo == 0) {
+								console.processStandardOutput("Please reenter the line number\n");
+								breakP = console.receiveStandardInput();
+							}
+						}
+						bool success = break_E(lineNo/*,context.getThreadID()*/);
+						std::stringstream confirmationMessage;
+						if(success) {
+							confirmationMessage << "Breakpoint set at line: " << lineNo << "\n\n";
+						}
+						else {
+							confirmationMessage << "Breakpoint already exists at line: " << lineNo << "\n\n";	
+						}
+						console.processStandardOutput(confirmationMessage.str());
+						//set ret to repeat the input prompt
+						ret = " ";
 					}
-					message << " (" << typeToString(symbolEntry.getType()) << "): ";
-					switch(symbolEntry.getType()->getKind()) {
-						case TYPE_INT:
-							//message << " (int): ";
-							message << *static_cast<int*>(var);
-						break;
-						case TYPE_REAL:
-							//message << " (real): ";
-							message << *static_cast<double*>(var);
-						break;
-						case TYPE_STRING:
-							//message << " (string): ";
-							message << *static_cast<std::string*>(var);
-						break;
-						case TYPE_BOOL:
-							//message << " (bool): ";
-							message << *static_cast<bool*>(var);
-						break;
-
-						case TYPE_VECTOR:
-							//message << " (vector): ";
-							message << *static_cast<TArray*>(var);
-						break;
-						case TYPE_VOID:
-							//message << " (void): ";
-							message << var;
-						break;
-
+					break;
+					case 'r'://remove (breakpoint)
+					case 'R':
+					{
+						std::string breakP = console.receiveStandardInput();
+						int lineNo =  0;
+						while(lineNo == 0) {
+							lineNo = atoi(breakP.c_str());
+							if(lineNo == 0) {
+								console.processStandardOutput("Please reenter the line number\n");
+								breakP = console.receiveStandardInput();
+							}
+						}	
+						bool success = remove_E(lineNo);
+						std::stringstream confirmationMessage;
+						if(success) {
+							confirmationMessage << "Breakpoint removed from line: " << lineNo << "\n\n";
+						}
+						else {
+							confirmationMessage << "No breakpoint exists at line " << lineNo << "\n\n";
+						}
+						console.processStandardOutput(confirmationMessage.str());
+						//set ret to repeat the input prompt
+						ret = " ";
 					}
-					message << "\n";
-					console.processStandardOutput(message.str());
+					break;
+					case 'p'://print
+					case 'P':
+					{
+						std::string varName = console.receiveStandardInput();
+						void* var = context.fetchVariable(varName);
+						if(var != NULL) {
+							std::stringstream message;
+							message << varName;
+							//get the function node which has the local scope's symbol table
+							const Node* nodey = scopes.top();
+								//Determine the datatype of the entry by looking in the local or global symbol table
+							Symbol symbolEntry;
+							if(const_cast<Node*>(nodey)->hasSymbol(varName)) {
+								symbolEntry = nodey->lookupSymbol(varName,0);
+							}
+							else {	//Variable exists in global scope
+								symbolEntry = globals[varName];		
+							}
+							message << " (" << typeToString(symbolEntry.getType()) << "): ";
+							switch(symbolEntry.getType()->getKind()) {
+								case TYPE_INT:
+									//message << " (int): ";
+									message << *static_cast<int*>(var);
+								break;
+								case TYPE_REAL:
+									//message << " (real): ";
+									message << *static_cast<double*>(var);
+								break;
+								case TYPE_STRING:
+									//message << " (string): ";
+									message << *static_cast<std::string*>(var);
+								break;
+								case TYPE_BOOL:
+									//message << " (bool): ";
+									message << *static_cast<bool*>(var);
+								break;
+								case TYPE_VECTOR:
+									//message << " (vector): ";
+									message << *static_cast<TArray*>(var);
+								break;
+								case TYPE_VOID:
+									//message << " (void): ";
+									message << var;
+								break;
+							}
+							message << "\n\n";
+							console.processStandardOutput(message.str());
+						}
+						else {
+							console.processStandardOutput("The variable " + varName + " either does not exist in the current scope, or has not been initialized\n\n");
+						}
+						ret = " "; 
+					}
+					break;
+					default:
+						console.processStandardOutput("Error, unrecognized command\n\n");
+						//set ret to repeat the prompt for input
+						ret = " ";
 				}
-				else {
-					console.processStandardOutput("The variable " + varName + " either does not exist in the current scope, or has not been initialized\n");
-				}
-				ret = " "; 
+				//cout << "breakpoints size: " << breakpoints.size() << endl;
 			}
-			break;
-			default:
-				console.processStandardOutput("Error, unrecognized command\n");
-				//set ret to repeat the prompt for input
-				ret = " ";
+			//Wakes up all threads waiting on the debugger
+			if(willBroadcast) {
+				//std::cout << "Broadcast" << std::endl;
+				pthread_cond_broadcast(&prompt_condition);
 			}
-			//cout << "breakpoints size: " << breakpoints.size() << endl;
+		}
+		else {	//If the thread was not expected, it will block here, allowing other threads to get through. 
+			//When the observer state changes, a broadcast will allow all these threads to return to the waiting area
+			//std::cout << "HERE!" << std::endl;
+			pthread_cond_wait(&prompt_condition, &prompt_mutex);
+		}
+		pthread_mutex_unlock(&prompt_mutex);
+		
+		//If the thread is resuming, remove it from the list of waiting threads
+		if(context.getResume() == true) {
+			pthread_mutex_lock(&threadList_mutex);
+			{
+				std::remove(waitingThreads.begin(), waitingThreads.end(), context.getThreadID());
+				//Needed to actually reduce the size of the container
+				//There should be exactly 1 instance of this thread's ID in the list
+				waitingThreads.pop_back();
+			}
+			pthread_mutex_unlock(&threadList_mutex);
 		}
 	}
 }
 
-void CommandObserver::step_E() {
-	stepping = true;
+//Note that just because this is the nth time the function has been called, it might not be to register thread N!
+//i.e. might call this function with threadNum=3 after calling it with threadNum = 4, but before threadNum = 2
+void CommandObserver::threadCreated_E(int threadNum, TetraContext& context) {
+
 }
 
-void CommandObserver::next_E() {
-	stopAtNext = true;
+void CommandObserver::threadDestroyed_E(int threadNum) {
+
+}
+
+void CommandObserver::step_E(TetraContext& context) {
+	context.setStepping(true);
+	allowedThread = context.getThreadID();
+}
+
+void CommandObserver::next_E(TetraContext& context) {
+	context.setStopAtNext(true);
+	allowedThread = context.getThreadID();
 }
 
 //Adds a breakpoint associated with the given line number. Returns false if there was already a breakpoint there.
 bool CommandObserver::break_E(int lineNum) {
 	Breakpoint toPush;
 	toPush.lineNo = lineNum;
+	toPush.threadLabel = -1;
+	bool ret = true;
 
-	if(std::find(breakpoints.begin(), breakpoints.end(), toPush) == breakpoints.end()) {
-		breakpoints.push_back(toPush);
-		return true;
+	pthread_mutex_lock(&breakList_mutex);
+	{
+		if(std::find(breakpoints.begin(), breakpoints.end(), toPush) == breakpoints.end()) {
+			breakpoints.push_back(toPush);
+		}
+		else {
+			ret = false;
+		}
 	}
-	else {
-		return false;
-	}
+	pthread_mutex_unlock(&breakList_mutex);
+
+	return ret;
 }
 
 //Removes a breakpoint from the given line number. Returns false if no breakpoint exists
 bool CommandObserver::remove_E(int lineNum) {
+	bool ret = false;
 	Breakpoint toPop;
 	toPop.lineNo = lineNum;
+	toPop.threadLabel = -1;
 	std::vector<Breakpoint>::iterator location = std::find(breakpoints.begin(), breakpoints.end(), toPop);
-	if(location != breakpoints.end()) {
-		breakpoints.erase(location);
-		return true;
+
+	pthread_mutex_lock(&breakList_mutex);
+	{
+		while(location != breakpoints.end()) {
+			breakpoints.erase(location);
+			ret = true;
+			location = std::find(breakpoints.begin(), breakpoints.end(), toPop);
+		}
 	}
-	else {
-		return false;
-	}
+	pthread_mutex_unlock(&breakList_mutex);
+	return ret;
 }
 
 

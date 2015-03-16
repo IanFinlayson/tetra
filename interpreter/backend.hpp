@@ -1186,6 +1186,10 @@ class scope_ptr {
 };
 
 
+//Forward declaration needed for a friend declaration in tetraContext
+class VirtualObserver;
+
+
 //This class wraps a std stack of TetraScopes
 
 class TetraContext {
@@ -1193,6 +1197,7 @@ class TetraContext {
 public:
 	//Note that this constructor starts with a GLOBAL scope. One must be initialized through initializeNewScope to have it represent local data	
 	TetraContext();
+	TetraContext(long);
 
 	void initializeGlobalVars(const Node *);
 
@@ -1279,12 +1284,41 @@ public:
 	void setupParallel();
 	void endParallel();
 
+	long getThreadID();
+
+	//For use when debugging
+	int getLastLineNum();
+	void* fetchVariable(std::string s);
+	void updateVarReferenceTable(const Node* node);
+	void popReferenceTable();
+
+	//Get and set methods for debug flags (inline)
+	int getLastLineNo(){return lastLineNo;}
+	bool getStepping(){return stepping;}
+	bool getStopAtNext(){return stopAtNext;}
+	bool getResume(){return resume;}
+
+	void setLastLineNo(int pLast){lastLineNo = pLast;}
+	void setStepping(bool pStepping){stepping = pStepping;}
+	void setStopAtNext(bool pStopAtNext){stopAtNext = pStopAtNext;}
+	void setResume(bool pResume){resume = pResume;}
+
 	//Prints a stack trace
 	void printStackTrace() const;
 private:
 
 	std::stack<scope_ptr> progStack;
-	scope_ptr* globalScope;	
+	scope_ptr* globalScope;
+	long threadID;
+	
+	//For use when debugging
+	int lastLineNo;
+	std::stack<std::map<std::string, int> > refTables;
+	std::map<std::string, int> globRefTable;
+	bool stepping;
+	bool stopAtNext;
+	bool resume;
+
 };
 
 
@@ -1352,7 +1386,9 @@ private:
 public:
 
 	virtual void notify_E(const Node*, TetraContext& context)=0;
-	virtual void step_E()=0;
+	//virtual void step_E()=0;
+	virtual void threadCreated_E(int,TetraContext&)=0;
+	virtual void threadDestroyed_E(int)=0;
 	//virtual void next_E()=0;
 	//virtual bool break_E(std::pair<int,pthread_t>)=0;
 	//virtual bool remove_E(std::pair<int,pthread_t>)=0;
@@ -1390,12 +1426,14 @@ public:
 	static std::string parseFlags(std::string*,int);
 	static void setDebug(bool);
 	static bool isDebugMode();
-	
+	static int obtainNewThreadID();
 private:
 	static int maxThreads;
 	static ostream* outputStream;
 	static VirtualConsole const * console_ptr;
 	static VirtualObserver* observer;
 	static bool debugMode;
+	static long nextThreadID;
+	static pthread_mutex_t next_thread_mutex;
 };
 #endif

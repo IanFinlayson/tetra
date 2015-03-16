@@ -1,7 +1,7 @@
 #There is a missing dependancy somewhere in this file.
 #Make will (on rare occasion) complain about multiple definition or some other linker error, which can be fixed by recompiling the whole project.
 #TODO: find the dependancy if it ever resurfaces
-
+#-ftemplate-backtrace-limit=1 
 # -pg -O3
 CC = clang++
 FLAGS = -Wall -pedantic -pthread -ftemplate-backtrace-limit=1 -g

@@ -141,6 +141,7 @@ void ThreadEnvironment::joinDetachedThreads() {
 }
 
 //This method returns the mutex associated with a string, or creates a new mutex associated with the string and returns that
+//TODO:This is a candidate for a read/write mutex
 pthread_mutex_t* ThreadEnvironment::identifyMutex(string mutexName) {
 
 	//cout << "Identifying mutex" << endl;

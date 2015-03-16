@@ -82,7 +82,7 @@ void VirtualObserver::updateVarReferenceTable(const Node* node) {
 		
 		//Check if the variable already exists
 		if(globRefTable.find(node->getString()) == globRefTable.end() && refTables.top().find(node->getString()) == refTables.top().end()){
-			std::cout << "Registered: " <<node->getString() << " at " << node->getInt()<<endl;
+			//std::cout << "Registered: " <<node->getString() << " at " << node->getInt()<<endl;
 			refTables.top()[node->getString()] = node->getInt();
 		}
 	}
@@ -92,9 +92,9 @@ void VirtualObserver::updateVarReferenceTable(const Node* node) {
 		//Check that we are assigning to a variable, rather than say, a vector refernece such as x[0][1]
 		if(node->child(0)->kind() == NODE_IDENTIFIER){
 			//Make sure the var has not already been registered
-			cout << node->child(0)->getString() <<"!!!!!!!" << endl;
+			//cout << node->child(0)->getString() <<"!!!!!!!" << endl;
 			if(globRefTable.find(node->child(0)->getString()) == globRefTable.end() && refTables.top().find(node->child(0)->getString()) == refTables.top().end()){
-				std::cout << "Registered: " <<node->child(0)->getString() << " at " << node->child(0)->getInt()<<endl;
+				//std::cout << "Registered: " <<node->child(0)->getString() << " at " << node->child(0)->getInt()<<endl;
 				refTables.top()[node->child(0)->getString()] = node->child(0)->getInt();
 			}
 		}

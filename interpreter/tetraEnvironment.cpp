@@ -11,6 +11,7 @@
 void TetraEnvironment::initialize() {
 	maxThreads = 8;
 	console_ptr = NULL;
+	//pthread_mutex_init(&next_thread_mutex, NULL);
 	//It would seem that this method is not supported on this platform
 	//maxThreads = pthread_num_processors_np();
 	//cout <<"Max threads:" <<maxThreads;
@@ -20,6 +21,7 @@ void TetraEnvironment::initialize() {
 void TetraEnvironment::initialize(const VirtualConsole& console) {
 	maxThreads = 8;
 	console_ptr = &console;
+	//pthread_mutex_init(&next_thread_mutex, NULL);
 	//It would seem that this method is not supported on this platform
 	//maxThreads = pthread_num_processors_np();
 	//cout <<"Max threads:" <<maxThreads;
@@ -89,6 +91,17 @@ std::string TetraEnvironment::parseFlags(std::string* flags, int flagCount) {
 	return ret;
 }
 
+int TetraEnvironment::obtainNewThreadID() {
+	int ret = -1;
+	pthread_mutex_lock(&next_thread_mutex);
+	ret = nextThreadID;
+	nextThreadID++;
+	pthread_mutex_unlock(&next_thread_mutex);
+	return ret;
+}
+
+pthread_mutex_t TetraEnvironment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+long TetraEnvironment::nextThreadID = 0;
 VirtualConsole const * TetraEnvironment::console_ptr = NULL;
 int TetraEnvironment::maxThreads = 8;
 bool TetraEnvironment::debugMode = false;
