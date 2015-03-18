@@ -4,6 +4,11 @@
 #include<vector>
 #include"backend.hpp"
 
+
+
+//structure for breakpoints. 
+//May be specified to work for a specific thread
+//May be called to only stop one thread
 struct BreakPoint {
         int lineNo;
         long threadLabel;
@@ -23,6 +28,8 @@ private:
 	//bool stepping;
 	//bool stopAtNext;
 	std::stack<const Node*> scopes;
+	//Stack of vectors of thread-specific variables so the observer can treat them specially
+	//std::stack<std::vector<std::string> > threadSpecificVars;
 
 	std::vector<long> waitingThreads;
 	long allowedThread;
@@ -39,7 +46,7 @@ private:
 
 	//Mutex allows access to a list of thread contexts. This list allows the debugger to signal that a thread should stop. Can;t use signals 
 	//TODO there MIGHT be a tiny chance of a bug if we attempt to access this list while a new scope is being pushed on
-	pthread_mutex_t contextMutex;
+	pthread_mutex_t context_mutex;
 
 	//Mutex for the breakpoint list. We could use a r/w mutex, but performance is not an issue
 	pthread_mutex_t breakList_mutex;
@@ -49,6 +56,7 @@ private:
 public:
 	CommandObserver();
 	void notify_E(const Node*, TetraContext& context);
+	void notifyThreadSpecificVariable_E(std::string);
 	void threadCreated_E(int,TetraContext&);
 	void threadDestroyed_E(int);
 	void step_E(TetraContext&);

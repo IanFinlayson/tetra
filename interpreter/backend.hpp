@@ -1189,6 +1189,12 @@ class scope_ptr {
 //Forward declaration needed for a friend declaration in tetraContext
 class VirtualObserver;
 
+enum ThreadStatus {
+        RUNNING,
+        STOPPED,
+        DESTROYED,
+	WAITING
+};
 
 //This class wraps a std stack of TetraScopes
 
@@ -1242,7 +1248,7 @@ public:
 
 	//Pushes an alias to the given scope onto the stack
 	//Used for multithreading
-	void branchOff(const scope_ptr baseScope);
+	void branchOff(const scope_ptr baseScope, scope_ptr* globScope);
 
 	//Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
 	void exitScope();
@@ -1289,6 +1295,8 @@ public:
 	//For use when debugging
 	int getLastLineNum();
 	void* fetchVariable(std::string s);
+	std::map<std::string, int>& getRefTable(){return refTables.top();}
+	std::map<std::string, int>& getGlobRefTable(){return globRefTable;}
 	void updateVarReferenceTable(const Node* node);
 	void popReferenceTable();
 
@@ -1297,11 +1305,15 @@ public:
 	bool getStepping(){return stepping;}
 	bool getStopAtNext(){return stopAtNext;}
 	bool getResume(){return resume;}
+	ThreadStatus getRunStatus(){return runStatus;}
+	bool isParallelForVariable(std::string);
 
 	void setLastLineNo(int pLast){lastLineNo = pLast;}
 	void setStepping(bool pStepping){stepping = pStepping;}
 	void setStopAtNext(bool pStopAtNext){stopAtNext = pStopAtNext;}
 	void setResume(bool pResume){resume = pResume;}
+	void setRunStatus(ThreadStatus pStatus){runStatus = pStatus;}
+	void registerParallelForVariable(std::string);
 
 	//Prints a stack trace
 	void printStackTrace() const;
@@ -1318,6 +1330,10 @@ private:
 	bool stepping;
 	bool stopAtNext;
 	bool resume;
+	ThreadStatus runStatus;
+	//TODO candidate for read-write mutex, though this is not exactly a fought-over mutex
+	pthread_mutex_t parallelList_mutex;
+	std::vector<std::string> parForVars;
 
 };
 
@@ -1387,6 +1403,7 @@ public:
 
 	virtual void notify_E(const Node*, TetraContext& context)=0;
 	//virtual void step_E()=0;
+	virtual void notifyThreadSpecificVariable_E(std::string)=0;
 	virtual void threadCreated_E(int,TetraContext&)=0;
 	virtual void threadDestroyed_E(int)=0;
 	//virtual void next_E()=0;

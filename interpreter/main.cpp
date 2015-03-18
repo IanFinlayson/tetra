@@ -115,7 +115,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 			//If we are in a parallel block, spawn a thread for this!
 			if(context.queryExecutionStatus() == PARALLEL) {
 				pthread_t newThread = spawnThread(node->child(0),ret,context);
-				std::cout << ">>>>>>>>>>>>>>>>>" << newThread << std::endl;
+				//std::cout << ">>>>>>>>>>>>>>>>>" << newThread << std::endl;
 				context.addThread(newThread);
 			}
 			else {
@@ -1152,6 +1152,8 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 	if(TetraEnvironment::isDebugMode()) {
 		//TetraEnvironment::getObserver().step_E();
 		tContext.setStopAtNext(true);
+		//Register the main thread
+		TetraEnvironment::getObserver().threadCreated_E(tContext.getThreadID(),tContext);
 	}
 
 	//try {

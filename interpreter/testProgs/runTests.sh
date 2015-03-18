@@ -44,6 +44,8 @@ prefixes[${#prefixes[*]}]="parVar";	results[${#results[*]}]=2
 prefixes[${#prefixes[*]}]="parForSim";	results[${#results[*]}]=3
 prefixes[${#prefixes[*]}]="parCon";	results[${#results[*]}]=8
 prefixes[${#prefixes[*]}]="parBreak";	results[${#results[*]}]=20
+prefixes[${#prefixes[*]}]="globPar";	results[${#results[*]}]=4
+prefixes[${#prefixes[*]}]="globFor";	results[${#results[*]}]=200
 
 successes=0
 total=${#prefixes[*]}

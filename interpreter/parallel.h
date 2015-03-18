@@ -39,9 +39,10 @@ struct evalArgs {
 	const Node* node;
 	TData<T>& ret;
 	scope_ptr scope;
+	scope_ptr* globalScope;
 
-	evalArgs(const Node* pNode, TData<T>& pRet, scope_ptr pScope) :
-		node(pNode), ret(pRet), scope(pScope)
+	evalArgs(const Node* pNode, TData<T>& pRet, scope_ptr pScope, scope_ptr* pGlobal) :
+		node(pNode), ret(pRet), scope(pScope), globalScope(pGlobal)
 	{
 		//do nothing
 	}
@@ -71,10 +72,18 @@ void wrapEvaluation(void* args) {
 
 	//Give the thread its own call stack
 	TetraContext contextCopy(TetraEnvironment::obtainNewThreadID());
-	contextCopy.branchOff(argList.scope);
-	cout << "One time thread start: " << contextCopy.getThreadID();	
+	contextCopy.branchOff(argList.scope, argList.globalScope);
+//	cout << "One time thread start: " << contextCopy.getThreadID();	
 	//Temporary error notificaiton
 	//cout << "Thread starting execution time: " << time(0) << endl;
+
+	//If debugging is enabled, notify the debugger a thread is under construction
+	if(TetraEnvironment::isDebugMode()) {
+		//std::cout << "Parallel for-loop thread created: " << contextCopy.getThreadID();
+		TetraEnvironment::getObserver().threadCreated_E(contextCopy.getThreadID(), contextCopy);
+		contextCopy.setRunStatus(RUNNING);
+	}
+
 	try {
 		//Go into execution with a normalized status
 		contextCopy.normalizeStatus();	
@@ -100,8 +109,12 @@ void wrapEvaluation(void* args) {
 	
 	//ThreadEnvironment::removeThread(pthread_self());
 
+	if(TetraEnvironment::isDebugMode()) {
+		TetraEnvironment::getObserver().threadDestroyed_E(contextCopy.getThreadID());
+	}
+
 	delete static_cast< evalArgs<T>* >(args);
-	cout << "Thread finished: " << time(0) << endl;
+//	cout << "Thread finished: " << time(0) << endl;
 	//pthread_exit(NULL);
 }
 
@@ -116,9 +129,14 @@ void wrapMultiEvaluation(void* args) {
 	//to the current call stack 
 	//(i.e. the stack frame that initialized this thread)
 	TetraContext contextCopy(TetraEnvironment::obtainNewThreadID());
-	contextCopy.branchOff(argList.args_ptr->scope);	
-	cout << "One time thread start: " << contextCopy.getThreadID();
+	contextCopy.branchOff(argList.args_ptr->scope, argList.args_ptr->globalScope);	
 	
+	//If debugging is enabled, notify the debugger a thread is under construction
+	if(TetraEnvironment::isDebugMode()) {
+		//std::cout << "Parallel for-loop thread created: " << contextCopy.getThreadID();
+		TetraEnvironment::getObserver().threadCreated_E(contextCopy.getThreadID(), contextCopy);
+		contextCopy.setRunStatus(RUNNING);
+	}
 	
 	//int arraySize = argList.values_ptr->size();
 
@@ -171,6 +189,11 @@ void wrapMultiEvaluation(void* args) {
 	//Release the mutex obtained in the while loop
 	pthread_mutex_unlock(argList.count_mutex_ptr);
 
+	//If in debug mode, notify that the thread has is about to be destroyed
+	if(TetraEnvironment::isDebugMode()) {
+		TetraEnvironment::getObserver().threadDestroyed_E(contextCopy.getThreadID());
+	}
+
 	//Delete the memory allocated for the arguments of this thread
 	//Note that the args needed for execution (argList.args_ptr) get deleted in wrapEvaluation
 	delete argList.args_ptr;
@@ -187,7 +210,7 @@ pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
 	pthread_attr_t attributes;
 	pthread_attr_init(&attributes);
 
-	evalArgs<T>* execArgs = new evalArgs<T>(node,ret,context.getScopeRef());
+	evalArgs<T>* execArgs = new evalArgs<T>(node,ret,context.getScopeRef(), &(context.getGlobalScopeRef()));
 	evalForArgs<T>* args = new evalForArgs<T>(execArgs, &varName, nextJob_mutex, nextJob, loopValues);
 	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
 
@@ -203,9 +226,9 @@ pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
 	pthread_attr_t attributes;
 	pthread_attr_init(&attributes);
 
-	evalArgs<T>* args = new evalArgs<T>(node,ret,context.getScopeRef());
+	evalArgs<T>* args = new evalArgs<T>(node,ret,context.getScopeRef(), &(context.getGlobalScopeRef()));
 	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-	cout <<"!!\n"<<endl;
+	//cout <<"!!\n"<<endl;
 	int success = pthread_create(&newThread, &attributes,(void*(*)(void*))wrapEvaluation<T>,(void*)(args));
 	assert(success == 0);//For now, we will assume that thread creations are correct
 	return newThread;
@@ -242,6 +265,12 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 
 			//Note that dataqueue is a handle to the actual array in the Variable Table
 			std::list<std::pair<pthread_t, TData<void*> > > dataQueue = context.declareThreadSpecificVariable(node->child(0)->getString());
+
+			//The debugger must be informed that we are using threadSpecific variables
+			if(TetraEnvironment::isDebugMode()) {
+				TetraEnvironment::getObserver().notifyThreadSpecificVariable_E(node->child(0)->getString());
+				context.registerParallelForVariable(node->child(0)->getString());
+			}
 
 			int currentIteration = 0;//Used to determine which iteratio nshould be tackled next
 			pthread_mutex_t iter_mutex;
@@ -299,9 +328,18 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 
 			pthread_mutex_unlock(&iter_mutex);
 
+			//If debugging, set this thread to waiting
+			if(TetraEnvironment::isDebugMode()) {
+				context.setRunStatus(WAITING);
+			}
+
 			//Wait for all the worker threads to terminate
 			for(int index = 0; index < NUM_THREADS && index < collection.getData()->size(); index++) {
 				pthread_join(workers[index], NULL);
+			}
+			//If debugging, reset to running!
+			if(TetraEnvironment::isDebugMode()) {
+				context.setRunStatus(RUNNING);	
 			}
 
 		}
@@ -312,8 +350,18 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 			context.setupParallel();
 			evaluateNode(node->child(0),ret,context);
 
+			//If we are in debug mode, set status to waiting
+			if(TetraEnvironment::isDebugMode()) {
+				context.setRunStatus(WAITING);
+			}
+
 			//Join with all other threads
 			context.endParallel();
+			
+			//If debug mode, return status to running
+			if(TetraEnvironment::isDebugMode()) {
+				context.setRunStatus(RUNNING);
+			}
 
 			//Note that it is an error to encounter some type of flag statement within a parallel block
 			//i.e. breaks/continues/returns will be ignored if their change in control would bring them outside the parallel block

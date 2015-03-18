@@ -3,11 +3,12 @@
 #TODO: find the dependancy if it ever resurfaces
 #-ftemplate-backtrace-limit=1 
 # -pg -O3
+# -ftemplate-backtrace-limit=1
 CC = clang++
-FLAGS = -Wall -pedantic -pthread -ftemplate-backtrace-limit=1 -g
+FLAGS = -Wall -pedantic -pthread -g -ftemplate-backtrace-limit=1
 SEARCHPATH = ../frontend
 DEBUG_MODE = -D USE_OBSERVER
-OPTIMIZE_MODE = -O1
+OPTIMIZE_MODE = -O3
 
 done: tetra
 	@echo
@@ -23,7 +24,7 @@ libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tData
 	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o virtualObserver.o
 	@echo
 
-run.o: run.cpp
+run.o: run.cpp main.cpp commandObserver.cpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c run.cpp
 	@echo
 

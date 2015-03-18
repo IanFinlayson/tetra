@@ -77,6 +77,17 @@ TetraContext::TetraContext() {
 	initializeNewScope(NULL);
 	globalScope = &(progStack.top());
 	threadID = -1;
+	//Debug variables
+	stopAtNext = false;
+	stepping = false;
+	resume = false;
+	lastLineNo = -1;
+
+	runStatus = STOPPED;
+	globRefTable = std::map<std::string, int>();
+	bool success = pthread_mutex_init(&parallelList_mutex, NULL);
+	assert(success == 0);
+	parForVars = std::vector<std::string>();
 }
 
 TetraContext::TetraContext(long tID) {
@@ -85,11 +96,17 @@ TetraContext::TetraContext(long tID) {
 	globalScope = &(progStack.top());
 	threadID = tID;
 
-	//Debug variables
+	//debug variables
+	globRefTable = std::map<std::string, int>();
 	stopAtNext = false;
 	stepping = false;
 	resume = false;
 	lastLineNo = -1;
+
+	runStatus = STOPPED;
+	bool success = pthread_mutex_init(&parallelList_mutex, NULL);
+	assert(success == 0);
+	parForVars = std::vector<std::string>();
 }
 
 void TetraContext::initializeGlobalVars(const Node * tree) {
@@ -135,12 +152,15 @@ void TetraContext::initializeNewScope(TetraScope& newScope) {
 //This function takes the given TetraScope, and pushes an alias to that scope into this context
 //Used for multithreading, so threads in the same scope can share the base scope,
 //while also being able to branch off into their own call stacks
-void TetraContext::branchOff(const scope_ptr baseScope) {
+//In addition to the base scope, the new scope also needs a pointer to the global scope
+//And also a coppy of any relevant debug info
+void TetraContext::branchOff(const scope_ptr baseScope, scope_ptr* globals) {
 	//cout << "X from base context: " << *(const_cast<scope_ptr&>(baseScope)->lookupVar<TArray>("x")) << endl;
 	scope_ptr newScopePtr(baseScope);
 	//Note that the "branch off" should be the base of as new TetraContext (for a new thread)
 	//assert(progStack.size() == 0);
 	progStack.push(newScopePtr);
+	globalScope=globals;
 	//cout << "X after branch: " <<  *(lookupVar<TArray>("x")) << endl;;
 }
 
@@ -257,12 +277,32 @@ void TetraContext::printStackTrace() const {
 ////////////////////////////////////////////////////////////////////////////////////////
 //Debugger specific methods
 
+//Returns true if the name references a parallel for variable, false otherwise
+bool TetraContext::isParallelForVariable(std::string varName) {
+
+	bool isParallelFor = false;
+	pthread_mutex_lock(&parallelList_mutex);
+	{
+		isParallelFor = (std::find(parForVars.begin(), parForVars.end(), varName) != parForVars.end());
+	}
+	pthread_mutex_unlock(&parallelList_mutex);
+	cout << varName << "? " << isParallelFor << std::endl;
+	return isParallelFor;
+}
+
+
+
 //Returns an untyped pointer to a given variable
 //Returns NULL if not found
 void* TetraContext::fetchVariable(std::string s) {
 
         const std::map<std::string,int>& refTable = refTables.top();
-        if(globRefTable.find(s) != globRefTable.end()) {
+
+	if(isParallelForVariable(s)) {
+		//lookup type doesn;t really matter, it will be cast back into a void*, then recast to the correct type
+		return lookupVar<int*>(s);
+	}
+        else if(globRefTable.find(s) != globRefTable.end()) {
                 //Return a pointer to the requested variable
                 //Interface requires passing a node pointer
                 //Note that although there is a global variable, their was never any mangling of the number (making it negative), so we are fine passing in the normal number without multiplying it by -1
@@ -306,7 +346,7 @@ void* TetraContext::fetchVariable(std::string s) {
 
 void TetraContext::updateVarReferenceTable(const Node* node) {
 
-        //We might need to push a new table to the stack, or add a new entry to the present table
+	//We might need to push a new table to the stack, or add a new entry to the present table
         if(node->kind() == NODE_FUNCTION) {
                 refTables.push(std::map<std::string,int>());
                 //Push the formal params on
@@ -322,8 +362,8 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
                         refTables.top()[paramNode->getString()] = paramNode->getInt();
                 }
 
-        }
-        else if(node->kind() == NODE_IDENTIFIER) {
+        }	//Should not attempt to register parallel for variables!
+        else if(node->kind() == NODE_IDENTIFIER  && !isParallelForVariable(node->getString())) {
                 //If we have found an identifier, add an entry for it
                 //We need this because it is possible that a user will use a variable before putting it in an assignment
                 //e.g.
@@ -334,16 +374,19 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
                 //print(x)
 
                 //Check if the variable already exists
-                if(globRefTable.find(node->getString()) == globRefTable.end() && refTables.top().find(node->getString()) == refTables.top().end()){
+                if(globRefTable.find(node->getString()) == globRefTable.end() && refTables.top().find(node->getString()) == refTables.top().end() && !isParallelForVariable(node->getString())){
                         //std::cout << "Registered: " <<node->getString() << " at " << node->getInt()<<endl;
                         refTables.top()[node->getString()] = node->getInt();
                 }
         }
 
         //ASSUMPTION: These nodes always have an identifier or NODE_VECREF of some sort to their left
+	//Note that these can never be a parallelForVariable
         else if(node->kind() == NODE_ASSIGN || node->kind() == NODE_GLOBAL || node->kind() == NODE_CONST) {
                 //Check that we are assigning to a variable, rather than say, a vector refernece such as x[0][1]
-                if(node->child(0)->kind() == NODE_IDENTIFIER){
+		//Also check that we are not attempting to do something crazy with a parallel for variable
+                if(node->child(0)->kind() == NODE_IDENTIFIER && !isParallelForVariable(node->child(0)->getString())){
+			cout << "!!!!!!!" << node->child(0)->getString() << std::endl;
                         //Make sure the var has not already been registered
                         //cout << node->child(0)->getString() <<"!!!!!!!" << endl;
                         if(globRefTable.find(node->child(0)->getString()) == globRefTable.end() && refTables.top().find(node->child(0)->getString()) == refTables.top().end()){
@@ -355,7 +398,21 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
         //else, we don't need to do anything
 }
   
+void TetraContext::registerParallelForVariable(std::string varName) {
 
+	pthread_mutex_lock(&parallelList_mutex);
+	{
+		//there is a possibility that this variable might be 'instantiated' many times within the same context.
+		//Therefore we will check for repeats
+		if(std::find(parForVars.begin(),parForVars.end(),varName) == parForVars.end()) {
+			std::cout << "Registerd PFV: " <<varName<<std::endl;
+			parForVars.push_back(varName);
+		}
+
+	}
+	pthread_mutex_unlock(&parallelList_mutex);
+
+}
 
 //When leaving a scope, pops the table of string references
 void TetraContext::popReferenceTable() {
