@@ -25,11 +25,6 @@ Node* root;
 /* this function calls yyparse on a file and returns the parse tree node */
 Node* parseFile(const string& fname);
 
-/* this is a stack of line numbers, it is used for saving the appropriate line numbers
- * with each node.  eg. when a function is parsed, yylineno is the LAST line of the
- * function, so we save the start of the function before parsing the rest of it out */
-stack<int> linenos;
-
 %}
 
 /* each non-terminal is represented with a node literlas are doubles */
@@ -40,70 +35,71 @@ stack<int> linenos;
   bool boolval;
   char stringval[256]; /* PODS only in union! */
   DataType* data_type;
+  int lineno;
 }
 
 /* typless tokens */
-%token TOK_IF
-%token TOK_ELIF
-%token TOK_ELSE
-%token TOK_FOR
-%token TOK_IN
-%token TOK_PARALLEL
-%token TOK_WHILE
-%token TOK_CONTINUE
-%token TOK_BREAK
-%token TOK_DEF
-%token TOK_OR
-%token TOK_AND
-%token TOK_NOT
-%token TOK_PASS
-%token TOK_RETURN
-%token TOK_INT
-%token TOK_REAL
-%token TOK_BOOL
-%token TOK_STRING
-%token TOK_ASSIGN
-%token TOK_PLUS
-%token TOK_MINUS
-%token TOK_TIMES
-%token TOK_DIVIDE
-%token TOK_MODULUS
-%token TOK_BITXOR
-%token TOK_BITAND
-%token TOK_BITOR
-%token TOK_BITNOT
-%token TOK_LEFTPARENS
-%token TOK_RIGHTPARENS
-%token TOK_LEFTBRACKET
-%token TOK_RIGHTBRACKET
-%token TOK_COMMA
-%token TOK_SEMICOLON
-%token TOK_COLON
-%token TOK_LSHIFT
-%token TOK_RSHIFT
-%token TOK_EXP
-%token TOK_LTE
-%token TOK_GTE
-%token TOK_EQ
-%token TOK_NEQ
-%token TOK_LT
-%token TOK_GT
-%token TOK_PLUSEQ
-%token TOK_MINUSEQ
-%token TOK_TIMESEQ
-%token TOK_DIVIDEEQ
-%token TOK_MODULUSEQ
-%token TOK_EXPEQ
-%token TOK_RSHIFTEQ
-%token TOK_LSHIFTEQ
-%token TOK_ANDEQ
-%token TOK_XOREQ
-%token TOK_OREQ
-%token TOK_ELLIPSIS
-%token TOK_BACKGROUND
-%token TOK_LOCK
-%token TOK_CONST
-%token TOK_GLOBAL
+%token <lineno> TOK_IF
+%token <lineno> TOK_ELIF
+%token <lineno> TOK_ELSE
+%token <lineno> TOK_FOR
+%token <lineno> TOK_IN
+%token <lineno> TOK_PARALLEL
+%token <lineno> TOK_WHILE
+%token <lineno> TOK_CONTINUE
+%token <lineno> TOK_BREAK
+%token <lineno> TOK_DEF
+%token <lineno> TOK_OR
+%token <lineno> TOK_AND
+%token <lineno> TOK_NOT
+%token <lineno> TOK_PASS
+%token <lineno> TOK_RETURN
+%token <lineno> TOK_INT
+%token <lineno> TOK_REAL
+%token <lineno> TOK_BOOL
+%token <lineno> TOK_STRING
+%token <lineno> TOK_ASSIGN
+%token <lineno> TOK_PLUS
+%token <lineno> TOK_MINUS
+%token <lineno> TOK_TIMES
+%token <lineno> TOK_DIVIDE
+%token <lineno> TOK_MODULUS
+%token <lineno> TOK_BITXOR
+%token <lineno> TOK_BITAND
+%token <lineno> TOK_BITOR
+%token <lineno> TOK_BITNOT
+%token <lineno> TOK_LEFTPARENS
+%token <lineno> TOK_RIGHTPARENS
+%token <lineno> TOK_LEFTBRACKET
+%token <lineno> TOK_RIGHTBRACKET
+%token <lineno> TOK_COMMA
+%token <lineno> TOK_SEMICOLON
+%token <lineno> TOK_COLON
+%token <lineno> TOK_LSHIFT
+%token <lineno> TOK_RSHIFT
+%token <lineno> TOK_EXP
+%token <lineno> TOK_LTE
+%token <lineno> TOK_GTE
+%token <lineno> TOK_EQ
+%token <lineno> TOK_NEQ
+%token <lineno> TOK_LT
+%token <lineno> TOK_GT
+%token <lineno> TOK_PLUSEQ
+%token <lineno> TOK_MINUSEQ
+%token <lineno> TOK_TIMESEQ
+%token <lineno> TOK_DIVIDEEQ
+%token <lineno> TOK_MODULUSEQ
+%token <lineno> TOK_EXPEQ
+%token <lineno> TOK_RSHIFTEQ
+%token <lineno> TOK_LSHIFTEQ
+%token <lineno> TOK_ANDEQ
+%token <lineno> TOK_XOREQ
+%token <lineno> TOK_OREQ
+%token <lineno> TOK_ELLIPSIS
+%token <lineno> TOK_BACKGROUND
+%token <lineno> TOK_LOCK
+%token <lineno> TOK_CONST
+%token <lineno> TOK_GLOBAL
 
 /* typed tokens */
 %token <intval> TOK_INTVAL
@@ -173,15 +169,13 @@ datadecl: TOK_CONST identifier TOK_ASSIGN expression {
 }
 
 /* a single function */
-function: TOK_DEF TOK_IDENTIFIER {linenos.push(yylineno);} formal_param_list return_type TOK_COLON block {
+function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
   $$->setStringval(string($2));
-  $$->setDataType($5);
-  $$->addChild($4);
-  $$->addChild($7);
-
-  $$->setLine(linenos.top( ));
-  linenos.pop( );
+  $$->setDataType($4);
+  $$->addChild($3);
+  $$->addChild($6);
+  $$->setLine($1);
 }
 
 /* a parameter list (with bannanas) */
@@ -237,13 +231,11 @@ block: newl_plus TOK_INDENT statements TOK_DEDENT {
 }
 
 /* a list of at least one statement */
-statements: statement {linenos.push(yylineno);} statements {
+statements: statement statements {
   $$ = new Node(NODE_STATEMENT);
   $$->addChild($1);
-  $$->addChild($3);
-
-  $$->setLine(linenos.top( ));
-  linenos.pop( );
+  $$->addChild($2);
+  $$->setLine($1->getLine( ));
 } | statement {
   $$ = $1;
 }
@@ -294,11 +286,10 @@ pass_statement: TOK_PASS {
 return_statement: TOK_RETURN {
   $$ = new Node(NODE_RETURN);
   $$->setLine(yylineno);
-} | TOK_RETURN {linenos.push(yylineno);} expression {
+} | TOK_RETURN expression {
   $$ = new Node(NODE_RETURN);
-  $$->addChild($3);
-  $$->setLine(linenos.top( ));
-  linenos.pop( );
+  $$->addChild($2);
+  $$->setLine($1);
 }
 break_statement: TOK_BREAK {
   $$ = new Node(NODE_BREAK);
@@ -314,6 +305,7 @@ if_statement: TOK_IF expression TOK_COLON block else_option {
   $$ = new Node(NODE_IF);
   $$->addChild($2);
   $$->addChild($4);
+  $$->setLine($1);
 
   if ($5) {
     $$->addChild($5);
@@ -336,6 +328,7 @@ elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
   c1->addChild($2);
   c1->addChild($4);
   $$->addChild(c1);
+  $$->setLine($1);
 
   $$->addChild($5);
   if ($6) {
@@ -348,6 +341,7 @@ elif_clauses: elif_clause elif_clauses {
   $$ = new Node(NODE_ELIF_CHAIN);
   $$->addChild($1);
   $$->addChild($2);
+  $$->setLine($1->getLine( ));
 } | elif_clause {
   $$ = $1;
 }
@@ -357,6 +351,7 @@ elif_clause: TOK_ELIF expression TOK_COLON block {
   $$ = new Node(NODE_ELIF_CLAUSE);
   $$->addChild($2);
   $$->addChild($4);
+  $$->setLine($1);
 }
 
 /* a for loop */
@@ -365,6 +360,7 @@ for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
   $$->addChild($2);
   $$->addChild($4);
   $$->addChild($6);
+  $$->setLine($1);
 }
 
 /* a parallel for loop */
@@ -373,6 +369,7 @@ parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
   $$->addChild($3);
   $$->addChild($5);
   $$->addChild($7);
+  $$->setLine($1);
 }
 
 /* a while loop */
@@ -380,18 +377,21 @@ while_statement: TOK_WHILE expression TOK_COLON block {
   $$ = new Node(NODE_WHILE);
   $$->addChild($2);
   $$->addChild($4);
+  $$->setLine($1);
 }
 
 /* a parallel block */
 parblock: TOK_PARALLEL TOK_COLON block {
   $$ = new Node(NODE_PARALLEL);
   $$->addChild($3);
+  $$->setLine($1);
 }
 
 /* a background block */
 background: TOK_BACKGROUND TOK_COLON block {
   $$ = new Node(NODE_BACKGROUND);
   $$->addChild($3);
+  $$->setLine($1);
 }
 
 /* a lock statement */
@@ -399,6 +399,7 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
   $$ = new Node(NODE_LOCK);
   $$->addChild($2);
   $$->addChild($4);
+  $$->setLine($1);
 }
 
 /* expressions - assignments first */
@@ -406,82 +407,105 @@ expression: variable TOK_ASSIGN assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | variable TOK_PLUSEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_PLUS);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_MINUSEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_MINUS);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_TIMESEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_TIMES);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_DIVIDEEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_DIVIDE);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_MODULUSEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_MODULUS);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_EXPEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_EXP);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_LSHIFTEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_SHIFTL);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_RSHIFTEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_SHIFTR);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_ANDEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_BITAND);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_OREQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_BITOR);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | variable TOK_XOREQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
+  $$->setLine($2);
   Node* rhs = new Node(NODE_BITXOR);
   rhs->addChild($1);
   rhs->addChild($3);
+  rhs->setLine($2);
   $$->addChild(rhs);
 } | assignterm {
   $$ = $1;
@@ -491,6 +515,7 @@ assignterm: assignterm TOK_OR orterm {
   $$ = new Node(NODE_OR);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | orterm {
   $$ = $1;
 }
@@ -500,6 +525,7 @@ orterm: orterm TOK_AND andterm {
   $$ = new Node(NODE_AND);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | andterm {
   $$ = $1;
 }
@@ -517,26 +543,32 @@ notterm: notterm TOK_LT relterm {
   $$ = new Node(NODE_LT);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | notterm TOK_GT relterm {
   $$ = new Node(NODE_GT);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | notterm TOK_LTE relterm {
   $$ = new Node(NODE_LTE);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | notterm TOK_GTE relterm {
   $$ = new Node(NODE_GTE);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | notterm TOK_EQ relterm {
   $$ = new Node(NODE_EQ);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | notterm TOK_NEQ relterm {
   $$ = new Node(NODE_NEQ);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | relterm {
   $$ = $1;
 }
@@ -546,6 +578,7 @@ relterm: relterm TOK_BITOR bitorterm {
   $$ = new Node(NODE_BITOR);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | bitorterm {
   $$ = $1;
 }
@@ -555,6 +588,7 @@ bitorterm: bitorterm TOK_BITXOR xorterm {
   $$ = new Node(NODE_BITXOR);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | xorterm {
   $$ = $1;
 }
@@ -564,6 +598,7 @@ xorterm: xorterm TOK_BITAND bitandterm {
   $$ = new Node(NODE_BITAND);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | bitandterm {
   $$ = $1;
 }
@@ -573,10 +608,12 @@ bitandterm: bitandterm TOK_LSHIFT shiftterm {
   $$ = new Node(NODE_SHIFTL);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | bitandterm TOK_RSHIFT shiftterm {
   $$ = new Node(NODE_SHIFTR);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | shiftterm {
   $$ = $1;
 }
@@ -586,10 +623,12 @@ shiftterm: shiftterm TOK_PLUS plusterm {
   $$ = new Node(NODE_PLUS);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | shiftterm TOK_MINUS plusterm {
   $$ = new Node(NODE_MINUS);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | plusterm {
   $$ = $1;
 }
@@ -599,14 +638,17 @@ plusterm: plusterm TOK_TIMES timesterm {
   $$ = new Node(NODE_TIMES);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | plusterm TOK_DIVIDE timesterm {
   $$ = new Node(NODE_DIVIDE);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | plusterm TOK_MODULUS timesterm {
   $$ = new Node(NODE_MODULUS);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | timesterm {
   $$ = $1;
 }
@@ -634,6 +676,7 @@ unaryterm: expterm TOK_EXP unaryterm {
   $$ = new Node(NODE_EXP);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | expterm {
   $$ = $1;
 }
@@ -703,7 +746,7 @@ vector_values: expression TOK_COMMA vector_values {
 
 /* an l-value - any identifier with any number of indexes after it */
 variable: identifier indices {
-        /* if it's a vector reference */
+  /* if it's a vector reference */
   if ($2) {
     $$ = new Node(NODE_VECREF);
     $$->addChild($1);
@@ -716,7 +759,7 @@ variable: identifier indices {
 
 /* any number of indices */
 indices: index indices {
-       $$ = new Node(NODE_INDEX);
+  $$ = new Node(NODE_INDEX);
   $$->addChild($1);
   $$->addChild($2);
 } | {
@@ -725,30 +768,33 @@ indices: index indices {
 
 /* a single index */
 index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
-     $$ = $2;
+  $$ = $2;
 }
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
-          $$ = new Node(NODE_IDENTIFIER);
+  $$ = new Node(NODE_IDENTIFIER);
   $$->setStringval($1);
 }
 
 /* a function call */
 funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
-       $$ = new Node(NODE_FUNCALL);
+  $$ = new Node(NODE_FUNCALL);
   $$->setStringval($1);
+  $$->setLine($2);
 } | TOK_IDENTIFIER TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
   $$ = new Node(NODE_FUNCALL);
   $$->setStringval($1);
   $$->addChild($3);
+  $$->setLine($2);
 }
 
 /* a list of at least one parameter */
 actual_param_list: expression TOK_COMMA actual_param_list {
-                 $$ = new Node(NODE_ACTUAL_PARAM_LIST);
+  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
   $$->addChild($1);
   $$->addChild($3);
+  $$->setLine($2);
 } | expression {
   $$ = $1;
 }

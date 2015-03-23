@@ -45,6 +45,7 @@ istream* in;
 
 /* look up a string and return its token code */
 int lookupId(const string& id) {
+  yylval.lineno = yylineno;
   if (id == "if")         {return TOK_IF;}
   if (id == "elif")       {return TOK_ELIF;}
   if (id == "else")       {return TOK_ELSE;}
@@ -329,6 +330,7 @@ int yylex( ) {
   }
 
   /* character operators and punctuation */
+  yylval.lineno = yylineno;
   switch (next) {
     /* single character ones */
     case '~': return TOK_BITNOT;
