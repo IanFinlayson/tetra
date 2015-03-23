@@ -1097,7 +1097,7 @@ if(TetraEnvironment::isDebugMode()){
 	//If we are exiting a scope, (i.e. just completed execution of a NODE_FUNCTION
 	//notify the context so it can pop its current symbol lookup table
 	if(node->kind() == NODE_FUNCTION) {
-		TetraEnvironment::getObserver().leftScope_E();
+		TetraEnvironment::getObserver().leftScope_E(context);
 		context.popReferenceTable();
 	}
 //#endif

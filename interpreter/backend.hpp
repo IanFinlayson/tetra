@@ -1315,6 +1315,18 @@ public:
 	void setRunStatus(ThreadStatus pStatus){runStatus = pStatus;}
 	void registerParallelForVariable(std::string);
 
+	//used to give debug info to newly created threads
+	//TODO find a less criminally inefficient, less hackish way to do this
+	void copyDebugInfo(TetraContext* baseContext){
+		parForVars = baseContext->parForVars;
+		refTables = baseContext->refTables;
+		globRefTable = baseContext->globRefTable;
+		scopes.push(baseContext->scopes.top());
+	}
+	//void copyDebugsInfo(std::stack<std::map<std::string, int> >& pRefs, std::map<std::string, int>& pGlobs);
+
+	std::stack<const Node*>&  getScopes(){return scopes;}
+
 	//Prints a stack trace
 	void printStackTrace() const;
 private:
@@ -1325,6 +1337,7 @@ private:
 	
 	//For use when debugging
 	int lastLineNo;
+	std::stack<const Node*> scopes;
 	std::stack<std::map<std::string, int> > refTables;
 	std::map<std::string, int> globRefTable;
 	bool stepping;
@@ -1334,6 +1347,8 @@ private:
 	//TODO candidate for read-write mutex, though this is not exactly a fought-over mutex
 	pthread_mutex_t parallelList_mutex;
 	std::vector<std::string> parForVars;
+
+
 
 };
 
@@ -1410,7 +1425,7 @@ public:
 	//virtual bool break_E(std::pair<int,pthread_t>)=0;
 	//virtual bool remove_E(std::pair<int,pthread_t>)=0;
 	//virtual void continue_E()=0;
-	virtual void leftScope_E()=0;
+	virtual void leftScope_E(TetraContext&)=0;
 	//virtual bool break_E(int)=0;
 	//virtual bool remove_E(int)=0;
 	void* fetchVariable(std::string s, TetraContext& context) const;

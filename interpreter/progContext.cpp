@@ -83,11 +83,12 @@ TetraContext::TetraContext() {
 	resume = false;
 	lastLineNo = -1;
 
-	runStatus = STOPPED;
+	refTables = std::stack<std::map<std::string, int> >();
 	globRefTable = std::map<std::string, int>();
 	bool success = pthread_mutex_init(&parallelList_mutex, NULL);
 	assert(success == 0);
 	parForVars = std::vector<std::string>();
+	scopes = std::stack<const Node*>();
 }
 
 TetraContext::TetraContext(long tID) {
@@ -98,6 +99,7 @@ TetraContext::TetraContext(long tID) {
 
 	//debug variables
 	globRefTable = std::map<std::string, int>();
+	refTables = std::stack<std::map<std::string, int> >();
 	stopAtNext = false;
 	stepping = false;
 	resume = false;
@@ -107,6 +109,7 @@ TetraContext::TetraContext(long tID) {
 	bool success = pthread_mutex_init(&parallelList_mutex, NULL);
 	assert(success == 0);
 	parForVars = std::vector<std::string>();
+	scopes = std::stack<const Node*>();
 }
 
 void TetraContext::initializeGlobalVars(const Node * tree) {
@@ -286,7 +289,7 @@ bool TetraContext::isParallelForVariable(std::string varName) {
 		isParallelFor = (std::find(parForVars.begin(), parForVars.end(), varName) != parForVars.end());
 	}
 	pthread_mutex_unlock(&parallelList_mutex);
-	cout << varName << "? " << isParallelFor << std::endl;
+	
 	return isParallelFor;
 }
 
@@ -386,7 +389,7 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
                 //Check that we are assigning to a variable, rather than say, a vector refernece such as x[0][1]
 		//Also check that we are not attempting to do something crazy with a parallel for variable
                 if(node->child(0)->kind() == NODE_IDENTIFIER && !isParallelForVariable(node->child(0)->getString())){
-			cout << "!!!!!!!" << node->child(0)->getString() << std::endl;
+			
                         //Make sure the var has not already been registered
                         //cout << node->child(0)->getString() <<"!!!!!!!" << endl;
                         if(globRefTable.find(node->child(0)->getString()) == globRefTable.end() && refTables.top().find(node->child(0)->getString()) == refTables.top().end()){
@@ -405,7 +408,7 @@ void TetraContext::registerParallelForVariable(std::string varName) {
 		//there is a possibility that this variable might be 'instantiated' many times within the same context.
 		//Therefore we will check for repeats
 		if(std::find(parForVars.begin(),parForVars.end(),varName) == parForVars.end()) {
-			std::cout << "Registerd PFV: " <<varName<<std::endl;
+			
 			parForVars.push_back(varName);
 		}
 

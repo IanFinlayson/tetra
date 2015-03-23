@@ -52,13 +52,15 @@ bool operator!=(Breakpoint a, Breakpoint b) {
 	return !(a == b);
 }
 
+//TODO Since these options were added over time, there are several common operations, suh as checking if a breakpoint exists, that should probably put into methods
+
 //Notifies the observer that a certain node in the program has been reached
 void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 
 	//Check to see if we entered a new scope
 	if(foundNode->kind() == NODE_FUNCTION) {
 		//cout << "Entering scope: " << foundNode->getString() << endl;
-		scopes.push(foundNode);
+		context.getScopes().push(foundNode);
 	}
 
 	int currentLine = foundNode->getLine();
@@ -169,7 +171,36 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 					case 'i'://Interrupt thread
 					case 'I':
 					{
-						cout << "coming soon" << endl;
+						std::string arg = " ";
+						arg = console.receiveStandardInput();
+						int threadNum = atoi(arg.c_str());
+						
+						if(threadNum == 0 && arg != "0") {
+							console.processStandardOutput("The second argument could not be parsed into a Thread ID.");
+						}
+						else {
+							pthread_mutex_lock(&context_mutex);
+							{	
+								bool threadFound = false;
+								for(std::list<TetraContext*>::iterator iter = threadContexts.begin(); iter != threadContexts.end(); ++iter) {
+									if((*iter)->getThreadID() == threadNum) {
+threadFound = true;
+if((*iter)->getRunStatus() == RUNNING) {
+	(*iter)->setStepping(true);
+}
+else {
+	console.processStandardOutput("The requested thread is not currently running");
+}
+									}
+								}
+								if(!threadFound) {
+									console.processStandardOutput("Could not find the requested thread.\nUse (l)ist (r)unning to show running threads");
+								}
+							}
+							pthread_mutex_unlock(&context_mutex);
+						}
+						
+
 					}
 					break;
 					case 'l':
@@ -198,7 +229,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 							case 'V'://filter will be 1
 							{
 								//get the function node which has the local scope's symbol table
-								const Node* nodey = scopes.top();
+								const Node* nodey = context.getScopes().top();
 									std::stringstream output;
 								output << "-----\n";
 								for(std::map<std::string, int>::const_iterator varIterator = ((filter == 0)?context.getGlobRefTable():context.getRefTable()).begin(); varIterator != ((filter == 0)?context.getGlobRefTable():context.getRefTable()).end(); ++varIterator) {
@@ -347,7 +378,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 							std::stringstream message;
 							message << varName;
 							//get the function node which has the local scope's symbol table
-							const Node* nodey = scopes.top();
+							const Node* nodey = context.getScopes().top();
 								//Determine the datatype of the entry by looking in the local or global symbol table
 							Symbol symbolEntry;
 							if(const_cast<Node*>(nodey)->hasSymbol(varName)) {
@@ -518,8 +549,8 @@ void CommandObserver::continue_E() {
 	//do nothing at the moment
 }
 
-void CommandObserver::leftScope_E() {
-	scopes.pop();
+void CommandObserver::leftScope_E(TetraContext& context) {
+	context.getScopes().pop();
 }
 
 void CommandObserver::notifyThreadSpecificVariable_E(std::string varName) {

@@ -27,7 +27,7 @@ private:
 	//Breakpoint lastLine;
 	//bool stepping;
 	//bool stopAtNext;
-	std::stack<const Node*> scopes;
+	//std::stack<const Node*> scopes;
 	//Stack of vectors of thread-specific variables so the observer can treat them specially
 	//std::stack<std::vector<std::string> > threadSpecificVars;
 
@@ -63,7 +63,7 @@ public:
 	void next_E(TetraContext&);
 	bool break_E(int);
 	void continue_E();
-	void leftScope_E();
+	void leftScope_E(TetraContext& context);
 	bool remove_E(int);
 };
 

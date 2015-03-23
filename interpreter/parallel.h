@@ -41,8 +41,11 @@ struct evalArgs {
 	scope_ptr scope;
 	scope_ptr* globalScope;
 
-	evalArgs(const Node* pNode, TData<T>& pRet, scope_ptr pScope, scope_ptr* pGlobal) :
-		node(pNode), ret(pRet), scope(pScope), globalScope(pGlobal)
+	//Debug stuff
+	TetraContext* debugCarrier;
+
+	evalArgs(const Node* pNode, TData<T>& pRet, scope_ptr pScope, scope_ptr* pGlobal, TetraContext* pContext) :
+		node(pNode), ret(pRet), scope(pScope), globalScope(pGlobal),debugCarrier(pContext)
 	{
 		//do nothing
 	}
@@ -73,6 +76,7 @@ void wrapEvaluation(void* args) {
 	//Give the thread its own call stack
 	TetraContext contextCopy(TetraEnvironment::obtainNewThreadID());
 	contextCopy.branchOff(argList.scope, argList.globalScope);
+	
 //	cout << "One time thread start: " << contextCopy.getThreadID();	
 	//Temporary error notificaiton
 	//cout << "Thread starting execution time: " << time(0) << endl;
@@ -81,6 +85,7 @@ void wrapEvaluation(void* args) {
 	if(TetraEnvironment::isDebugMode()) {
 		//std::cout << "Parallel for-loop thread created: " << contextCopy.getThreadID();
 		TetraEnvironment::getObserver().threadCreated_E(contextCopy.getThreadID(), contextCopy);
+		contextCopy.copyDebugInfo(argList.debugCarrier);
 		contextCopy.setRunStatus(RUNNING);
 	}
 
@@ -130,11 +135,12 @@ void wrapMultiEvaluation(void* args) {
 	//(i.e. the stack frame that initialized this thread)
 	TetraContext contextCopy(TetraEnvironment::obtainNewThreadID());
 	contextCopy.branchOff(argList.args_ptr->scope, argList.args_ptr->globalScope);	
-	
+
 	//If debugging is enabled, notify the debugger a thread is under construction
 	if(TetraEnvironment::isDebugMode()) {
 		//std::cout << "Parallel for-loop thread created: " << contextCopy.getThreadID();
 		TetraEnvironment::getObserver().threadCreated_E(contextCopy.getThreadID(), contextCopy);
+		contextCopy.copyDebugInfo(argList.args_ptr->debugCarrier);
 		contextCopy.setRunStatus(RUNNING);
 	}
 	
@@ -210,7 +216,7 @@ pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
 	pthread_attr_t attributes;
 	pthread_attr_init(&attributes);
 
-	evalArgs<T>* execArgs = new evalArgs<T>(node,ret,context.getScopeRef(), &(context.getGlobalScopeRef()));
+	evalArgs<T>* execArgs = new evalArgs<T>(node,ret,context.getScopeRef(), &(context.getGlobalScopeRef()), &context);
 	evalForArgs<T>* args = new evalForArgs<T>(execArgs, &varName, nextJob_mutex, nextJob, loopValues);
 	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
 
@@ -226,7 +232,7 @@ pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
 	pthread_attr_t attributes;
 	pthread_attr_init(&attributes);
 
-	evalArgs<T>* args = new evalArgs<T>(node,ret,context.getScopeRef(), &(context.getGlobalScopeRef()));
+	evalArgs<T>* args = new evalArgs<T>(node,ret,context.getScopeRef(), &(context.getGlobalScopeRef()),&context);
 	pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
 	//cout <<"!!\n"<<endl;
 	int success = pthread_create(&newThread, &attributes,(void*(*)(void*))wrapEvaluation<T>,(void*)(args));
