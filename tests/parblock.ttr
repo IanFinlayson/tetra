@@ -1,3 +1,13 @@
+def func3( ):
+    pass
+
+def func2( ):
+    pass
+
+
+def func1( ):
+    pass
+
 def doStuff( ):
     parallel:
         func1( )
