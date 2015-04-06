@@ -1108,6 +1108,10 @@ if(TetraEnvironment::isDebugMode()){
 //Equivilant of main for the interpreter module
 int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 
+	//Restore default values before interpreting flags
+	TetraEnvironment::setDebug(false);
+	TetraEnvironment::setMaxThreads(8);
+
 	//Parse flags
 	std::string flagErrors = TetraEnvironment::parseFlags(flags,flagCount);
 

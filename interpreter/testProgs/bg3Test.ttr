@@ -1,0 +1,12 @@
+def main() int:
+   v = [0]
+   doStuff(v)
+   return v[0]
+
+def doStuff(v [int]):
+   x = 2
+   background:
+      for z in [1 ... 1000]:
+         pass
+      v[0] += x
+   pass

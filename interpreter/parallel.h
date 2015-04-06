@@ -276,6 +276,7 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 			if(TetraEnvironment::isDebugMode()) {
 				TetraEnvironment::getObserver().notifyThreadSpecificVariable_E(node->child(0)->getString());
 				context.registerParallelForVariable(node->child(0)->getString());
+				//TODO "l v" in debugger does not currently see parallel for variables on initialization 
 			}
 
 			int currentIteration = 0;//Used to determine which iteratio nshould be tackled next

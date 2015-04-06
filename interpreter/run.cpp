@@ -79,11 +79,15 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	std::cout << "+------------------------------------" << endl;
+	std::cout << "\n+------------------------------------" << endl;
 	std::cout << "|Main Returned: " << ret << endl;
 	std::cout << "+------------------------------------" << endl;
 
 	//cout << endl << "For vectors: there were " << numAllocs_T << " allocations and " << numDeallocs_T << " Deallocations." << endl;
+
+	//The flags were dynamically allocated
+	//TODO i is probably possible to just pass a sub-array of argv to the interpreter
+	delete [] flags;
 
 	return ret;
 }

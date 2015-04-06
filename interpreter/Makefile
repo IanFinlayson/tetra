@@ -90,13 +90,16 @@ commandConsole.o: commandConsole.cpp backend.hpp commandConsole.h
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandConsole.cpp
 	@echo
 
-commandObserver.o: commandObserver.h commandObserver.cpp backend.hpp
+commandObserver.o: commandObserver.h commandObserver.cpp backend.hpp consoleArray.o
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandObserver.cpp
 	@echo
 
 virtualObserver.o: virtualObserver.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c virtualObserver.cpp
 	@echo
+
+consoleArray.o: consoleArray.cpp backend.hpp
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c consoleArray.cpp
 
 DEBUG:
 	touch main.cpp

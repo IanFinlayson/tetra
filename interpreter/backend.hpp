@@ -1399,7 +1399,21 @@ public:
 	virtual void processStandardOutput(const std::string) const = 0;
 };
 
+class ConsoleArray {
+private:
+	std::vector<VirtualConsole*> consoles;
+	int (*invokeConsolePolicy)(int,bool);
+public:
+	ConsoleArray();
+	ConsoleArray(int (invokeConsolePolicy)(int,bool));
+	VirtualConsole& getSpecifiedConsole(int, bool);
+	//Not currently threadsafe!
+	void setConsolePolicy(int (getConsole)(int,bool));
+	int registerConsole(VirtualConsole&);
+	bool removeConsole(VirtualConsole&);
 
+
+};
 
 class VirtualObserver {
 
@@ -1412,8 +1426,6 @@ private:
 	//bool stepping;
 	//bool stopAtNext;
 	//std::stack<Node*> scopes;
-	
-
 public:
 
 	virtual void notify_E(const Node*, TetraContext& context)=0;

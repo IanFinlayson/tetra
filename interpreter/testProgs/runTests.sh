@@ -46,6 +46,8 @@ prefixes[${#prefixes[*]}]="parCon";	results[${#results[*]}]=8
 prefixes[${#prefixes[*]}]="parBreak";	results[${#results[*]}]=20
 prefixes[${#prefixes[*]}]="globPar";	results[${#results[*]}]=4
 prefixes[${#prefixes[*]}]="globFor";	results[${#results[*]}]=200
+prefixes[${#prefixes[*]}]="bg2";	results[${#results[*]}]=2
+prefixes[${#prefixes[*]}]="bg3";	results[${#results[*]}]=2
 
 successes=0
 total=${#prefixes[*]}

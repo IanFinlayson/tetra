@@ -1,0 +1,13 @@
+global v = 0
+
+def main() int:
+   doStuff()
+   return v
+
+def doStuff():
+   x = 2
+   background:
+      for z in [1 ... 1000]:
+         pass
+      v += x
+   pass

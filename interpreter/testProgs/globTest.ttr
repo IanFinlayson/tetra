@@ -3,6 +3,7 @@ constant gC = 2
 
 def help():
     gC = 2
+    pass
 
 constant PI = 3.1416
 global sum = PI * 2.0

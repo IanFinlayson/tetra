@@ -11,7 +11,7 @@ def main() int:
                 values[5]=getMin([6,1,2,3,4,5,7,8,9],[7,1,2,3,4,5,6,8,9],costs,size)
                 values[6]=getMin([7,1,2,3,4,5,6,8,9],[8,1,2,3,4,5,6,7,9],costs,size)
                 values[7]=getMin([8,1,2,3,4,5,6,7,9],[9,1,2,3,4,5,6,7,8],costs,size)
-                values[8]=getMin([9,1,2,3,4,5,6,7,8],[5,1,2,3,4,6,7,8,9],costs,size)
+                values[8]=getMin([9,1,2,3,4,5,6,7,8],[1,2,3,4,5,6,7,8,9],costs,size)
                 #values[1]=getMin([5,1,2,3,4,6,7,8],[1,2,3,4,5,6,7,8],costs,size)
         min = 9999999
         for x in values:
@@ -28,6 +28,7 @@ def getMin(begin [int], end [int], costs[[int]], size int) int:
                 if cand < ret:
                         ret = cand
                 nextPerm(begin,size)
+                #print(begin,"\n")
         return ret
 
 def getCost(cities [int], costs [[int]], size int) int:
