@@ -1356,10 +1356,10 @@ private:
 //Header for Tetra Standard Library
 #define TSL_FUNCS 6
 void print(const Node*,TetraContext&);
-int readInt();
-double readReal();
-bool readBool();
-std::string readString();
+int readInt(int thread);
+double readReal(int thread);
+bool readBool(int thread);
+std::string readString(int thread);
 //All len functions count as a single function for TSL_FUNCS
 int len(TArray&);
 int len(std::string&);
@@ -1402,15 +1402,23 @@ public:
 class ConsoleArray {
 private:
 	std::vector<VirtualConsole*> consoles;
+	//Used to insure that only one thread has control of a particular console
+	std::vector<std::pair<pthread_mutex_t*,pthread_cond_t*> > consoleMutexes;
 	int (*invokeConsolePolicy)(int,bool);
 public:
 	ConsoleArray();
 	ConsoleArray(int (invokeConsolePolicy)(int,bool));
-	VirtualConsole& getSpecifiedConsole(int, bool);
+	~ConsoleArray();
+	VirtualConsole& getSpecifiedConsole(int, bool) const;
+	//These two work exactly like mutexes
+	void obtainConsoleMutex(int,bool) const;
+	void releaseConsoleMutex(int,bool) const;
+	void waitOnCondition(int,bool) const;
+	void broadcastCondition(int,bool) const;
 	//Not currently threadsafe!
 	void setConsolePolicy(int (getConsole)(int,bool));
 	int registerConsole(VirtualConsole&);
-	bool removeConsole(VirtualConsole&);
+	//bool removeConsole(VirtualConsole&);
 
 
 };
@@ -1458,9 +1466,10 @@ public:
 class TetraEnvironment {
 public:
 	static void initialize();
-	static void initialize(const VirtualConsole&);
-	static void setConsole(const VirtualConsole&);
-	static const VirtualConsole& getConsole();
+	static void initialize(const ConsoleArray&);
+	static void setConsoleArray(const ConsoleArray&);
+	static const ConsoleArray& getConsoleArray();
+	static const VirtualConsole& getConsole(int, bool);
 	static int getMaxThreads();
 	static void setMaxThreads(int);
 	static ostream& getOutputStream();
@@ -1474,7 +1483,7 @@ public:
 private:
 	static int maxThreads;
 	static ostream* outputStream;
-	static VirtualConsole const * console_ptr;
+	static ConsoleArray const * consoleArray_ptr;
 	static VirtualObserver* observer;
 	static bool debugMode;
 	static long nextThreadID;

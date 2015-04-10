@@ -33,13 +33,14 @@ private:
 
 	std::vector<long> waitingThreads;
 	long allowedThread;
+	bool yieldEnabled;//Some imlementations may find it more useful to disable this feature
 
 	//Linked List insures that if we try to access the list while a new thread is being created, the data structure won;t move on us (such as an Arraylist might if it hit capacity)
 	std::list<TetraContext*> threadContexts;
 
 
 	//Mutex makes sure only one thread is accepting input at a time
-	pthread_mutex_t prompt_mutex;
+	//pthread_mutex_t prompt_mutex;
 
 	//Mutex insures threads atomically add/remove themselves from the debug waiting queue
 	pthread_mutex_t threadList_mutex;
@@ -65,6 +66,7 @@ public:
 	void continue_E();
 	void leftScope_E(TetraContext& context);
 	bool remove_E(int);
+	void setYieldEnabled(bool);
 };
 
 #endif

@@ -10,7 +10,7 @@
 
 void TetraEnvironment::initialize() {
 	maxThreads = 8;
-	console_ptr = NULL;
+	consoleArray_ptr = NULL;
 	//pthread_mutex_init(&next_thread_mutex, NULL);
 	//It would seem that this method is not supported on this platform
 	//maxThreads = pthread_num_processors_np();
@@ -18,9 +18,9 @@ void TetraEnvironment::initialize() {
 	outputStream = &std::cout;
 }
 
-void TetraEnvironment::initialize(const VirtualConsole& console) {
+void TetraEnvironment::initialize(const ConsoleArray& console) {
 	maxThreads = 8;
-	console_ptr = &console;
+	consoleArray_ptr = &console;
 	//pthread_mutex_init(&next_thread_mutex, NULL);
 	//It would seem that this method is not supported on this platform
 	//maxThreads = pthread_num_processors_np();
@@ -43,12 +43,16 @@ int TetraEnvironment::getMaxThreads() {
 	return maxThreads;
 }
 
-void TetraEnvironment::setConsole(const VirtualConsole& pConsole) {
-	console_ptr = &pConsole;
+void TetraEnvironment::setConsoleArray(const ConsoleArray& pConsole) {
+	consoleArray_ptr = &pConsole;
 }
 
-const VirtualConsole& TetraEnvironment::getConsole() {
-	return *console_ptr; 
+const ConsoleArray& TetraEnvironment::getConsoleArray() {
+	return *consoleArray_ptr;
+}
+
+const VirtualConsole& TetraEnvironment::getConsole(int thread, bool debug) {
+	return consoleArray_ptr->getSpecifiedConsole(thread,debug); 
 }
 
 VirtualObserver& TetraEnvironment::getObserver() {
@@ -102,7 +106,7 @@ int TetraEnvironment::obtainNewThreadID() {
 
 pthread_mutex_t TetraEnvironment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 long TetraEnvironment::nextThreadID = 0;
-VirtualConsole const * TetraEnvironment::console_ptr = NULL;
+ConsoleArray const * TetraEnvironment::consoleArray_ptr = NULL;
 int TetraEnvironment::maxThreads = 8;
 bool TetraEnvironment::debugMode = false;
 ostream* TetraEnvironment::outputStream = &std::cout;

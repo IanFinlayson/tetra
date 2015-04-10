@@ -415,22 +415,22 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
 			break;
 			case 1:
 			{
-				ret.setData(readInt());
+				ret.setData(readInt(context.getThreadID()));
 			}
 			break;
 			case 2:
 			{
-				ret.setData(readReal());
+				ret.setData(readReal(context.getThreadID()));
 			}
 			break;
 			case 3:
 			{
-				ret.setData(readString());
+				ret.setData(readString(context.getThreadID()));
 			}
 			break;
 			case 4:
 			{
-				ret.setData(readBool());
+				ret.setData(readBool(context.getThreadID()));
 			}
 			break;
 			case 5:

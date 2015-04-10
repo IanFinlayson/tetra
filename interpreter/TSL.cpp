@@ -25,7 +25,7 @@ void print(const Node* args, TetraContext& context) {
 	//If args is an expression, actually print it!
 	else{
 		std::stringstream formattedData;
-		const VirtualConsole& console = TetraEnvironment::getConsole();
+		const VirtualConsole& console = TetraEnvironment::getConsole(context.getThreadID(),false);
 		switch(args->type()->getKind()) {
 			case TYPE_INT:
 			{
@@ -81,10 +81,10 @@ void print(const Node* args, TetraContext& context) {
 	}
 }
 
-int readInt() {
+int readInt(int threadNum) {
 	int ret = 0;
 	//while(!(cin >> ret)) {
-	while(!(stringstream(TetraEnvironment::getConsole().receiveStandardInput()) >> ret)) {
+	while(!(stringstream(TetraEnvironment::getConsole(threadNum,false).receiveStandardInput()) >> ret)) {
 		//Moves down the stream until it finds a readable number
 		cin.clear();
 		cin.ignore();
@@ -92,10 +92,10 @@ int readInt() {
 	return ret;
 }
 
-double readReal() {
+double readReal(int threadNum) {
 	double ret = 0;
 	//while(!(cin >> ret)) {
-	while(!(stringstream(TetraEnvironment::getConsole().receiveStandardInput()) >> ret)) {
+	while(!(stringstream(TetraEnvironment::getConsole(threadNum,false).receiveStandardInput()) >> ret)) {
 		//moves along the buffer until it finds a readable value
 		cin.clear();
 		cin.ignore();
@@ -103,9 +103,9 @@ double readReal() {
 	return ret;
 }
 
-bool readBool() {
+bool readBool(int threadNum) {
 	//Returns false on some variation of 'false', 'no', or 0
-	std::string input = TetraEnvironment::getConsole().receiveStandardInput();
+	std::string input = TetraEnvironment::getConsole(threadNum,false).receiveStandardInput();
 	//Compare input against the recognized values for false
 	if(input == "false" || input == "no" || input == "0") {
 		return false;
@@ -113,8 +113,8 @@ bool readBool() {
 	else return true;
 }
 
-string readString() {
-	std::string ret = TetraEnvironment::getConsole().receiveStandardInput();
+string readString(int threadNum) {
+	std::string ret = TetraEnvironment::getConsole(threadNum,false).receiveStandardInput();
 
 	return ret;
 }

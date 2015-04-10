@@ -24,11 +24,11 @@ CommandObserver::CommandObserver() {
 	//stepping = false;
 	//stopAtNext = false;
 
-	int success = pthread_mutex_init(&prompt_mutex,NULL);
+	//int success = pthread_mutex_init(&prompt_mutex,NULL);
 	//TODO revise so asserts are no longer used here
-	assert(success==0);
+	//assert(success==0);
 
-	success = pthread_mutex_init(&threadList_mutex,NULL);
+	int success = pthread_mutex_init(&threadList_mutex,NULL);
 	assert(success == 0);
 
 	success = pthread_mutex_init(&breakList_mutex,NULL);
@@ -41,6 +41,7 @@ CommandObserver::CommandObserver() {
 	assert(success == 0);
 
 	allowedThread = -1;//-1 means any thread may trip the debugger
+	yieldEnabled = true;
 }
 
 //Breakpoints are equal if they have the same line number, and they have the same line number, and they have the same thread ID or either has the universal threadID (-1)
@@ -101,7 +102,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 		//Register that this thread has stopped
 		context.setRunStatus(STOPPED);
 
-		const VirtualConsole& console = TetraEnvironment::getConsole();
+		const VirtualConsole& console = TetraEnvironment::getConsole(context.getThreadID(),true);
 
 		pthread_mutex_lock(&threadList_mutex);
 		{
@@ -118,7 +119,8 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 		}
 		pthread_mutex_unlock(&threadList_mutex);
 
-		pthread_mutex_lock(&prompt_mutex);
+		//pthread_mutex_lock(&prompt_mutex);
+		TetraEnvironment::getConsoleArray().obtainConsoleMutex(context.getThreadID(),false);
 
 		if(allowedThread == -1 || allowedThread == context.getThreadID()) {
 			std::string ret = " ";
@@ -433,16 +435,19 @@ else {
 			//Wakes up all threads waiting on the debugger
 			if(willBroadcast) {
 				//std::cout << "Broadcast" << std::endl;
-				pthread_cond_broadcast(&prompt_condition);
+				//pthread_cond_broadcast(&prompt_condition);
+				TetraEnvironment::getConsoleArray().broadcastCondition(context.getThreadID(),true);
 			}
 		}
 		else {	//If the thread was not expected, it will block here, allowing other threads to get through. 
 			//When the observer state changes, a broadcast will allow all these threads to return to the waiting area
 			//std::cout << "HERE!" << std::endl;
-			pthread_cond_wait(&prompt_condition, &prompt_mutex);
+			//pthread_cond_wait(&prompt_condition, &prompt_mutex);
+			TetraEnvironment::getConsoleArray().waitOnCondition(context.getThreadID(),true);
 		}
-		pthread_mutex_unlock(&prompt_mutex);
-		
+		//pthread_mutex_unlock(&prompt_mutex);
+		TetraEnvironment::getConsoleArray().releaseConsoleMutex(context.getThreadID(),true);
+
 		//If the thread is resuming, remove it from the list of waiting threads
 		if(context.getResume() == true) {
 			pthread_mutex_lock(&threadList_mutex);
@@ -466,7 +471,7 @@ void CommandObserver::threadCreated_E(int threadNum, TetraContext& context) {
 	std::stringstream threadMessage;
 	threadMessage << "Thread launched: " << threadNum << "\n";
 
-	TetraEnvironment::getConsole().processStandardOutput(threadMessage.str());
+	TetraEnvironment::getConsole(context.getThreadID(),true).processStandardOutput(threadMessage.str());
 	
 	TetraContext* threadData = &context;
 	
@@ -555,4 +560,8 @@ void CommandObserver::leftScope_E(TetraContext& context) {
 
 void CommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
 
+}
+
+void CommandObserver::setYieldEnabled(bool enable) {
+	yieldEnabled = enable;
 }

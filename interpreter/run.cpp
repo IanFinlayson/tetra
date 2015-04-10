@@ -21,13 +21,16 @@ int main(int argc, char** argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	CommandConsole console;
+	ConsoleArray console;
+	CommandConsole mainConsole = CommandConsole();
+	console.registerConsole(mainConsole);
 	CommandObserver observer;
 
 	//observer.break_E(5);
 
 	TetraEnvironment::initialize(console);
 	TetraEnvironment::setObserver(observer);
+
 
 	//cout << &observer << endl;
 	//cout << &(TetraEnvironment::getObserver()) << endl;
