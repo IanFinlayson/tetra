@@ -117,6 +117,12 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 				pthread_t newThread = spawnThread(node->child(0),ret,context);
 				//std::cout << ">>>>>>>>>>>>>>>>>" << newThread << std::endl;
 				context.addThread(newThread);
+				//If the next child node is not a statement,
+				//(i.e. we don;t need to spawn another thread)
+				//we should get rid of our parallel status
+				if(node->child(1)->kind() != NODE_STATEMENT) {
+					context.normalizeStatus();
+				}
 			}
 			else {
 				evaluateNode<T>(node->child(0),ret,context);
