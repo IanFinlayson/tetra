@@ -21,6 +21,10 @@
 #include<algorithm> //for find_if
 #include<sstream>
 #include<vector>
+#include<deque>
+
+
+#include "microStack.h"
 
 //This segment, adapted from http://stackoverflow.com/questions/826569/compelling-examples-of-custom-c-allocators,
 //Is used to tes memory allocation for different programs
@@ -432,7 +436,6 @@ private:
 	int vars;
 
         int hash(const std::string& name) const{
-		//cout << "In hash" << endl;
 	/*	int accum = 0;
 		for(int x = 0; x < name.size(); x++) {
 			accum += static_cast<int>(name[0]) * 33;
@@ -454,6 +457,7 @@ public:
 		loops = 0;
 		vars = 0;
         }
+
 
 	~VarHash() {
 		loops -= vars;
@@ -1028,7 +1032,8 @@ class scope_ptr {
 			refCount = new int();//Zero initialized
 			*refCount = 0;
 			status = NORMAL;
-			std::stack<ThreadPool*> spawnedThreads;
+			///*std::stack<ThreadPool*>*/ spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
+			MicroStack<ThreadPool*> spawnedThreads;
 			refCount_mutex_ptr = new pthread_mutex_t();
 			addReference();
 		}
@@ -1039,7 +1044,9 @@ class scope_ptr {
 			refCount = new int();//Zero initialized
 			*refCount = 0;
 			status = NORMAL;
-			std::stack<ThreadPool*> spawnedThreads;
+			//std::stack<ThreadPool*> spawnedThreads;
+			//spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
+			MicroStack<ThreadPool*> spawnedThreads;
 			refCount_mutex_ptr = new pthread_mutex_t();
 			addReference();
 		}
@@ -1052,7 +1059,8 @@ class scope_ptr {
 			//cout << "Access gained" << endl;
 			ptr = other.ptr;
 			status = other.status;
-			std::stack<ThreadPool*> spawnedThreads;
+			//std::stack<ThreadPool*> spawnedThreads;
+			MicroStack<ThreadPool*> spawnedThreads;
 			refCount_mutex_ptr = other.refCount_mutex_ptr;
 
 			//Note that we are copying the pointer, not the value!
@@ -1077,7 +1085,7 @@ class scope_ptr {
 		//For the purposes of the interpreter, however, this is the desired behavior
 		//This does not appear to ever get called. If that is the case, our thread-safetyness burden eases considerably, as we should only have to lock the reference incrementing/decrememnting
 		scope_ptr& operator=(const scope_ptr& other) {
-			cout << "THIS GETS CALLED\n\n\n\n\n" << endl;
+			//cout << "THIS GETS CALLED\n\n\n\n\n" << endl;
 			if(&other != this) {
 				//release old data
 				removeReference();
@@ -1179,7 +1187,8 @@ class scope_ptr {
 
 		//Because each context may spawn its own threads, we need to keep track of spawned threads on a thread-by-thread basis
 		//Becausehe main thread in parallel blocks. we actually have to keep track of a stack of threadpools, in case the main thread encounters another parallel statement in the same scope
-		std::stack<ThreadPool*> spawnedThreads;
+		//std::stack<ThreadPool*> spawnedThreads;
+		MicroStack<ThreadPool*> spawnedThreads;
 
 		//Because different threads may destroy themselves at arbitrary times, we must lock uses of refCount
 		pthread_mutex_t* refCount_mutex_ptr;
@@ -1204,6 +1213,10 @@ public:
 	//Note that this constructor starts with a GLOBAL scope. One must be initialized through initializeNewScope to have it represent local data	
 	TetraContext();
 	TetraContext(long);
+
+	TetraContext(const TetraContext&);
+
+	~TetraContext();
 
 	void initializeGlobalVars(const Node *);
 
@@ -1295,8 +1308,8 @@ public:
 	//For use when debugging
 	int getLastLineNum();
 	void* fetchVariable(std::string s);
-	std::map<std::string, int>& getRefTable(){return refTables.top();}
-	std::map<std::string, int>& getGlobRefTable(){return globRefTable;}
+	std::map<std::string, int>& getRefTable(){return refTables->top();}
+	std::map<std::string, int>& getGlobRefTable(){return *globRefTable;}
 	void updateVarReferenceTable(const Node* node);
 	void popReferenceTable();
 
@@ -1318,35 +1331,35 @@ public:
 	//used to give debug info to newly created threads
 	//TODO find a less criminally inefficient, less hackish way to do this
 	void copyDebugInfo(TetraContext* baseContext){
-		parForVars = baseContext->parForVars;
-		refTables = baseContext->refTables;
-		globRefTable = baseContext->globRefTable;
-		scopes.push(baseContext->scopes.top());
+		*parForVars = *(baseContext->parForVars);
+		*refTables = *(baseContext->refTables);
+		*globRefTable = *(baseContext->globRefTable);
+		scopes->push(baseContext->scopes->top());
 	}
 	//void copyDebugsInfo(std::stack<std::map<std::string, int> >& pRefs, std::map<std::string, int>& pGlobs);
 
-	std::stack<const Node*>&  getScopes(){return scopes;}
+	std::stack<const Node*>&  getScopes(){return *scopes;}
 
 	//Prints a stack trace
 	void printStackTrace() const;
 private:
 
-	std::stack<scope_ptr> progStack;
+	MicroStack<scope_ptr> progStack;
 	scope_ptr* globalScope;
 	long threadID;
 	
 	//For use when debugging
 	int lastLineNo;
-	std::stack<const Node*> scopes;
-	std::stack<std::map<std::string, int> > refTables;
-	std::map<std::string, int> globRefTable;
+	std::stack<const Node*>* scopes;
+	std::stack<std::map<std::string, int> >* refTables;
+	std::map<std::string, int>* globRefTable;
 	bool stepping;
 	bool stopAtNext;
 	bool resume;
 	ThreadStatus runStatus;
 	//TODO candidate for read-write mutex, though this is not exactly a fought-over mutex
 	pthread_mutex_t parallelList_mutex;
-	std::vector<std::string> parForVars;
+	std::vector<std::string>* parForVars;
 
 
 
@@ -1428,8 +1441,8 @@ class VirtualObserver {
 private:
 	//Reference table linking variable names to their integer abstractions
 	//Used so th debugger supports fetchVariable
-	std::stack<std::map<std::string, int> > refTables;
-	std::map<std::string, int> globRefTable;
+	//std::stack<std::map<std::string, int> > refTables;
+	//std::map<std::string, int> globRefTable;
 	//int lastLine;
 	//bool stepping;
 	//bool stopAtNext;

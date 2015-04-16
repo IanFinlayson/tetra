@@ -82,13 +82,22 @@ TetraContext::TetraContext() {
 	stepping = false;
 	resume = false;
 	lastLineNo = -1;
-
-	refTables = std::stack<std::map<std::string, int> >();
-	globRefTable = std::map<std::string, int>();
 	bool success = pthread_mutex_init(&parallelList_mutex, NULL);
 	assert(success == 0);
-	parForVars = std::vector<std::string>();
-	scopes = std::stack<const Node*>();
+	//Only need to initialize this if in debug mde
+	if(TetraEnvironment::isDebugMode()){
+		parForVars = new std::vector<std::string>();
+		scopes = new std::stack<const Node*>();
+		refTables = new std::stack<std::map<std::string, int> >();
+		globRefTable = new std::map<std::string, int>();
+	}
+	else {//Set to NULL so no problems when deleteing
+		parForVars = NULL;
+		scopes = NULL;
+		refTables = NULL;
+		globRefTable = NULL;
+	}
+
 }
 
 TetraContext::TetraContext(long tID) {
@@ -98,8 +107,6 @@ TetraContext::TetraContext(long tID) {
 	threadID = tID;
 
 	//debug variables
-	globRefTable = std::map<std::string, int>();
-	refTables = std::stack<std::map<std::string, int> >();
 	stopAtNext = false;
 	stepping = false;
 	resume = false;
@@ -108,8 +115,26 @@ TetraContext::TetraContext(long tID) {
 	runStatus = STOPPED;
 	bool success = pthread_mutex_init(&parallelList_mutex, NULL);
 	assert(success == 0);
-	parForVars = std::vector<std::string>();
-	scopes = std::stack<const Node*>();
+
+	//Only need to instantiate debug info if in debug mode
+	if(TetraEnvironment::isDebugMode()){
+		parForVars = new std::vector<std::string>();
+		scopes = new std::stack<const Node*>();
+		globRefTable = new std::map<std::string, int>();
+		refTables = new std::stack<std::map<std::string, int> >();
+	}
+	else {//Set to NULL so no problems when deleteing
+		parForVars = NULL;
+		scopes = NULL;
+		refTables = NULL;
+		globRefTable = NULL;
+	}
+
+}
+
+TetraContext::TetraContext(const TetraContext& other) {
+	//std::cout <<"S%^DUBHTUTRHVTYUINFU"<<endl;
+	assert(false);
 }
 
 void TetraContext::initializeGlobalVars(const Node * tree) {
@@ -122,7 +147,7 @@ void TetraContext::initializeGlobalVars(const Node * tree) {
 			//If debugging is enabled, register the name of the global in the global reference lookup table
 			if(TetraEnvironment::isDebugMode()) {
 				Node* id = candidate->child(0);
-				globRefTable[id->getString()] = id->getInt();
+				(*globRefTable)[id->getString()] = id->getInt();
 			}
 			
 			//perform assignment at this global scope
@@ -164,7 +189,17 @@ void TetraContext::branchOff(const scope_ptr baseScope, scope_ptr* globals) {
 	//assert(progStack.size() == 0);
 	progStack.push(newScopePtr);
 	globalScope=globals;
+
+	//Debug variables should already be initialized
+	/*if(TetraEnvironment::isDebugMode()) {
+		parForVars = new std::vector<std::string>();
+		scopes = new std::stack<const Node*>();
+		globRefTable = new std::map<std::string, int>();
+		refTables = new std::stack<std::map<std::string, int> >();
+	}*/
 	//cout << "X after branch: " <<  *(lookupVar<TArray>("x")) << endl;;
+
+
 }
 
 //destroys the current scope, returning to the previously initialized scope
@@ -173,12 +208,19 @@ void TetraContext::exitScope() {
 }
 
 //If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
-/*TetraContext::~TetraContext() {
-	while(!progStack.empty()) {
-		progStack.pop();
-	}
+TetraContext::~TetraContext() {
+
+	//Delete the debug variables if they have been initialized
+	delete parForVars;
+	delete globRefTable;
+	delete refTables;
+	delete scopes;
+//	while(!progStack.empty()) {
+//		progStack.pop();
+//	}
 }
 
+/*
 TData<void*>& TetraContext::declareReference(const string varName) {
 	return progStack.top()->declareReference(varName);
 }
@@ -193,6 +235,8 @@ scope_ptr& TetraContext::getScopeRef() {
 
 TetraContext& TetraContext::operator=(const TetraContext& other){
 	progStack = other.progStack;
+	cout <<"This gets called??"<<endl;
+	assert(false);
 	return *this;
 }
 
@@ -286,7 +330,7 @@ bool TetraContext::isParallelForVariable(std::string varName) {
 	bool isParallelFor = false;
 	pthread_mutex_lock(&parallelList_mutex);
 	{
-		isParallelFor = (std::find(parForVars.begin(), parForVars.end(), varName) != parForVars.end());
+		isParallelFor = (std::find(parForVars->begin(), parForVars->end(), varName) != parForVars->end());
 	}
 	pthread_mutex_unlock(&parallelList_mutex);
 	
@@ -298,19 +342,18 @@ bool TetraContext::isParallelForVariable(std::string varName) {
 //Returns an untyped pointer to a given variable
 //Returns NULL if not found
 void* TetraContext::fetchVariable(std::string s) {
-
-        const std::map<std::string,int>& refTable = refTables.top();
+        const std::map<std::string,int>& refTable = refTables->top();
 
 	if(isParallelForVariable(s)) {
 		//lookup type doesn;t really matter, it will be cast back into a void*, then recast to the correct type
 		return lookupVar<int*>(s);
 	}
-        else if(globRefTable.find(s) != globRefTable.end()) {
+        else if(globRefTable->find(s) != globRefTable->end()) {
                 //Return a pointer to the requested variable
                 //Interface requires passing a node pointer
                 //Note that although there is a global variable, their was never any mangling of the number (making it negative), so we are fine passing in the normal number without multiplying it by -1
                 Node x(NODE_IDENTIFIER);
-                x.setIntval(globRefTable.find(s)->second);
+                x.setIntval(globRefTable->find(s)->second);
                 x.setStringval(s);
 
 		//lookupVar requies some type. We will be casting the pointer 'correctly' later
@@ -351,18 +394,18 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
 
 	//We might need to push a new table to the stack, or add a new entry to the present table
         if(node->kind() == NODE_FUNCTION) {
-                refTables.push(std::map<std::string,int>());
+                refTables->push(std::map<std::string,int>());
                 //Push the formal params on
                 Node* paramNode = node->child(0);
 
                 //The variables should not yet exist
                 while(paramNode->kind() == NODE_FORMAL_PARAM_LIST) {
-                        refTables.top()[paramNode->child(0)->getString()] = paramNode->child(0)->getInt();
+                        refTables->top()[paramNode->child(0)->getString()] = paramNode->child(0)->getInt();
                         paramNode = paramNode->child(1);
                 }
                 //Push on final parameter (if it exists)
                 if(paramNode->kind() == NODE_FORMAL_PARAM) {
-                        refTables.top()[paramNode->getString()] = paramNode->getInt();
+                        refTables->top()[paramNode->getString()] = paramNode->getInt();
                 }
 
         }	//Should not attempt to register parallel for variables!
@@ -377,9 +420,9 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
                 //print(x)
 
                 //Check if the variable already exists
-                if(globRefTable.find(node->getString()) == globRefTable.end() && refTables.top().find(node->getString()) == refTables.top().end() && !isParallelForVariable(node->getString())){
+                if(globRefTable->find(node->getString()) == globRefTable->end() && refTables->top().find(node->getString()) == refTables->top().end() && !isParallelForVariable(node->getString())){
                         //std::cout << "Registered: " <<node->getString() << " at " << node->getInt()<<endl;
-                        refTables.top()[node->getString()] = node->getInt();
+                        refTables->top()[node->getString()] = node->getInt();
                 }
         }
 
@@ -392,9 +435,9 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
 			
                         //Make sure the var has not already been registered
                         //cout << node->child(0)->getString() <<"!!!!!!!" << endl;
-                        if(globRefTable.find(node->child(0)->getString()) == globRefTable.end() && refTables.top().find(node->child(0)->getString()) == refTables.top().end()){
+                        if(globRefTable->find(node->child(0)->getString()) == globRefTable->end() && refTables->top().find(node->child(0)->getString()) == refTables->top().end()){
                                 //std::cout << "Registered: " <<node->child(0)->getString() << " at " << node->child(0)->getInt()<<endl;
-                                refTables.top()[node->child(0)->getString()] = node->child(0)->getInt();
+                                refTables->top()[node->child(0)->getString()] = node->child(0)->getInt();
                         }
                 }
         }
@@ -407,9 +450,9 @@ void TetraContext::registerParallelForVariable(std::string varName) {
 	{
 		//there is a possibility that this variable might be 'instantiated' many times within the same context.
 		//Therefore we will check for repeats
-		if(std::find(parForVars.begin(),parForVars.end(),varName) == parForVars.end()) {
+		if(std::find(parForVars->begin(),parForVars->end(),varName) == parForVars->end()) {
 			
-			parForVars.push_back(varName);
+			parForVars->push_back(varName);
 		}
 
 	}
@@ -419,6 +462,6 @@ void TetraContext::registerParallelForVariable(std::string varName) {
 
 //When leaving a scope, pops the table of string references
 void TetraContext::popReferenceTable() {
-        refTables.pop();
+        refTables->pop();
 }
 

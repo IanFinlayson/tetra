@@ -1009,14 +1009,14 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 template<typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
-if(TetraEnvironment::isDebugMode()) {
+	if(TetraEnvironment::isDebugMode()) {
 //#ifdef USE_OBSERVER
 	//If we have encountered a new variable or new scope, context should be expolicitely notified here
-	context.updateVarReferenceTable(node);
+		context.updateVarReferenceTable(node);
 	//Notify the observer that we are about to execute a new node
-	TetraEnvironment::getObserver().notify_E(node,context);
+		TetraEnvironment::getObserver().notify_E(node,context);
 //#endif
-}
+	}
 
 	//Call the appropriate function based on the NodeKind of the node
 	switch(node->kind()) {
@@ -1098,16 +1098,16 @@ if(TetraEnvironment::isDebugMode()) {
 			throw e;
 	}
 
-if(TetraEnvironment::isDebugMode()){
+	if(TetraEnvironment::isDebugMode()){
 //#ifdef USE_OBSERVER
 	//If we are exiting a scope, (i.e. just completed execution of a NODE_FUNCTION
 	//notify the context so it can pop its current symbol lookup table
-	if(node->kind() == NODE_FUNCTION) {
-		TetraEnvironment::getObserver().leftScope_E(context);
-		context.popReferenceTable();
-	}
+		if(node->kind() == NODE_FUNCTION) {
+			TetraEnvironment::getObserver().leftScope_E(context);
+			context.popReferenceTable();
+		}
 //#endif
-}
+	}
 
 }
 

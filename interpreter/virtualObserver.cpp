@@ -1,5 +1,5 @@
 #include"backend.hpp"
-
+/*
 //Returns an untyped pointer to a given variable
 //Returns NULL if not found
 void* VirtualObserver::fetchVariable(std::string s, TetraContext& context) const {
@@ -29,7 +29,7 @@ void* VirtualObserver::fetchVariable(std::string s, TetraContext& context) const
 	else {
 		return NULL;
 	}
-
+*/
 /*	if(context.getGlobalScopeRef()->containsVar(s)) {
 		return context.getGlobalScopeRef()->lookupVar<void*>(s);
 	}
@@ -39,7 +39,7 @@ void* VirtualObserver::fetchVariable(std::string s, TetraContext& context) const
 	else {	//Not found (variable does not exist at current scope)
 		return NULL;
 	}*/
-}
+//}
 
 //Since the basic interpreter abstracts away the variable names, while in debug mode,
 //the observer needs to keep a reference table whenever entering or leaving a scope so that
@@ -51,7 +51,7 @@ void* VirtualObserver::fetchVariable(std::string s, TetraContext& context) const
 //when they are encountered in the interpreter. A prebuilt table for the scope cannot
 //reflect that different variables may have been initialized at different locations or
 //logicl paths
-void VirtualObserver::updateVarReferenceTable(const Node* node) {
+/*void VirtualObserver::updateVarReferenceTable(const Node* node) {
 
 	//We might need to push a new table to the stack, or add a new entry to the present table
 	if(node->kind() == NODE_FUNCTION) {
@@ -107,4 +107,4 @@ void VirtualObserver::popReferenceTable() {
 	refTables.pop();
 }
 
-
+*/

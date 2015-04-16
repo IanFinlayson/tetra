@@ -47,7 +47,7 @@ struct evalArgs {
 	evalArgs(const Node* pNode, TData<T>& pRet, scope_ptr pScope, scope_ptr* pGlobal, TetraContext* pContext) :
 		node(pNode), ret(pRet), scope(pScope), globalScope(pGlobal),debugCarrier(pContext)
 	{
-		//do nothing
+	//	cout << "This gets called!"<<endl;//do nothing
 	}
 };
 
@@ -154,7 +154,7 @@ void wrapMultiEvaluation(void* args) {
 
 		//TODO fix race condition as of 11/10/14
 		//This is expected to be a parallel variable
-		*(argList.args_ptr->scope->template lookupVar<T>(*(argList.varName_ptr))) = *static_cast<T*>((argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
+		(*(argList.args_ptr->scope)->template lookupVar<T>(*(argList.varName_ptr))) = *static_cast<T*>((argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
 
 		//string x = *(argList.varName_ptr
 		//T* temp = argList.args_->ptr->scope->template lookupVar<T>(namer);

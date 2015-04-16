@@ -111,7 +111,7 @@ DEBUG:
 	make -e
 
 OPTIMIZED:
-	rm *.o
+	rm -f *.o
 	@echo $(OPTIMIZE_MODE)
 	$(eval FLAGS += $(OPTIMIZE_MODE))
 	@echo $(FLAGS)

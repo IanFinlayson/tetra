@@ -194,6 +194,7 @@ TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
 	//if the data points to something, we must perform a deep copy
 	if(other.pointedTo != TYPE_VOID) {
 		//Must typecheck to see what we must delete, and what we must allocate
+		//std::cout << "Utilizing new" << std::endl;
 		switch(other.pointedTo.getKind()) {
 			case TYPE_INT:
 				delete static_cast<int*>(data);
