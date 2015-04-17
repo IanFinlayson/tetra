@@ -31,6 +31,7 @@ int main(int argc, char** argv) {
 	TetraEnvironment::initialize(console);
 	TetraEnvironment::setObserver(observer);
 
+	TetraEnvironment::setMaxThreads(8);
 
 	//cout << &observer << endl;
 	//cout << &(TetraEnvironment::getObserver()) << endl;

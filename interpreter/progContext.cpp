@@ -132,10 +132,10 @@ TetraContext::TetraContext(long tID) {
 
 }
 
-TetraContext::TetraContext(const TetraContext& other) {
+/*TetraContext::TetraContext(const TetraContext& other) {
 	//std::cout <<"S%^DUBHTUTRHVTYUINFU"<<endl;
 	assert(false);
-}
+}*/
 
 void TetraContext::initializeGlobalVars(const Node * tree) {
 

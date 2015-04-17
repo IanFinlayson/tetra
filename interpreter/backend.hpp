@@ -1214,7 +1214,7 @@ public:
 	TetraContext();
 	TetraContext(long);
 
-	TetraContext(const TetraContext&);
+//	TetraContext(const TetraContext&);
 
 	~TetraContext();
 
