@@ -9,20 +9,26 @@ For clarity, whenever this documentation uses "the program", it refers to the te
 
 ```cpp
 static void initialize()
-static void initialize(const VirtualConsole&)
+static void initialize(const ConsoleArray&)
 ```
 
-sets up the environment with default values. Any program utilizing the interpreter should call this method. The second version also sets the given console for the environment (For more on Consoles, see the VirtualConsole documentation).
+sets up the environment with default values. Any program utilizing the interpreter should call this method. The second version also sets the given ConsoleArray for the environment (For more on Consoles, see the ConsoleArray and VirtualConsole documentation).
 
 ```cpp
-static void setConsole(const virtualConsole&)
-static const VirtualConsole& getConsole()
+static void setConsoleArray(const ConsoleArray&)
+static const ConsoleArray& getConsoleArray()
 ```
 
-These methods explicitely get and set the console for the TetraEnvironment.
+These methods explicitely get and set the ConsoleArray for the TetraEnvironment.
 
 ```cpp
-static void setObserver(const virtualObserver&)
+static const VirtualConsole& getConsole(int, bool)
+```
+
+This method gets a specific console according to the policy of the set ConsoleArray.
+
+```cpp
+static void setObserver(const VirtualObserver&)
 static VirtualObserver& getObserver()
 ```
 
@@ -37,7 +43,23 @@ static void setMaxThreads(int)
 gets and sets the number of threads that should be started when a parallel for-loop is initialized.
 
 ```cpp
-static void 
+static void setDebug(bool)
+static bool isDebugMode()
+```
+
+These methods are used to set and query whether or not the interpreter is set to keep track of debug information, and notify the debugger during execution.
+
+```cpp
+static std::string parseFlags(std::string*,int)
+```
+
+This method takes an array of flags (represented as strings) and the length of the arrays. It essentially takes raw command-line arameters, and makes the requested changes to the interpreter. (as of 4/24/15, the only flag supported is debugging). If there is an error parsing, a message is returned. Otherwise, the method returns "". 
+
+```cpp
+static int obtainNewThreadID();
+```
+
+Each time this method is called, a new integer is returned (0, then 1, then 2, etc) in a threadsafe manner. Used to assign numeric IDs to threads.
 
 
 ###TData<T>
@@ -160,14 +182,14 @@ template <typename T>
 T* lookupVar(string varName)
 T* lookupVar(const Node* varNode)
 ```
-to get the pointer to the variable referenced by varName, or the variable enumerated by the given node (which should be of type NODE_IDENTIFIER). If no such variable exists in the current scope, it will be created and initialized to a default value of 0, false, "", or [] depending on the type. Note that you must supply the type of the variable you are referencing. This can usually be obtained by getting the DataType of the node which the interpreter is examining.
+to get the pointer to the variable enumerated by the given node(which should be of type NODE_IDENTIFIER). Use the string version for parallel-for variables, and the int version for all other variables (the reasoning behin this is unfortunate, and is a target for refactoring). If no such variable exists in the current scope, the int version will create and initializ the variable to a default value of 0, false, "", or [] depending on the type. The string version will simply fail an assertion, since parallel for variables should be initialized in another way (See the TetraContext class). Note that you must supply the type of the variable you are referencing. This can usually be obtained by getting the DataType of the node which the interpreter is examining.
 
 ```cpp
 bool conatinsVar(const std::string varname) const
 bool containsVar(const Node*varNode) const
 ```
 
-These methods state whether or not the scope contains the variable denoted by the string/node is contained within this scope.
+These methods state whether or not the scope contains the variable denoted by the string/node is contained within this scope. Similar to lookupVar, the string version should be used for parallel for variables, and the int version for all others.
 
 The TetraScope class uses an enumeration ExecutionStatus to keep track of special conditions the interpreter must account for when executing the program.
 
@@ -195,7 +217,14 @@ This value denotes that a NODE_RETURN (i.e. 'return' statement) was encountered,
 
 The TetraContext class wraps a stack of TetraScopes (explained below), and a TetraScope representing the global scope. A tetra program changes scope whenever it calls a function. It does not change scope when the program executes other blocks, such as if statements and while loops. There should exist exactly one TetraContext per executing thread of the program.
 
-The TetraContext only has a default constructor.
+The TetraContext has a default constructor which initializes no data.
+Slightly more useful is the constructor:
+
+```cpp
+TetraContext(long)
+```
+
+which initializes the scope with a given numeric ID (i.e. thread ID)
 
 Once the Tetra Context has been default-constructed, you can call the method
 
@@ -288,6 +317,41 @@ void endParallel()
 ```
 
 to initialize a ThreadPool, add threads to the pool, and join with the threads in the ThreadPool. ThreadPools started with startParallel are destroyrd via endParallel on a LIFO basis.
+
+On the note of threads, the method
+
+```cpp
+long getThreadID()
+```
+
+can be used to get the numerical ID of this context.
+
+When debugging is enabled, the TetraContext will keep track of certain information. This information can be accessed via the following methods:
+
+```cpp
+int getLastLineNum()
+void* fetchVariable(std::string)
+std::map<std::string, int>& getRefTable()
+std::map<std::string, int>& getGlobRefTable()
+bool isParallelForVariable(std::string)
+void registerParallelForVariable(std::string)
+void updateVarReferenceTable(const Node*)
+void popReferenceTable()
+```
+
+getLastLineNum() returns the last line of source code that the context evaluated. fetchVariable() is used to get a pointer to a variable by name. It returns NULL if the variable does not exist. The next two methods are used to get the types of variables by name, so the pointer returned by fetchVariable can be casted to the appropriate type. The isParallelFor function is used to query whether a string identifies a parallel for variable or not. The last three methods are used internally to notify the TetraContext of changes in the program, being the creation of a parallel for variable, the evaluation of a node, and the exiting of a function respectively.
+
+
+While debugging, the TetraContext also maintains flags and values about its current state. The following are getter and setter methods for those values.
+
+```cpp
+bool getStepping()		void setStepping(bool)
+bool getStopAtNext()		void setStopAtNext(bool)
+bool getResume()		void setResume(bool)
+ThreadStatus getRunStatus()	void setRunStatus(ThreadStatus)
+```
+
+The three methods represent three flags which a=can be modified and queried by the other parts of the program. Debuggers can use this information to control how the context executes. The last methods set and query an enum of whether the thread is RUNNING, WAITING, or STOPPED.
 
 Lastly, the class provides the method
 
@@ -458,6 +522,43 @@ The node can be accessed by calling
 ```cpp
 Node* getNode()
 ```
+###ConsoleArray
+
+The ConsoleArray class is a class used for the interpreter to manage multiple windows of input. As of 4/24/15, it is untested for multiple windows, but the functionality does not hurt single-window execution.
+
+The ConsoleArray class works by maintaining a list of VirtualConsoles. These consoles each get certain threading primitives associated with them according to a user specified policy. That policy is of the form int (policy)(int, bool). Given the threadID and whether or not the message is coming from a debug prompt or not, the user-specified policy should point to the appropriate console number.
+
+To construct a new ConsoleArray, use
+
+```cpp
+ConsoleArray()
+ConsoleArray(int (...)(int,bool)
+```
+
+The latter sets the console policy for the array.
+
+To register a new console, use
+```cpp
+int registerConsole(VirtualConsole&)
+```
+The integer returned will be the numeric identifier of the console according to the ConsoleArray. In other words, if the programmer registers console A, and the function returns 2, then the policy function for the console should return 2 in whatever case console A should be used.
+
+To get the a console, use
+```cpp
+VirtualConsole& getSpecifiedConsole(int, bool) const
+```
+where int is the thread number, and bool is true if the use of the console is debugging-related.
+
+As mentioned above, the ConsoleArray maintains threading primitives associated with each console. However, it is up to the programmer to properly use these primitives. That is, the ConsoleArray class will not automaticallt limit access to any given console to a single thread, since that is not always the desired bahavior. The ConsoleArray wraps calls to these primitives as follows:
+
+```cpp
+void obtainConsoleMutex(int,bool) const
+void releaseonsoleMutex(int,bool) const
+void waitOnCondition(int,bool) const
+void broadcastCondition(int,bool) const
+```
+
+These methods invoke the ConsoleArray's Console policy to obtain the appropriate primitive. The calls are anaologous to mutex_lock, mutex_release, condition_wait, and condition_broadcast respectively.
 
 ###VirtualConsole
 
@@ -490,12 +591,6 @@ virtual void leftScope_E() = 0
 ```
 
 The interpreter calls this method immediately after exiting a scope (i.e. returning from a function), but before calling notify_E for the next node. Some implementations of a debugger may not need this functionality, in which case the method can be stubbed.
-
-```cpp
-void* fetchVariable(std::string name, TetraContext& context) const
-```
-
-This method is implemented in VirtualObserver as a convenience. The method checks the current scope and global scope for a variable with name "name". If such a variable exists, it returns a pointer to its value. If it does not exist or has not been initialized, it returns NULL. Note that this method does not provide the type of the variable, so some other way will need to be used to get its type.
 
 #####A Word About the testProgs Directory
 The interpreter folder contains a series of tetra programs, and a shell script that executes each program and tests its return value against a list of expected return values. Going to this directory and executing "sh runTests.sh" will execute all the test programs, and give information about the successfailure of each program. This can be used as a quick check to insure that changes to the interpreter did not break previous functionality. To add additional tests, create a file called [*]Test.ttr, copy and paste one of the lines in the shell script defining the test cases, and fill in the values of [*] for the name and the expected return value.
