@@ -67,6 +67,9 @@ public:
 	void leftScope_E(TetraContext& context);
 	bool remove_E(int);
 	void setYieldEnabled(bool);
+
+	//Returns a list of linenumbers of stopped threads
+	std::vector<int> getThreadLocations();
 };
 
 #endif

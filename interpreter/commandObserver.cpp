@@ -355,7 +355,7 @@ else {
 						else {	
 							bool success = false;
 							//Note that this method is threadsafe
-							remove_E(lineNo);
+							success = remove_E(lineNo);
 
 							pthread_mutex_unlock(&breakList_mutex);
 							std::stringstream confirmationMessage;
@@ -564,4 +564,19 @@ void CommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
 
 void CommandObserver::setYieldEnabled(bool enable) {
 	yieldEnabled = enable;
+}
+
+std::vector<int> CommandObserver::getThreadLocations(){
+	std::vector<int> ret;
+	pthread_mutex_lock(&context_mutex);
+	{
+		for(std::list<TetraContext*>::iterator context = threadContexts.begin(); context != threadContexts.end();context++){
+			if((*context)->getRunStatus() == STOPPED){
+				ret.push_back((*context)->getLastLineNo());
+			}
+		}
+	}
+	pthread_mutex_unlock(&context_mutex);
+	return ret;
+
 }
