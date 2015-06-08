@@ -1,7 +1,8 @@
-def process(i int):
-  pass
+
 
 
 def main( ):
   parallel for i in [1 ... 100]:
-    process(i)
+    print(i * i, "\n")
+
+

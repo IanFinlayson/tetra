@@ -3,7 +3,7 @@
 
 class Debugger
 {
-public:
+  public:
     Debugger();
 };
 

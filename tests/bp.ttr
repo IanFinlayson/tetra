@@ -1,0 +1,10 @@
+
+
+def main( ) int:
+  parallel:
+    x = 0
+    y = 2
+  return 0
+
+
+
