@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created by: The Qt Meta Object Compiler version 67 (Qt 5.3.0)
+** Created by: The Qt Meta Object Compiler version 67 (Qt 5.4.1)
 **
 ** WARNING! All changes made in this file will be lost!
 *****************************************************************************/
@@ -12,7 +12,7 @@
 #if !defined(Q_MOC_OUTPUT_REVISION)
 #error "The header file 'mainwindow.h' doesn't include <QObject>."
 #elif Q_MOC_OUTPUT_REVISION != 67
-#error "This file was generated using the moc from 5.3.0. It"
+#error "This file was generated using the moc from 5.4.1. It"
 #error "cannot be used with the include files from this version of Qt."
 #error "(The moc has changed too much.)"
 #endif
@@ -29,41 +29,42 @@ struct qt_meta_stringdata_MainWindow_t {
     )
 static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_MainWindow = {
     {
-QT_MOC_LITERAL(0, 0, 10),
-QT_MOC_LITERAL(1, 11, 23),
-QT_MOC_LITERAL(2, 35, 0),
-QT_MOC_LITERAL(3, 36, 23),
-QT_MOC_LITERAL(4, 60, 23),
-QT_MOC_LITERAL(5, 84, 24),
-QT_MOC_LITERAL(6, 109, 22),
-QT_MOC_LITERAL(7, 132, 23),
-QT_MOC_LITERAL(8, 156, 23),
-QT_MOC_LITERAL(9, 180, 24),
-QT_MOC_LITERAL(10, 205, 25),
-QT_MOC_LITERAL(11, 231, 29),
-QT_MOC_LITERAL(12, 261, 22),
-QT_MOC_LITERAL(13, 284, 23),
-QT_MOC_LITERAL(14, 308, 29),
-QT_MOC_LITERAL(15, 338, 4),
-QT_MOC_LITERAL(16, 343, 27),
-QT_MOC_LITERAL(17, 371, 31),
-QT_MOC_LITERAL(18, 403, 31),
-QT_MOC_LITERAL(19, 435, 22),
-QT_MOC_LITERAL(20, 458, 23),
-QT_MOC_LITERAL(21, 482, 19),
-QT_MOC_LITERAL(22, 502, 17),
-QT_MOC_LITERAL(23, 520, 11),
-QT_MOC_LITERAL(24, 532, 22),
-QT_MOC_LITERAL(25, 555, 7),
-QT_MOC_LITERAL(26, 563, 34),
-QT_MOC_LITERAL(27, 598, 28),
-QT_MOC_LITERAL(28, 627, 15),
-QT_MOC_LITERAL(29, 643, 7),
-QT_MOC_LITERAL(30, 651, 18),
-QT_MOC_LITERAL(31, 670, 18),
-QT_MOC_LITERAL(32, 689, 8),
-QT_MOC_LITERAL(33, 698, 6),
-QT_MOC_LITERAL(34, 705, 25)
+QT_MOC_LITERAL(0, 0, 10), // "MainWindow"
+QT_MOC_LITERAL(1, 11, 23), // "on_actionCopy_triggered"
+QT_MOC_LITERAL(2, 35, 0), // ""
+QT_MOC_LITERAL(3, 36, 23), // "on_actionSave_triggered"
+QT_MOC_LITERAL(4, 60, 23), // "on_actionOpen_triggered"
+QT_MOC_LITERAL(5, 84, 24), // "on_actionPrint_triggered"
+QT_MOC_LITERAL(6, 109, 22), // "on_actionCut_triggered"
+QT_MOC_LITERAL(7, 132, 23), // "on_actionUndo_triggered"
+QT_MOC_LITERAL(8, 156, 23), // "on_actionRedo_triggered"
+QT_MOC_LITERAL(9, 180, 24), // "on_actionPaste_triggered"
+QT_MOC_LITERAL(10, 205, 25), // "on_actionDelete_triggered"
+QT_MOC_LITERAL(11, 231, 29), // "on_actionSelect_All_triggered"
+QT_MOC_LITERAL(12, 261, 22), // "on_actionNew_triggered"
+QT_MOC_LITERAL(13, 284, 23), // "on_actionFind_triggered"
+QT_MOC_LITERAL(14, 308, 29), // "on_actionLine_Numbers_toggled"
+QT_MOC_LITERAL(15, 338, 4), // "arg1"
+QT_MOC_LITERAL(16, 343, 27), // "on_actionMinimize_triggered"
+QT_MOC_LITERAL(17, 371, 31), // "on_actionLine_Numbers_triggered"
+QT_MOC_LITERAL(18, 403, 31), // "on_actionClear_Output_triggered"
+QT_MOC_LITERAL(19, 435, 22), // "on_actionDebug_toggled"
+QT_MOC_LITERAL(20, 458, 23), // "on_actionStop_triggered"
+QT_MOC_LITERAL(21, 482, 19), // "documentWasModified"
+QT_MOC_LITERAL(22, 502, 17), // "updateCoordinates"
+QT_MOC_LITERAL(23, 520, 11), // "exitRunMode"
+QT_MOC_LITERAL(24, 532, 22), // "on_actionRun_triggered"
+QT_MOC_LITERAL(25, 555, 7), // "checked"
+QT_MOC_LITERAL(26, 563, 34), // "on_actionExit_Debug_Mode_trig..."
+QT_MOC_LITERAL(27, 598, 28), // "on_actionTab_Width_triggered"
+QT_MOC_LITERAL(28, 627, 15), // "newThreadWindow"
+QT_MOC_LITERAL(29, 643, 7), // "Editor*"
+QT_MOC_LITERAL(30, 651, 18), // "activeThreadWindow"
+QT_MOC_LITERAL(31, 670, 18), // "setActiveSubWindow"
+QT_MOC_LITERAL(32, 689, 8), // "QWidget*"
+QT_MOC_LITERAL(33, 698, 6), // "window"
+QT_MOC_LITERAL(34, 705, 25) // "on_actionResume_triggered"
+
     },
     "MainWindow\0on_actionCopy_triggered\0\0"
     "on_actionSave_triggered\0on_actionOpen_triggered\0"
@@ -219,7 +220,7 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
 
 const QMetaObject MainWindow::staticMetaObject = {
     { &QMainWindow::staticMetaObject, qt_meta_stringdata_MainWindow.data,
-      qt_meta_data_MainWindow,  qt_static_metacall, 0, 0}
+      qt_meta_data_MainWindow,  qt_static_metacall, Q_NULLPTR, Q_NULLPTR}
 };
 
 
@@ -230,7 +231,7 @@ const QMetaObject *MainWindow::metaObject() const
 
 void *MainWindow::qt_metacast(const char *_clname)
 {
-    if (!_clname) return 0;
+    if (!_clname) return Q_NULLPTR;
     if (!strcmp(_clname, qt_meta_stringdata_MainWindow.stringdata))
         return static_cast<void*>(const_cast< MainWindow*>(this));
     return QMainWindow::qt_metacast(_clname);

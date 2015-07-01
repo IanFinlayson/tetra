@@ -10,7 +10,7 @@ void Debugger::debugFile(){
     qDebug() << "HERE";
     Node* newNode;
     Console console(this->mainWindow);
-    TetraEnvironment::initialize(console);
+    //TetraEnvironment::initialize(console);
     qDebug() << "1";
 
     TetraEnvironment::setObserver(debugger);
@@ -19,7 +19,7 @@ void Debugger::debugFile(){
     try{
         qDebug() << "1";
          qDebug() << "2";
-        TetraEnvironment::getObserver().step_E();
+        //TetraEnvironment::getObserver().step_E();
         qDebug() << "3";
         interpret(newNode);
         qDebug() << "4";

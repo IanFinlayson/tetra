@@ -16,8 +16,8 @@ void FileRunner::runFile(){
     TetraEnvironment::setObserver(debugger);
     qDebug() << "3";
 
-    TetraEnvironment::initialize(console);
-    qDebug() << "4";
+    //TetraEnvironment::initialize(console);
+    //qDebug() << "4";
 
     try{
         newNode = parseFile(mainWindow->getOpenFile().toStdString());

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.3.0
+** Created by: Qt User Interface Compiler version 5.4.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -317,7 +317,7 @@ public:
         userInput = new QPlainTextEdit(centralWidget);
         userInput->setObjectName(QStringLiteral("userInput"));
 
-        //verticalLayout_2->addWidget(userInput);
+        verticalLayout_2->addWidget(userInput);
 
         pushButton = new QPushButton(centralWidget);
         pushButton->setObjectName(QStringLiteral("pushButton"));
