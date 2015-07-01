@@ -10,15 +10,16 @@
 #include <QSignalMapper>
 #include "syntaxhighlighter.h"
 #include "filerunner.h"
-#include "debugger.h"
 #include "../frontend/frontend.hpp"
 #include "../interpreter/backend.hpp"
+//#include "debugwindow.h"
 
 class Editor;
 class FileRunner;
-class Debugger;
+class DebugWindow;
 QT_BEGIN_NAMESPACE
 class QPrinter;
+class Console;
 QT_END_NAMESPACE
 
 namespace Ui {
@@ -34,7 +35,6 @@ public:
     ~MainWindow();
     bool openProject();
     bool newProject();
-    void showEditor();
     QString getOpenFile();
     void setMainValue(int);
     void setBuildSuccessful(bool);
@@ -44,11 +44,11 @@ public:
     void debugMode(bool);
     void runFile();
     void quit();
-    void setTabWidth(int tabWidth);
 
     void printOutput(QString);
     std::string getUserInput();
-
+    QStatusBar getStatusBar();
+    void setConsole(Console);
 private slots:
     void on_actionCopy_triggered();
     void on_actionSave_triggered();
@@ -76,24 +76,31 @@ private slots:
     void on_actionExit_Debug_Mode_triggered();
     void on_actionTab_Width_triggered();
 
-    Editor *newThreadWindow();
-    Editor *activeThreadWindow();
+    DebugWindow *newThreadWindow();
+    DebugWindow *activeThreadWindow();
     void setActiveSubWindow(QWidget *window);
 
+    void on_actionStep_triggered();
 
-    void on_actionResume_triggered();
+    void on_actionContinue_triggered();
+
+    void on_actionNext_triggered();
+
+    void on_actionSet_Breakpoint_triggered();
+
+    void on_actionRemove_Breakpoint_triggered();
 
 private:
     Ui::MainWindow *ui;
     QString openFile;
 
-    void hideDisplay();
+    void showDisplay(bool arg1);
+
     void setupEditor();
     void setupShortcuts();
 
     QSignalMapper *windowMapper;
     void setupThreadMdi();
-    
     
     Highlighter *highlighter;
 
@@ -105,13 +112,13 @@ private:
 
     QString mode;
     FileRunner *fileRunner;
-    Debugger *debugger;
     QThread *tetraThread;
 
-    int tabWidth;
+    void createStatusBar();
+    int projectTabWidth;
 
-
-
+    void hideUserInput(bool);
+    void simulateStdIn(QString);
 protected:
     void closeEvent(QCloseEvent *);
 
@@ -133,4 +140,6 @@ public:
     }
 };
 
+
 #endif // MAINWINDOW_H
+

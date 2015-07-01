@@ -14,14 +14,16 @@ done: tetra
 	@echo
 	@echo Build Completed
 
+
+
 #tetra: run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o
 #	$(CC) $(FLAGS) run.o main.o TSL.o functionTable.o nodeTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o $(SEARCHPATH)/libfrontend.a -o tetra	
 tetra: run.o libbackend.a
 	$(CC) $(FLAGS) run.o libbackend.a $(SEARCHPATH)/libfrontend.a -o tetra
 
 #create a linkable library letting other programs call interpret(Node* node)
-libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o virtualObserver.o consoleArray.o
-	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o virtualObserver.o consoleArray.o
+libbackend.a: main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o ideCommandObserver.o virtualObserver.o consoleArray.o
+	ar rcs libbackend.a main.o TSL.o functionTable.o progContext.o variableContext.o tDataSpecializations.o tArray.o threadEnvironment.o runtimeError.o systemError.o commandConsole.o tetraEnvironment.o commandObserver.o ideCommandObserver.o virtualObserver.o consoleArray.o
 	@echo
 
 run.o: run.cpp main.cpp commandObserver.cpp
@@ -93,6 +95,11 @@ commandConsole.o: commandConsole.cpp backend.hpp commandConsole.h
 commandObserver.o: commandObserver.h commandObserver.cpp backend.hpp consoleArray.o
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c commandObserver.cpp
 	@echo
+
+ideCommandObserver.o: ideCommandObserver.h ideCommandObserver.cpp backend.hpp consoleArray.o
+	$(CC) $(FLAGS) -I$(SEARCHPATH) -c ideCommandObserver.cpp
+	@echo
+
 
 virtualObserver.o: virtualObserver.cpp backend.hpp
 	$(CC) $(FLAGS) -I$(SEARCHPATH) -c virtualObserver.cpp

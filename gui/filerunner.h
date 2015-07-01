@@ -20,8 +20,7 @@ signals:
     void finished();
 
 public slots:
-    void runFile();
-
+    void runFile(bool debug);
 };
 
 

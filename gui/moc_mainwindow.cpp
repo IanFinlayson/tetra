@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[35];
-    char stringdata[731];
+    QByteArrayData data[39];
+    char stringdata[857];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -58,12 +58,16 @@ QT_MOC_LITERAL(25, 555, 7), // "checked"
 QT_MOC_LITERAL(26, 563, 34), // "on_actionExit_Debug_Mode_trig..."
 QT_MOC_LITERAL(27, 598, 28), // "on_actionTab_Width_triggered"
 QT_MOC_LITERAL(28, 627, 15), // "newThreadWindow"
-QT_MOC_LITERAL(29, 643, 7), // "Editor*"
-QT_MOC_LITERAL(30, 651, 18), // "activeThreadWindow"
-QT_MOC_LITERAL(31, 670, 18), // "setActiveSubWindow"
-QT_MOC_LITERAL(32, 689, 8), // "QWidget*"
-QT_MOC_LITERAL(33, 698, 6), // "window"
-QT_MOC_LITERAL(34, 705, 25) // "on_actionResume_triggered"
+QT_MOC_LITERAL(29, 643, 12), // "DebugWindow*"
+QT_MOC_LITERAL(30, 656, 18), // "activeThreadWindow"
+QT_MOC_LITERAL(31, 675, 18), // "setActiveSubWindow"
+QT_MOC_LITERAL(32, 694, 8), // "QWidget*"
+QT_MOC_LITERAL(33, 703, 6), // "window"
+QT_MOC_LITERAL(34, 710, 23), // "on_actionStep_triggered"
+QT_MOC_LITERAL(35, 734, 27), // "on_actionContinue_triggered"
+QT_MOC_LITERAL(36, 762, 23), // "on_actionNext_triggered"
+QT_MOC_LITERAL(37, 786, 33), // "on_actionSet_Breakpoint_trigg..."
+QT_MOC_LITERAL(38, 820, 36) // "on_actionRemove_Breakpoint_tr..."
 
     },
     "MainWindow\0on_actionCopy_triggered\0\0"
@@ -84,9 +88,13 @@ QT_MOC_LITERAL(34, 705, 25) // "on_actionResume_triggered"
     "exitRunMode\0on_actionRun_triggered\0"
     "checked\0on_actionExit_Debug_Mode_triggered\0"
     "on_actionTab_Width_triggered\0"
-    "newThreadWindow\0Editor*\0activeThreadWindow\0"
-    "setActiveSubWindow\0QWidget*\0window\0"
-    "on_actionResume_triggered"
+    "newThreadWindow\0DebugWindow*\0"
+    "activeThreadWindow\0setActiveSubWindow\0"
+    "QWidget*\0window\0on_actionStep_triggered\0"
+    "on_actionContinue_triggered\0"
+    "on_actionNext_triggered\0"
+    "on_actionSet_Breakpoint_triggered\0"
+    "on_actionRemove_Breakpoint_triggered"
 };
 #undef QT_MOC_LITERAL
 
@@ -96,7 +104,7 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      28,   14, // methods
+      32,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -104,34 +112,38 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,  154,    2, 0x08 /* Private */,
-       3,    0,  155,    2, 0x08 /* Private */,
-       4,    0,  156,    2, 0x08 /* Private */,
-       5,    0,  157,    2, 0x08 /* Private */,
-       6,    0,  158,    2, 0x08 /* Private */,
-       7,    0,  159,    2, 0x08 /* Private */,
-       8,    0,  160,    2, 0x08 /* Private */,
-       9,    0,  161,    2, 0x08 /* Private */,
-      10,    0,  162,    2, 0x08 /* Private */,
-      11,    0,  163,    2, 0x08 /* Private */,
-      12,    0,  164,    2, 0x08 /* Private */,
-      13,    0,  165,    2, 0x08 /* Private */,
-      14,    1,  166,    2, 0x08 /* Private */,
-      16,    0,  169,    2, 0x08 /* Private */,
-      17,    0,  170,    2, 0x08 /* Private */,
-      18,    0,  171,    2, 0x08 /* Private */,
-      19,    1,  172,    2, 0x08 /* Private */,
-      20,    0,  175,    2, 0x08 /* Private */,
-      21,    0,  176,    2, 0x08 /* Private */,
-      22,    0,  177,    2, 0x08 /* Private */,
-      23,    0,  178,    2, 0x08 /* Private */,
-      24,    1,  179,    2, 0x08 /* Private */,
-      26,    0,  182,    2, 0x08 /* Private */,
-      27,    0,  183,    2, 0x08 /* Private */,
-      28,    0,  184,    2, 0x08 /* Private */,
-      30,    0,  185,    2, 0x08 /* Private */,
-      31,    1,  186,    2, 0x08 /* Private */,
-      34,    0,  189,    2, 0x08 /* Private */,
+       1,    0,  174,    2, 0x08 /* Private */,
+       3,    0,  175,    2, 0x08 /* Private */,
+       4,    0,  176,    2, 0x08 /* Private */,
+       5,    0,  177,    2, 0x08 /* Private */,
+       6,    0,  178,    2, 0x08 /* Private */,
+       7,    0,  179,    2, 0x08 /* Private */,
+       8,    0,  180,    2, 0x08 /* Private */,
+       9,    0,  181,    2, 0x08 /* Private */,
+      10,    0,  182,    2, 0x08 /* Private */,
+      11,    0,  183,    2, 0x08 /* Private */,
+      12,    0,  184,    2, 0x08 /* Private */,
+      13,    0,  185,    2, 0x08 /* Private */,
+      14,    1,  186,    2, 0x08 /* Private */,
+      16,    0,  189,    2, 0x08 /* Private */,
+      17,    0,  190,    2, 0x08 /* Private */,
+      18,    0,  191,    2, 0x08 /* Private */,
+      19,    1,  192,    2, 0x08 /* Private */,
+      20,    0,  195,    2, 0x08 /* Private */,
+      21,    0,  196,    2, 0x08 /* Private */,
+      22,    0,  197,    2, 0x08 /* Private */,
+      23,    0,  198,    2, 0x08 /* Private */,
+      24,    1,  199,    2, 0x08 /* Private */,
+      26,    0,  202,    2, 0x08 /* Private */,
+      27,    0,  203,    2, 0x08 /* Private */,
+      28,    0,  204,    2, 0x08 /* Private */,
+      30,    0,  205,    2, 0x08 /* Private */,
+      31,    1,  206,    2, 0x08 /* Private */,
+      34,    0,  209,    2, 0x08 /* Private */,
+      35,    0,  210,    2, 0x08 /* Private */,
+      36,    0,  211,    2, 0x08 /* Private */,
+      37,    0,  212,    2, 0x08 /* Private */,
+      38,    0,  213,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -161,6 +173,10 @@ static const uint qt_meta_data_MainWindow[] = {
     0x80000000 | 29,
     0x80000000 | 29,
     QMetaType::Void, 0x80000000 | 32,   33,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
 
        0        // eod
@@ -196,12 +212,16 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 21: _t->on_actionRun_triggered((*reinterpret_cast< bool(*)>(_a[1]))); break;
         case 22: _t->on_actionExit_Debug_Mode_triggered(); break;
         case 23: _t->on_actionTab_Width_triggered(); break;
-        case 24: { Editor* _r = _t->newThreadWindow();
-            if (_a[0]) *reinterpret_cast< Editor**>(_a[0]) = _r; }  break;
-        case 25: { Editor* _r = _t->activeThreadWindow();
-            if (_a[0]) *reinterpret_cast< Editor**>(_a[0]) = _r; }  break;
+        case 24: { DebugWindow* _r = _t->newThreadWindow();
+            if (_a[0]) *reinterpret_cast< DebugWindow**>(_a[0]) = _r; }  break;
+        case 25: { DebugWindow* _r = _t->activeThreadWindow();
+            if (_a[0]) *reinterpret_cast< DebugWindow**>(_a[0]) = _r; }  break;
         case 26: _t->setActiveSubWindow((*reinterpret_cast< QWidget*(*)>(_a[1]))); break;
-        case 27: _t->on_actionResume_triggered(); break;
+        case 27: _t->on_actionStep_triggered(); break;
+        case 28: _t->on_actionContinue_triggered(); break;
+        case 29: _t->on_actionNext_triggered(); break;
+        case 30: _t->on_actionSet_Breakpoint_triggered(); break;
+        case 31: _t->on_actionRemove_Breakpoint_triggered(); break;
         default: ;
         }
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
@@ -243,13 +263,13 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 28)
+        if (_id < 32)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 28;
+        _id -= 32;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 28)
+        if (_id < 32)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 28;
+        _id -= 32;
     }
     return _id;
 }

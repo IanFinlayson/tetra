@@ -20,12 +20,12 @@
    <property name="styleSheet">
     <string notr="true">background: rgb(255, 255, 255)</string>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout_2">
-    <item>
-     <widget class="QSplitter" name="splitter">
+   <layout class="QGridLayout" name="gridLayout_3">
+    <item row="0" column="0">
+     <widget class="QSplitter" name="mainSplitter">
       <property name="styleSheet">
        <string notr="true">QSplitter::handle{
-	background-color: white;
+background-color: white;
 }</string>
       </property>
       <property name="orientation">
@@ -89,66 +89,80 @@ border: 1px solid grey
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <item>
-         <widget class="QLabel" name="outputLabel">
-          <property name="text">
-           <string>Output:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QTextEdit" name="output">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="autoFillBackground">
-           <bool>false</bool>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QTextEdit{
+      <widget class="QSplitter" name="splitter">
+       <property name="styleSheet">
+        <string notr="true">QSplitter::handle{
+background-color: white;
+}</string>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QWidget" name="layoutWidget">
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QLabel" name="outputLabel">
+           <property name="text">
+            <string>Output:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="output">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QTextEdit{
 border: 1px solid grey;
 }</string>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Plain</enum>
-          </property>
-          <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAsNeeded</enum>
-          </property>
-          <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAsNeeded</enum>
-          </property>
-          <property name="sizeAdjustPolicy">
-           <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
-          </property>
-          <property name="lineWrapMode">
-           <enum>QTextEdit::WidgetWidth</enum>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="placeholderText">
-           <string/>
-          </property>
-         </widget>
-        </item>
-       </layout>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Plain</enum>
+           </property>
+           <property name="verticalScrollBarPolicy">
+            <enum>Qt::ScrollBarAsNeeded</enum>
+           </property>
+           <property name="horizontalScrollBarPolicy">
+            <enum>Qt::ScrollBarAsNeeded</enum>
+           </property>
+           <property name="sizeAdjustPolicy">
+            <enum>QAbstractScrollArea::AdjustToContentsOnFirstShow</enum>
+           </property>
+           <property name="lineWrapMode">
+            <enum>QTextEdit::WidgetWidth</enum>
+           </property>
+           <property name="readOnly">
+            <bool>true</bool>
+           </property>
+           <property name="placeholderText">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="layoutWidget">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPlainTextEdit" name="userInput"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="enterInputButton">
+           <property name="text">
+            <string>Enter</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QPlainTextEdit" name="userInput"/>
-    </item>
-    <item>
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>Enter</string>
-      </property>
      </widget>
     </item>
    </layout>
@@ -212,9 +226,14 @@ border: 1px solid grey;
      <string>Debug</string>
     </property>
     <addaction name="actionDebug"/>
-    <addaction name="actionResume"/>
-    <addaction name="actionPause"/>
     <addaction name="actionExit_Debug_Mode"/>
+    <addaction name="separator"/>
+    <addaction name="actionStep"/>
+    <addaction name="actionNext"/>
+    <addaction name="actionContinue"/>
+    <addaction name="actionSet_Breakpoint"/>
+    <addaction name="actionRemove_Breakpoint"/>
+    <addaction name="actionInterrupt"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -241,7 +260,7 @@ border: 1px solid grey;
     <bool>true</bool>
    </property>
    <property name="windowTitle">
-    <string>toolBar</string>
+    <string>Toolbar</string>
    </property>
    <property name="autoFillBackground">
     <bool>true</bool>
@@ -259,7 +278,7 @@ border: 1px solid grey;
     </size>
    </property>
    <property name="toolButtonStyle">
-    <enum>Qt::ToolButtonFollowStyle</enum>
+    <enum>Qt::ToolButtonIconOnly</enum>
    </property>
    <property name="floatable">
     <bool>false</bool>
@@ -283,11 +302,9 @@ border: 1px solid grey;
    <addaction name="actionDebug"/>
    <addaction name="actionExit_Debug_Mode"/>
    <addaction name="separator"/>
-   <addaction name="actionResume"/>
-   <addaction name="actionPause"/>
-   <addaction name="actionStep_Through"/>
-   <addaction name="actionStep_Over"/>
-   <addaction name="actionStep_Out"/>
+   <addaction name="actionStep"/>
+   <addaction name="actionNext"/>
+   <addaction name="actionContinue"/>
   </widget>
   <action name="actionSave">
    <property name="icon">
@@ -480,7 +497,7 @@ border: 1px solid grey;
     <string>Clear Output</string>
    </property>
   </action>
-  <action name="actionResume">
+  <action name="actionContinue">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -489,22 +506,10 @@ border: 1px solid grey;
      <normaloff>:/icons/Tetra Resources/icons/appbar.control.resume.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.resume.png</iconset>
    </property>
    <property name="text">
-    <string>Resume</string>
+    <string>Continue</string>
    </property>
   </action>
-  <action name="actionPause">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.control.pause.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.pause.png</iconset>
-   </property>
-   <property name="text">
-    <string>Pause</string>
-   </property>
-  </action>
-  <action name="actionStep_Through">
+  <action name="actionStep">
    <property name="enabled">
     <bool>false</bool>
    </property>
@@ -513,31 +518,10 @@ border: 1px solid grey;
      <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.into.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.into.png</iconset>
    </property>
    <property name="text">
-    <string>Step Through</string>
+    <string>Step</string>
    </property>
-  </action>
-  <action name="actionStep_Out">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.out.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.out.png</iconset>
-   </property>
-   <property name="text">
-    <string>Step Out</string>
-   </property>
-  </action>
-  <action name="actionStep_Over">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.over.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.over.png</iconset>
-   </property>
-   <property name="text">
-    <string>Step Over</string>
+   <property name="toolTip">
+    <string>Step</string>
    </property>
   </action>
   <action name="actionExit_Debug_Mode">
@@ -555,6 +539,42 @@ border: 1px solid grey;
   <action name="actionTab_Width">
    <property name="text">
     <string>Tab Width</string>
+   </property>
+  </action>
+  <action name="actionInterrupt">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Interrupt</string>
+   </property>
+  </action>
+  <action name="actionSet_Breakpoint">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Set Breakpoint</string>
+   </property>
+  </action>
+  <action name="actionRemove_Breakpoint">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Remove Breakpoint</string>
+   </property>
+  </action>
+  <action name="actionNext">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="AppResources.qrc">
+     <normaloff>:/icons/Tetra Resources/icons/appbar.navigate.next.png</normaloff>:/icons/Tetra Resources/icons/appbar.navigate.next.png</iconset>
+   </property>
+   <property name="text">
+    <string>Next</string>
    </property>
   </action>
  </widget>

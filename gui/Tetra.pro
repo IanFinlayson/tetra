@@ -22,7 +22,7 @@ SOURCES += main.cpp\
     syntaxhighlighter.cpp \
     editor.cpp \
     filerunner.cpp \
-    debugger.cpp
+    debugwindow.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -30,7 +30,7 @@ HEADERS  += \
     syntaxhighlighter.h \
     editor.h \
     filerunner.h \
-    debugger.h
+    debugwindow.h
 
 FORMS    += \
     mainwindow.ui \

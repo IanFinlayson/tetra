@@ -14,6 +14,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QGridLayout>
+#include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QMainWindow>
@@ -59,28 +60,32 @@ public:
     QAction *actionFull_Screen;
     QAction *actionLine_Numbers;
     QAction *actionClear_Output;
-    QAction *actionResume;
-    QAction *actionPause;
-    QAction *actionStep_Through;
-    QAction *actionStep_Out;
-    QAction *actionStep_Over;
+    QAction *actionContinue;
+    QAction *actionStep;
     QAction *actionExit_Debug_Mode;
     QAction *actionTab_Width;
+    QAction *actionInterrupt;
+    QAction *actionSet_Breakpoint;
+    QAction *actionRemove_Breakpoint;
+    QAction *actionNext;
     QWidget *centralWidget;
-    QVBoxLayout *verticalLayout_2;
-    QSplitter *splitter;
+    QGridLayout *gridLayout_3;
+    QSplitter *mainSplitter;
     QWidget *layoutWidget;
     QGridLayout *gridLayout;
     Editor *input;
     QLabel *tetraFileLabel;
     QLabel *cursorPosition;
     QMdiArea *threadMdi;
+    QSplitter *splitter;
     QWidget *layoutWidget1;
     QVBoxLayout *verticalLayout;
     QLabel *outputLabel;
     QTextEdit *output;
+    QWidget *layoutWidget2;
+    QHBoxLayout *horizontalLayout;
     QPlainTextEdit *userInput;
-    QPushButton *pushButton;
+    QPushButton *enterInputButton;
     QMenuBar *menuBar;
     QMenu *menuFile;
     QMenu *menuHelp;
@@ -182,58 +187,55 @@ public:
         actionLine_Numbers->setEnabled(true);
         actionClear_Output = new QAction(MainWindow);
         actionClear_Output->setObjectName(QStringLiteral("actionClear_Output"));
-        actionResume = new QAction(MainWindow);
-        actionResume->setObjectName(QStringLiteral("actionResume"));
-        actionResume->setEnabled(false);
+        actionContinue = new QAction(MainWindow);
+        actionContinue->setObjectName(QStringLiteral("actionContinue"));
+        actionContinue->setEnabled(false);
         QIcon icon8;
         icon8.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.control.resume.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionResume->setIcon(icon8);
-        actionPause = new QAction(MainWindow);
-        actionPause->setObjectName(QStringLiteral("actionPause"));
-        actionPause->setEnabled(false);
+        actionContinue->setIcon(icon8);
+        actionStep = new QAction(MainWindow);
+        actionStep->setObjectName(QStringLiteral("actionStep"));
+        actionStep->setEnabled(false);
         QIcon icon9;
-        icon9.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.control.pause.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionPause->setIcon(icon9);
-        actionStep_Through = new QAction(MainWindow);
-        actionStep_Through->setObjectName(QStringLiteral("actionStep_Through"));
-        actionStep_Through->setEnabled(false);
-        QIcon icon10;
-        icon10.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.debug.step.into.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionStep_Through->setIcon(icon10);
-        actionStep_Out = new QAction(MainWindow);
-        actionStep_Out->setObjectName(QStringLiteral("actionStep_Out"));
-        actionStep_Out->setEnabled(false);
-        QIcon icon11;
-        icon11.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.debug.step.out.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionStep_Out->setIcon(icon11);
-        actionStep_Over = new QAction(MainWindow);
-        actionStep_Over->setObjectName(QStringLiteral("actionStep_Over"));
-        actionStep_Over->setEnabled(false);
-        QIcon icon12;
-        icon12.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.debug.step.over.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionStep_Over->setIcon(icon12);
+        icon9.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.debug.step.into.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionStep->setIcon(icon9);
         actionExit_Debug_Mode = new QAction(MainWindow);
         actionExit_Debug_Mode->setObjectName(QStringLiteral("actionExit_Debug_Mode"));
         actionExit_Debug_Mode->setEnabled(false);
-        QIcon icon13;
-        icon13.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.bug.remove.png"), QSize(), QIcon::Normal, QIcon::Off);
-        actionExit_Debug_Mode->setIcon(icon13);
+        QIcon icon10;
+        icon10.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.bug.remove.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionExit_Debug_Mode->setIcon(icon10);
         actionTab_Width = new QAction(MainWindow);
         actionTab_Width->setObjectName(QStringLiteral("actionTab_Width"));
+        actionInterrupt = new QAction(MainWindow);
+        actionInterrupt->setObjectName(QStringLiteral("actionInterrupt"));
+        actionInterrupt->setEnabled(false);
+        actionSet_Breakpoint = new QAction(MainWindow);
+        actionSet_Breakpoint->setObjectName(QStringLiteral("actionSet_Breakpoint"));
+        actionSet_Breakpoint->setEnabled(false);
+        actionRemove_Breakpoint = new QAction(MainWindow);
+        actionRemove_Breakpoint->setObjectName(QStringLiteral("actionRemove_Breakpoint"));
+        actionRemove_Breakpoint->setEnabled(false);
+        actionNext = new QAction(MainWindow);
+        actionNext->setObjectName(QStringLiteral("actionNext"));
+        actionNext->setEnabled(false);
+        QIcon icon11;
+        icon11.addFile(QStringLiteral(":/icons/Tetra Resources/icons/appbar.navigate.next.png"), QSize(), QIcon::Normal, QIcon::Off);
+        actionNext->setIcon(icon11);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
         centralWidget->setStyleSheet(QStringLiteral("background: rgb(255, 255, 255)"));
-        verticalLayout_2 = new QVBoxLayout(centralWidget);
-        verticalLayout_2->setSpacing(6);
-        verticalLayout_2->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_2->setObjectName(QStringLiteral("verticalLayout_2"));
-        splitter = new QSplitter(centralWidget);
-        splitter->setObjectName(QStringLiteral("splitter"));
-        splitter->setStyleSheet(QLatin1String("QSplitter::handle{\n"
-"	background-color: white;\n"
+        gridLayout_3 = new QGridLayout(centralWidget);
+        gridLayout_3->setSpacing(6);
+        gridLayout_3->setContentsMargins(11, 11, 11, 11);
+        gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
+        mainSplitter = new QSplitter(centralWidget);
+        mainSplitter->setObjectName(QStringLiteral("mainSplitter"));
+        mainSplitter->setStyleSheet(QLatin1String("QSplitter::handle{\n"
+"background-color: white;\n"
 "}"));
-        splitter->setOrientation(Qt::Vertical);
-        layoutWidget = new QWidget(splitter);
+        mainSplitter->setOrientation(Qt::Vertical);
+        layoutWidget = new QWidget(mainSplitter);
         layoutWidget->setObjectName(QStringLiteral("layoutWidget"));
         gridLayout = new QGridLayout(layoutWidget);
         gridLayout->setSpacing(6);
@@ -277,7 +279,13 @@ public:
 
         gridLayout->addWidget(threadMdi, 1, 0, 1, 1);
 
-        splitter->addWidget(layoutWidget);
+        mainSplitter->addWidget(layoutWidget);
+        splitter = new QSplitter(mainSplitter);
+        splitter->setObjectName(QStringLiteral("splitter"));
+        splitter->setStyleSheet(QLatin1String("QSplitter::handle{\n"
+"background-color: white;\n"
+"}"));
+        splitter->setOrientation(Qt::Vertical);
         layoutWidget1 = new QWidget(splitter);
         layoutWidget1->setObjectName(QStringLiteral("layoutWidget1"));
         verticalLayout = new QVBoxLayout(layoutWidget1);
@@ -311,18 +319,27 @@ public:
         verticalLayout->addWidget(output);
 
         splitter->addWidget(layoutWidget1);
-
-        verticalLayout_2->addWidget(splitter);
-
-        userInput = new QPlainTextEdit(centralWidget);
+        layoutWidget2 = new QWidget(splitter);
+        layoutWidget2->setObjectName(QStringLiteral("layoutWidget2"));
+        horizontalLayout = new QHBoxLayout(layoutWidget2);
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        horizontalLayout->setContentsMargins(0, 0, 0, 0);
+        userInput = new QPlainTextEdit(layoutWidget2);
         userInput->setObjectName(QStringLiteral("userInput"));
 
-        verticalLayout_2->addWidget(userInput);
+        horizontalLayout->addWidget(userInput);
 
-        pushButton = new QPushButton(centralWidget);
-        pushButton->setObjectName(QStringLiteral("pushButton"));
+        enterInputButton = new QPushButton(layoutWidget2);
+        enterInputButton->setObjectName(QStringLiteral("enterInputButton"));
 
-        verticalLayout_2->addWidget(pushButton);
+        horizontalLayout->addWidget(enterInputButton);
+
+        splitter->addWidget(layoutWidget2);
+        mainSplitter->addWidget(splitter);
+
+        gridLayout_3->addWidget(mainSplitter, 0, 0, 1, 1);
 
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
@@ -351,7 +368,7 @@ public:
         toolBar->setStyleSheet(QStringLiteral(""));
         toolBar->setMovable(false);
         toolBar->setIconSize(QSize(32, 32));
-        toolBar->setToolButtonStyle(Qt::ToolButtonFollowStyle);
+        toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
         toolBar->setFloatable(false);
         MainWindow->addToolBar(Qt::TopToolBarArea, toolBar);
 
@@ -387,9 +404,14 @@ public:
         menuBuild->addAction(actionBuild);
         menuBuild->addAction(actionStop);
         menuDebug->addAction(actionDebug);
-        menuDebug->addAction(actionResume);
-        menuDebug->addAction(actionPause);
         menuDebug->addAction(actionExit_Debug_Mode);
+        menuDebug->addSeparator();
+        menuDebug->addAction(actionStep);
+        menuDebug->addAction(actionNext);
+        menuDebug->addAction(actionContinue);
+        menuDebug->addAction(actionSet_Breakpoint);
+        menuDebug->addAction(actionRemove_Breakpoint);
+        menuDebug->addAction(actionInterrupt);
         menuWindow->addAction(actionMinimize);
         menuWindow->addAction(actionFull_Screen);
         menuWindow->addSeparator();
@@ -410,11 +432,9 @@ public:
         toolBar->addAction(actionDebug);
         toolBar->addAction(actionExit_Debug_Mode);
         toolBar->addSeparator();
-        toolBar->addAction(actionResume);
-        toolBar->addAction(actionPause);
-        toolBar->addAction(actionStep_Through);
-        toolBar->addAction(actionStep_Over);
-        toolBar->addAction(actionStep_Out);
+        toolBar->addAction(actionStep);
+        toolBar->addAction(actionNext);
+        toolBar->addAction(actionContinue);
 
         retranslateUi(MainWindow);
 
@@ -448,25 +468,29 @@ public:
         actionFull_Screen->setText(QApplication::translate("MainWindow", "Full Screen", 0));
         actionLine_Numbers->setText(QApplication::translate("MainWindow", "Line Numbers", 0));
         actionClear_Output->setText(QApplication::translate("MainWindow", "Clear Output", 0));
-        actionResume->setText(QApplication::translate("MainWindow", "Resume", 0));
-        actionPause->setText(QApplication::translate("MainWindow", "Pause", 0));
-        actionStep_Through->setText(QApplication::translate("MainWindow", "Step Through", 0));
-        actionStep_Out->setText(QApplication::translate("MainWindow", "Step Out", 0));
-        actionStep_Over->setText(QApplication::translate("MainWindow", "Step Over", 0));
+        actionContinue->setText(QApplication::translate("MainWindow", "Continue", 0));
+        actionStep->setText(QApplication::translate("MainWindow", "Step", 0));
+#ifndef QT_NO_TOOLTIP
+        actionStep->setToolTip(QApplication::translate("MainWindow", "Step", 0));
+#endif // QT_NO_TOOLTIP
         actionExit_Debug_Mode->setText(QApplication::translate("MainWindow", "Exit Debug Mode", 0));
         actionTab_Width->setText(QApplication::translate("MainWindow", "Tab Width", 0));
+        actionInterrupt->setText(QApplication::translate("MainWindow", "Interrupt", 0));
+        actionSet_Breakpoint->setText(QApplication::translate("MainWindow", "Set Breakpoint", 0));
+        actionRemove_Breakpoint->setText(QApplication::translate("MainWindow", "Remove Breakpoint", 0));
+        actionNext->setText(QApplication::translate("MainWindow", "Next", 0));
         tetraFileLabel->setText(QApplication::translate("MainWindow", "Tetra File:", 0));
         cursorPosition->setText(QApplication::translate("MainWindow", "0, 0", 0));
         outputLabel->setText(QApplication::translate("MainWindow", "Output:", 0));
         output->setPlaceholderText(QString());
-        pushButton->setText(QApplication::translate("MainWindow", "Enter", 0));
+        enterInputButton->setText(QApplication::translate("MainWindow", "Enter", 0));
         menuFile->setTitle(QApplication::translate("MainWindow", "File", 0));
         menuHelp->setTitle(QApplication::translate("MainWindow", "Help", 0));
         menuEdit->setTitle(QApplication::translate("MainWindow", "Edit", 0));
         menuBuild->setTitle(QApplication::translate("MainWindow", "Build", 0));
         menuDebug->setTitle(QApplication::translate("MainWindow", "Debug", 0));
         menuWindow->setTitle(QApplication::translate("MainWindow", "Window", 0));
-        toolBar->setWindowTitle(QApplication::translate("MainWindow", "toolBar", 0));
+        toolBar->setWindowTitle(QApplication::translate("MainWindow", "Toolbar", 0));
     } // retranslateUi
 
 };

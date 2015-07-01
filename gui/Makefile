@@ -54,27 +54,27 @@ SOURCES       = main.cpp \
 		syntaxhighlighter.cpp \
 		editor.cpp \
 		filerunner.cpp \
-		debugger.cpp qrc_AppResources.cpp \
+		debugwindow.cpp qrc_AppResources.cpp \
 		moc_mainwindow.cpp \
 		moc_openappdialog.cpp \
 		moc_syntaxhighlighter.cpp \
 		moc_editor.cpp \
 		moc_filerunner.cpp \
-		moc_debugger.cpp
+		moc_debugwindow.cpp
 OBJECTS       = main.o \
 		mainwindow.o \
 		openappdialog.o \
 		syntaxhighlighter.o \
 		editor.o \
 		filerunner.o \
-		debugger.o \
+		debugwindow.o \
 		qrc_AppResources.o \
 		moc_mainwindow.o \
 		moc_openappdialog.o \
 		moc_syntaxhighlighter.o \
 		moc_editor.o \
 		moc_filerunner.o \
-		moc_debugger.o
+		moc_debugwindow.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/shell-unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
@@ -138,13 +138,13 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		syntaxhighlighter.h \
 		editor.h \
 		filerunner.h \
-		debugger.h main.cpp \
+		debugwindow.h main.cpp \
 		mainwindow.cpp \
 		openappdialog.cpp \
 		syntaxhighlighter.cpp \
 		editor.cpp \
 		filerunner.cpp \
-		debugger.cpp
+		debugwindow.cpp
 QMAKE_TARGET  = Tetra
 DESTDIR       = #avoid trailing-slash linebreak
 TARGET        = Tetra
@@ -319,8 +319,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents AppResources.qrc $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h openappdialog.h syntaxhighlighter.h editor.h filerunner.h debugger.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp openappdialog.cpp syntaxhighlighter.cpp editor.cpp filerunner.cpp debugger.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h openappdialog.h syntaxhighlighter.h editor.h filerunner.h debugwindow.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp openappdialog.cpp syntaxhighlighter.cpp editor.cpp filerunner.cpp debugwindow.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mainwindow.ui openappdialog.ui $(DISTDIR)/
 
 
@@ -345,38 +345,18 @@ check: first
 compiler_rcc_make_all: qrc_AppResources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_AppResources.cpp
-qrc_AppResources.cpp: AppResources.qrc \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra
+qrc_AppResources.cpp: AppResources.qrc
 	/usr/lib/x86_64-linux-gnu/qt5/bin/rcc -name AppResources AppResources.qrc -o qrc_AppResources.cpp
 
-compiler_moc_header_make_all: moc_mainwindow.cpp moc_openappdialog.cpp moc_syntaxhighlighter.cpp moc_editor.cpp moc_filerunner.cpp moc_debugger.cpp
+compiler_moc_header_make_all: moc_mainwindow.cpp moc_openappdialog.cpp moc_syntaxhighlighter.cpp moc_editor.cpp moc_filerunner.cpp moc_debugwindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mainwindow.cpp moc_openappdialog.cpp moc_syntaxhighlighter.cpp moc_editor.cpp moc_filerunner.cpp moc_debugger.cpp
+	-$(DEL_FILE) moc_mainwindow.cpp moc_openappdialog.cpp moc_syntaxhighlighter.cpp moc_editor.cpp moc_filerunner.cpp moc_debugwindow.cpp
 moc_mainwindow.cpp: syntaxhighlighter.h \
 		filerunner.h \
 		mainwindow.h \
-		debugger.h \
-		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
+		../interpreter/backend.hpp \
 		../interpreter/microStack.h \
-		../interpreter/commandObserver.h \
 		mainwindow.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/finlayson/tetra/gui -I/home/finlayson/tetra/frontend -I/home/finlayson/tetra/interpreter -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include mainwindow.h -o moc_mainwindow.cpp
 
@@ -386,8 +366,6 @@ moc_openappdialog.cpp: mainwindow.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
 		openappdialog.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/finlayson/tetra/gui -I/home/finlayson/tetra/frontend -I/home/finlayson/tetra/interpreter -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include openappdialog.h -o moc_openappdialog.cpp
 
@@ -400,8 +378,6 @@ moc_editor.cpp: mainwindow.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
 		editor.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/finlayson/tetra/gui -I/home/finlayson/tetra/frontend -I/home/finlayson/tetra/interpreter -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include editor.h -o moc_editor.cpp
 
@@ -411,21 +387,11 @@ moc_filerunner.cpp: mainwindow.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
 		filerunner.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/finlayson/tetra/gui -I/home/finlayson/tetra/frontend -I/home/finlayson/tetra/interpreter -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include filerunner.h -o moc_filerunner.cpp
 
-moc_debugger.cpp: mainwindow.h \
-		syntaxhighlighter.h \
-		filerunner.h \
-		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
-		debugger.h
-	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/finlayson/tetra/gui -I/home/finlayson/tetra/frontend -I/home/finlayson/tetra/interpreter -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include debugger.h -o moc_debugger.cpp
+moc_debugwindow.cpp: debugwindow.h
+	/usr/lib/x86_64-linux-gnu/qt5/bin/moc $(DEFINES) -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64 -I/home/finlayson/tetra/gui -I/home/finlayson/tetra/frontend -I/home/finlayson/tetra/interpreter -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtPrintSupport -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/4.9 -I/usr/include/x86_64-linux-gnu/c++/4.9 -I/usr/include/c++/4.9/backward -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include -I/usr/local/include -I/usr/lib/gcc/x86_64-linux-gnu/4.9/include-fixed -I/usr/include/x86_64-linux-gnu -I/usr/include debugwindow.h -o moc_debugwindow.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -439,9 +405,7 @@ ui_mainwindow.h: mainwindow.ui \
 		filerunner.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h
+		../interpreter/microStack.h
 	/usr/lib/x86_64-linux-gnu/qt5/bin/uic mainwindow.ui -o ui_mainwindow.h
 
 ui_openappdialog.h: openappdialog.ui
@@ -463,8 +427,6 @@ main.o: main.cpp mainwindow.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
 		openappdialog.h \
 		editor.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
@@ -475,11 +437,10 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
 		ui_mainwindow.h \
 		editor.h \
-		openappdialog.h
+		openappdialog.h \
+		debugwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
 
 openappdialog.o: openappdialog.cpp openappdialog.h \
@@ -489,8 +450,6 @@ openappdialog.o: openappdialog.cpp openappdialog.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h \
 		ui_openappdialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o openappdialog.o openappdialog.cpp
 
@@ -503,30 +462,21 @@ editor.o: editor.cpp editor.h \
 		filerunner.h \
 		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h
+		../interpreter/microStack.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o editor.o editor.cpp
 
 filerunner.o: filerunner.cpp filerunner.h \
 		mainwindow.h \
 		syntaxhighlighter.h \
-		debugger.h \
-		../interpreter/backend.hpp \
 		../frontend/frontend.hpp \
+		../interpreter/backend.hpp \
 		../interpreter/microStack.h \
+		../interpreter/ideCommandObserver.h \
 		../interpreter/commandObserver.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filerunner.o filerunner.cpp
 
-debugger.o: debugger.cpp mainwindow.h \
-		syntaxhighlighter.h \
-		filerunner.h \
-		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
-		debugger.h \
-		../interpreter/commandObserver.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debugger.o debugger.cpp
+debugwindow.o: debugwindow.cpp debugwindow.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debugwindow.o debugwindow.cpp
 
 qrc_AppResources.o: qrc_AppResources.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qrc_AppResources.o qrc_AppResources.cpp
@@ -546,8 +496,8 @@ moc_editor.o: moc_editor.cpp
 moc_filerunner.o: moc_filerunner.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_filerunner.o moc_filerunner.cpp
 
-moc_debugger.o: moc_debugger.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_debugger.o moc_debugger.cpp
+moc_debugwindow.o: moc_debugwindow.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_debugwindow.o moc_debugwindow.cpp
 
 ####### Install
 

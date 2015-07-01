@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_FileRunner_t {
-    QByteArrayData data[4];
-    char stringdata[29];
+    QByteArrayData data[5];
+    char stringdata[35];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,10 +32,11 @@ static const qt_meta_stringdata_FileRunner_t qt_meta_stringdata_FileRunner = {
 QT_MOC_LITERAL(0, 0, 10), // "FileRunner"
 QT_MOC_LITERAL(1, 11, 8), // "finished"
 QT_MOC_LITERAL(2, 20, 0), // ""
-QT_MOC_LITERAL(3, 21, 7) // "runFile"
+QT_MOC_LITERAL(3, 21, 7), // "runFile"
+QT_MOC_LITERAL(4, 29, 5) // "debug"
 
     },
-    "FileRunner\0finished\0\0runFile"
+    "FileRunner\0finished\0\0runFile\0debug"
 };
 #undef QT_MOC_LITERAL
 
@@ -56,13 +57,13 @@ static const uint qt_meta_data_FileRunner[] = {
        1,    0,   24,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-       3,    0,   25,    2, 0x0a /* Public */,
+       3,    1,   25,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void,
 
  // slots: parameters
-    QMetaType::Void,
+    QMetaType::Void, QMetaType::Bool,    4,
 
        0        // eod
 };
@@ -73,7 +74,7 @@ void FileRunner::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         FileRunner *_t = static_cast<FileRunner *>(_o);
         switch (_id) {
         case 0: _t->finished(); break;
-        case 1: _t->runFile(); break;
+        case 1: _t->runFile((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
@@ -86,7 +87,6 @@ void FileRunner::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
             }
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObject FileRunner::staticMetaObject = {
