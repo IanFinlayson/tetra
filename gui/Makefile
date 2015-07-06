@@ -54,6 +54,7 @@ SOURCES       = main.cpp \
 		syntaxhighlighter.cpp \
 		editor.cpp \
 		filerunner.cpp \
+		openapp.cpp \
 		debugwindow.cpp qrc_AppResources.cpp \
 		moc_mainwindow.cpp \
 		moc_openappdialog.cpp \
@@ -67,6 +68,7 @@ OBJECTS       = main.o \
 		syntaxhighlighter.o \
 		editor.o \
 		filerunner.o \
+		openapp.o \
 		debugwindow.o \
 		qrc_AppResources.o \
 		moc_mainwindow.o \
@@ -138,12 +140,14 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		syntaxhighlighter.h \
 		editor.h \
 		filerunner.h \
-		debugwindow.h main.cpp \
+		debugwindow.h \
+		tetra.h main.cpp \
 		mainwindow.cpp \
 		openappdialog.cpp \
 		syntaxhighlighter.cpp \
 		editor.cpp \
 		filerunner.cpp \
+		openapp.cpp \
 		debugwindow.cpp
 QMAKE_TARGET  = Tetra
 DESTDIR       = #avoid trailing-slash linebreak
@@ -172,7 +176,7 @@ first: all
 
 ####### Build rules
 
-$(TARGET): /home/finlayson/tetra/gui/../frontend/libfrontend.a /home/finlayson/tetra/gui/../interpreter/libbackend.a ui_mainwindow.h ui_openappdialog.h $(OBJECTS)  
+$(TARGET): /home/finlayson/tetra/gui/../frontend/libfrontend.a /home/finlayson/tetra/gui/../interpreter/libbackend.a ui_mainwindow.h ui_openappdialog.h ui_openapp.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: Tetra.pro /usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++-64/qmake.conf /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -319,9 +323,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents AppResources.qrc $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.h openappdialog.h syntaxhighlighter.h editor.h filerunner.h debugwindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mainwindow.cpp openappdialog.cpp syntaxhighlighter.cpp editor.cpp filerunner.cpp debugwindow.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mainwindow.ui openappdialog.ui $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.h openappdialog.h syntaxhighlighter.h editor.h filerunner.h debugwindow.h tetra.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mainwindow.cpp openappdialog.cpp syntaxhighlighter.cpp editor.cpp filerunner.cpp openapp.cpp debugwindow.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mainwindow.ui openappdialog.ui openapp.ui $(DISTDIR)/
 
 
 clean:compiler_clean 
@@ -395,9 +399,9 @@ moc_debugwindow.cpp: debugwindow.h
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_mainwindow.h ui_openappdialog.h
+compiler_uic_make_all: ui_mainwindow.h ui_openappdialog.h ui_openapp.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_mainwindow.h ui_openappdialog.h
+	-$(DEL_FILE) ui_mainwindow.h ui_openappdialog.h ui_openapp.h
 ui_mainwindow.h: mainwindow.ui \
 		editor.h \
 		mainwindow.h \
@@ -410,6 +414,9 @@ ui_mainwindow.h: mainwindow.ui \
 
 ui_openappdialog.h: openappdialog.ui
 	/usr/lib/x86_64-linux-gnu/qt5/bin/uic openappdialog.ui -o ui_openappdialog.h
+
+ui_openapp.h: openapp.ui
+	/usr/lib/x86_64-linux-gnu/qt5/bin/uic openapp.ui -o ui_openapp.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -438,8 +445,8 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		../frontend/frontend.hpp \
 		../interpreter/microStack.h \
 		ui_mainwindow.h \
-		editor.h \
 		openappdialog.h \
+		editor.h \
 		debugwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainwindow.o mainwindow.cpp
 
@@ -474,6 +481,9 @@ filerunner.o: filerunner.cpp filerunner.h \
 		../interpreter/ideCommandObserver.h \
 		../interpreter/commandObserver.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filerunner.o filerunner.cpp
+
+openapp.o: openapp.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o openapp.o openapp.cpp
 
 debugwindow.o: debugwindow.cpp debugwindow.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o debugwindow.o debugwindow.cpp
