@@ -1,9 +1,8 @@
-#ifndef EDITOR_H
-#define EDITOR_H
+#ifndef DEBUGWINDOW_H
+#define DEBUGWINDOW_H
 
 #include <QPlainTextEdit>
 #include <QObject>
-#include "mainwindow.h"
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -14,12 +13,11 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-class Editor: public QPlainTextEdit
+class DebugWindow: public QPlainTextEdit
 {
     Q_OBJECT
 public:
-    Editor(QWidget *parent = 0);
-    QString getCoordinates();
+    DebugWindow(QWidget *parent = 0);
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
@@ -32,41 +30,37 @@ public:
     int getTabWidth();
 
 private slots:
-    void updateCursorCoordinates();
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect &, int);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *e);
     void resizeEvent(QResizeEvent *event);
 
 private:
-    int getLeadingSpaces();
-    bool isTab(QString direction);
     QTextCursor cursor;
-    QString coordinates;
-    QWidget *lineNumberArea;
+    QWidget *debuggerLineNumberArea;
     bool lineNumbersVisible;
     bool lineHighlighted;
     int tabWidth;
+    void fill(QString);
 };
 
-class LineNumberArea : public QWidget{
+class DebuggerLineNumberArea : public QWidget{
 public:
-    LineNumberArea(Editor *editor) : QWidget(editor) {
-        codeEditor = editor;
+    DebuggerLineNumberArea(DebugWindow *debugWindow) : QWidget(debugWindow) {
+        debugger = debugWindow;
     }
 
     QSize sizeHint() const {
-        return QSize(codeEditor->lineNumberAreaWidth(), 0);
+        return QSize(debugger->lineNumberAreaWidth(), 0);
     }
 
 protected:
     void paintEvent(QPaintEvent *event) {
-        codeEditor->lineNumberAreaPaintEvent(event);
+        debugger->lineNumberAreaPaintEvent(event);
     }
 
 private:
-    Editor *codeEditor;
+    DebugWindow *debugger;
 };
 #endif

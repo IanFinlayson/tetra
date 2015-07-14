@@ -1,0 +1,6 @@
+def main( ):
+  a = "Bob"
+  b = "Smith"
+  full = a + " "  + b
+  print(full)
+

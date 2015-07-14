@@ -1,0 +1,20 @@
+# sum an array of numbers in a given range
+def sum_range(numbers [int], start int, end int) int:
+  total = 0
+  i = start
+  while i <= end:
+    total += numbers[i]
+    i += 1
+  return total
+
+# sum an array of numbers in parallel
+def sum(numbers [int]) int:
+  mid = len(numbers) / 2
+  parallel:
+    a = sum_range(numbers, 0, mid - 1)
+    b = sum_range(numbers, mid, len(numbers) - 1)
+  return a + b
+
+# print the sum of the first 100 natural numbers
+def main( ):
+  print(sum([1 ... 100]))

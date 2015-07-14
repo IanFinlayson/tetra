@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     syntaxhighlighter.cpp \
     editor.cpp \
     filerunner.cpp \
-    debugger.cpp
+    openapp.cpp \
+    debugwindow.cpp
 
 HEADERS  += \
     mainwindow.h \
@@ -30,11 +31,13 @@ HEADERS  += \
     syntaxhighlighter.h \
     editor.h \
     filerunner.h \
-    debugger.h
+    debugwindow.h \
+    tetra.h
 
 FORMS    += \
     mainwindow.ui \
-    openappdialog.ui
+    openappdialog.ui \
+    openapp.ui
 
 RESOURCES += \
     AppResources.qrc
@@ -46,10 +49,11 @@ DEPENDPATH += $$PWD/../frontend
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../frontend/libfrontend.a
 
-
 unix:!macx: LIBS += -L$$PWD/../interpreter/ -lbackend
 
 INCLUDEPATH += $$PWD/../interpreter
 DEPENDPATH += $$PWD/../interpreter
 
 unix:!macx: PRE_TARGETDEPS += $$PWD/../interpreter/libbackend.a
+
+

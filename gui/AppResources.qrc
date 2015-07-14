@@ -17,6 +17,7 @@
         <file>Tetra Resources/icons/appbar.control.resume.png</file>
         <file>Tetra Resources/icons/appbar.bug.remove.png</file>
         <file>Tetra Resources/icons/appbar.control.pause.png</file>
+        <file>Tetra Resources/icons/appbar.navigate.next.png</file>
     </qresource>
     <qresource prefix="/graphics">
         <file>Tetra Resources/logo.png</file>

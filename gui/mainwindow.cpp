@@ -7,7 +7,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QMdiArea>
-#include<QMdiSubWindow>
+#include <QMdiSubWindow>
 #include <QMessageBox>
 #include <QPrinter>
 #include <QPrintDialog>
@@ -17,7 +17,7 @@
 #include <QSize>
 #include <QTabWidget>
 #include <QThread>
-
+#include "debugwindow.h"
 
 MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWindow){
     menuBar()->setNativeMenuBar(true);
@@ -34,21 +34,21 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     tetraThread = new QThread;
     fileRunner = new FileRunner(this);
-    debugger = new Debugger(this);
     mainValue = 0;
 
     connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
 
-    tabWidth = 4;
     setupThreadMdi();
+    createStatusBar();
 
-
+    projectTabWidth=ui->input->getTabWidth();
 }
 
 MainWindow::~MainWindow(){
     delete ui;
 }
 
+//sets default values and connect signals/slots
 void MainWindow::setupEditor(){
     QFont font = QFont("Monaco");
     font.setFixedPitch(true);
@@ -77,33 +77,31 @@ void MainWindow::setupEditor(){
     connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
     connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
     connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
-    //connnect(this, SIGNAL()
-    hideDisplay();
+
+    ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+
+
+    showDisplay(false);
 }
 
 void MainWindow::setupThreadMdi(){
     ui->threadMdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     ui->threadMdi->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     windowMapper = new QSignalMapper;
-    //connect(windowMapper, SIGNAL(mapped(QWidget*)),
-                // this, SLOT(setActiveSubWindow(QWidget*)));
-}
-
-void MainWindow::hideDisplay(){
-    ui->tetraFileLabel->hide();
-    ui->outputLabel->hide();
-    ui->input->hide();
-    ui->output->hide();
-    ui->cursorPosition->hide();
     ui->threadMdi->hide();
 }
 
-void MainWindow::showEditor(){
-    ui->tetraFileLabel->show();
-    ui->outputLabel->show();
-    ui->input->show();
-    ui->output->show();
-    ui->cursorPosition->show();
+void MainWindow::showDisplay(bool arg1){
+    if(arg1){
+        statusBar()->showMessage("Ready.");
+    }
+    ui->tetraFileLabel->setVisible(arg1);
+    ui->outputLabel->setVisible(arg1);
+    ui->input->setVisible(arg1);
+    ui->output->setVisible(arg1);
+    ui->cursorPosition->setVisible(arg1);
+    ui->userInput->setVisible(arg1);
+    ui->enterInputButton->setVisible(arg1);
 }
 
 void MainWindow::setupShortcuts(){
@@ -132,7 +130,7 @@ bool MainWindow::newProject(){
     on_actionNew_triggered();
     if(openFile != ""){
         projectCreated = true;
-        showEditor();
+        showDisplay(true);
     }
     return projectCreated;
 }
@@ -142,7 +140,7 @@ bool MainWindow::openProject(){
     on_actionOpen_triggered();
     if(openFile != ""){
         projectOpened = true;
-        showEditor();
+        showDisplay(true);
     }
     return projectOpened;
 }
@@ -158,6 +156,7 @@ void MainWindow::quit(){
     }
 }
 
+//gives stripped name of file (removes file path)
 QString MainWindow::strippedName(const QString &fullFileName){
     return QFileInfo(fullFileName).fileName();
 }
@@ -170,6 +169,7 @@ void MainWindow::documentWasModified(){
     setWindowModified(ui->input->document()->isModified());
 }
 
+//asks user whether or not to save file before closing file
 bool MainWindow::maybeSave(){
     if (ui->input->document()->isModified()) {
         QMessageBox::StandardButton ret;
@@ -309,51 +309,31 @@ void MainWindow::on_actionClear_Output_triggered(){
 }
 //-----------------------------------------------//
 
+//highlights line and prints error
 void MainWindow::printError(Error e){
     buildSuccessful = false;
     ui->input->moveCursor(e.getLine());
     ui->output->insertPlainText(QString::number(e.getLine()) + ": " + QString::fromStdString(e.getMessage()) + "\n");
     ui->input->highlightLine(QColor(Qt::red));
+    //statusBar()->showMessage("Error.");
 }
 
-void MainWindow::printMainValue(){
-    ui->output->insertPlainText("Main returned: " + QString::number(mainValue)+ "\n");
-}
-
-
-
-void MainWindow::on_actionDebug_toggled(bool arg1)
-{
+void MainWindow::on_actionDebug_toggled(bool arg1){
+    on_actionClear_Output_triggered();
     debugMode(arg1);
     ui->actionDebug->setEnabled(!arg1);
     ui->actionExit_Debug_Mode->setEnabled(arg1);
     if(arg1){
-        debugger->moveToThread(tetraThread);
+        statusBar()->showMessage ("Debugging.");
+        maybeSave();
+        fileRunner->moveToThread(tetraThread);
         tetraThread->start();
-        QMetaObject::invokeMethod(debugger, "debugFile", Qt::QueuedConnection);
+        qDebug() << "hey";
+        QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,true));
+        newThreadWindow();
     }
 }
 
-void MainWindow::runFile(){
-    Node *newNode;
-    try{
-        newNode = parseFile(openFile.toStdString());
-        mainValue = interpret(newNode);
-        buildSuccessful = true;
-        printMainValue();
-    }
-
-    catch (RuntimeError e){
-
-    }
-    catch (SystemError e){
-
-    }
-    catch (Error e){
-        printError(e);
-    }
-    tetraThread->exit(0);
-}
 
 void MainWindow::on_actionStop_triggered(){
     exitRunMode();
@@ -368,11 +348,13 @@ void MainWindow::setBuildSuccessful(bool buildSuccessful){
 }
 void MainWindow::setMainValue(int mainValue){
     this->mainValue = mainValue;
+    //statusBar()->showMessage(QString::number(mainValue));
 }
 void MainWindow::exitRunMode(){
     ui->actionRun->setChecked(false);
     ui->input->setReadOnly(false);
     ui->actionRun->setEnabled(true);
+    statusBar()->showMessage("Ready.");
 }
 
 void MainWindow::debugMode(bool value){
@@ -387,11 +369,13 @@ void MainWindow::debugMode(bool value){
     ui->actionBuild->setEnabled(!value);
     ui->actionRun->setEnabled(!value);
     ui->actionStop->setEnabled(!value);
-    ui->actionResume->setEnabled(value);
-    ui->actionPause->setEnabled(value);
-    ui->actionStep_Through->setEnabled(value);
-    ui->actionStep_Over->setEnabled(value);
-    ui->actionStep_Out->setEnabled(value);
+    ui->actionContinue->setEnabled(value);
+    ui->actionStep->setEnabled(value);
+    ui->actionInterrupt->setEnabled(value);
+    ui->actionNext->setEnabled(value);
+    ui->actionSet_Breakpoint->setEnabled(value);
+    ui->actionRemove_Breakpoint->setEnabled(value);
+
 }
 
 void MainWindow::on_actionRun_triggered(bool checked){
@@ -399,17 +383,13 @@ void MainWindow::on_actionRun_triggered(bool checked){
     ui->actionRun->setDisabled(true);
     ui->input->setReadOnly(true);
     if(checked){
+        statusBar()->showMessage("Running.");
         maybeSave();
         fileRunner->moveToThread(tetraThread);
         tetraThread->start();
-        QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection);
+        QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,false));
     }
 }
-
-
-
-\
-
 
 void MainWindow::on_actionExit_Debug_Mode_triggered()
 {
@@ -423,37 +403,35 @@ void MainWindow::on_actionExit_Debug_Mode_triggered()
        ui->actionDebug->setEnabled(true);
        ui->actionDebug->setChecked(false);
        debugMode(false);
-       //ui->threadMdi->closeAllSubWindows();
+       ui->threadMdi->closeAllSubWindows();
+       statusBar()->showMessage("Ready.");
+       this->tetraThread->disconnect();
     }
-}
-
-void MainWindow::setTabWidth(int tabWidth){
-    this->tabWidth = tabWidth;
-    ui->input->setTabWidth(tabWidth);
 }
 
 void MainWindow::on_actionTab_Width_triggered(){
     bool valueChanged;
-    int tabWidth =  QInputDialog::getInt(this, "Tab Width", "Enter new tab width:", this->tabWidth, 3, 10, 1, &valueChanged);
+    int tabWidth =  QInputDialog::getInt(this, "Tab Width", "Enter new tab width:", ui->input->getTabWidth(), 3, 10, 1, &valueChanged);
     if(valueChanged){
-        this->setTabWidth(tabWidth);
+        ui->input->setTabWidth(tabWidth);
+        this->projectTabWidth=tabWidth;
     }
 }
 
 //--------------------MDI Methods--------------------//
-Editor *MainWindow::newThreadWindow(){
-    Editor *newEditor = new Editor;
+DebugWindow *MainWindow::newThreadWindow(){
+    DebugWindow *newDebugWindow = new DebugWindow;
+    newDebugWindow->setPlainText(ui->input->toPlainText());
     QMdiSubWindow *subWindow = new QMdiSubWindow;
-    subWindow->setWidget(newEditor);
+    subWindow->setWidget(newDebugWindow);
     subWindow->resize(QDesktopWidget().availableGeometry(this).size() * 0.2);
     subWindow->setWindowFlags(Qt::CustomizeWindowHint);
     ui->threadMdi->addSubWindow(subWindow);
     subWindow->show();
 }
-Editor *MainWindow::activeThreadWindow()
-{
+DebugWindow *MainWindow::activeThreadWindow(){
     if (QMdiSubWindow *activeThreadWindow = ui->threadMdi->activeSubWindow()){
-        return qobject_cast<Editor *>(activeThreadWindow->widget());
+        return qobject_cast<DebugWindow *>(activeThreadWindow->widget());
     }
     return 0;
 }
@@ -464,16 +442,76 @@ void MainWindow::setActiveSubWindow(QWidget *window){
     ui->threadMdi->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
-void MainWindow::on_actionResume_triggered()
-{
-    newThreadWindow();
-}
-
+//overrides output to output window
 void MainWindow::printOutput(QString string){
     ui->output->insertPlainText(string);
+    QScrollBar *outputSb = ui->output->verticalScrollBar();
+    outputSb->setValue(outputSb->maximum());
 }
 
+//overrides input to user input window
 std::string MainWindow::getUserInput(){
+    QEventLoop loop; //loop waits for user to press enter button before retrieving text
+    QObject::connect(ui->enterInputButton, SIGNAL(clicked()), &loop, SLOT(quit()));
+    loop.exec();
     QString input = ui->userInput->toPlainText();
+    ui->userInput->clear();
     return input.toStdString();
+}
+
+void MainWindow::createStatusBar(){
+    statusBar()->showMessage("Welcome to Tetra.");
+}
+
+
+//--------------------Debugger Methods--------------------//
+void MainWindow::on_actionStep_triggered(){
+    hideUserInput(true);
+    simulateStdIn("s");
+    hideUserInput(false);
+}
+
+void MainWindow::on_actionContinue_triggered(){
+    hideUserInput(true);
+    simulateStdIn("c");
+    hideUserInput(false);
+}
+
+void MainWindow::on_actionNext_triggered(){
+    hideUserInput(true);
+    simulateStdIn("n");
+    hideUserInput(false);
+}
+
+//make texts in user input window invisible
+void MainWindow::hideUserInput(bool hide){
+    if(hide){ui->userInput->setStyleSheet("color: rgba(255, 255, 255, 0);");}
+    else{ui->userInput->setStyleSheet("color: rgba(255, 255, 255, 255);");}
+}
+
+void MainWindow::on_actionSet_Breakpoint_triggered(){
+    hideUserInput(true);
+    simulateStdIn("b");
+
+    bool valueChanged;
+    int lineNumber =  QInputDialog::getInt(this, "Set Breakpoint", "Enter line number:", 1, 1, this->activeThreadWindow()->blockCount(), 1, &valueChanged);
+    simulateStdIn(QString::number(lineNumber));
+    hideUserInput(false);
+}
+
+//simulate std in by entering text to input box and pressing enter input button
+void MainWindow::simulateStdIn(QString input){
+    ui->userInput->setPlainText(input);
+    ui->enterInputButton->animateClick();
+}
+
+
+void MainWindow::on_actionRemove_Breakpoint_triggered(){
+    hideUserInput(true);
+    simulateStdIn("r");
+
+    bool valueChanged;
+    int lineNumber =  QInputDialog::getInt(this, "Remove  Breakpoint", "Enter line number:", 1, 1, this->activeThreadWindow()->blockCount(), 1, &valueChanged);
+    simulateStdIn(QString::number(lineNumber));
+    hideUserInput(false);
 }

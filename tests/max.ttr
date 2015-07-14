@@ -1,0 +1,14 @@
+
+def max(nums [int]) int:
+  largest = 0
+  parallel for num in nums:
+    if num > largest:
+      lock largest:
+        if num > largest:
+          largest = num
+  return largest
+
+def main( ):
+  nums = [18, 32, 96, 48, 60]
+  print(max(nums))
+

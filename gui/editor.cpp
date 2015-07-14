@@ -1,7 +1,7 @@
 #include "editor.h"
-#include <QPlainTextEdit>
 #include <QtWidgets>
 
+/*Editor is a text editor that is designed specifically for Tetra code*/
 Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
     connect(this, SIGNAL(cursorPositionChanged()),
          this, SLOT(updateCursorCoordinates()));
@@ -17,7 +17,7 @@ Editor::Editor(QWidget *parent):QPlainTextEdit(parent){
     lineHighlighted = false;
     tabWidth = 4;
 }
-
+//overrides default navigation
 void Editor::keyPressEvent(QKeyEvent *e){
     cursor = this->textCursor();
     if(e->key() == Qt::Key_Tab){ //replaces tab key with predetermined amount of spaces
@@ -250,4 +250,8 @@ bool Editor::checkLineHighlighted(){
 
 void Editor::setTabWidth(int tabWidth){
     this->tabWidth = tabWidth;
+}
+
+int Editor::getTabWidth(){
+    return this->tabWidth;
 }

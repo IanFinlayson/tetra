@@ -1,26 +1,45 @@
 #include "syntaxhighlighter.h"
 
+// the colors used for highlighting
+const unsigned int COLOR_TYPE = 0xB58900;
+const unsigned int COLOR_KEYWORD = 0x268BD2;
+const unsigned int COLOR_PARALLEL = 0x2AA198;
+const unsigned int COLOR_VALUE = 0xDC322F;
+const unsigned int COLOR_STRING = 0x6C71C4;
+const unsigned int COLOR_COMMENT = 0x859900;
+
+
+
+// build a QColor from a 24-bit hexadecimal color value
+QColor colorFromHex(unsigned int color) {
+  int r = (color & 0xFF0000) >> 16;
+  int g = (color & 0x00FF00) >> 8;
+  int b = color & 0x0000FF;
+  return QColor(r, g, b, 255);
+}
+
+// set up the highlighting
 Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
     HighlightingRule rule;
 
-    typeFormat.setForeground(QColor(42, 148, 43, 255));
+    // types
+    typeFormat.setForeground(colorFromHex(COLOR_TYPE));
     typeFormat.setFontWeight(QFont::Bold);
     QStringList typePatterns;
     typePatterns << "\\bint\\b" << "\\breal\\b" << "\\bstring\\b" << "\\bbool\\b";
-
     foreach (const QString &pattern, typePatterns) {
         rule.pattern = QRegExp(pattern);
         rule.format = typeFormat;
         highlightingRules.append(rule);
     }
 
-    keywordFormat.setForeground(QColor(196, 107, 0, 255));
+    // keywords
+    keywordFormat.setForeground(colorFromHex(COLOR_KEYWORD));
     keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bif\\b" << "\\belif\\b" << "\\belse\\b" << "\\bfor\\b" << "\\bin\\b"  <<
                        "\\bwhile\\b" << "\\bcontinue\\b" << "\\bbreak\\b" << "\\bdef\\b" << "\\bor\\b" <<
                        "\\band\\b" << "\\bnot\\b" << "\\bpass\\b" << "\\breturn\\b";
-
     foreach (const QString &pattern, keywordPatterns) {
         rule.pattern = QRegExp(pattern);
         rule.format = keywordFormat;
@@ -28,7 +47,8 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
     }
 
 
-    parallelFormat.setForeground(QColor(34, 122, 115, 255));
+    // parallel stuff
+    parallelFormat.setForeground(colorFromHex(COLOR_PARALLEL));
     parallelFormat.setFontWeight(QFont::Bold);
     QStringList parallelPatterns;
     parallelPatterns << "\\bparallel\\b"<< "\\bbackground\\b" << "\\block\\b";
@@ -39,8 +59,8 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
     }
 
 
-
-    valueFormat.setForeground(QColor(195, 58, 21, 255));
+    // values
+    valueFormat.setForeground(colorFromHex(COLOR_VALUE));
     QStringList valuePatterns;
     valuePatterns << "\\btrue\\b" << "\\bfalse\\b" << "[0-9]\\d{0,3}" << "\\d.\\d";
     foreach (const QString &pattern, valuePatterns){
@@ -49,12 +69,14 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
         highlightingRules.append(rule);
     }
 
-    quotationFormat.setForeground(QColor(118, 20, 0, 255));
+    // strings
+    quotationFormat.setForeground(colorFromHex(COLOR_STRING));
     rule.pattern = QRegExp("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    singleLineCommentFormat.setForeground(QColor(118, 20, 0, 255));
+    // comments
+    singleLineCommentFormat.setForeground(colorFromHex(COLOR_COMMENT));
     rule.pattern = QRegExp("#[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
