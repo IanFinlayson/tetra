@@ -1,7 +1,7 @@
 Tetra Parallel Programming Language
 ===================================
 
-Tetra is a high-level parallel programming language thatis designed to make
+Tetra is a high-level parallel programming language that is designed to make
 parallel programs easier to write, visualize, debug, and optimize. Its goals
 are to make parallel programming easier for students and professionals alike.
 
