@@ -1,14 +1,25 @@
-dump-tree
+# general C++ things
 *.o
-*.gen.*
-tags
-.*.swp
 *.a
 gmon.out
-tetra
-testLog.txt
-checkTestLog.txt
-seg.txt
-testCheckLog.txt
+
+# lex/yacc generated files
+*.gen.*
+
+# Vim swap files
+.*.swp
+
+# tag files
+tags
 cscope.out
+
+# QT generated files
+moc_*
+ui_*
+qrc_*
+
+# executables
 Tetra
+dump-tree
+tetra
+
