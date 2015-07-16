@@ -35,6 +35,7 @@ Requirements
 2. A C++ compiler (clang++ is default).
 3. make
 4. graphviz for automatic tree diagrams.
+5. QT SDK for the IDE.
 
 Tetra is licensed under the MIT license.
 
