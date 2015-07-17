@@ -33,9 +33,6 @@ int main(int argc, char** argv) {
 
   TetraEnvironment::setMaxThreads(8);
 
-  //cout << &observer << endl;
-  //cout << &(TetraEnvironment::getObserver()) << endl;
-
   //Parse flags
   std::string* flags = NULL;
   int numFlags = argc - 2; //number of flags - prog name and file name
@@ -61,7 +58,6 @@ int main(int argc, char** argv) {
   //Make it so that the debug prompt will be started at the very beginning
   //TetraEnvironment::getObserver().step_E();
 #endif
-  std::cout << "Running: " << argv[argc-1] << endl;
   int ret = 0;
   try {   
     ret = interpret(tree,flags,numFlags);
@@ -83,15 +79,13 @@ int main(int argc, char** argv) {
     exit(EXIT_FAILURE);
   }
 
-  std::cout << "\n+------------------------------------" << endl;
-  std::cout << "|Main Returned: " << ret << endl;
-  std::cout << "+------------------------------------" << endl;
-
-  //cout << endl << "For vectors: there were " << numAllocs_T << " allocations and " << numDeallocs_T << " Deallocations." << endl;
-
   //The flags were dynamically allocated
   //TODO i is probably possible to just pass a sub-array of argv to the interpreter
   delete [] flags;
 
+  std::cout << std::endl;
+
   return ret;
 }
+
+

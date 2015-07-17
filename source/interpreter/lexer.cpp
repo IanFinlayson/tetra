@@ -1,4 +1,5 @@
-/* this file provides lexical analysis for Tetra it implements the yylex
+/* lexer.cpp
+ * this file provides lexical analysis for Tetra it implements the yylex
  * function used by the parser.  Tetra does not use flex principally because
  * doing whitespace-based blocking is difficult due to the limitations of flex
  * (not being able to capture and respond to EOF) */

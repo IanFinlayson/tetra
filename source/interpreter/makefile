@@ -10,12 +10,19 @@ SRCS := $(wildcard *.cpp)
 HDRS := $(wildcard *.h)
 OBJS := $(patsubst %.cpp,%.o,$(SRCS))
 
-# link it all together
-all: $(OBJS) $(HDRS) makefile parser.gen.o
+all: tetra libtetra.a
+	@echo "All Done :)"
+
+# build the tetra executable
+tetra: $(OBJS) $(HDRS) makefile parser.gen.o
 	$(CC) $(FLAGS) $(OBJS) parser.gen.o -o tetra
-	mkdir -p ../../bin ../../lib
+	mkdir -p ../../bin
 	cp tetra ../../bin/
+
+# build the static library
+libtetra.a: $(OBJS) $(HDRS) makefile parser.gen.o
 	ar rcs libtetra.a $(OBJS) parser.gen.o
+	mkdir -p ../../lib
 	cp libtetra.a ../../lib/
 
 # compile an object based on source and headers

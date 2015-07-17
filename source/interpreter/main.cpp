@@ -1099,13 +1099,10 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 
   //Construct a TetraContext (this also initializes the global scope)
   TetraContext tContext(TetraEnvironment::obtainNewThreadID());	
-  std::cout <<"Starting context initialized"<<std::endl;
   //Build function lookup table, find address of main method
   FunctionMap::build(tree);
-  std::cout << "Function tree built " <<std::endl;
   FunctionMap::optimizeLookup(tree);
   FunctionMap::optimizeFunctionLookup(tree);
-  std::cout << "Optimization successful" << std::endl;
   const Node* start = FunctionMap::getFunctionNode("main#");
 
   //If Main was not found, print an error
@@ -1126,8 +1123,6 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
   //Initialize a scope fpr the main method, and run!
 
   tContext.initializeNewScope(start);
-
-  std::cout <<"Interpreting..."<<std::endl;
 
   //If debugging is on, set the breakpoint for the start. Don;t do it any earlier, because the preprocessor needs to 'evaluate nodes' which can improperly trigger the debugger
   if(TetraEnvironment::isDebugMode()) {
