@@ -9,7 +9,7 @@
 
 #include <map>
 #include <iostream>
-#include <frontend.hpp>
+#include <frontend.h>
 #include <string>
 
 using std::string;

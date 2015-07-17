@@ -1,8 +1,8 @@
 /*#ifndef RUNTIME_ERROR_H
 #define RUNTIME_ERROR_H
 
-#include "frontend.hpp"
-#include "backend.hpp"
+#include "frontend.h"
+#include "backend.h"
 
 class RuntimeError: public Error{
 public:

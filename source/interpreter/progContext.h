@@ -12,7 +12,7 @@
 #include <iostream>
 #include <string>
 #include "variableContext.h"
-#include "frontend.hpp"
+#include "frontend.h"
 #include <pthread.h>
 #include "threadEnvironment.h"
 #include <time.h>

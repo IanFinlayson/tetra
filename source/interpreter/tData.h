@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <string>
-#include "frontend.hpp"
+#include "frontend.h"
 
 //#define NDEBUG
 #include <assert.h>

@@ -7,8 +7,8 @@
 //#include<cstdlib>
 //#include<sstream>
 //#include"tData.h"
-#include"frontend.hpp"
-#include"backend.hpp"
+#include"frontend.h"
+#include"backend.h"
 //#include "tArray.h"
 
 using std::string;

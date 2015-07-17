@@ -1,5 +1,5 @@
-#include"frontend.hpp"
-#include"backend.hpp"
+#include"frontend.h"
+#include"backend.h"
 #include"ideCommandObserver.h"
 #include<sstream>
 

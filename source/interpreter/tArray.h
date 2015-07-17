@@ -10,7 +10,7 @@
 #include<string>
 #include<cstdlib>
 #include"tData.h"
-#include"frontend.hpp"
+#include"frontend.h"
 
 //Used for some threadsafety
 #include<pthread.h>

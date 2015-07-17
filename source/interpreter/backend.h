@@ -9,7 +9,7 @@
 
 #include <iostream>
 #include <string>
-#include "frontend.hpp"
+#include "frontend.h"
 #include <stack>
 #include <pthread.h>
 #include <time.h>

@@ -4,7 +4,10 @@
 gmon.out
 
 # lex/yacc generated files
-*.gen.*
+*.gencpp
+*.genhpp
+parser.output
+
 
 # Vim swap files
 .*.swp

@@ -8,8 +8,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
-#include "frontend.hpp"
-#include "parser.gen.hpp"
+#include "frontend.h"
+#include "parser.genhpp"
 
 using namespace std;
 
@@ -173,25 +173,4 @@ void dumpTreeStdout(Node* node, int level = 0) {
     dumpTreeStdout(node->child(i), level + 1);
   }
 }
-
-/* the main function */
-int main(int argc, char** argv) {
-  /* if a file was passed, use that over stdin */
-  if (argc < 2) {
-    cerr << "Please pass a file name!" << endl;
-    return 0;
-  }
-
-  /* try to parse the tree from this file and dump it to the screen */
-  try {
-    Node* tree = parseFile(argv[1]);
-    dumpTreeStdout(tree);
-    dumpTreeGraphviz(tree);
-  } catch(Error e) {
-    cout << e;
-  }
-
-  return 0;
-}
-
 

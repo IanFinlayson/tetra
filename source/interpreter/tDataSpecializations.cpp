@@ -7,8 +7,8 @@
 
 //#include "tData.h"
 //#include "tArray.h"
-#include "backend.hpp"
-#include "frontend.hpp"
+#include "backend.h"
+#include "frontend.h"
 
 //#define NDEBUG
 #include <assert.h>

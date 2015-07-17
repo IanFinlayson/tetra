@@ -3,13 +3,13 @@
  * This command line running by executing this file, while allowing tools access to a method which will build and run the program
  */
 #include<iostream>
-#include"frontend.hpp"
-#include"backend.hpp"
+#include"frontend.h"
+#include"backend.h"
 #include"commandConsole.h"
 #include"commandObserver.h"
 #include<cstdlib>
 
-//These are defined in frontend.hpp and main.cpp respectively
+//These are defined in frontend.h and main.cpp respectively
 int interpret(Node*);
 int interpret(Node*,std::string*,int);
 

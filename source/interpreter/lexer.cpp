@@ -8,8 +8,8 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "frontend.hpp"
-#include "parser.gen.hpp"
+#include "frontend.h"
+#include "parser.genhpp"
 
 using namespace std;
 

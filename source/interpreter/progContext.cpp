@@ -8,8 +8,8 @@
 #include <stack>
 #include <iostream>
 #include <string>
-#include "frontend.hpp"
-#include "backend.hpp"
+#include "frontend.h"
+#include "backend.h"
 //#include "progContext.h"
 //#include "functionTable.h"
 //#include "tArray.h"

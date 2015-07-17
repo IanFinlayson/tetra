@@ -8,10 +8,10 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include "frontend.hpp"
+#include "frontend.h"
 /*#include "tData.h"
 #include "tArray.h"*/
-#include "backend.hpp"
+#include "backend.h"
 
 using std::string;
 

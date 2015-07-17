@@ -1,7 +1,7 @@
 #include<string>
 #include<iostream>
-#include"frontend.hpp"
-#include"backend.hpp"
+#include"frontend.h"
+#include"backend.h"
 /*#include"tData.h"
 #include"tArray.h"
 #include"progContext.h"

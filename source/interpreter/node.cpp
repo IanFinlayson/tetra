@@ -5,8 +5,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
-#include "frontend.hpp"
-#include "parser.gen.hpp"
+#include "frontend.h"
+#include "parser.genhpp"
 
 extern int yylineno;
 

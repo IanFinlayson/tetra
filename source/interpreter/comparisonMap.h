@@ -8,12 +8,14 @@
 #include <string>
 #include <map>
 #include <iostream>
-//#include "tData.h"
-#include "frontend.hpp"
-//#include "tArray.h"
-#include "backend.hpp"
+#include "tData.h"
+#include "frontend.h"
+#include "tArray.h"
+#include "backend.h"
 using std::string;
 
+template<typename T>
+void evaluateNode(const Node*, TData<T>&, TetraContext&);
 
 //Offloaded negation methods
 //For all types except for which a specialization is declared, classic negation will do

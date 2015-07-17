@@ -4,10 +4,10 @@
  */
 
 //#include "functionTable.h"
-#include "backend.hpp"
+#include "backend.h"
 #include <map>
 #include <iostream>
-#include <frontend.hpp>
+#include "frontend.h"
 #include <string>
 #include <cstdlib>
 #include <sstream>

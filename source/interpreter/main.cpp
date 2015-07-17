@@ -8,13 +8,13 @@
 #include <string>
 #include <map>
 #include <sstream>
-#include "frontend.hpp"
+#include "frontend.h"
 /*#include "tArray.h"
 #include "tData.h"
 #include "functionTable.h"
 #include "nodeTable.h"*/
-#include "operationMap.cpp"
-#include "comparisonMap.cpp"
+#include "operationMap.h"
+#include "comparisonMap.h"
 /*#include "variableContext.h"
 #include "progContext.h"
 #include "TSL.h"
@@ -22,7 +22,7 @@
 #include "threadEnvironment.h"
 */
 #include "parallel.h"
-#include "backend.hpp"
+#include "backend.h"
 //#define NDEBUG
 #include <assert.h>
 
