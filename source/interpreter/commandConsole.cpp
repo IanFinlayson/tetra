@@ -3,13 +3,13 @@
 #include<sstream>
 
 std::string CommandConsole::receiveStandardInput() const {
-	std::string input;
+  std::string input;
 
-	std::cin >> input;
+  std::cin >> input;
 
-	return input;
+  return input;
 }
 
 void CommandConsole::processStandardOutput(const std::string output) const {
-	std::cout << output;
+  std::cout << output;
 }

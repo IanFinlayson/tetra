@@ -7,8 +7,8 @@
 extern std::map<std::string, Symbol> globals;
 
 //as a courtesy, we will provide this method
-/*std::string statusToString(ThreadStatus status){
-	switch(status){
+/*std::string statusToString(ThreadStatus status) {
+	switch(status) {
 	case RUNNING: return "Running";
 	case STOPPED: return "Stopped";
 	case DESTROYED: return "Destroyed";
@@ -254,10 +254,10 @@ else {
 								output << "-----\n";
 								pthread_mutex_lock(&context_mutex);
 								{
-									for(std::list<TetraContext*>::iterator contextIter =  threadContexts.begin(); contextIter != threadContexts.end(); ++contextIter){
+									for(std::list<TetraContext*>::iterator contextIter =  threadContexts.begin(); contextIter != threadContexts.end(); ++contextIter) {
 										
 										TetraContext* loopContext = *contextIter;
-										if(filter == 1 || (filter == 2 && loopContext->getRunStatus() == RUNNING) || (filter == 3 && loopContext->getRunStatus() == STOPPED)){
+										if(filter == 1 || (filter == 2 && loopContext->getRunStatus() == RUNNING) || (filter == 3 && loopContext->getRunStatus() == STOPPED)) {
 											output << "Thread " << loopContext->getThreadID() << ": " << statusToString(loopContext->getRunStatus()) << "\n";
 										}
 									}
@@ -539,12 +539,12 @@ void IDECommandObserver::setYieldEnabled(bool enable) {
 	CommandObserver::setYieldEnabled(enable);
 }
 
-std::vector<int> IDECommandObserver::getThreadLocations(){
+std::vector<int> IDECommandObserver::getThreadLocations() {
 	/*std::vector<int> ret;
 	pthread_mutex_lock(&context_mutex);
 	{
-		for(std::list<TetraContext*>::iterator context = threadContexts.begin(); context != threadContexts.end();context++){
-			if((*context)->getRunStatus() == STOPPED){
+		for(std::list<TetraContext*>::iterator context = threadContexts.begin(); context != threadContexts.end();context++) {
+			if((*context)->getRunStatus() == STOPPED) {
 				ret.push_back((*context)->getLastLineNo());
 			}
 		}

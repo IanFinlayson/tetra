@@ -9,99 +9,99 @@
  */
 
 void TetraEnvironment::initialize() {
-	maxThreads = 8;
-	consoleArray_ptr = NULL;
-	//pthread_mutex_init(&next_thread_mutex, NULL);
-	//It would seem that this method is not supported on this platform
-	//maxThreads = pthread_num_processors_np();
-	//cout <<"Max threads:" <<maxThreads;
-	outputStream = &std::cout;
+  maxThreads = 8;
+  consoleArray_ptr = NULL;
+  //pthread_mutex_init(&next_thread_mutex, NULL);
+  //It would seem that this method is not supported on this platform
+  //maxThreads = pthread_num_processors_np();
+  //cout <<"Max threads:" <<maxThreads;
+  outputStream = &std::cout;
 }
 
 void TetraEnvironment::initialize(const ConsoleArray& console) {
-	maxThreads = 8;
-	consoleArray_ptr = &console;
-	//pthread_mutex_init(&next_thread_mutex, NULL);
-	//It would seem that this method is not supported on this platform
-	//maxThreads = pthread_num_processors_np();
-	//cout <<"Max threads:" <<maxThreads;
-	outputStream = &std::cout;
+  maxThreads = 8;
+  consoleArray_ptr = &console;
+  //pthread_mutex_init(&next_thread_mutex, NULL);
+  //It would seem that this method is not supported on this platform
+  //maxThreads = pthread_num_processors_np();
+  //cout <<"Max threads:" <<maxThreads;
+  outputStream = &std::cout;
 }
 void TetraEnvironment::setMaxThreads(int pNum) {
-	maxThreads = pNum;
+  maxThreads = pNum;
 }
 
 void TetraEnvironment::setOutputStream(ostream& pOut) {
-	outputStream = &pOut;
+  outputStream = &pOut;
 }
 
 ostream& TetraEnvironment::getOutputStream() {
-	return *outputStream;
+  return *outputStream;
 }
 
 int TetraEnvironment::getMaxThreads() {
-	return maxThreads;
+  return maxThreads;
 }
 
 void TetraEnvironment::setConsoleArray(const ConsoleArray& pConsole) {
-	consoleArray_ptr = &pConsole;
+  consoleArray_ptr = &pConsole;
 }
 
 const ConsoleArray& TetraEnvironment::getConsoleArray() {
-	return *consoleArray_ptr;
+  return *consoleArray_ptr;
 }
 
 const VirtualConsole& TetraEnvironment::getConsole(int thread, bool debug) {
-	return consoleArray_ptr->getSpecifiedConsole(thread,debug); 
+  return consoleArray_ptr->getSpecifiedConsole(thread,debug); 
 }
 
 VirtualObserver& TetraEnvironment::getObserver() {
-	return *observer;
+  return *observer;
 }
 
 void TetraEnvironment::setObserver(VirtualObserver& pObserver) {
-	observer = &pObserver;
+  observer = &pObserver;
 }
 
 //Determines whether the interpreter should be executing in debug mode or not
 void TetraEnvironment::setDebug(bool toggle) {
-	debugMode = toggle;
+  debugMode = toggle;
 }
 
 bool TetraEnvironment::isDebugMode() {
-	return debugMode;
+  return debugMode;
 }
 
 //Sets options based on the flags that get passed in.
 //Returns "" on successful parsing, otherwise returns an error message
 std::string TetraEnvironment::parseFlags(std::string* flags, int flagCount) {
-	if(flags==NULL||flagCount == 0) {
-		return "";
-	}
+  if(flags==NULL||flagCount == 0) {
+    return "";
+  }
 
-	std::string ret = "";
+  std::string ret = "";
 
-	for(int index = 0; index < flagCount; index++) {
-		//For the time being, these will be case sensitive
-		std::string arg = flags[index];
-		if(arg == "-debug" || arg == "-d") {
-			setDebug(true);
-		}
-		else {
-			ret += "Failed to recognize option: " + arg + "\n";
-		}
-	}
+  for(int index = 0; index < flagCount; index++) {
+    //For the time being, these will be case sensitive
+    std::string arg = flags[index];
+    if(arg == "-debug" || arg == "-d") {
+      setDebug(true);
+    }
+    else {
+      ret += "Failed to recognize option: " + arg + "\n";
+    }
+  }
 
-	return ret;
+  return ret;
 }
 
 int TetraEnvironment::obtainNewThreadID() {
-	int ret = -1;
-	pthread_mutex_lock(&next_thread_mutex);
-	ret = nextThreadID;
-	nextThreadID++;
-	pthread_mutex_unlock(&next_thread_mutex);
-	return ret;
+  int ret = -1;
+  pthread_mutex_lock(&next_thread_mutex);
+  ret = nextThreadID;
+  nextThreadID++;
+  pthread_mutex_unlock(&next_thread_mutex);
+  return ret;
 }
 
 pthread_mutex_t TetraEnvironment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
