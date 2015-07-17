@@ -1,8 +1,0 @@
-
-
-
-def main( ):
-  parallel for i in [1 ... 100]:
-    print(i * i, "\n")
-
-

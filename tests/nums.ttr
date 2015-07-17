@@ -1,6 +1,0 @@
-
-def main( ):
-  x = 12345
-  y = 1.0
-  print(.35)
-  print(1.)

@@ -1,7 +1,0 @@
-
-def main( ):
-  man = "Ian"
-  x = 29
-  print( )
-  print("Hello", man, "you are", x * 365, "days old")
-

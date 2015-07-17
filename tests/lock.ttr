@@ -1,5 +1,0 @@
-def lockTest( ):
-    lock total:
-        total += sum
-
-
