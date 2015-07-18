@@ -14,29 +14,30 @@ all: tetra libtetra.a
 	@echo "All Done :)"
 
 # build the tetra executable
-tetra: $(OBJS) $(HDRS) makefile parser.gen.o
-	$(CC) $(FLAGS) $(OBJS) parser.gen.o -o tetra
-	mkdir -p ../../bin
-	cp tetra ../../bin/
+tetra: $(OBJS) parser.o
+	$(CC) $(FLAGS) $(OBJS) parser.o -o tetra
+	#mkdir -p ../../bin
+	#cp tetra ../../bin/
 
 # build the static library
-libtetra.a: $(OBJS) $(HDRS) makefile parser.gen.o
-	ar rcs libtetra.a $(OBJS) parser.gen.o
-	mkdir -p ../../lib
-	cp libtetra.a ../../lib/
+libtetra.a: $(OBJS) parser.o
+	ar rcs libtetra.a $(OBJS) parser.o
+	#mkdir -p ../../lib
+	#cp libtetra.a ../../lib/
 
 # compile an object based on source and headers
-%.o: %.cpp $(HDRS) makefile parser.genh
+%.o: %.cpp $(HDRS) parser.genh makefile
 	$(CC) $(FLAGS) -c $< -o $@
 
 # compile the parser
-parser.gen.o: parser.gencpp $(HDRS) makefile
-	$(CC) $(FLAGS) -c -x c++ parser.gencpp -o parser.gen.o
+parser.o: parser.gencpp $(HDRS) makefile
+	$(CC) $(FLAGS) -c -x c++ parser.gencpp -o parser.o
 parser.gencpp parser.genh: parser.y $(HDRS) makefile
 	bison -d -v parser.y -o parser.gencpp
 
 # tidy up
 clean:
-	rm -f libtetra.a tetra $(OBJS) parser.gen*
+	rm -f libtetra.a tetra $(OBJS) parser.o parser.gen* parser.output
 
+.PHONY: all clean
 
