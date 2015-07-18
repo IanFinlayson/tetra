@@ -8,8 +8,8 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include "frontend.h"
-#include "backend.h"
+#include "frontend.hpp"
+#include "backend.hpp"
 
 using std::string;
 

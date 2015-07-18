@@ -1,43 +1,46 @@
 # makefile
 
 # options
-CC = clang++
-FLAGS = -Wall -pedantic -g -pthread -ftemplate-backtrace-limit=1
-OPTIMIZE_MODE = -O3
+CC := clang++
+FLAGS := -Wall -pedantic -g -pthread -ftemplate-backtrace-limit=1
 
 # globs
 SRCS := $(wildcard *.cpp)
-HDRS := $(wildcard *.h)
+HDRS := $(wildcard *.hpp)
 OBJS := $(patsubst %.cpp,%.o,$(SRCS))
+OBJS += parser.o
 
+# build the interpter executable and aslp the library
 all: tetra libtetra.a
 	@echo "All Done :)"
 
 # build the tetra executable
-tetra: $(OBJS) parser.o
-	$(CC) $(FLAGS) $(OBJS) parser.o -o tetra
-	#mkdir -p ../../bin
-	#cp tetra ../../bin/
+tetra: $(OBJS)
+	$(CC) $(FLAGS) $(OBJS) -o tetra
+	mkdir -p ../../bin
+	cp tetra ../../bin/
 
 # build the static library
-libtetra.a: $(OBJS) parser.o
-	ar rcs libtetra.a $(OBJS) parser.o
-	#mkdir -p ../../lib
-	#cp libtetra.a ../../lib/
+libtetra.a: $(OBJS)
+	ar rcs libtetra.a $(OBJS)
+	mkdir -p ../../lib
+	cp libtetra.a ../../lib/
 
 # compile an object based on source and headers
-%.o: %.cpp $(HDRS) parser.genh makefile
+%.o: %.cpp $(HDRS) parser.genhpp makefile
 	$(CC) $(FLAGS) -c $< -o $@
 
-# compile the parser
-parser.o: parser.gencpp $(HDRS) makefile
+# build the parser object based on bison generated files
+parser.o: parser.gencpp $(HDRS) parser.genhpp makefile
 	$(CC) $(FLAGS) -c -x c++ parser.gencpp -o parser.o
-parser.gencpp parser.genh: parser.y $(HDRS) makefile
+
+# compile the parser with bison
+parser.gencpp parser.genhpp: parser.y $(HDRS) makefile
 	bison -d -v parser.y -o parser.gencpp
 
 # tidy up
 clean:
-	rm -f libtetra.a tetra $(OBJS) parser.o parser.gen* parser.output
+	rm -f libtetra.a tetra $(OBJS) parser.genhpp parser.gencpp parser.output
 
 .PHONY: all clean
 

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
-#include "frontend.h"
+#include "frontend.hpp"
 #include "parser.genhpp"
 
 /* this function search and replaces a string in place */

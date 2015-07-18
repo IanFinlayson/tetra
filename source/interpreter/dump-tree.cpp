@@ -8,7 +8,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
-#include "frontend.h"
+#include "frontend.hpp"
 #include "parser.genhpp"
 
 using namespace std;

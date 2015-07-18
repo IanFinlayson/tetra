@@ -11,8 +11,8 @@
 #include <stack>
 #include <iostream>
 #include <string>
-#include "frontend.h"
-#include "backend.h"
+#include "frontend.hpp"
+#include "backend.hpp"
 #include <list>
 
 #include <assert.h>

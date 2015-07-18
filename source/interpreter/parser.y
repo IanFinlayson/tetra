@@ -12,7 +12,7 @@
 
 using namespace std;
 
-#include "frontend.h"
+#include "frontend.hpp"
 
 extern int yylineno;
 int yylex( );

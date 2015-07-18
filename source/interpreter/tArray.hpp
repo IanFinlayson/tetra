@@ -9,8 +9,8 @@
 #include<iostream>
 #include<string>
 #include<cstdlib>
-#include"tData.h"
-#include"frontend.h"
+#include"tData.hpp"
+#include"frontend.hpp"
 
 //Used for some threadsafety
 #include<pthread.h>

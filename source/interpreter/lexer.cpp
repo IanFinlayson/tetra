@@ -9,7 +9,7 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "frontend.h"
+#include "frontend.hpp"
 #include "parser.genhpp"
 
 using namespace std;

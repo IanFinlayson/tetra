@@ -1,5 +1,5 @@
-#include"backend.h"
-#include"commandConsole.h"
+#include"backend.hpp"
+#include"commandConsole.hpp"
 #include<sstream>
 
 std::string CommandConsole::receiveStandardInput() const {

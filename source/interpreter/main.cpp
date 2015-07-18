@@ -8,11 +8,11 @@
 #include <string>
 #include <map>
 #include <sstream>
-#include "frontend.h"
-#include "operationMap.h"
-#include "comparisonMap.h"
-#include "parallel.h"
-#include "backend.h"
+#include "frontend.hpp"
+#include "operationMap.hpp"
+#include "comparisonMap.hpp"
+#include "parallel.hpp"
+#include "backend.hpp"
 #include <assert.h>
 
 //Forward declarations of certain functions. Refer to the function bodies for comments

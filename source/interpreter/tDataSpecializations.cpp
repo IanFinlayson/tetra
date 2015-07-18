@@ -2,8 +2,8 @@
  * This file contains specializations for the TData class
  */
 
-#include "backend.h"
-#include "frontend.h"
+#include "backend.hpp"
+#include "frontend.hpp"
 #include <assert.h>
 
 

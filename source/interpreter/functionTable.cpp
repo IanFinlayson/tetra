@@ -7,10 +7,10 @@
  file's syntax tree) This uses a single object design.
  */
 
-#include "backend.h"
+#include "backend.hpp"
 #include <map>
 #include <iostream>
-#include "frontend.h"
+#include "frontend.hpp"
 #include <string>
 #include <cstdlib>
 #include <sstream>

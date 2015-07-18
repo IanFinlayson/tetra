@@ -20,8 +20,8 @@
 #include <vector>
 #include <deque>
 
-#include "frontend.h" 
-#include "microStack.h"
+#include "frontend.hpp" 
+#include "microStack.hpp"
 
 /* This segment, adapted from
  * http://stackoverflow.com/questions/826569/compelling-examples-of-custom-c-allocators,

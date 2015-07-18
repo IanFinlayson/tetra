@@ -1,9 +1,9 @@
 //This class defines Tetra Standard Library functions
 
 #include<iostream>
-#include"frontend.h"
+#include"frontend.hpp"
 #include<string.h>
-#include"backend.h"
+#include"backend.hpp"
 
 template <typename T>
 void evaluateNode(const Node*,TData<T>&,TetraContext&);
