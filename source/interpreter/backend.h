@@ -1490,5 +1490,13 @@ T* VarTable::lookupVar(const std::string varName) {
           static long nextThreadID;
           static pthread_mutex_t next_thread_mutex;
       };
+
+      class CommandConsole : public VirtualConsole {
+        public:
+          std::string receiveStandardInput() const;
+
+          void processStandardOutput(const std::string output) const;
+      };
+
 #endif
 

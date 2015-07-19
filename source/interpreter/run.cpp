@@ -5,7 +5,6 @@
 #include<iostream>
 #include"frontend.h"
 #include"backend.h"
-#include"commandConsole.h"
 #include"commandObserver.h"
 #include<cstdlib>
 
