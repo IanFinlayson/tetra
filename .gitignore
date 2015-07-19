@@ -5,7 +5,7 @@ gmon.out
 
 # lex/yacc generated files
 *.gencpp
-*.genhpp
+*.genh
 parser.output
 
 # Vim swap files
