@@ -8,7 +8,6 @@ gmon.out
 *.genhpp
 parser.output
 
-
 # Vim swap files
 .*.swp
 
@@ -23,6 +22,5 @@ qrc_*
 
 # executables
 Tetra
-dump-tree
 tetra
 

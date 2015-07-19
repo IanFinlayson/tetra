@@ -15,7 +15,7 @@ CXX           = g++
 DEFINES       = -DQT_NO_DEBUG -DQT_PRINTSUPPORT_LIB -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB
 CFLAGS        = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -O2 -Wall -W -D_REENTRANT -fPIC $(DEFINES)
-INCPATH       = -I. -I../frontend -I../interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore -I. -I. -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++
+INCPATH       = -I. -I../interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore -I. -I. -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++
 QMAKE         = /opt/Qt/5.5/gcc_64/bin/qmake
 DEL_FILE      = rm -f
 CHK_DIR_EXISTS= test -d
@@ -36,7 +36,7 @@ DISTNAME      = Tetra1.0.0
 DISTDIR = /home/finlayson/tetra/source/gui/.tmp/Tetra1.0.0
 LINK          = g++
 LFLAGS        = -Wl,-O1 -Wl,-rpath,/opt/Qt/5.5/gcc_64 -Wl,-rpath,/opt/Qt/5.5/gcc_64/lib
-LIBS          = $(SUBLIBS) -L/home/finlayson/tetra/source/gui/../frontend/ -lfrontend -L/home/finlayson/tetra/source/gui/../interpreter/ -lbackend -L/opt/Qt/5.5/gcc_64/lib -lQt5PrintSupport -L/usr/lib64 -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
+LIBS          = $(SUBLIBS) -L/home/finlayson/tetra/source/gui/../interpreter/ -ltetra -L/opt/Qt/5.5/gcc_64/lib -lQt5PrintSupport -L/usr/lib64 -lQt5Widgets -lQt5Gui -lQt5Core -lGL -lpthread 
 AR            = ar cqs
 RANLIB        = 
 SED           = sed
@@ -248,7 +248,7 @@ first: all
 
 ####### Build rules
 
-$(TARGET): /home/finlayson/tetra/source/gui/../frontend/libfrontend.a /home/finlayson/tetra/source/gui/../interpreter/libbackend.a ui_mainwindow.h ui_openappdialog.h ui_openapp.h $(OBJECTS)  
+$(TARGET): /home/finlayson/tetra/source/gui/../interpreter/libtetra.a ui_mainwindow.h ui_openappdialog.h ui_openapp.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: Tetra.pro /opt/Qt/5.5/gcc_64/mkspecs/linux-g++/qmake.conf /opt/Qt/5.5/gcc_64/mkspecs/features/spec_pre.prf \
@@ -565,26 +565,7 @@ check: first
 compiler_rcc_make_all: qrc_AppResources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_AppResources.cpp
-qrc_AppResources.cpp: AppResources.qrc \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra \
-		Tetra
+qrc_AppResources.cpp: AppResources.qrc
 	/opt/Qt/5.5/gcc_64/bin/rcc -name AppResources AppResources.qrc -o qrc_AppResources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_openappdialog.cpp moc_syntaxhighlighter.cpp moc_editor.cpp moc_filerunner.cpp moc_debugwindow.cpp
@@ -728,12 +709,12 @@ moc_mainwindow.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QMainWindow \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		mainwindow.h \
-		../frontend/frontend.hpp \
 		../interpreter/backend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		mainwindow.h
-	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/frontend -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore mainwindow.h -o moc_mainwindow.cpp
+	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore mainwindow.h -o moc_mainwindow.cpp
 
 moc_openappdialog.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QDialog \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qdialog.h \
@@ -876,14 +857,14 @@ moc_openappdialog.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QDialog \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QPushButton \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qpushbutton.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qabstractbutton.h \
 		openappdialog.h
-	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/frontend -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore openappdialog.h -o moc_openappdialog.cpp
+	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore openappdialog.h -o moc_openappdialog.cpp
 
 moc_syntaxhighlighter.cpp: /opt/Qt/5.5/gcc_64/include/QtGui/QSyntaxHighlighter \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qsyntaxhighlighter.h \
@@ -993,7 +974,7 @@ moc_syntaxhighlighter.cpp: /opt/Qt/5.5/gcc_64/include/QtGui/QSyntaxHighlighter \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextcursor.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		syntaxhighlighter.h
-	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/frontend -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore syntaxhighlighter.h -o moc_syntaxhighlighter.cpp
+	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore syntaxhighlighter.h -o moc_syntaxhighlighter.cpp
 
 moc_editor.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QPlainTextEdit \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qplaintextedit.h \
@@ -1135,10 +1116,10 @@ moc_editor.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QPlainTextEdit \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		editor.h
-	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/frontend -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore editor.h -o moc_editor.cpp
+	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore editor.h -o moc_editor.cpp
 
 moc_filerunner.cpp: mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QMainWindow \
@@ -1279,11 +1260,11 @@ moc_filerunner.cpp: mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		filerunner.h
-	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/frontend -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore filerunner.h -o moc_filerunner.cpp
+	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore filerunner.h -o moc_filerunner.cpp
 
 moc_debugwindow.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QPlainTextEdit \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qplaintextedit.h \
@@ -1403,7 +1384,7 @@ moc_debugwindow.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QPlainTextEdit \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qfontdatabase.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		debugwindow.h
-	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/frontend -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore debugwindow.h -o moc_debugwindow.cpp
+	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/gui -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore debugwindow.h -o moc_debugwindow.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -1552,8 +1533,8 @@ ui_mainwindow.h: mainwindow.ui \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp
 	/opt/Qt/5.5/gcc_64/bin/uic mainwindow.ui -o ui_mainwindow.h
 
 ui_openappdialog.h: openappdialog.ui
@@ -1711,8 +1692,8 @@ main.o: main.cpp mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		openappdialog.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QDialog \
@@ -1871,8 +1852,8 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		ui_mainwindow.h \
 		openappdialog.h \
@@ -2162,8 +2143,8 @@ openappdialog.o: openappdialog.cpp openappdialog.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QPushButton \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qpushbutton.h \
@@ -2532,8 +2513,8 @@ editor.o: editor.cpp editor.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		../interpreter/backend.hpp \
-		../frontend/frontend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QtWidgets \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QtWidgetsDepends \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QtCore \
@@ -2996,12 +2977,10 @@ filerunner.o: filerunner.cpp filerunner.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qsyntaxhighlighter.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
-		../frontend/frontend.hpp \
 		../interpreter/backend.hpp \
-		../interpreter/microStack.h \
+		../interpreter/frontend.hpp \
+		../interpreter/microStack.hpp \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
-		../interpreter/ideCommandObserver.h \
-		../interpreter/commandObserver.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QDebug
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filerunner.o filerunner.cpp
 

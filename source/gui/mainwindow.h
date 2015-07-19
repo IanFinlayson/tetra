@@ -10,9 +10,8 @@
 #include <QSignalMapper>
 #include "syntaxhighlighter.h"
 #include "filerunner.h"
-#include "../frontend/frontend.hpp"
+#include "../interpreter/frontend.hpp"
 #include "../interpreter/backend.hpp"
-//#include "debugwindow.h"
 
 class Editor;
 class FileRunner;
