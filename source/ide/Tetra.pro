@@ -39,7 +39,7 @@ RESOURCES += \
 INCLUDEPATH += $$PWD/../interpreter
 DEPENDPATH += $$PWD/../interpreter
 
-unix:!macx: PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
-unix:!macx: LIBS += -L$$PWD/../interpreter/ -ltetra
+PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
+LIBS += -L$$PWD/../interpreter/ -ltetra
 
 

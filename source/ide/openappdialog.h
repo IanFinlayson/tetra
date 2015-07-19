@@ -2,7 +2,7 @@
 #define OPENAPPDIALOG_H
 
 #include <QDialog>
-#include <mainwindow.h>
+#include "mainwindow.h"
 #include <QPushButton>
 
 namespace Ui {
