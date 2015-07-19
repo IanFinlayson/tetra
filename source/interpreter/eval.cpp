@@ -298,35 +298,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       Error e(message.str(),node->getLine());
   }
 }
-/*
-//Used for aliasing arrays within the same scope (e.g. for loops)
-//Makes it so that the address denoted by Node1 points to the array denoted by arrayArg
-void aliasArray(const Node* node, TArray& arrayArg, TetraContext& context) {
 
-//Get the identifier used for the alias
-string formalParamName = node->getString();
 
-TData<void*>& alias = context.declareReference(formalParamName);
-//Get a pointer to the TData location of the destination scope
-
-//Generics needed so that the method recognizes void* and TArray* as the same data type
-alias.setData<void*>(&arrayArg);
-}*/
-/*
-//Makes it so that the address denoted by Node1 points to the array denoted by node2
-//This version is used for function calls, where the aliasing takes place across scopes
-void aliasArray(const Node* node1, const Node* node2, TetraScope& destinationContext, TetraContext& sourceContext) {
-
-//Get the name used to reference the alias
-string formalParamName = node1->getString();
-
-TData<void*>& alias = destinationContext.declareReference(formalParamName);
-//Get a pointer to the TData location of the destination scope
-
-//Set the alias to point to the original array	
-alias.setData<void*>(sourceContext.lookupVar<TArray>(node2->getString()));
-}
-*/
 //Takes the values denoted by node2 in the context of the sourceContext,
 //copies them with new names (deifned by node1) into the TetraScope desitnationScope
 //Used for passing arguments between function calls
@@ -477,79 +450,6 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
     //returns to the old scope once the function has finished evaluating
     context.exitScope();
   }
-  /*
-     if(funcName == "print") {
-     if(node->child(0) != NULL) {
-     print(node->child(0),context);
-     }
-//Each print does NOT end with a line break
-//std::cout << endl;
-}
-else if(funcName == "read_int") {
-ret.setData(readInt());
-}
-else if(funcName == "read_real") {
-ret.setData(readReal());
-}
-else if(funcName == "read_string") {
-ret.setData(readString());
-}
-else if(funcName == "read_bool") {
-ret.setData(readBool());
-}
-else if(funcName == "len") {
-if(node->child(0)->type()->getKind() == TYPE_STRING) {
-TData<string> value;
-evaluateNode(node->child(0),value,context);
-ret.setData(len(value.getData()));
-}
-else if(node->child(0)->type()->getKind() == TYPE_VECTOR) {
-TData<TArray> value;
-evaluateNode(node->child(0),value,context);
-ret.setData(len(value.getData()));
-}
-else {	//attempting to take length of another type is an error
-std::stringstream message;
-message << "Attempted to obtain length of unknown type. ID: " << node->child(0)->type()->getKind();
-Error e(message.str(),node->getLine());
-}
-}		//USER DEFINED FUNCTION
-else {
-  //gets the node where the body of the called function begins
-  ///////////////	//const Node* funcNode = FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
-
-  const Node* funcNode = FunctionMap::getFunctionNode(node);
-
-  //check if there are parameters to be passed, and do so if needed
-  //This call will have arguments if and only if the calling node has children	
-  if(node->child(0) != NULL) {
-
-//When copying arg list, we must have handles to both scopes
-//Calling scope handle
-TetraScope destScope(node);
-
-//cout << "Old scope X: " << *(context.lookupVar<TArray>("x")) << endl;
-
-//Initialize the new scope with the passed parameters
-pasteArgList(funcNode->child(0),node->child(0), destScope, context);
-
-//Set the new scope to the scope we created containing all the parameters
-//cout << "x: " << destScope.lookupVar<int>("x") << endl;
-context.initializeNewScope(destScope);
-}
-else { //if there are no args, we still need to initialize a new scope!
-context.initializeNewScope(node);
-}
-
-//Place this node on the call stack, so it can be printed in the stack trace
-context.getCurrentScope().setCallNode(node);
-
-//transfer control to the function
-evaluateNode<T>(funcNode,ret,context);
-
-//returns to the old scope once the function has finished evaluating
-context.exitScope();
-}*/
 }
 
 //evaluates operations on data types
@@ -558,17 +458,6 @@ void evaluateExpression(const Node* node, TData<T>& ret, TetraContext& context) 
 
   //Static tables containing what actions to perform given which operation node	
   static OperationList<T> execData;
-  /*
-     TData<T> op1;
-     evaluateNode<T>(node->child(0),op1,context);
-     TData<T> op2;
-  //Check if we have a binary or unary operation
-  if(node->child(1) != NULL) {
-  evaluateNode<T>(node->child(1),op2,context);
-  }
-  //Execute the operation and store the result in ret
-  ret.setData(execData.execute(node->kind(),op1,op2));
-  */
   ret.setData(execData.execute(node->kind(),node->child(0), node->child(1),context));
 }
 
@@ -1132,28 +1021,7 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
     TetraEnvironment::getObserver().threadCreated_E(tContext.getThreadID(),tContext);
   }
 
-  //try {
   evaluateNode<int>(start, retVal, tContext);
-  //		tContext.exitScope();
-  /*}
-    catch (Error e) { //Print out any errors
-    std::cout << "---------------------------------------------------------------" << std::endl;
-    std::cout << "The following error was encountered while running your program: " << std::endl;
-    std::cout << e.getMessage() << std::endl;
-    std::cout << "Near Line: " << e.getLine() << std::endl;
-    std::cout << "Stack trace: ";
-    tContext.printStackTrace();
-  //Set return value to error code
-  retVal.setData(1);
-  }*/
-
-  //Wait for all outstanding threads to terminate
-  //This contains a subtle error if a thread removes itself between the conditional and the joini
-  /*	while(ThreadEnvironment::queryThreads() != 0) {
-      pthread_t x = ThreadEnvironment::getNextJoin();
-      pthread_join(x, NULL);
-      }*/
-
   ThreadEnvironment::joinDetachedThreads();
 
   tContext.exitScope();
@@ -1166,7 +1034,6 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 
 
 }
-
 
 //Convenience call with no flags
 int interpret(Node* tree) {

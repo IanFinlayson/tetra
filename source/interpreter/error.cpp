@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include "frontend.h"
+#include "backend.h"
 #include "parser.genh"
 
 /* this function search and replaces a string in place */
@@ -83,3 +84,20 @@ ostream& operator<<(ostream& out, const Error& error) {
   return out;
 }
 
+/* the runtime error class */
+RuntimeError::RuntimeError(const std::string& pMessage, int pLine, TetraContext& pContext) : Error(pMessage,pLine), context(pContext) {
+  //nothing else
+}
+
+TetraContext& RuntimeError::getContext() {
+  return context;
+}
+
+/* the system error class */
+SystemError::SystemError(const std::string& pMessage, int pLine, const Node* pNode) : Error(pMessage,pLine), node(pNode) {
+	//nothing else
+}
+
+const Node* SystemError::getNode() {
+	return node;
+}
