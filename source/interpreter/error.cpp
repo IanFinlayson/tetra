@@ -5,8 +5,8 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstdio>
-#include "frontend.hpp"
-#include "parser.genhpp"
+#include "frontend.h"
+#include "parser.genh"
 
 /* this function search and replaces a string in place */
 void replace(string& str, const string& from, const string& to) {

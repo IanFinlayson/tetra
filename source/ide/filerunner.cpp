@@ -1,5 +1,5 @@
 #include "filerunner.h"
-#include "ideCommandObserver.hpp"
+#include "ideCommandObserver.h"
 #include <QDebug>
 
 int interpret(Node*, std::string[], int);

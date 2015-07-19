@@ -5,8 +5,8 @@
 #include<iostream>
 #include<map>
 #include<string>
-#include"frontend.hpp"
-#include"backend.hpp"
+#include"frontend.h"
+#include"backend.h"
 #include<pthread.h>
 #include<list>
 using std::string;

@@ -9,8 +9,8 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "frontend.hpp"
-#include "parser.genhpp"
+#include "frontend.h"
+#include "parser.genh"
 
 using namespace std;
 

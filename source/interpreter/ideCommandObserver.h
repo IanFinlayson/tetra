@@ -1,8 +1,8 @@
 //#ifndef OBSERVER_H
 //#define OBSERVER_H
 
-#include "commandObserver.hpp"
-#include "backend.hpp"
+#include "commandObserver.h"
+#include "backend.h"
 
 
 //structure for breakpoints. 

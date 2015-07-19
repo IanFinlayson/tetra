@@ -2,8 +2,8 @@
  * This class wraps an array of tData<void*> used to make arrays and multi-dimensional arrays
  */
 
-#include"frontend.hpp"
-#include"backend.hpp"
+#include"frontend.h"
+#include"backend.h"
 
 using std::string;
 using std::vector;

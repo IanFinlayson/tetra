@@ -565,7 +565,26 @@ check: first
 compiler_rcc_make_all: qrc_AppResources.cpp
 compiler_rcc_clean:
 	-$(DEL_FILE) qrc_AppResources.cpp
-qrc_AppResources.cpp: AppResources.qrc
+qrc_AppResources.cpp: AppResources.qrc \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra \
+		Tetra
 	/opt/Qt/5.5/gcc_64/bin/rcc -name AppResources AppResources.qrc -o qrc_AppResources.cpp
 
 compiler_moc_header_make_all: moc_mainwindow.cpp moc_openappdialog.cpp moc_syntaxhighlighter.cpp moc_editor.cpp moc_filerunner.cpp moc_debugwindow.cpp
@@ -709,6 +728,9 @@ moc_mainwindow.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QMainWindow \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
 		mainwindow.h \
+		../interpreter/frontend.h \
+		../interpreter/backend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		mainwindow.h
 	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/ide -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore mainwindow.h -o moc_mainwindow.cpp
@@ -853,6 +875,9 @@ moc_openappdialog.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QDialog \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QPushButton \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qpushbutton.h \
@@ -1109,6 +1134,9 @@ moc_editor.cpp: /opt/Qt/5.5/gcc_64/include/QtWidgets/QPlainTextEdit \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		editor.h
 	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/ide -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore editor.h -o moc_editor.cpp
 
@@ -1250,6 +1278,9 @@ moc_filerunner.cpp: mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		filerunner.h
 	/opt/Qt/5.5/gcc_64/bin/moc $(DEFINES) -I/opt/Qt/5.5/gcc_64/mkspecs/linux-g++ -I/home/finlayson/tetra/source/ide -I/home/finlayson/tetra/source/interpreter -I/opt/Qt/5.5/gcc_64/include -I/opt/Qt/5.5/gcc_64/include/QtPrintSupport -I/opt/Qt/5.5/gcc_64/include/QtWidgets -I/opt/Qt/5.5/gcc_64/include/QtGui -I/opt/Qt/5.5/gcc_64/include/QtCore filerunner.h -o moc_filerunner.cpp
@@ -1519,7 +1550,10 @@ ui_mainwindow.h: mainwindow.ui \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qsyntaxhighlighter.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
-		filerunner.h
+		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h
 	/opt/Qt/5.5/gcc_64/bin/uic mainwindow.ui -o ui_mainwindow.h
 
 ui_openappdialog.h: openappdialog.ui
@@ -1676,6 +1710,9 @@ main.o: main.cpp mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		openappdialog.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QDialog \
@@ -1833,6 +1870,9 @@ mainwindow.o: mainwindow.cpp mainwindow.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		ui_mainwindow.h \
 		openappdialog.h \
@@ -2121,6 +2161,9 @@ openappdialog.o: openappdialog.cpp openappdialog.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QPushButton \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/qpushbutton.h \
@@ -2488,6 +2531,9 @@ editor.o: editor.cpp editor.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
 		filerunner.h \
+		../interpreter/backend.h \
+		../interpreter/frontend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QtWidgets \
 		/opt/Qt/5.5/gcc_64/include/QtWidgets/QtWidgetsDepends \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QtCore \
@@ -2950,7 +2996,12 @@ filerunner.o: filerunner.cpp filerunner.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qsyntaxhighlighter.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/qtextobject.h \
 		/opt/Qt/5.5/gcc_64/include/QtGui/QTextCharFormat \
+		../interpreter/frontend.h \
+		../interpreter/backend.h \
+		../interpreter/microStack.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QObject \
+		../interpreter/ideCommandObserver.h \
+		../interpreter/commandObserver.h \
 		/opt/Qt/5.5/gcc_64/include/QtCore/QDebug
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o filerunner.o filerunner.cpp
 

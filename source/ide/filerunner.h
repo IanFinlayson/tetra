@@ -2,7 +2,7 @@
 #define FILERUNNER_H
 
 #include "mainwindow.h"
-#include "backend.hpp"
+#include "backend.h"
 #include <sys/types.h>
 #include <QObject>
 

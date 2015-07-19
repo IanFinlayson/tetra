@@ -1,6 +1,6 @@
-#include"frontend.hpp"
-#include"backend.hpp"
-#include"ideCommandObserver.hpp"
+#include"frontend.h"
+#include"backend.h"
+#include"ideCommandObserver.h"
 #include<sstream>
 
 //Global symbol table

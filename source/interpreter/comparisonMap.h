@@ -8,9 +8,9 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include "frontend.hpp"
-#include "tArray.hpp"
-#include "backend.hpp"
+#include "frontend.h"
+#include "tArray.h"
+#include "backend.h"
 using std::string;
 
 template<typename T>
