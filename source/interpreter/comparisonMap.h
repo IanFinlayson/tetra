@@ -9,7 +9,6 @@
 #include <map>
 #include <iostream>
 #include "frontend.h"
-#include "tArray.h"
 #include "backend.h"
 using std::string;
 
