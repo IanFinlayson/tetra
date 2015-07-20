@@ -8,10 +8,6 @@
 #include"commandObserver.h"
 #include<cstdlib>
 
-//These are defined in frontend.h and main.cpp respectively
-int interpret(Node*);
-int interpret(Node*,std::string*,int);
-
 int main(int argc, char** argv) {
 
   //Check that the proper number of arguments were passed

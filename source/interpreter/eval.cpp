@@ -870,7 +870,6 @@ template<typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 
   if(TetraEnvironment::isDebugMode()) {
-    //#ifdef USE_OBSERVER
     //If we have encountered a new variable or new scope, context should be expolicitely notified here
     context.updateVarReferenceTable(node);
     //Notify the observer that we are about to execute a new node
@@ -972,7 +971,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 }
 
 //Equivilant of main for the interpreter module
-int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
+int interpret(Node* tree, std::string* flags, int flagCount) {
 
   //Restore default values before interpreting flags
   TetraEnvironment::setDebug(false);
@@ -1035,9 +1034,5 @@ int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0) {
 
 }
 
-//Convenience call with no flags
-int interpret(Node* tree) {
-  return interpret(tree,NULL,0);
-}
 
 

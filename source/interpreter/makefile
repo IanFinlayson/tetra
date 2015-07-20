@@ -10,8 +10,8 @@ HDRS := $(wildcard *.h)
 OBJS := $(patsubst %.cpp,%.o,$(SRCS))
 OBJS += parser.o
 
-# build the interpter executable and aslp the library
-all: tetra libtetra.a
+# build the interpter executable, the library and tags
+all: tetra libtetra.a tags
 	@echo "All Done :)"
 
 # build the tetra executable
@@ -37,6 +37,10 @@ parser.o: parser.gencpp $(HDRS) parser.genh makefile
 # compile the parser with bison
 parser.gencpp parser.genh: parser.y $(HDRS) makefile
 	bison -d -v parser.y -o parser.gencpp && mv parser.genhpp parser.genh
+
+# generate tag file
+tags: $(SRCS) $(HDRS) parser.y
+	ctags $(SRCS) $(HDRS) parser.y
 
 # tidy up
 clean:
