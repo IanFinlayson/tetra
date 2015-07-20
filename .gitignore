@@ -21,6 +21,6 @@ ui_*
 qrc_*
 
 # executables
-Tetra
 tetra
+tetraide
 

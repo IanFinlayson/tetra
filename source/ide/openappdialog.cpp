@@ -9,7 +9,7 @@
 OpenAppDialog::OpenAppDialog(QWidget *parent):QDialog(parent), ui(new Ui::OpenAppDialog){
     this->mainwindow = NULL;
     ui->setupUi(this);
-    QPixmap tetraLogo(":/graphics/Tetra Resources/logo.png");
+    QPixmap tetraLogo(":/graphics/resources/logo.png");
     ui->logo->setPixmap(tetraLogo);
     ui->logo->setAlignment(Qt::AlignCenter);
 

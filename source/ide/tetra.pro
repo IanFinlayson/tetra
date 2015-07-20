@@ -1,22 +1,32 @@
+# set the compiler to clang
+QMAKE_CXX = clang++
 
+# specify icons
 ICON = tetra.icns
-QMAKE_INFO_PLIST = Info.plist
-OTHER_FILES += Info.plist
 
+# set the QT modules we need
 QT += core gui
-
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-TARGET = Tetra
+# build an application
+TARGET = tetraide
 TEMPLATE = app
 
+# include the interpreter path
+INCLUDEPATH += $$PWD/../interpreter
+DEPENDPATH += $$PWD/../interpreter
+
+# link to the tetra interpreter library
+PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
+LIBS += -L$$PWD/../interpreter/ -ltetra
+
+# specify all the files we need
 SOURCES += main.cpp\
     mainwindow.cpp \
     openappdialog.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
     filerunner.cpp \
-    openapp.cpp \
     debugwindow.cpp
 
 HEADERS  += \
@@ -34,12 +44,5 @@ FORMS    += \
     openapp.ui
 
 RESOURCES += \
-    AppResources.qrc
-
-INCLUDEPATH += $$PWD/../interpreter
-DEPENDPATH += $$PWD/../interpreter
-
-PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
-LIBS += -L$$PWD/../interpreter/ -ltetra
-
+    resources.qrc
 
