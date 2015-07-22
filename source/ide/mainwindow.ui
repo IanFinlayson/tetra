@@ -309,7 +309,7 @@ border: 1px solid grey;
   <action name="actionSave">
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.save.png</normaloff>:/icons/Tetra Resources/icons/appbar.save.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.save.png</normaloff>:/icons/resources/icons/appbar.save.png</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -331,7 +331,7 @@ border: 1px solid grey;
   <action name="actionPrint">
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.printer.text.png</normaloff>:/icons/Tetra Resources/icons/appbar.printer.text.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.printer.text.png</normaloff>:/icons/resources/icons/appbar.printer.text.png</iconset>
    </property>
    <property name="text">
     <string>Print...</string>
@@ -358,7 +358,7 @@ border: 1px solid grey;
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.undo.png</normaloff>:/icons/Tetra Resources/icons/appbar.undo.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.undo.png</normaloff>:/icons/resources/icons/appbar.undo.png</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -370,7 +370,7 @@ border: 1px solid grey;
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.redo.png</normaloff>:/icons/Tetra Resources/icons/appbar.redo.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.redo.png</normaloff>:/icons/resources/icons/appbar.redo.png</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -400,7 +400,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.control.play.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.play.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.control.play.png</normaloff>:/icons/resources/icons/appbar.control.play.png</iconset>
    </property>
    <property name="text">
     <string>Run</string>
@@ -415,7 +415,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.bug.png</normaloff>:/icons/Tetra Resources/icons/appbar.bug.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.bug.png</normaloff>:/icons/resources/icons/appbar.bug.png</iconset>
    </property>
    <property name="text">
     <string>Debug</string>
@@ -442,7 +442,7 @@ border: 1px solid grey;
   <action name="actionBuild">
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.protractor.png</normaloff>:/icons/Tetra Resources/icons/appbar.protractor.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.protractor.png</normaloff>:/icons/resources/icons/appbar.protractor.png</iconset>
    </property>
    <property name="text">
     <string>Build</string>
@@ -454,7 +454,7 @@ border: 1px solid grey;
   <action name="actionStop">
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.control.stop.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.stop.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.control.stop.png</normaloff>:/icons/resources/icons/appbar.control.stop.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -503,7 +503,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.control.resume.png</normaloff>:/icons/Tetra Resources/icons/appbar.control.resume.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.control.resume.png</normaloff>:/icons/resources/icons/appbar.control.resume.png</iconset>
    </property>
    <property name="text">
     <string>Continue</string>
@@ -515,7 +515,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.into.png</normaloff>:/icons/Tetra Resources/icons/appbar.debug.step.into.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.debug.step.into.png</normaloff>:/icons/resources/icons/appbar.debug.step.into.png</iconset>
    </property>
    <property name="text">
     <string>Step</string>
@@ -530,7 +530,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.bug.remove.png</normaloff>:/icons/Tetra Resources/icons/appbar.bug.remove.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.bug.remove.png</normaloff>:/icons/resources/icons/appbar.bug.remove.png</iconset>
    </property>
    <property name="text">
     <string>Exit Debug Mode</string>
@@ -571,7 +571,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="AppResources.qrc">
-     <normaloff>:/icons/Tetra Resources/icons/appbar.navigate.next.png</normaloff>:/icons/Tetra Resources/icons/appbar.navigate.next.png</iconset>
+     <normaloff>:/icons/resources/icons/appbar.navigate.next.png</normaloff>:/icons/resources/icons/appbar.navigate.next.png</iconset>
    </property>
    <property name="text">
     <string>Next</string>

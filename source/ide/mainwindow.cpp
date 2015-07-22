@@ -29,7 +29,7 @@ MainWindow::MainWindow(QWidget *parent):QMainWindow(parent), ui(new Ui::MainWind
 
     highlighter = new Highlighter(ui->input->document());
 
-    QIcon icon(":graphics/Tetra Resources/icons/tetra squares.ico");
+    QIcon icon(":graphics/resources/icons/tetra squares.ico");
     this->setWindowIcon(icon);
 
     tetraThread = new QThread;

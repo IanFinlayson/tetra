@@ -1,0 +1,25 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>resources/icons/appbar.bug.png</file>
+        <file>resources/icons/appbar.control.play.png</file>
+        <file>resources/icons/appbar.control.stop.png</file>
+        <file>resources/icons/appbar.redo.png</file>
+        <file>resources/icons/appbar.save.png</file>
+        <file>resources/icons/appbar.undo.png</file>
+        <file>resources/icons/appbar.printer.text.png</file>
+        <file>resources/icons/appbar.protractor.png</file>
+        <file>resources/icons/logo_squares.ico</file>
+        <file>resources/icons/appbar.arrow.down.png</file>
+        <file>resources/icons/appbar.arrow.up.png</file>
+        <file>resources/icons/appbar.debug.step.over.png</file>
+        <file>resources/icons/appbar.debug.step.out.png</file>
+        <file>resources/icons/appbar.debug.step.into.png</file>
+        <file>resources/icons/appbar.control.resume.png</file>
+        <file>resources/icons/appbar.bug.remove.png</file>
+        <file>resources/icons/appbar.control.pause.png</file>
+        <file>resources/icons/appbar.navigate.next.png</file>
+    </qresource>
+    <qresource prefix="/graphics">
+        <file>resources/logo.png</file>
+    </qresource>
+</RCC>

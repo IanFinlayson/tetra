@@ -1,12 +1,6 @@
 #ifndef BACKEND_H
 #define BACKEND_H
 
-/* This class wraps all data types used in a tetra program.  A note about the
- * comments, an "ordinary case" for using a TData object involves all
- * situations EXCEPT when: The template for the type is void* and...  the void*
- * is pointing at a dynamically allocated piece of memory for which the TData
- * has ownership */ 
-
 #include <iostream>
 #include <string>
 #include <stack>
@@ -19,17 +13,14 @@
 #include <sstream>
 #include <vector>
 #include <deque>
+#include <memory>
+#include <stdio.h>
 
 #include "frontend.h" 
 #include "microStack.h"
 
-/* This segment, adapted from
- * http://stackoverflow.com/questions/826569/compelling-examples-of-custom-c-allocators,
- * Is used to tes memory allocation for different programs When not using this,
- * can typedef mmap_allocator with a standard allocator */
-
-#include<memory>
-#include<stdio.h>
+/* a custom allocator for handling memory this was created to assuage fears
+ * that STL allocations were causing performance issues */
 static int numAllocs_T = 0;
 static int numDeallocs_T = 0;
 
@@ -62,34 +53,28 @@ class mmap_allocator: public std::allocator<T> {
 };
 
 
-//Interpret function from main
 
-int interpret(Node*);
-int interpret(Node*,std::string*,int);
-
+/* the TData class represents any Tetra data type */
 template<typename T>
 class TData {
   public:
     TData();
-
     TData(const T& pData);
-
-    //Copy Constructor
     TData(const TData<T>& other);
-
-    //default destructor
     ~TData();
 
-
-    //If this TData object is storing a pointer to a dynamically allocated variable, it MUST USE THIS METHOD TO INFORM THE OBJECT THAT IT SHOULD DELETE SOMETHING WHEN IT IS DONE
-    //In essence, this method notifies the object that it is no longer being used in an ordinary case, but has ownership of some dynamically allocated memory		
+    /* If this object is storing a pointer to a dynamically allocated variable,
+     * it must use this method to inform the object that it should delete
+     * something when it is done. In essence, this method notifies the object
+     * that it is no longer being used in an ordinary case, but has ownership
+     * of some dynamically allocated memory */
     template<typename R>
-      void setDeletableType();
+    void setDeletableType();
 
     const DataType getPointedTo() const;
 
     template<typename R>
-      bool setData(const R& pData);
+    bool setData(const R& pData);
 
     TData<T>& operator=(const TData<T>&);
 
@@ -97,7 +82,6 @@ class TData {
     T& getData();
   private:
     T data;
-    //used for deleting dynamically allocated data if this object utilizes it;
     DataType pointedTo;
 };
 
@@ -110,20 +94,20 @@ template<typename T>
 TData<T>::TData(const T& pData) : data(pData),  pointedTo(TYPE_VOID) {
 }
 
-//Default copy constructor is fine for ordinary case
+/* default copy constructor is fine for ordinary case */
 template<typename T>
 TData<T>::TData(const TData<T>& other) : data(other.data), pointedTo(other.pointedTo.getKind()) {
 }
 
-//default destructor, in ordinary cases no cleanup is needed
+/* default destructor, in ordinary cases no cleanup is needed */
 template<typename T>
 TData<T>::~TData() {
 }
 
-//Naive copt is adequate under ordinary circumstances
+/* naive copy is adequate under ordinary circumstances */
 template <typename T>
 TData<T>& TData<T>::operator=(const TData<T>& other) {
-  //unles we are  working with variables (see TDataspecializations), a naive copy shouild be fine
+  /* unles we are  working with variables (see TDataspecializations), a naive copy shouild be fine */
   pointedTo = other.pointedTo;
   data = other.data;
   return *this;
@@ -139,9 +123,8 @@ TData<T>& TData<T>::operator=(const TData<T>& other) {
 
 template<typename T> template<typename R>
 void TData<T>::setDeletableType(){
-  //A non-specialized version of this method should never be called
+  /* a non-specialized version of this method should never be called */
   assert(false);
-  //cout << "Error, attmepting to set unsupported type as deletable type.\nThis may result in a memory leak." << endl;
 }
 
 template<typename T>
@@ -151,14 +134,17 @@ const DataType TData<T>::getPointedTo() const {
 
 template<typename T> template<typename R>
 bool TData<T>::setData(const R& pData) {
-  //By default, this should not do anything, but we will specialize the tamplate for the few scenarios where this actually works
-  //Note that this is occasionbally called on mismatched types. This is expected behavior for the interpreter.
-  //As an exampole, a statement node may be expecting an int return type, because it was called within a function returning an int,
-  //it then sees s = "abc" which returns a string. The interpreter will call TData<int>::setData<string>(...), and do nothing.
+  /* by default, this should not do anything, but we will specialize the
+   * tamplate for the few scenarios where this actually works -- /Note that
+   * this is occasionbally called on mismatched types. This is expected
+   * behavior for the interpreter./As an example, a statement node may be
+   * expecting an int return type, because it was called within a function
+   * returning an int, it then sees s = "abc" which returns a string. The
+   * interpreter will call TData<int>::setData<string>(...), and do nothing. */
   return false;
 }   
 
-//Get a reference to what is stored within the object
+/* get a reference to what is stored within the object */
 template<typename T>
 const T& TData<T>::getData() const {
   return data;
@@ -172,33 +158,30 @@ T& TData<T>::getData() {
 
 /*
  * This class wraps an array of tData<void*> used to make arrays and multi-dimensional arrays
- * 
  */
-
 class TArray { 
   public: 
     TArray();
     TArray(const TArray&);
     ~TArray(); 
 
-    //gets the element pointed to by
-    //(const and non-const versions)
+    /* get elements pointed at a certain index */
     TData<void*>& elementAt(unsigned int);
     const TData<void*>& elementAt(unsigned int) const;
 
-    //Add an element using copy constructor
+    /* add an element using copy constructor */
     void addElement(const TData<void*>&);
 
-    //Utility methods used for iterating over the vector in for (-each) loops, and vector cleanup	
+    /* utility methods used for iterating over the vector in for (-each) loops, and vector cleanup	 */
     const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator begin() const;
     const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator end() const;
 
     int size() const;
 
-    //Copy assignment operator
+    /* copy assignment operator */
     TArray& operator=(const TArray& other);
 
-    //All operations must be defined (or at least stubbed) to work with our operators!
+    /* all operations must be defined (or at least stubbed) to work with our operators! */
     TArray operator||(TArray& other) {
       return *this;
     }
@@ -256,72 +239,67 @@ class TArray {
     TArray operator!() {
       return *this;
     }
-    //The specialization for TArray EXP TArray is presently in the operationMap class
 
   private:
-
-    //Implementation of smart pointer for vector that uses simple reference counting
+    /* implementation of smart pointer for vector that uses simple reference counting */
     class vec_ptr {
       public:
         vec_ptr() {
-          ptr = new std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >;
-          refCount = new int();//Zero initialized
+          ptr = new std::vector< TData<void*> >;
+          refCount = new int();
           *refCount = 0;
           array_mutex_ptr = new pthread_mutex_t();
           pthread_mutex_init(array_mutex_ptr, NULL);
           addReference();
         }
 
-        //Copy constructor aliases this TArray to the other, rather than performing a deep copy
-        //Note that this is largely desired behavior
-        //there is an error here if the array gets deleted whiole it is passed, and before it locks
+        /* copy constructor aliases this TArray to the other, rather than performing a deep copy
+           note that this is largely desired behavior */
         vec_ptr(const vec_ptr& other) {
           other.lockArray();
           ptr = other.ptr;
           refCount = other.refCount;
           array_mutex_ptr = other.array_mutex_ptr;
-          //Note that we already have the mutex needed to change the increment value
+          /* note that we already have the mutex needed to change the increment value */
           (*refCount)++;
 
           other.unlockArray();
-          //addReference();	
         }
 
         ~vec_ptr() {
           removeReference();
         }
 
-        //Assignment operator aliases the pointer
-        //Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
-        //For the purposes of the interpreter, however, this is the desired behavior
+        /* Assignment operator aliases the pointer
+           note that this means that the copy assignment operator/copy constructor will
+           perform a SHALLOW copy for the purposes of the interpreter, however, this
+           is the desired behavior */
         vec_ptr& operator=(const vec_ptr& other) {
 
           if(&other != this) {
 
             removeReference();
 
-            //This may contain a race condition
-            //other may be getting copy assigned as well, leading to corrupted values
-            //TODO: check this out on paper
+            /* this may contain a race condition, other may be getting copy assigned as well
+             * leading to corrupted values TODO: check this out on paper */
             other.lockArray();
             ptr = other.ptr;
             refCount = other.refCount;
             array_mutex_ptr = other.array_mutex_ptr;
 
-            (*refCount)++;//We already hold the mutex for incrementing this!
+            /* we already hold the mutex for incrementing this! */
+            (*refCount)++;
 
             other.unlockArray();
-
-            //addReference();
           }
           return *this;
         }
 
-        //Methods to simulate pointer functionality
-        std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >& operator*() const {
+        /* methods to simulate pointer functionality */
+        std::vector< TData<void*> >& operator*() const {
           return *ptr;
         } 
-        std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >* operator->() const {
+        std::vector< TData<void*> >* operator->() const {
           return ptr;
         }
 
@@ -335,15 +313,16 @@ class TArray {
 
           pthread_mutex_lock(array_mutex_ptr);
 
-          //Bool used to flag if the mutex can be destroyed
-          //(since we cannot destroy it while holding it)
+          /* bool used to flag if the mutex can be destroyed
+           * (since we cannot destroy it while holding it) */
           bool destroyable = false;
 
           (*refCount)--;
           if(*refCount == 0) {
             delete refCount;
             delete ptr;
-            //Used temporarily to insure that if a race condition occurs, a stale pointer does not still coincidentally point at an ok value
+            /* used temporarily to insure that if a race condition occurs, a
+             * stale pointer does not still coincidentally point at an ok value */
             ptr = NULL;
             destroyable = true;
           }
@@ -355,7 +334,8 @@ class TArray {
           }
         }
 
-        //For the copy constructor, we must insure that the source does not get corrupted as we are writing to ourselves
+        /* for the copy constructor, we must insure that the source does not get corrupted
+         * as we are writing to ourselves */
         void lockArray() const{
           pthread_mutex_lock(array_mutex_ptr);
         }
@@ -367,27 +347,28 @@ class TArray {
         std::vector< TData<void*>/* , mmap_allocator<TData<void*> >*/ >* ptr;
         int* refCount;
 
-        //Because threads can be copied in different threads (see, pass by reference to functions)
-        //we must thread-safe thread assignment
+        /* because threads can be copied in different threads (see, pass by
+         * reference to functions), we must thread-safe thread assignment */
         pthread_mutex_t* array_mutex_ptr;
-        //pthread_mutex_t* copy_mutex_ptr;
     };
 
-    //A smart pointer to a vector of void*
+    /* a smart pointer to a vector of void* */
     vec_ptr elements;
 
-    //Implementation of stream insertion allows for printing of array
+    /* implementation of stream insertion allows for printing of array */
     friend std::ostream& operator<<(std::ostream& outStream, TArray obj);
 };
 
+/* interpret a tetra program parsed into a Node tree */
+int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0);
 
 template<> TData<void*>::TData(const TData<void*>& other);
 template<> TData<void*>::~TData();
 template<> TData<void*>& TData<void*>::operator=(const TData<void*>&);
 template<> template<> void TData<void*>::setDeletableType<TArray>();
 
-//Template specializations for setData and setDeletable type
-//Declared here because TData<TArray> must be defined before all declarations may occur
+/* template specializations for setData and setDeletable type
+   declared here because TData<TArray> must be defined before all declarations may occur */
 template<> template<> bool TData<int>::setData<int>(const int&);
 template<> template<> bool TData<double>::setData<double>(const double&);
 template<> template<> bool TData<bool>::setData<bool>(const bool&);
@@ -405,16 +386,10 @@ template<> template<> void TData<void*>::setDeletableType<std::string>();
 template<> template<> void TData<void*>::setDeletableType<void>();
 template<> template<> bool TData<TArray>::setData<TArray>(const TArray&);
 
-//This class is a bare bones hash table for variable lookup
-
-#include<string>
-#include<iostream>
-
+/* this class is a bare bones hash table for variable lookup */
 class VarHash{
   private:
     typedef std::pair<std::string, TData<void*> > keyVal;
-    //std::pair<std::string, void*>* table;
-    // keyVal* table;
     keyVal table[30];
     int hashSize;
 
@@ -434,8 +409,7 @@ class VarHash{
 
   public:
     VarHash(int size) {
-      hashSize = 30;// * size;
-      //table = new keyVal[hashSize];
+      hashSize = 30;
       keyVal table[30];
       for(int x = 0; x < hashSize; x++) {
         table[x] = keyVal("",TData<void*>(NULL));
@@ -449,82 +423,59 @@ class VarHash{
 
     ~VarHash() {
       loops -= vars;
-      //cout << "-----------------------------" << endl;
-      //cout << "For this table, there were " << hashes << " hashes" << endl;
-      //cout << "There were " << hashMisses << " misses out of " << vars << " insewrtions" << endl;
-      //cout << "we searched " << loops << " additional times" << endl; 
     }
 
     TData<void*>& operator[](int index) {
       assert(table[index].first == "");
-      //index could be negative if using global scope
-      //cout << "index: " << abs(index) << endl;
+      /* index could be negative if using global scope */
       return table[abs(index)].second;
-      //TData<void*> ret = table[abs(index)].second;
-      //cout <<"Retrieved" <<endl;
-      //cout << ret.getData() <<endl;
-      //return table[abs(index)].second;
     }
 
     TData<void*>& operator[](const std::string& name) {
-      //Get the hash key for the var name, and the associated pair
+      /* get the hash key for the var name, and the associated pair */
       int hashVal = hash(name);
       int origVal = hashVal;
 
 
       hashes++;
 
-      //cout <<"Val: " << hashVal;
       keyVal* comp = &table[hashVal];
-      //cout << "Out o loop" << endl;
-      //Check that the value in the bucket is actually the pair requested
+      /* check that the value in the bucket is actually the pair requested */
       while(comp->first != name) {
         loops++;
-        //std::cout<<"Hash miss!" << endl;
-
-        //If the bucket is actually empty, then the requested pair does not exist
-        //Therefore, we will need to add it, and we can stop looking in the table
+        /* if the bucket is actually empty, then the requested pair does not exist
+           therefore, we will need to add it, and we can stop looking in the table */
         if(comp->second.getData() == NULL) {
           table[hashVal].first = name;
           vars ++;
-          //std::cout << "Emplaced new variable" << std::endl;
           comp = &table[hashVal];
           if(hashVal != origVal) {
             hashMisses++;
-            //cout << "Inserted value at hash " << hashVal << " instead of " << origHash << endl;
-
           }
         }
-        //otherwise, continue looking towards the next value in the array
+        /* otherwise, continue looking towards the next value in the array */
         else{
           hashVal = (1 + hashVal) % hashSize;
 
           comp = &table[hashVal];
         }
       }
-      //cout << "Returned: " << table[hashVal].second.getData()<<endl;
       return table[hashVal].second;
     }
 
 
-    /*      TData<void*>& operator[](const std::string name) {
-            cout << "!" << endl;
-            return const_cast<const TData<void*>& >((*this)[name]);
-            }*/
-
     bool exists(std::string name) const{
-
-      //Get the hash key for the var name, and the associated pair
+      /* get the hash key for the var name, and the associated pair */
       int hashVal = hash(name);
       keyVal const * comp = &table[hashVal];
-      //Check that the value in the bucket is actually the pair requested
+      /* check that the value in the bucket is actually the pair requested */
       while(comp->first != name) {
-        //If the bucket is actually empty, then the requested pair does not exist
-        //Therefore, we will need to add it, and we can stop looking in the table
+        /* if the bucket is actually empty, then the requested pair does not exist */
+        /* therefore, we will need to add it, and we can stop looking in the table */
         if(comp->second.getData() == NULL) {
           return false;
         }
-        //otherwise, continue looking towards the next value in the array
+        /* otherwise, continue looking towards the next value in the array */
         else{
           hashVal = (1 + hashVal) % hashSize;
 
@@ -536,7 +487,7 @@ class VarHash{
     }
 
     bool exists(const Node* varNode) const{
-      //index could be negative if using global scope
+      /* index could be negative if using global scope */
       return table[abs(varNode->getInt())].second.getData() != NULL;
     }
 };
@@ -548,10 +499,7 @@ class VarHash{
 class VarTable {
 
   public:
-
     VarTable();
-
-    //Release allocated data
     ~VarTable();
 
     VarTable& operator=(const VarTable& other) {
@@ -559,13 +507,13 @@ class VarTable {
       return *this;
     }
 
-    //returns a reference to the storage location of the variable. The interpreter supplies the expected type.
+    /* returns a reference to the storage location of the variable. The interpreter supplies the expected type. */
     template<typename T>
       T* lookupVar(std::string varName);
     template<typename T>
       T* lookupVar(const Node* varNode);
 
-    //Checks whether a named variable is in the scope, without actually adding it if it does not exist
+    /* checks whether a named variable is in the scope, without actually adding it if it does not exist */
     bool containsVar(const std::string varName) const;
     bool containsVar(const Node* varNode) const;
     //Returns a TData from within varMap containing an invalid reference. The reference can be set to something valid, and that thing will not be deleted when this variableContext goes out of scope
@@ -689,7 +637,6 @@ T* VarTable::lookupVar(const std::string varName) {
     //Note that another thread may have inserted the value while we were waitring for write privelages!
     //Hence, we must again check that the variable is stillnot in the table
     //TODO check this logic with the new hash table changes
-    //if(varMap.find(varName) == varMap.end()) {
     if(!varMap.exists(varName)) {
       varMap[varName] = insertable;
     }
@@ -708,795 +655,747 @@ T* VarTable::lookupVar(const std::string varName) {
   //The program should never get to here, because the only reason we should call this for a parallel variable, which should return above
   assert(false);
   return ret;
+}
+
+
+
+///////////End cop y of lookup var
+
+
+//Returns a reference to the storage location of the variable
+////defined in the header because it is a template
+//TODO: set a single return value for single exit point, and simplify lock/unlock semantics
+template<typename T>
+T* VarTable::lookupVar(const Node* varNode) {
+  //pthread_mutex_lock(&table_mutex);
+  std::string varName = varNode->getString();
+  //Index may be negative if a global variable is being referenced
+  int index = abs(varNode->getInt());
+  //Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
+  std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > >::iterator loc;
+
+  pthread_rwlock_rdlock(&table_mutex);
+
+  //Check if variable is a thread-specific variable (e.g. parallel for loop variable)	
+  //TODO fix this race condition (as of 11/10/14)
+  loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
+  if(loc != parForVars.end()) {
+    std::list< std::pair< pthread_t, TData<void*> > >& varList = (*loc).second;
+    std::list< std::pair< pthread_t, TData<void*> > >::iterator value;
+    value = std::find_if(varList.begin(), varList.end(), CheckThread(pthread_self()));
+    if(value != varList.end()) {
+
+      T* ret = static_cast<T*>(value->second.getData());
+      pthread_rwlock_unlock(&table_mutex);
+      return ret;
+    }
+    else {	//If this thread has not yet registered a value, create it
+      //Unlock the read mutex while we assmeble the data to be inserted, will eventually obtain write privelages
+      pthread_rwlock_unlock(&table_mutex);
+
+      T* newData_ptr = new T();
+      //cout << "New Data: " << newData_ptr << endl;
+      TData<void*> insertable(newData_ptr);
+      //Ensure that insertable gets copied correctly, and deleted correctly when we are done
+      insertable.setDeletableType<T>();
+      //Obtain write privelages
+      pthread_rwlock_wrlock(&table_mutex);
+
+      //Note that since THIS thread can push in a pair with pthread_t equal to pthread_self()
+      //Hence there is no need to check whether the condition is still true or not
+
+      varList.push_back(std::pair<pthread_t,TData<void*> >(pthread_self(), insertable));
+      (varList.rbegin())->second.setDeletableType<T>();
+      T* ret = static_cast<T*>((varList.rbegin())->second.getData());
+      pthread_rwlock_unlock(&table_mutex);
+      //cout << "Ret: " << ret << endl;
+      return ret;
+    }
+  }
+  //check whether a normal entry exists for this variable
+  //The find and [] operators are redundant. we can combine them into one search
+  else if(varMap[index].getData() == NULL) {
+
+    //Otherwise, we must insert a new variable into the current scope
+
+    //Release read privelages while we assemble what we need to insert
+    pthread_rwlock_unlock(&table_mutex);
+    //If the variable does not yet exist, we need to allocate memory for the TData to point to!
+    T* newData_ptr = new T(); //() should zero the memory for primitive types, so that all types have a default value
+    //Obtain write privelages before we insert
+    pthread_rwlock_wrlock(&table_mutex);
+
+    //Note that another thread may have inserted the value while we were waitring for write privelages!
+    //Hence, we must again check that the variable is stillnot in the table
+    //TODO check this logic with the new hash table changes
+    if(varMap[index].getData() == NULL) {
+      //Note that it is important that these two statements remain seperate.
+      //Attempting to assemble the TData object before insertion will lead to either an extra allocation and object copy or a memory leak
+      varMap[index] = TData<void*>(newData_ptr);
+      varMap[index].setDeletableType<T>();
+    }
+    //else do nothing, as the statement after this block will retrieve the correct value
+    }
+    T* ret = static_cast<T*>(varMap[index].getData());
+    //Release whatever lock we happened to have
+    pthread_rwlock_unlock(&table_mutex);
+
+    return ret;
   }
 
 
 
-  ///////////End cop y of lookup var
+  /*
+   * ThreqdEnvironment wraps single global object storing infomration about the states of all threads in the program
+   * This class is responsible for ensuring that all threads exit in an orderly fashion
+   */
 
 
-  //Returns a reference to the storage location of the variable
-  ////defined in the header because it is a template
-  //TODO: set a single return value for single exit point, and simplify lock/unlock semantics
-  template<typename T>
-    T* VarTable::lookupVar(const Node* varNode) {
-      //pthread_mutex_lock(&table_mutex);
-      std::string varName = varNode->getString();
-      //Index may be negative if a global variable is being referenced
-      int index = abs(varNode->getInt());
-      //Check whether this variable is a parallel for variable. Ideally there won;t be many of these floating around, but we can implement a non-linear algorithm later if needed
-      std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > >::iterator loc;
+  //This class contains everything needed for a thread of execution to keep track of and join back with all threads that it spawns
 
-      pthread_rwlock_rdlock(&table_mutex);
+  class ThreadPool {
 
-      //Check if variable is a thread-specific variable (e.g. parallel for loop variable)	
-      //TODO fix this race condition (as of 11/10/14)
-      loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
-      if(loc != parForVars.end()) {
-        std::list< std::pair< pthread_t, TData<void*> > >& varList = (*loc).second;
-        std::list< std::pair< pthread_t, TData<void*> > >::iterator value;
-        value = std::find_if(varList.begin(), varList.end(), CheckThread(pthread_self()));
-        if(value != varList.end()) {
+    private:
 
-          T* ret = static_cast<T*>(value->second.getData());
-          pthread_rwlock_unlock(&table_mutex);
-          return ret;
+      pthread_mutex_t threadCount_mutex;
+      std::vector<pthread_t> currentThreads;
+
+    public:
+
+      ThreadPool();
+
+      //Since the threadCount is a less-visited area, we will use a coarse mutex for reading and writing
+      //Atomically queries the number of registered active threads
+      int queryThreads();
+
+      //Atomically increments the number of active threads
+      void addThread(pthread_t aThread);
+
+      //Atomically decrements the number of active threads
+      void removeThread(pthread_t rThread);
+
+      pthread_t getNextJoin();
+
+      void waitTillEmpty();
+  };
+
+
+  class ThreadEnvironment {
+
+    private:
+
+      //This holds the count of ADDITIONAL running p-threads (not including the main thread)
+      //This allows the main thread to not execute until every thread has finished, so that resources don;t get unexpectedly destroyed while other threads are running
+      //(e.g. the Node tree doesn;t get destroyed while another thread is exeuting instructions)
+      //Mutex insures that threads don;t simultaneously try to destroy themselves/add new threads
+      std::vector< pthread_t > currentThreads;
+      pthread_mutex_t threadCount_mutex;
+      ThreadPool backgroundThreads;
+
+      //This vector holds each MUTEX lock created by the program
+      //By putting them all in one global location, we allow threads to query whether a particular mutex has been created or not
+      std::map<std::string, pthread_mutex_t* /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/ > mutexes;
+      pthread_mutex_t map_mutex;
+
+      //We may want to change the constructor to an initializer, as pthread_create may return errors
+      ThreadEnvironment();
+      ~ThreadEnvironment();
+
+      static ThreadEnvironment instance;
+
+    public:
+
+      //Since the threadCount is a less-visited area, we will use a coarse mutex for reading and writing
+      //Atomically queries the number of registered active threads
+      static int queryThreads();
+
+      //Atomically increments the number of active threads
+      static void addThread(pthread_t aThread);
+
+      //Atomically decrements the number of active threads
+      static void removeThread(pthread_t rThread);
+
+      static pthread_t getNextJoin();
+
+      //This could use a better name, as the name implies an oxymoron
+      static void joinDetachedThreads();
+
+      //This method returns the mutex associated with a string, or creates a new mutex associated with the string and returns that
+      static pthread_mutex_t* identifyMutex(std::string mutexName);
+  };
+
+  /*
+   * This file builds a function lookup table so that when the interpreter encounters a function     call, it can easily find the address of the appropriate node where the called function code res    ides
+   *Since there is only one funciton table per program (even if using multiple files, the further     functions should be addable by calling buildTree for each file's syntax tree) There can only b    e one instance.
+   * TODO: For a long time, this class has been a convoluted mix between a singleton and static member class. Must query the design plans of the debugger to see whether this will ever be needed as an object, so we can stick with one or the other
+   */
+  class FunctionMap {
+
+    private:
+      FunctionMap();
+      std::map<std::string, Node*> lookup;
+      Node** functionLookup;
+      static FunctionMap instance;
+      static void concatSignature(const Node*,std::string&);
+
+    public:
+      //Returns the address of a node containing the function body of the function denoted by functionSignature
+      static const Node* getFunctionNode(const std::string functionSignature);
+
+      static const Node* getFunctionNode(const Node* callNode);
+
+      //Generates a unique function signature based on the name AND the arguments
+      static const std::string getFunctionSignature(const Node* node);
+
+      //Fills the function map given the specified base node
+      static void build(const Node* tree);
+
+      //does some pre-work to optimize variable lookup
+      static void optimizeLookup(const Node*);
+      static void optimizeFunctionLookup(Node*);
+
+      //Release allocated resources from the instance
+      static void cleanup();
+  };
+
+  /*
+   * The classes contained in this file are used to keep track of certain properties of a program as it is being executed
+   * These include the function call stack, the variables currently in scope, and where the programshould jump to should there be a break or continue statement
+   * Although your standard running program utilizes one stack, this stack is represented via an object because if the eventual need for multiple call stacks through multithreading
+   */
+
+
+  //Each context will have a flag as to what action should be taken when control reaches a structure Node
+  //NORMAL: continue as usual
+  //ELIF: Denotes that program control is in an elif chain. Keep evaluating condiitons while this is true. Note that if the program ever needs to change to any other mode, it means that some condition was true (and hence no longer has an ELIF execution status).
+  //CONTINUIE: Keep returning until a loop is hit, then reevaluate the loop node
+  //BREAK: keep returning until you hit a loop node, then return from that node
+  //RETURN: keep returning until you hit a function call, then return from the function call. This takes precedence over breaks and continues
+  //PARALLEL: each statement node encountered will result in a new spwned thread. Note that for conditionals and loops, only one thread will be spawned to evaluate the bodies of the conditionals/loops
+  enum ExecutionStatus {
+
+    NORMAL,
+    ELIF,
+    CONTINUE,
+    BREAK,
+    RETURN,
+    PARALLEL
+  };
+
+  //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
+  class TetraScope {
+
+    public:
+      TetraScope();
+      TetraScope(const Node*);
+
+      //Returns a pointer to the data referenced by the given variable name 'name', or creates a place for it if it does not yet exist
+      template <typename T>
+        T* lookupVar(/*std::string*/const Node* name) {
+          return varScope.lookupVar<T>(name);
         }
-        else {	//If this thread has not yet registered a value, create it
-          //Unlock the read mutex while we assmeble the data to be inserted, will eventually obtain write privelages
-          pthread_rwlock_unlock(&table_mutex);
 
-          T* newData_ptr = new T();
-          //cout << "New Data: " << newData_ptr << endl;
-          TData<void*> insertable(newData_ptr);
-          //Ensure that insertable gets copied correctly, and deleted correctly when we are done
-          insertable.setDeletableType<T>();
-          //Obtain write privelages
-          pthread_rwlock_wrlock(&table_mutex);
+      template <typename T>
+        T* lookupVar(std::string name) {
+          return varScope.lookupVar<T>(name);
+        }		//Used for aliasing an array
+      //Returns an unitialized pointer that will be associated with varName
+      //The calling program can set this pointer to point to whatever varname should alias.
+      TData<void*>& declareReference(const std::string varName);
 
-          //Note that since THIS thread can push in a pair with pthread_t equal to pthread_self()
-          //Hence there is no need to check whether the condition is still true or not
+      //declare a variable that can hold different values across different threads
+      std::list<std::pair<pthread_t,TData<void*> > >& declareThreadSpecificVariable(const std::string&);
 
-          varList.push_back(std::pair<pthread_t,TData<void*> >(pthread_self(), insertable));
-          (varList.rbegin())->second.setDeletableType<T>();
-          T* ret = static_cast<T*>((varList.rbegin())->second.getData());
-          pthread_rwlock_unlock(&table_mutex);
-          //cout << "Ret: " << ret << endl;
-          return ret;
+      //Used by loops and constrol statements to determine if they can proceed, or if they should return
+      ExecutionStatus queryExecutionStatus();
+
+      //sets the execution status to the specified value
+      void setExecutionStatus(ExecutionStatus status);
+
+      bool containsVar(std::string varName) const;
+      bool containsVar(const Node* varNode) const;
+
+      //Used by the TetraContext to obtain a stack trace
+      void setCallNode(const Node*);
+      const Node* getCallNode() const;
+    private:
+      VarTable varScope;
+      ExecutionStatus executionStatus;
+
+      //This boolean denotes that there are multiple threads working in the current scope.
+      //While that is the case, Insertions into the scope's VarTable must be performed in a threadsafe manner
+      bool multiThreaded;
+
+      //By storing the address of the call node, we can print back a call stack to the user if the program terminates unexpectedly
+      const Node* callNode;
+  };
+
+
+  //Class defines a smart pointer to a TetraScope
+  class scope_ptr {
+
+    public:
+      scope_ptr(const Node * callNode) {
+        ptr = new TetraScope(callNode);
+        refCount = new int();//Zero initialized
+        *refCount = 0;
+        status = NORMAL;
+        ///*std::stack<ThreadPool*>*/ spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
+        MicroStack<ThreadPool*> spawnedThreads;
+        refCount_mutex_ptr = new pthread_mutex_t();
+        addReference();
+      }
+
+      //Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters. Note that scope does not include spawned threads.
+      scope_ptr(const TetraScope& newScope) {
+        ptr = new TetraScope(newScope);
+        refCount = new int();//Zero initialized
+        *refCount = 0;
+        status = NORMAL;
+        //std::stack<ThreadPool*> spawnedThreads;
+        //spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
+        MicroStack<ThreadPool*> spawnedThreads;
+        refCount_mutex_ptr = new pthread_mutex_t();
+        addReference();
+      }
+      //Copy constructor aliases this Scope to the other, rather than performing a deep copy
+      //Note that this is largely desired behavior
+      //Note also that each Scope_ptr must have its own threadpool stack!
+      scope_ptr(const scope_ptr& other) {
+        //cout << "This gets waited at a few times" << endl;
+        other.lockScope();
+        //cout << "Access gained" << endl;
+        ptr = other.ptr;
+        status = other.status;
+        //std::stack<ThreadPool*> spawnedThreads;
+        MicroStack<ThreadPool*> spawnedThreads;
+        refCount_mutex_ptr = other.refCount_mutex_ptr;
+
+        //Note that we are copying the pointer, not the value!
+        //Since the pointer does not change, this assignment is threadsafe
+        refCount = other.refCount;
+
+        (*refCount)++;
+        other.unlockScope();
+        //addReference();
+      }
+
+      ~scope_ptr() {
+        removeReference();
+        //Note that if spawnedThreads is null, delete is still valid
+        //delete spawnedThreads;
+        //Check to see if we must delete the underlying object
+
+      }
+
+      //Assignment operator aliases the pointer to the scope, but stillm ust have its own thread call stack
+      //Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
+      //For the purposes of the interpreter, however, this is the desired behavior
+      //This does not appear to ever get called. If that is the case, our thread-safetyness burden eases considerably, as we should only have to lock the reference incrementing/decrememnting
+      scope_ptr& operator=(const scope_ptr& other) {
+        //cout << "THIS GETS CALLED\n\n\n\n\n" << endl;
+        if(&other != this) {
+          //release old data
+          removeReference();
+
+          //Copy new data
+          ptr = other.ptr;
+          refCount = other.refCount;
+          status = other.status;
+          //spawnedThreads = NULL;
+          addReference();
+        }
+        return *this;
+      }
+
+      void addThread(pthread_t thread) {
+        //Note that the threadpool implementation of this method is threadsafe
+        lockScope();
+        spawnedThreads.top()->addThread(thread);
+        unlockScope();
+      }
+
+      void setupParallel() {
+        //Since each scope_ptr gets its own copy of spawnedThreads (even if everything else is an alias), this is threadsafe
+        ThreadPool* newPool = new ThreadPool();
+
+        lockScope();
+        spawnedThreads.push(newPool);
+        unlockScope();
+      }
+
+      void endParallel() {
+        //cout << "Main finished: " << time(0) << endl;
+        spawnedThreads.top()->waitTillEmpty();
+        //cout << "All joined: " << time(0) << endl;
+        delete spawnedThreads.top();
+        spawnedThreads.pop();
+      }
+
+
+
+      //Methods to simulate pointer functionality
+      TetraScope& operator*() const {
+        return *ptr;
+      }
+      TetraScope* operator->() const {
+        return ptr;
+      }
+
+      //void notifyBreak() {status = BREAK; }
+      //void notifyContinue() {status = CONTINUE; }
+      //void notifyReturn() {status = RETURN; }
+      //void notifyElif() {status = ELIF; }
+      //void normalizeStatus() {status = NORMAL; }
+      void setExecutionStatus(ExecutionStatus pStatus){status = pStatus; }
+      ExecutionStatus queryExecutionStatus() {return status; }	
+
+    private:
+      //add/removeReference are put under a mutex for thread safety
+      void addReference() {
+        pthread_mutex_lock(refCount_mutex_ptr);
+        (*refCount)++;
+        pthread_mutex_unlock(refCount_mutex_ptr);
+      }
+      //When a reference is removed, check if we must delete it
+      //Note that when the last reference is removed, there are physically NO MORE REFERENCES to the data, so there is nothing ot fear from a threadsafety perspective
+      //This includes the possibility of copy constructing, since if a thread is copy constructing, it is a)holding a reference and b) not deleting that reference
+      void removeReference() {
+
+        pthread_mutex_lock(refCount_mutex_ptr);
+
+        //Bool is used to check if we need to destroy the mutex at the end
+        bool destroyable = false;
+
+        (*refCount)--;
+        if(*refCount == 0) {
+          delete refCount;
+          delete ptr;
+          destroyable = true;
+        }
+
+        pthread_mutex_unlock(refCount_mutex_ptr);
+        if(destroyable) {
+          delete refCount_mutex_ptr;
         }
       }
-      //check whether a normal entry exists for this variable
-      //The find and [] operators are redundant. we can combine them into one search
-      else if(varMap[index].getData() == NULL) {
 
-        //This is a legacy portion of code. The check for if something is a global variable is presently in the TetraContext's wrapper call of lookupVar
-        //If the variable is not in the current scope, it might be in the global scope
-        /*		scope_ptr& globalScopeRef = context.getGlobalScopeRef();
-
-              if(globalScopeRef->containsVar(varname)) {
-
-              T* ret = globalScopeRef->lookupVar<T>(varName);
-
-        //release read mutex
-        pthread_rwlock_unlock(&table_mutex);
-        return ret;
-        }
-        */
-        //Otherwise, we must insert a new variable into the current scope
-
-        //Release read privelages while we assemble what we need to insert
-        pthread_rwlock_unlock(&table_mutex);
-        //If the variable does not yet exist, we need to allocate memory for the TData to point to!
-        T* newData_ptr = new T(); //() should zero the memory for primitive types, so that all types have a default value
-        //!!	TData<void*> insertable(newData_ptr);
-        //Must notify TData that it is pointing at dynamically allocated memory
-        //!!	insertable.setDeletableType<T>();
-
-        //Obtain write privelages before we insert
-        pthread_rwlock_wrlock(&table_mutex);
-
-        //Note that another thread may have inserted the value while we were waitring for write privelages!
-        //Hence, we must again check that the variable is stillnot in the table
-        //TODO check this logic with the new hash table changes
-        if(varMap[index].getData() == NULL) {
-          //if(!varMap.exists(varName)) {
-          //cout <<"Inserting: " << varName << " with index "<<index<< " at address " <</*(&insertable)*/"..." << endl;
-          //!!		varMap[index] = insertable;
-
-          //Note that it is important that these two statements remain seperate.
-          //Attempting to assemble the TData object before insertion will lead to either an extra allocation and object copy or a memory leak
-          varMap[index] = TData<void*>(newData_ptr);
-          varMap[index].setDeletableType<T>();
-        }
-        //cout <<"here1"<<endl;
-        //else do nothing, as the statement after this block will retrieve the correct value
-        }
-        //cout <<"Near op" << endl;
-        //varMap[varName];
-        T* ret = static_cast<T*>(varMap[index].getData());
-        //Release whatever lock we happened to have
-        pthread_rwlock_unlock(&table_mutex);
-
-        //return static_cast<T*>(varMap[varName].getData());
-        //cout << "here2" << endl;
-        //	cout <<"Ret: " << ret << endl;
-        return ret;
+      void lockScope() const {
+        pthread_mutex_lock(refCount_mutex_ptr);
       }
 
+      void unlockScope() const {
+        pthread_mutex_unlock(refCount_mutex_ptr);
+      }
+
+      TetraScope* ptr;
+      int* refCount;
+      //Because different threads my have their own execution statuses, this variable is stored here
+      ExecutionStatus status;
+
+      //Because each context may spawn its own threads, we need to keep track of spawned threads on a thread-by-thread basis
+      //Becausehe main thread in parallel blocks. we actually have to keep track of a stack of threadpools, in case the main thread encounters another parallel statement in the same scope
+      //std::stack<ThreadPool*> spawnedThreads;
+      MicroStack<ThreadPool*> spawnedThreads;
+
+      //Because different threads may destroy themselves at arbitrary times, we must lock uses of refCount
+      pthread_mutex_t* refCount_mutex_ptr;
+  };
 
 
-      /*
-       * ThreqdEnvironment wraps single global object storing infomration about the states of all threads in the program
-       * This class is responsible for ensuring that all threads exit in an orderly fashion
-       */
+  enum ThreadStatus {
+    RUNNING,
+    STOPPED,
+    DESTROYED,
+    WAITING
+  };
 
+  //This class wraps a std stack of TetraScopes
 
-      //This class contains everything needed for a thread of execution to keep track of and join back with all threads that it spawns
+  class TetraContext {
 
-      class ThreadPool {
+    public:
+      //Note that this constructor starts with a GLOBAL scope. One must be initialized through initializeNewScope to have it represent local data	
+      TetraContext();
+      TetraContext(long);
 
-        private:
+      //	TetraContext(const TetraContext&);
 
-          pthread_mutex_t threadCount_mutex;
-          std::vector<pthread_t> currentThreads;
+      ~TetraContext();
 
-        public:
+      void initializeGlobalVars(const Node *);
 
-          ThreadPool();
-
-          //Since the threadCount is a less-visited area, we will use a coarse mutex for reading and writing
-          //Atomically queries the number of registered active threads
-          int queryThreads();
-
-          //Atomically increments the number of active threads
-          void addThread(pthread_t aThread);
-
-          //Atomically decrements the number of active threads
-          void removeThread(pthread_t rThread);
-
-          pthread_t getNextJoin();
-
-          void waitTillEmpty();
-      };
-
-
-      class ThreadEnvironment {
-
-        private:
-
-          //This holds the count of ADDITIONAL running p-threads (not including the main thread)
-          //This allows the main thread to not execute until every thread has finished, so that resources don;t get unexpectedly destroyed while other threads are running
-          //(e.g. the Node tree doesn;t get destroyed while another thread is exeuting instructions)
-          //Mutex insures that threads don;t simultaneously try to destroy themselves/add new threads
-          std::vector< pthread_t > currentThreads;
-          pthread_mutex_t threadCount_mutex;
-          ThreadPool backgroundThreads;
-
-          //This vector holds each MUTEX lock created by the program
-          //By putting them all in one global location, we allow threads to query whether a particular mutex has been created or not
-          std::map<std::string, pthread_mutex_t* /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/ > mutexes;
-          pthread_mutex_t map_mutex;
-
-          //We may want to change the constructor to an initializer, as pthread_create may return errors
-          ThreadEnvironment();
-          ~ThreadEnvironment();
-
-          static ThreadEnvironment instance;
-
-        public:
-
-          //Since the threadCount is a less-visited area, we will use a coarse mutex for reading and writing
-          //Atomically queries the number of registered active threads
-          static int queryThreads();
-
-          //Atomically increments the number of active threads
-          static void addThread(pthread_t aThread);
-
-          //Atomically decrements the number of active threads
-          static void removeThread(pthread_t rThread);
-
-          static pthread_t getNextJoin();
-
-          //This could use a better name, as the name implies an oxymoron
-          static void joinDetachedThreads();
-
-          //This method returns the mutex associated with a string, or creates a new mutex associated with the string and returns that
-          static pthread_mutex_t* identifyMutex(std::string mutexName);
-      };
-
-      /*
-       * This file builds a function lookup table so that when the interpreter encounters a function     call, it can easily find the address of the appropriate node where the called function code res    ides
-       *Since there is only one funciton table per program (even if using multiple files, the further     functions should be addable by calling buildTree for each file's syntax tree) There can only b    e one instance.
-       * TODO: For a long time, this class has been a convoluted mix between a singleton and static member class. Must query the design plans of the debugger to see whether this will ever be needed as an object, so we can stick with one or the other
-       */
-      class FunctionMap {
-
-        private:
-          FunctionMap();
-          std::map<std::string, Node*> lookup;
-          Node** functionLookup;
-          static FunctionMap instance;
-          static void concatSignature(const Node*,std::string&);
-
-        public:
-          //Returns the address of a node containing the function body of the function denoted by functionSignature
-          static const Node* getFunctionNode(const std::string functionSignature);
-
-          static const Node* getFunctionNode(const Node* callNode);
-
-          //Generates a unique function signature based on the name AND the arguments
-          static const std::string getFunctionSignature(const Node* node);
-
-          //Fills the function map given the specified base node
-          static void build(const Node* tree);
-
-          //does some pre-work to optimize variable lookup
-          static void optimizeLookup(const Node*);
-          static void optimizeFunctionLookup(Node*);
-
-          //Release allocated resources from the instance
-          static void cleanup();
-      };
-
-      /*
-       * The classes contained in this file are used to keep track of certain properties of a program as it is being executed
-       * These include the function call stack, the variables currently in scope, and where the programshould jump to should there be a break or continue statement
-       * Although your standard running program utilizes one stack, this stack is represented via an object because if the eventual need for multiple call stacks through multithreading
-       */
-
-
-      //Each context will have a flag as to what action should be taken when control reaches a structure Node
-      //NORMAL: continue as usual
-      //ELIF: Denotes that program control is in an elif chain. Keep evaluating condiitons while this is true. Note that if the program ever needs to change to any other mode, it means that some condition was true (and hence no longer has an ELIF execution status).
-      //CONTINUIE: Keep returning until a loop is hit, then reevaluate the loop node
-      //BREAK: keep returning until you hit a loop node, then return from that node
-      //RETURN: keep returning until you hit a function call, then return from the function call. This takes precedence over breaks and continues
-      //PARALLEL: each statement node encountered will result in a new spwned thread. Note that for conditionals and loops, only one thread will be spawned to evaluate the bodies of the conditionals/loops
-      enum ExecutionStatus {
-
-        NORMAL,
-        ELIF,
-        CONTINUE,
-        BREAK,
-        RETURN,
-        PARALLEL
-      };
-
-      //This embedded class represents the details of the present runtime environment, including the current VariableContext and loop depth
-      class TetraScope {
-
-        public:
-          TetraScope();
-          TetraScope(const Node*);
-
-          //Returns a pointer to the data referenced by the given variable name 'name', or creates a place for it if it does not yet exist
-          template <typename T>
-            T* lookupVar(/*std::string*/const Node* name) {
-              return varScope.lookupVar<T>(name);
-            }
-
-          template <typename T>
-            T* lookupVar(std::string name) {
-              return varScope.lookupVar<T>(name);
-            }		//Used for aliasing an array
-          //Returns an unitialized pointer that will be associated with varName
-          //The calling program can set this pointer to point to whatever varname should alias.
-          TData<void*>& declareReference(const std::string varName);
-
-          //declare a variable that can hold different values across different threads
-          std::list<std::pair<pthread_t,TData<void*> > >& declareThreadSpecificVariable(const std::string&);
-
-          //Used by loops and constrol statements to determine if they can proceed, or if they should return
-          ExecutionStatus queryExecutionStatus();
-
-          //sets the execution status to the specified value
-          void setExecutionStatus(ExecutionStatus status);
-
-          bool containsVar(std::string varName) const;
-          bool containsVar(const Node* varNode) const;
-
-          //Used by the TetraContext to obtain a stack trace
-          void setCallNode(const Node*);
-          const Node* getCallNode() const;
-        private:
-          VarTable varScope;
-          ExecutionStatus executionStatus;
-
-          //This boolean denotes that there are multiple threads working in the current scope.
-          //While that is the case, Insertions into the scope's VarTable must be performed in a threadsafe manner
-          bool multiThreaded;
-
-          //By storing the address of the call node, we can print back a call stack to the user if the program terminates unexpectedly
-          const Node* callNode;
-      };
-
-
-      //Class defines a smart pointer to a TetraScope
-      class scope_ptr {
-
-        public:
-          scope_ptr(const Node * callNode) {
-            ptr = new TetraScope(callNode);
-            refCount = new int();//Zero initialized
-            *refCount = 0;
-            status = NORMAL;
-            ///*std::stack<ThreadPool*>*/ spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
-            MicroStack<ThreadPool*> spawnedThreads;
-            refCount_mutex_ptr = new pthread_mutex_t();
-            addReference();
+      //This initializer function initializes a new TetraContext object so that its base scope is aliased to the current scope of the currentContext.
+      //This allows threads to share the same scope while not caring where they branch
+      /*	void initializeContextBranch(TetraContext* newContext, TetraContext& currentContext) {
+          newContext->progStack.push( currentContext.progStack.top() );
           }
-
-          //Creates a pointer that points to a COPY of the given tetrascope. Used for initializing funciton parameters. Note that scope does not include spawned threads.
-          scope_ptr(const TetraScope& newScope) {
-            ptr = new TetraScope(newScope);
-            refCount = new int();//Zero initialized
-            *refCount = 0;
-            status = NORMAL;
-            //std::stack<ThreadPool*> spawnedThreads;
-            //spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
-            MicroStack<ThreadPool*> spawnedThreads;
-            refCount_mutex_ptr = new pthread_mutex_t();
-            addReference();
+          */
+      //Wraps a call to lookupVar of the current scope after checking that there are no globals
+      template<typename T>
+        T* lookupVar(/*std::string*/const Node* varNode) {
+          //cout << "VarNode: " <<varNode << endl;
+          if(/*getGlobalScopeRef()->containsVar(varNode)*/varNode->getInt() < 0) {
+            //cout <<"Looking for: " << varNode->getString() << endl;
+            return (getGlobalScopeRef()->lookupVar<T>(varNode));
+            //T* ret = (getGlobalScopeRef()->lookupVar<T>(varNode));
+            //cout << "Found: " << ret << endl;
+            //return ret;
           }
-          //Copy constructor aliases this Scope to the other, rather than performing a deep copy
-          //Note that this is largely desired behavior
-          //Note also that each Scope_ptr must have its own threadpool stack!
-          scope_ptr(const scope_ptr& other) {
-            //cout << "This gets waited at a few times" << endl;
-            other.lockScope();
-            //cout << "Access gained" << endl;
-            ptr = other.ptr;
-            status = other.status;
-            //std::stack<ThreadPool*> spawnedThreads;
-            MicroStack<ThreadPool*> spawnedThreads;
-            refCount_mutex_ptr = other.refCount_mutex_ptr;
-
-            //Note that we are copying the pointer, not the value!
-            //Since the pointer does not change, this assignment is threadsafe
-            refCount = other.refCount;
-
-            (*refCount)++;
-            other.unlockScope();
-            //addReference();
+          else {
+            return progStack.top()->lookupVar<T>(varNode);
           }
+        }
 
-          ~scope_ptr() {
-            removeReference();
-            //Note that if spawnedThreads is null, delete is still valid
-            //delete spawnedThreads;
-            //Check to see if we must delete the underlying object
-
+      template<typename T>
+        T* lookupVar(std::string name) {
+          if(getGlobalScopeRef()->containsVar(name)) {
+            return (getGlobalScopeRef()->lookupVar<T>(name));
           }
-
-          //Assignment operator aliases the pointer to the scope, but stillm ust have its own thread call stack
-          //Note that this means that the copy assignment operator/copy constructor will perform a SHALLOW copy
-          //For the purposes of the interpreter, however, this is the desired behavior
-          //This does not appear to ever get called. If that is the case, our thread-safetyness burden eases considerably, as we should only have to lock the reference incrementing/decrememnting
-          scope_ptr& operator=(const scope_ptr& other) {
-            //cout << "THIS GETS CALLED\n\n\n\n\n" << endl;
-            if(&other != this) {
-              //release old data
-              removeReference();
-
-              //Copy new data
-              ptr = other.ptr;
-              refCount = other.refCount;
-              status = other.status;
-              //spawnedThreads = NULL;
-              addReference();
-            }
-            return *this;
+          else {
+            return progStack.top()->lookupVar<T>(name);
           }
+        }
+      //Wraps a call of declareReference for the current scope
+      //TData<void*>& declareReference(const std::string varName);
 
-          void addThread(pthread_t thread) {
-            //Note that the threadpool implementation of this method is threadsafe
-            lockScope();
-            spawnedThreads.top()->addThread(thread);
-            unlockScope();
-          }
+      //Overloaded function call, one when there is no initial setup for a scope (i.e. a function call with no formal parameters that must be initialized)
+      //The second is for adding a scope which had to have some data preloaded into it, as is the case when calling a function with arguments
+      void initializeNewScope(const Node* callNode);
+      void initializeNewScope(TetraScope& newScope);
 
-          void setupParallel() {
-            //Since each scope_ptr gets its own copy of spawnedThreads (even if everything else is an alias), this is threadsafe
-            ThreadPool* newPool = new ThreadPool();
+      //Pushes an alias to the given scope onto the stack
+      //Used for multithreading
+      void branchOff(const scope_ptr baseScope, scope_ptr* globScope);
 
-            lockScope();
-            spawnedThreads.push(newPool);
-            unlockScope();
-          }
+      //Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
+      void exitScope();
 
-          void endParallel() {
-            //cout << "Main finished: " << time(0) << endl;
-            spawnedThreads.top()->waitTillEmpty();
-            //cout << "All joined: " << time(0) << endl;
-            delete spawnedThreads.top();
-            spawnedThreads.pop();
-          }
+      //If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
+      //~TetraContext();
 
+      //Returns a reference to the current scope
+      //This may be outdated
+      TetraScope& getCurrentScope();
 
+      scope_ptr& getScopeRef();
 
-          //Methods to simulate pointer functionality
-          TetraScope& operator*() const {
-            return *ptr;
-          }
-          TetraScope* operator->() const {
-            return ptr;
-          }
+      scope_ptr& getGlobalScopeRef() {
+        return *globalScope;
+      }
 
-          //void notifyBreak() {status = BREAK; }
-          //void notifyContinue() {status = CONTINUE; }
-          //void notifyReturn() {status = RETURN; }
-          //void notifyElif() {status = ELIF; }
-          //void normalizeStatus() {status = NORMAL; }
-          void setExecutionStatus(ExecutionStatus pStatus){status = pStatus; }
-          ExecutionStatus queryExecutionStatus() {return status; }	
+      //wraps a call to the current scope's queryExecutionStatus
+      ExecutionStatus queryExecutionStatus();
 
-        private:
-          //add/removeReference are put under a mutex for thread safety
-          void addReference() {
-            pthread_mutex_lock(refCount_mutex_ptr);
-            (*refCount)++;
-            pthread_mutex_unlock(refCount_mutex_ptr);
-          }
-          //When a reference is removed, check if we must delete it
-          //Note that when the last reference is removed, there are physically NO MORE REFERENCES to the data, so there is nothing ot fear from a threadsafety perspective
-          //This includes the possibility of copy constructing, since if a thread is copy constructing, it is a)holding a reference and b) not deleting that reference
-          void removeReference() {
+      //Sets the current scope's ExecutionStatus to the appropriate value
+      void notifyBreak();
+      void notifyContinue();
+      void notifyReturn();
+      void notifyElif();
+      void notifyParallel();
 
-            pthread_mutex_lock(refCount_mutex_ptr);
+      //Sets the current scope's executionStatus to NORMAL
+      void normalizeStatus();
 
-            //Bool is used to check if we need to destroy the mutex at the end
-            bool destroyable = false;
+      //Declares  variable that can have different values across different threads
+      std::list<std::pair<pthread_t,TData<void*> > >& declareThreadSpecificVariable(const std::string&);
 
-            (*refCount)--;
-            if(*refCount == 0) {
-              delete refCount;
-              delete ptr;
-              destroyable = true;
-            }
+      //Performs a deep copy of the current context
+      TetraContext& operator=(const TetraContext&);
 
-            pthread_mutex_unlock(refCount_mutex_ptr);
-            if(destroyable) {
-              delete refCount_mutex_ptr;
-            }
-          }
+      //Methods dealing with parallelism at a contextual level
+      void addThread(pthread_t);
+      void setupParallel();
+      void endParallel();
 
-          void lockScope() const {
-            pthread_mutex_lock(refCount_mutex_ptr);
-          }
+      long getThreadID();
 
-          void unlockScope() const {
-            pthread_mutex_unlock(refCount_mutex_ptr);
-          }
+      //For use when debugging
+      int getLastLineNum();
+      void* fetchVariable(std::string s);
+      std::map<std::string, int>& getRefTable(){return refTables->top();}
+      std::map<std::string, int>& getGlobRefTable(){return *globRefTable;}
+      void updateVarReferenceTable(const Node* node);
+      void popReferenceTable();
 
-          TetraScope* ptr;
-          int* refCount;
-          //Because different threads my have their own execution statuses, this variable is stored here
-          ExecutionStatus status;
+      //Get and set methods for debug flags (inline)
+      int getLastLineNo(){return lastLineNo;}
+      bool getStepping(){return stepping;}
+      bool getStopAtNext(){return stopAtNext;}
+      bool getResume(){return resume;}
+      ThreadStatus getRunStatus(){return runStatus;}
+      bool isParallelForVariable(std::string);
 
-          //Because each context may spawn its own threads, we need to keep track of spawned threads on a thread-by-thread basis
-          //Becausehe main thread in parallel blocks. we actually have to keep track of a stack of threadpools, in case the main thread encounters another parallel statement in the same scope
-          //std::stack<ThreadPool*> spawnedThreads;
-          MicroStack<ThreadPool*> spawnedThreads;
+      void setLastLineNo(int pLast){lastLineNo = pLast;}
+      void setStepping(bool pStepping){stepping = pStepping;}
+      void setStopAtNext(bool pStopAtNext){stopAtNext = pStopAtNext;}
+      void setResume(bool pResume){resume = pResume;}
+      void setRunStatus(ThreadStatus pStatus){runStatus = pStatus;}
+      void registerParallelForVariable(std::string);
 
-          //Because different threads may destroy themselves at arbitrary times, we must lock uses of refCount
-          pthread_mutex_t* refCount_mutex_ptr;
-      };
+      //used to give debug info to newly created threads
+      //TODO find a less criminally inefficient, less hackish way to do this
+      void copyDebugInfo(TetraContext* baseContext){
+        *parForVars = *(baseContext->parForVars);
+        *refTables = *(baseContext->refTables);
+        *globRefTable = *(baseContext->globRefTable);
+        scopes->push(baseContext->scopes->top());
+      }
+      //void copyDebugsInfo(std::stack<std::map<std::string, int> >& pRefs, std::map<std::string, int>& pGlobs);
 
+      std::stack<const Node*>&  getScopes(){return *scopes;}
 
-      //Forward declaration needed for a friend declaration in tetraContext
-      class VirtualObserver;
+      //Prints a stack trace
+      void printStackTrace() const;
+    private:
 
-      enum ThreadStatus {
-        RUNNING,
-        STOPPED,
-        DESTROYED,
-        WAITING
-      };
+      MicroStack<scope_ptr> progStack;
+      scope_ptr* globalScope;
+      long threadID;
 
-      //This class wraps a std stack of TetraScopes
-
-      class TetraContext {
-
-        public:
-          //Note that this constructor starts with a GLOBAL scope. One must be initialized through initializeNewScope to have it represent local data	
-          TetraContext();
-          TetraContext(long);
-
-          //	TetraContext(const TetraContext&);
-
-          ~TetraContext();
-
-          void initializeGlobalVars(const Node *);
-
-          //This initializer function initializes a new TetraContext object so that its base scope is aliased to the current scope of the currentContext.
-          //This allows threads to share the same scope while not caring where they branch
-          /*	void initializeContextBranch(TetraContext* newContext, TetraContext& currentContext) {
-              newContext->progStack.push( currentContext.progStack.top() );
-              }
-              */
-          //Wraps a call to lookupVar of the current scope after checking that there are no globals
-          template<typename T>
-            T* lookupVar(/*std::string*/const Node* varNode) {
-              //cout << "VarNode: " <<varNode << endl;
-              if(/*getGlobalScopeRef()->containsVar(varNode)*/varNode->getInt() < 0) {
-                //cout <<"Looking for: " << varNode->getString() << endl;
-                return (getGlobalScopeRef()->lookupVar<T>(varNode));
-                //T* ret = (getGlobalScopeRef()->lookupVar<T>(varNode));
-                //cout << "Found: " << ret << endl;
-                //return ret;
-              }
-              else {
-                return progStack.top()->lookupVar<T>(varNode);
-              }
-            }
-
-          template<typename T>
-            T* lookupVar(std::string name) {
-              if(getGlobalScopeRef()->containsVar(name)) {
-                return (getGlobalScopeRef()->lookupVar<T>(name));
-              }
-              else {
-                return progStack.top()->lookupVar<T>(name);
-              }
-            }
-          //Wraps a call of declareReference for the current scope
-          //TData<void*>& declareReference(const std::string varName);
-
-          //Overloaded function call, one when there is no initial setup for a scope (i.e. a function call with no formal parameters that must be initialized)
-          //The second is for adding a scope which had to have some data preloaded into it, as is the case when calling a function with arguments
-          void initializeNewScope(const Node* callNode);
-          void initializeNewScope(TetraScope& newScope);
-
-          //Pushes an alias to the given scope onto the stack
-          //Used for multithreading
-          void branchOff(const scope_ptr baseScope, scope_ptr* globScope);
-
-          //Pops the current scope off the stack. Has the effect of destroying al variables of the present scope
-          void exitScope();
-
-          //If, for some reason the tetra program crashes inadvertantly, we may as well clean up the TetraContext stack
-          //~TetraContext();
-
-          //Returns a reference to the current scope
-          //This may be outdated
-          TetraScope& getCurrentScope();
-
-          scope_ptr& getScopeRef();
-
-          scope_ptr& getGlobalScopeRef() {
-            return *globalScope;
-          }
-
-          //wraps a call to the current scope's queryExecutionStatus
-          ExecutionStatus queryExecutionStatus();
-
-          //Sets the current scope's ExecutionStatus to the appropriate value
-          void notifyBreak();
-          void notifyContinue();
-          void notifyReturn();
-          void notifyElif();
-          void notifyParallel();
-
-          //Sets the current scope's executionStatus to NORMAL
-          void normalizeStatus();
-
-          //Declares  variable that can have different values across different threads
-          std::list<std::pair<pthread_t,TData<void*> > >& declareThreadSpecificVariable(const std::string&);
-
-          //Performs a deep copy of the current context
-          TetraContext& operator=(const TetraContext&);
-
-          //Methods dealing with parallelism at a contextual level
-          void addThread(pthread_t);
-          void setupParallel();
-          void endParallel();
-
-          long getThreadID();
-
-          //For use when debugging
-          int getLastLineNum();
-          void* fetchVariable(std::string s);
-          std::map<std::string, int>& getRefTable(){return refTables->top();}
-          std::map<std::string, int>& getGlobRefTable(){return *globRefTable;}
-          void updateVarReferenceTable(const Node* node);
-          void popReferenceTable();
-
-          //Get and set methods for debug flags (inline)
-          int getLastLineNo(){return lastLineNo;}
-          bool getStepping(){return stepping;}
-          bool getStopAtNext(){return stopAtNext;}
-          bool getResume(){return resume;}
-          ThreadStatus getRunStatus(){return runStatus;}
-          bool isParallelForVariable(std::string);
-
-          void setLastLineNo(int pLast){lastLineNo = pLast;}
-          void setStepping(bool pStepping){stepping = pStepping;}
-          void setStopAtNext(bool pStopAtNext){stopAtNext = pStopAtNext;}
-          void setResume(bool pResume){resume = pResume;}
-          void setRunStatus(ThreadStatus pStatus){runStatus = pStatus;}
-          void registerParallelForVariable(std::string);
-
-          //used to give debug info to newly created threads
-          //TODO find a less criminally inefficient, less hackish way to do this
-          void copyDebugInfo(TetraContext* baseContext){
-            *parForVars = *(baseContext->parForVars);
-            *refTables = *(baseContext->refTables);
-            *globRefTable = *(baseContext->globRefTable);
-            scopes->push(baseContext->scopes->top());
-          }
-          //void copyDebugsInfo(std::stack<std::map<std::string, int> >& pRefs, std::map<std::string, int>& pGlobs);
-
-          std::stack<const Node*>&  getScopes(){return *scopes;}
-
-          //Prints a stack trace
-          void printStackTrace() const;
-        private:
-
-          MicroStack<scope_ptr> progStack;
-          scope_ptr* globalScope;
-          long threadID;
-
-          //For use when debugging
-          int lastLineNo;
-          std::stack<const Node*>* scopes;
-          std::stack<std::map<std::string, int> >* refTables;
-          std::map<std::string, int>* globRefTable;
-          bool stepping;
-          bool stopAtNext;
-          bool resume;
-          ThreadStatus runStatus;
-          //TODO candidate for read-write mutex, though this is not exactly a fought-over mutex
-          pthread_mutex_t parallelList_mutex;
-          std::vector<std::string>* parForVars;
+      //For use when debugging
+      int lastLineNo;
+      std::stack<const Node*>* scopes;
+      std::stack<std::map<std::string, int> >* refTables;
+      std::map<std::string, int>* globRefTable;
+      bool stepping;
+      bool stopAtNext;
+      bool resume;
+      ThreadStatus runStatus;
+      //TODO candidate for read-write mutex, though this is not exactly a fought-over mutex
+      pthread_mutex_t parallelList_mutex;
+      std::vector<std::string>* parForVars;
 
 
 
-      };
+  };
 
 
-      //Header for Tetra Standard Library
+  //Header for Tetra Standard Library
 #define TSL_FUNCS 6
-      void print(const Node*,TetraContext&);
-      int readInt(int thread);
-      double readReal(int thread);
-      bool readBool(int thread);
-      std::string readString(int thread);
-      //All len functions count as a single function for TSL_FUNCS
-      int len(TArray&);
-      int len(std::string&);
+  void print(const Node*,TetraContext&);
+  int readInt(int thread);
+  double readReal(int thread);
+  bool readBool(int thread);
+  std::string readString(int thread);
+  //All len functions count as a single function for TSL_FUNCS
+  int len(TArray&);
+  int len(std::string&);
 
-      /*
-       * This class is used in reporting runtime errors
-       */
+  /*
+   * This class is used in reporting runtime errors
+   */
 
-      class RuntimeError: public Error {
-        public:
-          RuntimeError(const std::string& pMessage, int pLine, TetraContext& pContext);
-          TetraContext& getContext();
-        private:
-          TetraContext context;
-      };
+  class RuntimeError: public Error {
+    public:
+      RuntimeError(const std::string& pMessage, int pLine, TetraContext& pContext);
+      TetraContext& getContext();
+    private:
+      TetraContext context;
+  };
 
-      /*
-       * These types of errors are thrown when the interpreter enters an invalid state
-       * e.g. the interpreter fails to find information about the types of certain variables
-       */
+  /*
+   * These types of errors are thrown when the interpreter enters an invalid state
+   * e.g. the interpreter fails to find information about the types of certain variables
+   */
 
-      class SystemError: public Error {
-        public:
-          SystemError(const std::string& pMessage, int pLine, const Node* pNode);
-          const Node* getNode();
-        private:
-          const Node* node;
-      };
+  class SystemError: public Error {
+    public:
+      SystemError(const std::string& pMessage, int pLine, const Node* pNode);
+      const Node* getNode();
+    private:
+      const Node* node;
+  };
 
-      //This class allows other libraries to define how the interpreter should handle I/O
-      class VirtualConsole {
+  //This class allows other libraries to define how the interpreter should handle I/O
+  class VirtualConsole {
 
-        public:
-          //Used to input standard input. Implementation should return the user input as a string
-          virtual std::string receiveStandardInput() const = 0;
-          //Used for standard output. Argument is a string containing what the Tetra Program is requesting to output.
-          virtual void processStandardOutput(const std::string) const = 0;
-      };
+    public:
+      //Used to input standard input. Implementation should return the user input as a string
+      virtual std::string receiveStandardInput() const = 0;
+      //Used for standard output. Argument is a string containing what the Tetra Program is requesting to output.
+      virtual void processStandardOutput(const std::string) const = 0;
+  };
 
-      class ConsoleArray {
-        private:
-          std::vector<VirtualConsole*> consoles;
-          //Used to insure that only one thread has control of a particular console
-          std::vector<std::pair<pthread_mutex_t*,pthread_cond_t*> > consoleMutexes;
-          int (*invokeConsolePolicy)(int,bool);
-        public:
-          ConsoleArray();
-          ConsoleArray(int (invokeConsolePolicy)(int,bool));
-          ~ConsoleArray();
-          VirtualConsole& getSpecifiedConsole(int, bool) const;
-          //These two work exactly like mutexes
-          void obtainConsoleMutex(int,bool) const;
-          void releaseConsoleMutex(int,bool) const;
-          void waitOnCondition(int,bool) const;
-          void broadcastCondition(int,bool) const;
-          //Not currently threadsafe!
-          void setConsolePolicy(int (getConsole)(int,bool));
-          int registerConsole(VirtualConsole&);
-          //bool removeConsole(VirtualConsole&);
-
-
-      };
-
-      class VirtualObserver {
-
-        private:
-          //Reference table linking variable names to their integer abstractions
-          //Used so th debugger supports fetchVariable
-          //std::stack<std::map<std::string, int> > refTables;
-          //std::map<std::string, int> globRefTable;
-          //int lastLine;
-          //bool stepping;
-          //bool stopAtNext;
-          //std::stack<Node*> scopes;
-        public:
-
-          virtual void notify_E(const Node*, TetraContext& context)=0;
-          //virtual void step_E()=0;
-          virtual void notifyThreadSpecificVariable_E(std::string)=0;
-          virtual void threadCreated_E(int,TetraContext&)=0;
-          virtual void threadDestroyed_E(int)=0;
-          //virtual void next_E()=0;
-          //virtual bool break_E(std::pair<int,pthread_t>)=0;
-          //virtual bool remove_E(std::pair<int,pthread_t>)=0;
-          //virtual void continue_E()=0;
-          virtual void leftScope_E(TetraContext&)=0;
-          //virtual bool break_E(int)=0;
-          //virtual bool remove_E(int)=0;
-          void* fetchVariable(std::string s, TetraContext& context) const;
-          void updateVarReferenceTable(const Node*);
-          void popReferenceTable();
-
-          //Where the global variable cross reference list will be initialized
-          friend void FunctionMap::optimizeLookup(const Node* start);
-      };
+  class ConsoleArray {
+    private:
+      std::vector<VirtualConsole*> consoles;
+      //Used to insure that only one thread has control of a particular console
+      std::vector<std::pair<pthread_mutex_t*,pthread_cond_t*> > consoleMutexes;
+      int (*invokeConsolePolicy)(int,bool);
+    public:
+      ConsoleArray();
+      ConsoleArray(int (invokeConsolePolicy)(int,bool));
+      ~ConsoleArray();
+      VirtualConsole& getSpecifiedConsole(int, bool) const;
+      //These two work exactly like mutexes
+      void obtainConsoleMutex(int,bool) const;
+      void releaseConsoleMutex(int,bool) const;
+      void waitOnCondition(int,bool) const;
+      void broadcastCondition(int,bool) const;
+      //Not currently threadsafe!
+      void setConsolePolicy(int (getConsole)(int,bool));
+      int registerConsole(VirtualConsole&);
+      //bool removeConsole(VirtualConsole&);
 
 
-      /*
-       * This class stores constants related to the environment where the program is run, including:
-       * -number of allowed threads
-       * -where to print for print statements
-       */ 
+  };
 
-      class TetraEnvironment {
-        public:
-          static void initialize();
-          static void initialize(const ConsoleArray&);
-          static void setConsoleArray(const ConsoleArray&);
-          static const ConsoleArray& getConsoleArray();
-          static const VirtualConsole& getConsole(int, bool);
-          static int getMaxThreads();
-          static void setMaxThreads(int);
-          static ostream& getOutputStream();
-          static void setOutputStream(ostream&);
-          static VirtualObserver& getObserver();
-          static void setObserver(VirtualObserver&);
-          static std::string parseFlags(std::string*,int);
-          static void setDebug(bool);
-          static bool isDebugMode();
-          static int obtainNewThreadID();
-        private:
-          static int maxThreads;
-          static ostream* outputStream;
-          static ConsoleArray const * consoleArray_ptr;
-          static VirtualObserver* observer;
-          static bool debugMode;
-          static long nextThreadID;
-          static pthread_mutex_t next_thread_mutex;
-      };
+  class VirtualObserver {
+    public:
+      virtual void notify_E(const Node*, TetraContext& context)=0;
+      virtual void notifyThreadSpecificVariable_E(std::string)=0;
+      virtual void threadCreated_E(int,TetraContext&)=0;
+      virtual void threadDestroyed_E(int)=0;
+      virtual void leftScope_E(TetraContext&)=0;
+      void* fetchVariable(std::string s, TetraContext& context) const;
+      void updateVarReferenceTable(const Node*);
+      void popReferenceTable();
 
-      class CommandConsole : public VirtualConsole {
-        public:
-          std::string receiveStandardInput() const;
+      //Where the global variable cross reference list will be initialized
+      friend void FunctionMap::optimizeLookup(const Node* start);
+  };
 
-          void processStandardOutput(const std::string output) const;
-      };
+
+  /*
+   * This class stores constants related to the environment where the program is run, including:
+   * -number of allowed threads
+   * -where to print for print statements
+   */ 
+  class TetraEnvironment {
+    public:
+      static void initialize();
+      static void initialize(const ConsoleArray&);
+      static void setConsoleArray(const ConsoleArray&);
+      static const ConsoleArray& getConsoleArray();
+      static const VirtualConsole& getConsole(int, bool);
+      static int getMaxThreads();
+      static void setMaxThreads(int);
+      static ostream& getOutputStream();
+      static void setOutputStream(ostream&);
+      static VirtualObserver& getObserver();
+      static void setObserver(VirtualObserver&);
+      static std::string parseFlags(std::string*,int);
+      static void setDebug(bool);
+      static bool isDebugMode();
+      static int obtainNewThreadID();
+    private:
+      static int maxThreads;
+      static ostream* outputStream;
+      static ConsoleArray const * consoleArray_ptr;
+      static VirtualObserver* observer;
+      static bool debugMode;
+      static long nextThreadID;
+      static pthread_mutex_t next_thread_mutex;
+  };
+
+
+  class CommandConsole : public VirtualConsole {
+    public:
+      std::string receiveStandardInput() const;
+
+      void processStandardOutput(const std::string output) const;
+  };
 
 
 #endif
