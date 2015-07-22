@@ -8,7 +8,7 @@
 #include"commandObserver.h"
 #include<cstdlib>
 
-//These are defined in frontend.h and main.cpp respectively
+//These are defined in frontend.h and eval.cpp respectively
 int interpret(Node*);
 int interpret(Node*,std::string*,int);
 

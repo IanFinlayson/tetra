@@ -23,8 +23,6 @@ tetra: $(OBJS)
 # build the static library
 libtetra.a: $(OBJS)
 	ar rcs libtetra.a $(OBJS)
-	mkdir -p ../../lib
-	cp libtetra.a ../../lib/
 
 # compile an object based on source and headers
 %.o: %.cpp $(HDRS) parser.genh makefile

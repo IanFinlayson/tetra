@@ -1498,5 +1498,6 @@ T* VarTable::lookupVar(const std::string varName) {
           void processStandardOutput(const std::string output) const;
       };
 
+
 #endif
 
