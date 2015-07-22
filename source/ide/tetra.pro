@@ -1,5 +1,6 @@
 # set the compiler to clang
 QMAKE_CXX = clang++
+QMAKE_LINK = clang++
 
 # set options
 CONFIG += qt debug thread warnoff
@@ -48,4 +49,7 @@ FORMS    += \
 
 RESOURCES += \
     resources.qrc
+
+# add a post compile step to copy the file
+QMAKE_POST_LINK  = "cp tetraide ../../bin && echo 'All Done :)'"
 

@@ -21,8 +21,6 @@ int main(int argc, char** argv) {
   console.registerConsole(mainConsole);
   CommandObserver observer;
 
-  //observer.break_E(5);
-
   TetraEnvironment::initialize(console);
   TetraEnvironment::setObserver(observer);
 
@@ -49,10 +47,6 @@ int main(int argc, char** argv) {
     std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
     exit(EXIT_FAILURE);
   }
-#ifdef USE_OBSERVER
-  //Make it so that the debug prompt will be started at the very beginning
-  //TetraEnvironment::getObserver().step_E();
-#endif
   int ret = 0;
   try {   
     ret = interpret(tree,flags,numFlags);
