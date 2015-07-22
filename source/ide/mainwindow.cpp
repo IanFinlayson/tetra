@@ -50,10 +50,8 @@ MainWindow::~MainWindow(){
 
 //sets default values and connect signals/slots
 void MainWindow::setupEditor(){
-    QFont font = QFont("Monaco");
-    font.setFixedPitch(true);
+    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPointSize(12);
-    font.setStyleHint(QFont::TypeWriter);
 
     QFontMetrics metrics(font);
     ui->input->setFont(font);
@@ -79,7 +77,6 @@ void MainWindow::setupEditor(){
     connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
 
     ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-
 
     showDisplay(false);
 }
