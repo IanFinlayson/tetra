@@ -559,7 +559,7 @@ void CommandObserver::leftScope_E(TetraContext& context) {
 }
 
 void CommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
-
+  UNUSED(varName);
 }
 
 void CommandObserver::setYieldEnabled(bool enable) {

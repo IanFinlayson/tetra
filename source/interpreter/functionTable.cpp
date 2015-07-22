@@ -59,7 +59,7 @@ void optimizeFunction(Node* base, Node** funcs, std::map<std::string, Node*>& lo
 
   if(base->kind() == NODE_FUNCALL) {
 
-    for(int index = 0; index < lookup.size(); index++) {
+    for(unsigned int index = 0; index < lookup.size(); index++) {
 
       std::string name = base->getString();
       //These if statements provide optimization for TSL built in functions

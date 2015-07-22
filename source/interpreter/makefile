@@ -2,7 +2,7 @@
 
 # options
 CC := clang++
-FLAGS := -Wall -pedantic -g -pthread -ftemplate-backtrace-limit=1
+FLAGS := -W -Wall -pedantic -g -pthread -ftemplate-backtrace-limit=1
 
 # globs
 SRCS := $(wildcard *.cpp)

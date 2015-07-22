@@ -24,40 +24,63 @@ void evaluateNode(const Node*, TData<T>&, TetraContext&);
 //strings.  By default, all "improper" operations will return a blank string,
 //since any other behavior would be non-intuitive for now.
 string operator/(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 
 string operator*(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator-(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator^(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator||(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator&&(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator|(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator&(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator<<(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator>>(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 string operator!(string a) {
+  UNUSED(a)
   return "";
 }
 string operator%(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 
@@ -69,9 +92,13 @@ T calculateExponential(T a, T b) {
   return pow(static_cast<double>(a), static_cast<double>(b));
 }
 string calculateExponential(string a, string b) {
+  UNUSED(a)
+  UNUSED(b)
   return "";
 }
 TArray calculateExponential(TArray& a, TArray& b) {
+  UNUSED(a)
+  UNUSED(b)
   //return default TArray
   TArray x;
   return x;
@@ -83,6 +110,8 @@ T bitLeftShift(T a, T b) {
   return a << b;
 }
 double bitLeftShift(double a, double b) {
+  UNUSED(a)
+  UNUSED(b)
   return 0;
 }
 
@@ -91,6 +120,8 @@ T bitRightShift(T a, T b) {
   return a >> b;
 }
 double bitRightShift(double a, double b) {
+  UNUSED(a)
+  UNUSED(b)
   return 0;
 }
 
@@ -99,6 +130,8 @@ T bitwiseOr(T a, T b) {
   return a | b;
 }
 double bitwiseOr(double a, double b) {
+  UNUSED(a)
+  UNUSED(b)
   return 0;
 }
 
@@ -107,6 +140,8 @@ T bitwiseAnd(T a, T b) {
   return a & b;
 }
 double bitwiseAnd(double a, double b) {
+  UNUSED(a)
+  UNUSED(b)
   return 0;
 }
 
@@ -115,6 +150,8 @@ T bitwiseXOr(T a, T b) {
   return a ^ b;
 }
 double bitwiseXOr(double a, double b) {
+  UNUSED(a)
+  UNUSED(b)
   return 0;
 }
 
@@ -123,6 +160,8 @@ T remainderDivision(T a, T b) {
   return a % b;
 }
 double remainderDivision(double a, double b) {
+  UNUSED(a)
+  UNUSED(b)
   return 0;
 }
 
@@ -313,6 +352,7 @@ class OperationList
     }
 
     T bitNot(Node* a, Node* b, TetraContext& context) {
+      UNUSED(b)
       //return a + b;
       TData<T> op1;
       evaluateNode<T>(a,op1,context);

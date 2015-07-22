@@ -428,6 +428,7 @@ DebugWindow *MainWindow::newThreadWindow(){
     subWindow->setWindowFlags(Qt::CustomizeWindowHint);
     ui->threadMdi->addSubWindow(subWindow);
     subWindow->show();
+    return newDebugWindow;
 }
 DebugWindow *MainWindow::activeThreadWindow(){
     if (QMdiSubWindow *activeThreadWindow = ui->threadMdi->activeSubWindow()){

@@ -18,7 +18,7 @@ ConsoleArray::ConsoleArray(int (policy)(int,bool)) {
 
 //Delete the dynamically allocated threading primitives
 ConsoleArray::~ConsoleArray() {
-  for(int x = 0; x < consoleMutexes.size(); ++x) {
+  for(unsigned int x = 0; x < consoleMutexes.size(); ++x) {
     delete consoleMutexes[x].first;
     delete consoleMutexes[x].second;
   }

@@ -19,6 +19,9 @@
 #include "frontend.h" 
 #include "microStack.h"
 
+/* macro to squelch unused variable warnings */
+#define UNUSED(x) (void) x;
+
 /* a custom allocator for handling memory this was created to assuage fears
  * that STL allocations were causing performance issues */
 static int numAllocs_T = 0;
@@ -141,6 +144,7 @@ bool TData<T>::setData(const R& pData) {
    * expecting an int return type, because it was called within a function
    * returning an int, it then sees s = "abc" which returns a string. The
    * interpreter will call TData<int>::setData<string>(...), and do nothing. */
+  UNUSED(pData)
   return false;
 }   
 
@@ -176,6 +180,7 @@ class TArray {
     const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator begin() const;
     const std::vector< TData<void*>/*, mmap_allocator<TData<void*> >*/ >::const_iterator end() const;
 
+    /* get the size of the array */
     int size() const;
 
     /* copy assignment operator */
@@ -183,57 +188,75 @@ class TArray {
 
     /* all operations must be defined (or at least stubbed) to work with our operators! */
     TArray operator||(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator&&(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     bool operator<(TArray& other) {
+      UNUSED(other)
       return false;
     }
     bool operator<=(TArray& other) {
+      UNUSED(other)
       return false;
     }
     bool operator>(TArray& other) {
+      UNUSED(other)
       return false;
     }
     bool operator>=(TArray& other) {
+      UNUSED(other)
       return false;
     }
     bool operator==(TArray& other) {
+      UNUSED(other)
       return false;
     }
     bool operator!=(TArray& other) {
+      UNUSED(other)
       return false;
     }
     TArray operator^(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator|(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator&(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator<<(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator>>(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator+(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator-(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator*(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator/(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator%(TArray& other) {
+      UNUSED(other)
       return *this;
     }
     TArray operator!() {
@@ -399,17 +422,16 @@ class VarHash{
     int vars;
 
     int hash(const std::string& name) const{
-      /*	int accum = 0;
-          for(int x = 0; x < name.size(); x++) {
-          accum += static_cast<int>(name[0]) * 33;
-          }
-          return accum % hashSize;*/
-      return 1;
+      unsigned int accum = 0;
+      for(unsigned int x = 0; x < name.size(); x++) {
+        accum += static_cast<unsigned int>(name[0]) * 33;
+      }
+      return accum % hashSize;
     }
 
   public:
     VarHash(int size) {
-      hashSize = 30;
+      hashSize = size;
       keyVal table[30];
       for(int x = 0; x < hashSize; x++) {
         table[x] = keyVal("",TData<void*>(NULL));
@@ -502,11 +524,6 @@ class VarTable {
     VarTable();
     ~VarTable();
 
-    VarTable& operator=(const VarTable& other) {
-      cout << "Please don;t use this! (VarTable::operator=)" << endl;
-      return *this;
-    }
-
     /* returns a reference to the storage location of the variable. The interpreter supplies the expected type. */
     template<typename T>
       T* lookupVar(std::string varName);
@@ -521,6 +538,9 @@ class VarTable {
 
     std::list<std::pair<pthread_t,TData<void*> > >& declareParForVar(const std::string&);
   private:
+    /* this is private and not defined -- non-copyabe object */
+    VarTable& operator=(const VarTable& other);
+
     //std::map<std::string, TData<void*> > varMap;
     //std::map<std::string, TData<void*>, std::less<std::string>, mmap_allocator<std::pair<const string, TData<void*> > > > varMap;
     VarHash varMap;

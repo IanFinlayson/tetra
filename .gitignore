@@ -19,6 +19,7 @@ cscope.out
 moc_*
 ui_*
 qrc_*
+source/ide/Makefile
 
 # executables
 tetra

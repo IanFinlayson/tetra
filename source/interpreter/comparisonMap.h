@@ -31,6 +31,7 @@ bool negator<string>(string a) {
 //Specialization for bitwise array negation for now will just return null
 template<>
 bool negator<TArray>(TArray a) {
+  UNUSED(a)
   return false;
 }
 
@@ -119,11 +120,13 @@ class ComparisonList {
     //Since negaiton does not work for strings or arrays, we will offload it to a specialized function
 
     bool logNot(const Node* a, const Node* b, TetraContext& context) {
+      UNUSED(b)
       TData<T> op1;
       evaluateNode<T>(a,op1,context);
       return negator(op1.getData());
     }
     bool logNot(T a, T b) {
+      UNUSED(b)
       return negator(a);
     }
 

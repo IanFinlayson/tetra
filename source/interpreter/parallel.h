@@ -22,7 +22,7 @@ template<typename T>
 void evaluateAddress(const Node*, TData<T>&, TetraContext& context);
 
 void dummy(void* args) {
-
+  UNUSED(args)
 }
 
 //This class wraps the arguments which must be passed to an evaluateNode statment so they can be passed as arguments to spawned threads

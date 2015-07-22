@@ -1,6 +1,9 @@
 # set the compiler to clang
 QMAKE_CXX = clang++
 
+# set options
+CONFIG += qt debug thread warnoff
+
 # specify icons
 ICON = tetra.icns
 
