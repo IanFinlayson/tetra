@@ -265,6 +265,9 @@ void MainWindow::on_actionCut_triggered(){
 void MainWindow::on_actionUndo_triggered(){
     ui->input->undo();
 }
+void MainWindow::on_actionQuit_triggered(){
+  quit( );
+}
 void MainWindow::on_actionRedo_triggered(){
     ui->input->redo();
 }

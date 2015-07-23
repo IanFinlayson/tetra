@@ -333,6 +333,9 @@ border: 1px solid grey;
    <property name="text">
     <string>Print...</string>
    </property>
+   <property name="toolTip">
+    <string>Print this file</string>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>false</bool>
    </property>
