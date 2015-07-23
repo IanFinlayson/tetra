@@ -11,14 +11,18 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Tetra IDE</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/icons/resources/icons/logo_squares.ico</normaloff>:/icons/resources/icons/logo_squares.ico</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="styleSheet">
-    <string notr="true">background: rgb(255, 255, 255)</string>
+    <string notr="true"/>
    </property>
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
@@ -57,13 +61,6 @@ background-color: white;
            <string notr="true">Editor{
 border: 1px solid grey
 }</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="tetraFileLabel">
-          <property name="text">
-           <string>Tetra File:</string>
           </property>
          </widget>
         </item>
@@ -186,6 +183,7 @@ border: 1px solid grey;
     <addaction name="actionSave"/>
     <addaction name="separator"/>
     <addaction name="actionPrint"/>
+    <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -295,7 +293,6 @@ border: 1px solid grey;
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
-   <addaction name="actionBuild"/>
    <addaction name="actionRun"/>
    <addaction name="actionStop"/>
    <addaction name="separator"/>
@@ -308,7 +305,7 @@ border: 1px solid grey;
   </widget>
   <action name="actionSave">
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.save.png</normaloff>:/icons/resources/icons/appbar.save.png</iconset>
    </property>
    <property name="text">
@@ -330,7 +327,7 @@ border: 1px solid grey;
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.printer.text.png</normaloff>:/icons/resources/icons/appbar.printer.text.png</iconset>
    </property>
    <property name="text">
@@ -357,7 +354,7 @@ border: 1px solid grey;
   </action>
   <action name="actionUndo">
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.undo.png</normaloff>:/icons/resources/icons/appbar.undo.png</iconset>
    </property>
    <property name="text">
@@ -369,7 +366,7 @@ border: 1px solid grey;
   </action>
   <action name="actionRedo">
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.redo.png</normaloff>:/icons/resources/icons/appbar.redo.png</iconset>
    </property>
    <property name="text">
@@ -399,7 +396,7 @@ border: 1px solid grey;
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.control.play.png</normaloff>:/icons/resources/icons/appbar.control.play.png</iconset>
    </property>
    <property name="text">
@@ -414,7 +411,7 @@ border: 1px solid grey;
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.bug.png</normaloff>:/icons/resources/icons/appbar.bug.png</iconset>
    </property>
    <property name="text">
@@ -441,7 +438,7 @@ border: 1px solid grey;
   </action>
   <action name="actionBuild">
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.protractor.png</normaloff>:/icons/resources/icons/appbar.protractor.png</iconset>
    </property>
    <property name="text">
@@ -453,7 +450,7 @@ border: 1px solid grey;
   </action>
   <action name="actionStop">
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.control.stop.png</normaloff>:/icons/resources/icons/appbar.control.stop.png</iconset>
    </property>
    <property name="text">
@@ -502,7 +499,7 @@ border: 1px solid grey;
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.control.resume.png</normaloff>:/icons/resources/icons/appbar.control.resume.png</iconset>
    </property>
    <property name="text">
@@ -514,7 +511,7 @@ border: 1px solid grey;
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.debug.step.into.png</normaloff>:/icons/resources/icons/appbar.debug.step.into.png</iconset>
    </property>
    <property name="text">
@@ -529,7 +526,7 @@ border: 1px solid grey;
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.bug.remove.png</normaloff>:/icons/resources/icons/appbar.bug.remove.png</iconset>
    </property>
    <property name="text">
@@ -570,11 +567,16 @@ border: 1px solid grey;
     <bool>false</bool>
    </property>
    <property name="icon">
-    <iconset resource="AppResources.qrc">
+    <iconset resource="resources.qrc">
      <normaloff>:/icons/resources/icons/appbar.navigate.next.png</normaloff>:/icons/resources/icons/appbar.navigate.next.png</iconset>
    </property>
    <property name="text">
     <string>Next</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
    </property>
   </action>
  </widget>
@@ -587,7 +589,7 @@ border: 1px solid grey;
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="AppResources.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>

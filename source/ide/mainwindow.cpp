@@ -92,7 +92,6 @@ void MainWindow::showDisplay(bool arg1){
     if(arg1){
         statusBar()->showMessage("Ready.");
     }
-    ui->tetraFileLabel->setVisible(arg1);
     ui->outputLabel->setVisible(arg1);
     ui->input->setVisible(arg1);
     ui->output->setVisible(arg1);
@@ -111,6 +110,7 @@ void MainWindow::setupShortcuts(){
     ui->actionUndo->setShortcuts(QKeySequence::Undo);
     ui->actionSave->setShortcuts(QKeySequence::Save);
     ui->actionOpen->setShortcuts(QKeySequence::Open);
+    ui->actionQuit->setShortcuts(QKeySequence::Quit);
     ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
 }
 
@@ -201,7 +201,6 @@ void MainWindow::on_actionNew_triggered(){
             ui->input->setPlainText("");
             openFile = filename;
             on_actionSave_triggered();
-            ui->tetraFileLabel->setText(strippedName(openFile));
             ui->output->setPlainText("");
         }
     }
@@ -235,7 +234,6 @@ void MainWindow::on_actionOpen_triggered(){
                 ttrFile.close();
 
                 ui->input->setPlainText(fileText);
-                ui->tetraFileLabel->setText(strippedName(openFile));
                 ui->output->clear();
             }
         }

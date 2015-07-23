@@ -1,6 +1,7 @@
 # sum an array of numbers in a given range
 def sum_range(numbers [int], start int, end int) int:
   total = 0
+
   i = start
   while i <= end:
     total += numbers[i]
