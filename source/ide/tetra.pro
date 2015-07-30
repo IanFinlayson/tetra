@@ -27,7 +27,6 @@ LIBS += -L$$PWD/../interpreter/ -ltetra
 # specify all the files we need
 SOURCES += main.cpp\
     mainwindow.cpp \
-    openappdialog.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
     filerunner.cpp \
@@ -35,7 +34,6 @@ SOURCES += main.cpp\
 
 HEADERS  += \
     mainwindow.h \
-    openappdialog.h \
     syntaxhighlighter.h \
     editor.h \
     filerunner.h \
@@ -44,7 +42,6 @@ HEADERS  += \
 
 FORMS    += \
     mainwindow.ui \
-    openappdialog.ui \
     openapp.ui
 
 RESOURCES += \

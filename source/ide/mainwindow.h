@@ -74,7 +74,6 @@ private slots:
     void exitRunMode();
     void on_actionRun_triggered(bool checked);
     void on_actionExit_Debug_Mode_triggered();
-    void on_actionTab_Width_triggered();
 
     DebugWindow *newThreadWindow();
     DebugWindow *activeThreadWindow();

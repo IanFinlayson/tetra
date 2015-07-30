@@ -242,7 +242,6 @@ border: 1px solid grey;
     <addaction name="separator"/>
     <addaction name="actionClear_Output"/>
     <addaction name="separator"/>
-    <addaction name="actionTab_Width"/>
     <addaction name="actionLine_Numbers"/>
    </widget>
    <addaction name="menuFile"/>
@@ -534,11 +533,6 @@ border: 1px solid grey;
    </property>
    <property name="text">
     <string>Exit Debug Mode</string>
-   </property>
-  </action>
-  <action name="actionTab_Width">
-   <property name="text">
-    <string>Tab Width</string>
    </property>
   </action>
   <action name="actionInterrupt">

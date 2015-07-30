@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "openappdialog.h"
 #include "editor.h"
 #include <QDesktopWidget>
 #include <QtCore>
@@ -123,7 +122,11 @@ void MainWindow::closeEvent(QCloseEvent *event){
 
 bool MainWindow::newProject(){
     bool projectCreated = false;
-    on_actionTab_Width_triggered();
+
+    /* set the default tab width */
+    ui->input->setTabWidth(4);
+    this->projectTabWidth = 4;
+
     on_actionNew_triggered();
     if(openFile != ""){
         projectCreated = true;
@@ -196,7 +199,7 @@ void MainWindow::updateCoordinates(){
 //-----------Menu Bar/Tool Bar Actions-----------//
 void MainWindow::on_actionNew_triggered(){
     if (maybeSave()){
-        QString filename = QFileDialog::getSaveFileName(this, tr("New Project"), "../../../..", "Tetra (*.ttr)");
+        QString filename = QFileDialog::getSaveFileName(this, tr("New Project"), "", "Tetra (*.ttr)");
         if(!filename.isEmpty()){
             ui->input->setPlainText("");
             openFile = filename;
@@ -216,7 +219,7 @@ void MainWindow::on_actionSave_triggered(){
         ttrFile.close();
     }
     else{
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "../../../..", "Tetra (*.ttr)");
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "", "Tetra (*.ttr)");
         if(!filename.isEmpty()){
             on_actionSave_triggered();
         }
@@ -224,7 +227,7 @@ void MainWindow::on_actionSave_triggered(){
 }
 void MainWindow::on_actionOpen_triggered(){
     if (maybeSave()){
-        QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "../../../..", "Tetra (*.ttr)");
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Tetra (*.ttr)");
         if(!filename.isEmpty()){
             QFile ttrFile(filename);
             if(ttrFile.open(QFile::ReadOnly | QFile::Text)){
@@ -404,15 +407,6 @@ void MainWindow::on_actionExit_Debug_Mode_triggered()
        ui->threadMdi->closeAllSubWindows();
        statusBar()->showMessage("Ready.");
        this->tetraThread->disconnect();
-    }
-}
-
-void MainWindow::on_actionTab_Width_triggered(){
-    bool valueChanged;
-    int tabWidth =  QInputDialog::getInt(this, "Tab Width", "Enter new tab width:", ui->input->getTabWidth(), 3, 10, 1, &valueChanged);
-    if(valueChanged){
-        ui->input->setTabWidth(tabWidth);
-        this->projectTabWidth=tabWidth;
     }
 }
 
