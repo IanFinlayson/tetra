@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 
     MainWindow w;
     w.showMaximized();
-    w.newProject( );
+    w.startProject( );
 
     return app.exec();
 }

@@ -120,10 +120,32 @@ void MainWindow::closeEvent(QCloseEvent *event){
 }
 
 
+bool MainWindow::startProject( ) {
+    /* set the default tab width TODO make a setting */
+    ui->input->setTabWidth(4);
+    this->projectTabWidth = 4;
+
+    /* set the file name to something temporary, they can either hit
+     * new or open to actually have a better file name */
+    openFile = "/tmp/temp.ttr";
+
+    /* set up these things... */
+    showDisplay(true);
+    QFile ttrFile(openFile);
+    QTextStream in(&ttrFile);
+    QString fileText = in.readAll();
+    ttrFile.close();
+
+    ui->input->setPlainText(fileText);
+    ui->output->clear(); 
+    return true;
+}
+
+
 bool MainWindow::newProject(){
     bool projectCreated = false;
 
-    /* set the default tab width */
+    /* set the default tab width TODO make a setting */
     ui->input->setTabWidth(4);
     this->projectTabWidth = 4;
 
@@ -160,9 +182,6 @@ void MainWindow::quit(){
 QString MainWindow::strippedName(const QString &fullFileName){
     return QFileInfo(fullFileName).fileName();
 }
-//-------------------------------------//
-
-
 
 //-------------------------------------//
 void MainWindow::documentWasModified(){
@@ -208,6 +227,23 @@ void MainWindow::on_actionNew_triggered(){
         }
     }
 }
+
+void MainWindow::on_actionStartProject_triggered( ) {
+        QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Tetra (*.ttr)");
+        if(!filename.isEmpty()){
+            QFile ttrFile(filename);
+            if(ttrFile.open(QFile::ReadOnly | QFile::Text)){
+                openFile = filename;
+                QTextStream in(&ttrFile);
+                QString fileText = in.readAll();
+                ttrFile.close();
+
+                ui->input->setPlainText(fileText);
+                ui->output->clear();
+            }
+        }
+}
+
 void MainWindow::on_actionSave_triggered(){
     QFile ttrFile(openFile);
     if(ttrFile.open(QFile::WriteOnly | QFile::Text)){

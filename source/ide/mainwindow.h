@@ -34,6 +34,7 @@ public:
     ~MainWindow();
     bool openProject();
     bool newProject();
+    bool startProject();
     QString getOpenFile();
     void setMainValue(int);
     void setBuildSuccessful(bool);
@@ -60,6 +61,7 @@ private slots:
     void on_actionPaste_triggered();
     void on_actionDelete_triggered();
     void on_actionSelect_All_triggered();
+    void on_actionStartProject_triggered( );
     void on_actionNew_triggered();
     void on_actionFind_triggered();
     void on_actionLine_Numbers_toggled(bool arg1);
