@@ -1,4 +1,4 @@
-
+# the main function
 def max(nums [int]) int:
   largest = 0
   parallel for num in nums:

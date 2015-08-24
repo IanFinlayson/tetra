@@ -1,14 +1,12 @@
 #include "syntaxhighlighter.h"
 
 // the colors used for highlighting
-const unsigned int COLOR_TYPE = 0xB58900;
-const unsigned int COLOR_KEYWORD = 0x268BD2;
-const unsigned int COLOR_PARALLEL = 0x2AA198;
-const unsigned int COLOR_VALUE = 0xDC322F;
-const unsigned int COLOR_STRING = 0x6C71C4;
-const unsigned int COLOR_COMMENT = 0x859900;
-
-
+const unsigned int COLOR_TYPE = 0xBF9407;
+const unsigned int COLOR_KEYWORD = 0x0315B6;
+const unsigned int COLOR_PARALLEL = 0x0315B6;
+const unsigned int COLOR_VALUE = 0xBB002B;
+const unsigned int COLOR_STRING = 0xBB002B;
+const unsigned int COLOR_COMMENT = 0x007231; 
 
 // build a QColor from a 24-bit hexadecimal color value
 QColor colorFromHex(unsigned int color) {
@@ -24,7 +22,6 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
 
     // types
     typeFormat.setForeground(colorFromHex(COLOR_TYPE));
-    typeFormat.setFontWeight(QFont::Bold);
     QStringList typePatterns;
     typePatterns << "\\bint\\b" << "\\breal\\b" << "\\bstring\\b" << "\\bbool\\b";
     foreach (const QString &pattern, typePatterns) {
@@ -35,7 +32,6 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
 
     // keywords
     keywordFormat.setForeground(colorFromHex(COLOR_KEYWORD));
-    keywordFormat.setFontWeight(QFont::Bold);
     QStringList keywordPatterns;
     keywordPatterns << "\\bif\\b" << "\\belif\\b" << "\\belse\\b" << "\\bfor\\b" << "\\bin\\b"  <<
                        "\\bwhile\\b" << "\\bcontinue\\b" << "\\bbreak\\b" << "\\bdef\\b" << "\\bor\\b" <<
@@ -49,7 +45,6 @@ Highlighter::Highlighter(QTextDocument *parent): QSyntaxHighlighter(parent){
 
     // parallel stuff
     parallelFormat.setForeground(colorFromHex(COLOR_PARALLEL));
-    parallelFormat.setFontWeight(QFont::Bold);
     QStringList parallelPatterns;
     parallelPatterns << "\\bparallel\\b"<< "\\bbackground\\b" << "\\block\\b";
     foreach (const QString &pattern, parallelPatterns) {
