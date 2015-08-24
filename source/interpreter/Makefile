@@ -1,4 +1,4 @@
-# makefile
+# Makefile
 
 # options
 CC := clang++
@@ -25,15 +25,15 @@ libtetra.a: $(OBJS)
 	ar rcs libtetra.a $(OBJS)
 
 # compile an object based on source and headers
-%.o: %.cpp $(HDRS) parser.genh makefile
+%.o: %.cpp $(HDRS) parser.genh Makefile
 	$(CC) $(FLAGS) -c $< -o $@
 
 # build the parser object based on bison generated files
-parser.o: parser.gencpp $(HDRS) parser.genh makefile
+parser.o: parser.gencpp $(HDRS) parser.genh Makefile
 	$(CC) $(FLAGS) -c -x c++ parser.gencpp -o parser.o
 
 # compile the parser with bison
-parser.gencpp parser.genh: parser.y $(HDRS) makefile
+parser.gencpp parser.genh: parser.y $(HDRS) Makefile
 	bison -d -v parser.y -o parser.gencpp && mv parser.genhpp parser.genh
 
 # generate tag file
