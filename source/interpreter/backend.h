@@ -34,7 +34,6 @@ class mmap_allocator: public std::allocator<T> {
     typedef T* pointer;
     typedef const T* const_pointer;
 
-
     template<typename _Tp1>
       struct rebind {
         typedef mmap_allocator<_Tp1> other;
@@ -54,8 +53,6 @@ class mmap_allocator: public std::allocator<T> {
       mmap_allocator(const mmap_allocator<U> &a) throw(): std::allocator<T>(a) { }
     ~mmap_allocator() throw() { }
 };
-
-
 
 /* the TData class represents any Tetra data type */
 template<typename T>
@@ -158,7 +155,6 @@ template<typename T>
 T& TData<T>::getData() {
   return data;
 }
-
 
 /*
  * This class wraps an array of tData<void*> used to make arrays and multi-dimensional arrays
@@ -383,7 +379,7 @@ class TArray {
 };
 
 /* interpret a tetra program parsed into a Node tree */
-int interpret(Node* tree, std::string* flags = NULL, int flagCount = 0);
+int interpret(Node* tree, int debug, int threads);
 
 template<> TData<void*>::TData(const TData<void*>& other);
 template<> TData<void*>::~TData();
@@ -524,35 +520,37 @@ class VarTable {
     VarTable();
     ~VarTable();
 
-    /* returns a reference to the storage location of the variable. The interpreter supplies the expected type. */
+    /* returns a reference to the storage location of the variable. The
+     * interpreter supplies the expected type. */
     template<typename T>
       T* lookupVar(std::string varName);
     template<typename T>
       T* lookupVar(const Node* varNode);
 
-    /* checks whether a named variable is in the scope, without actually adding it if it does not exist */
+    /* checks whether a named variable is in the scope, without actually adding
+     * it if it does not exist */
     bool containsVar(const std::string varName) const;
     bool containsVar(const Node* varNode) const;
-    //Returns a TData from within varMap containing an invalid reference. The reference can be set to something valid, and that thing will not be deleted when this variableContext goes out of scope
-    //TData<void*>& declareReference(const std::string varName);
+    /* Returns a TData from within varMap containing an invalid reference. The
+      reference can be set to something valid, and that thing will not be
+      deleted when this variableContext goes out of scope TData<void*>&
+      declareReference(const std::string varName); */
 
     std::list<std::pair<pthread_t,TData<void*> > >& declareParForVar(const std::string&);
   private:
     /* this is private and not defined -- non-copyabe object */
     VarTable& operator=(const VarTable& other);
 
-    //std::map<std::string, TData<void*> > varMap;
-    //std::map<std::string, TData<void*>, std::less<std::string>, mmap_allocator<std::pair<const string, TData<void*> > > > varMap;
     VarHash varMap;
-    //pthread_mutex_t table_mutex;
     pthread_rwlock_t table_mutex;
 
-    //This is a std::vector containing pairs associating strings with another vector containing pairs that associate a thread with a TData value
-    //This is used in the context of parallel for loops, where the lookup function can:
-    //1) check if the outer vector contains a string matching the given lookup value
-    //2) if so, obtain the vector for that value
-    //3) search the pairs of the inner vector to see if the calling thread has an entry for that variable
-    //4) return the correct variable for that thread
+    /* This is a std::vector containing pairs associating strings with another
+     * vector containing pairs that associate a thread with a TData value
+    This is used in the context of parallel for loops, where the lookup
+    function can: 1) check if the outer vector contains a string matching the
+    given lookup value 2) if so, obtain the vector for that value 3) search the
+    pairs of the inner vector to see if the calling thread has an entry for
+    that variable 4) return the correct variable for that thread */
     std::list< std::pair<std::string, std::list<std::pair<pthread_t,TData<void*> > > > > parForVars;
 
     //Predicate functions for the lookupVar function
@@ -579,17 +577,6 @@ class VarTable {
 
 
 };
-
-//lookupVar for when an optimization may be present
-/*template<typename T>
-  T* VarTable::lookupVar(const Node* varNode) {
-  if(varNode->getInt() == 0) {
-  return lookupVar<T>(varNode->getString());
-  }
-  }*/
-///////////////Copy of lookupVar in case I badly mess things up////////////
-//
-//
 
 template<typename T>
 T* VarTable::lookupVar(const std::string varName) {

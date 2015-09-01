@@ -971,19 +971,11 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
 }
 
 //Equivilant of main for the interpreter module
-int interpret(Node* tree, std::string* flags, int flagCount) {
+int interpret(Node* tree, int debug, int threads) {
 
-  //Restore default values before interpreting flags
-  TetraEnvironment::setDebug(false);
-  //TetraEnvironment::setMaxThreads(8);
-
-  //Parse flags
-  std::string flagErrors = TetraEnvironment::parseFlags(flags,flagCount);
-
-  if(flagErrors != "") {
-    Error e(flagErrors,0);
-    throw e;
-  }
+  // set environment settings
+  TetraEnvironment::setDebug(debug);
+  TetraEnvironment::setMaxThreads(threads);
 
   //Construct a TetraContext (this also initializes the global scope)
   TetraContext tContext(TetraEnvironment::obtainNewThreadID());	

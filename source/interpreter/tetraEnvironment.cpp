@@ -72,29 +72,6 @@ bool TetraEnvironment::isDebugMode() {
   return debugMode;
 }
 
-//Sets options based on the flags that get passed in.
-//Returns "" on successful parsing, otherwise returns an error message
-std::string TetraEnvironment::parseFlags(std::string* flags, int flagCount) {
-  if(flags==NULL||flagCount == 0) {
-    return "";
-  }
-
-  std::string ret = "";
-
-  for(int index = 0; index < flagCount; index++) {
-    //For the time being, these will be case sensitive
-    std::string arg = flags[index];
-    if(arg == "-debug" || arg == "-d") {
-      setDebug(true);
-    }
-    else {
-      ret += "Failed to recognize option: " + arg + "\n";
-    }
-  }
-
-  return ret;
-}
-
 int TetraEnvironment::obtainNewThreadID() {
   int ret = -1;
   pthread_mutex_lock(&next_thread_mutex);
