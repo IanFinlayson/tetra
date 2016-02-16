@@ -803,33 +803,33 @@ actual_param_list: expression TOK_COMMA actual_param_list {
 %%
 
 int yywrap( ) { 
-  return 1;
+    return 1;
 }
 
 void yyerror(const char* str) {
-  throw Error(str, yylineno);
+    throw Error(str, yylineno);
 }
 
 /* parse from a file */
 extern istream* in;
 Node* parseFile(const string& fname) {
-  reset_lexer( );
+    reset_lexer( );
 
-/* open the file */
-  ifstream file(fname.c_str( ));
+    /* open the file */
+    ifstream file(fname.c_str( ));
 
-/* if it's not open, we failed */
-  if (!file.is_open( )) {
-    throw Error("Could not open file '" + fname + "'");
-  }
+    /* if it's not open, we failed */
+    if (!file.is_open( )) {
+        throw Error("Could not open file '" + fname + "'");
+    }
 
-/* set the in stream (defined in lexer.cpp) */
-  in = &file;
+    /* set the in stream (defined in lexer.cpp) */
+    in = &file;
 
-/* call yyparse */
-  yyparse( );
+    /* call yyparse */
+    yyparse( );
 
-/* return the root of the parse tree */
-  return root;
+    /* return the root of the parse tree */
+    return root;
 }
 

@@ -41,7 +41,7 @@ string stringType(Node* node) {
     case NODE_CONST: return "CONST";
     case NODE_GLOBAL: return "GLOBAL";
 
-                      /* operators */
+    /* operators */
     case NODE_ASSIGN: return "=";
     case NODE_OR: return "or";
     case NODE_AND: return "and";
@@ -65,33 +65,33 @@ string stringType(Node* node) {
     case NODE_MODULUS: return "%";
     case NODE_EXP: return "EXP";
 
-                   /* functions */
+    /* functions */
     case NODE_FUNCALL: return "CALL: " + node->getString( );
     case NODE_ACTUAL_PARAM_LIST: return "ARGS";
 
-                                 /* vectors */
+    /* vectors */
     case NODE_VECREF: return "VECREF";
     case NODE_INDEX: return "INDEX";
     case NODE_VECVAL: return "VECVAL";
     case NODE_VECRANGE: return "VECRANGE";
 
-                        /* leafs */
+    /* leafs */
     case NODE_INTVAL:
-                        ss << "INT: " << node->getInt( );
-                        return ss.str( );
+        ss << "INT: " << node->getInt( );
+        return ss.str( );
     case NODE_REALVAL:
-                        ss << "REAL: " << node->getReal( );
-                        return ss.str( );
+        ss << "REAL: " << node->getReal( );
+        return ss.str( );
     case NODE_STRINGVAL: return "\\\"" +  node->getString( ) + "\\\"";
     case NODE_IDENTIFIER: return "ID " + node->getString( );
     case NODE_BOOLVAL:
-                          if (node->getBool( )) {
-                            return "true";
-                          } else {
-                            return "false";
-                          }
+        if (node->getBool( )) {
+            return "true";
+        } else {
+            return "false";
+        }
     default:
-                          throw Error("Unsupported node type!");
+        throw Error("Unsupported node type!");
   }
 }
 
@@ -138,7 +138,7 @@ void dumpTreeGraphviz(Node* node) {
 
   system("rm tree.png");
   system("dot -Tpng tree.gv -o tree.png");
-  system("rm tree.gv");
+  //system("rm tree.gv");
   system("xdg-open tree.png");
 }
 

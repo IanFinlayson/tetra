@@ -25,3 +25,7 @@ source/ide/Makefile
 tetra
 tetraide
 
+# generated tree files
+tree.gv
+tree.png
+
