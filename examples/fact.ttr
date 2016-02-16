@@ -11,3 +11,4 @@ def main( ):
     n = read_int( )
     print(n, "! = ", fact(n))
 
+
