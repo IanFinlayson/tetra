@@ -10,12 +10,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1052.3622"
-   height="744.09448"
+   width="941.35999"
+   height="281"
    id="svg2"
    version="1.1"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="logo.svg"
+   inkscape:version="0.48.4 r9939"
+   sodipodi:docname="logo-text.svg"
    inkscape:export-filename="/home/finlayson/imgs/tetra/logo2"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
@@ -38,16 +38,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.69999999"
-     inkscape:cx="537.49829"
-     inkscape:cy="292.83289"
+     inkscape:cx="540.35543"
+     inkscape:cy="235.69003"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:snap-global="false"
-     inkscape:window-width="1392"
-     inkscape:window-height="1056"
-     inkscape:window-x="524"
-     inkscape:window-y="20"
+     inkscape:window-width="1280"
+     inkscape:window-height="814"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -65,7 +65,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -73,10 +73,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-308.2677)">
+     transform="translate(0,-771.36218)">
     <g
        id="g3344"
-       transform="matrix(-1,0,0,1,417.41115,0)">
+       transform="matrix(-1,0,0,1,386.41161,259.99984)">
       <rect
          transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,0,0)"
          y="483.41736"
@@ -128,14 +128,14 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:237.5px;line-height:125%;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="417.14285"
-       y="723.79077"
+       style="font-size:237.5px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Fira Sans;-inkscape-font-specification:Fira Sans"
+       x="386.14331"
+       y="983.79059"
        id="text3349"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3351"
-         x="417.14285"
-         y="723.79077">tetra</tspan></text>
+         x="386.14331"
+         y="983.79059">tetra</tspan></text>
   </g>
 </svg>
