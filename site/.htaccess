@@ -2,4 +2,4 @@
 RewriteEngine On
 RewriteBase /
 RewriteRule ^([a-z]+)/?$ site.php?page=$1 [NC,L,QSA]
-RewriteRule ^$ site.php?page=index [NC,L,QSA]
+RewriteRule ^$ site.php?page=home [NC,L,QSA]

@@ -54,7 +54,7 @@ a:active {
     color:#2CA119;
 }
 
-/* used for clearing the floats after the menu bar */
+/* used for clearing the floats after they have been laid out */
 .clear {
     clear:both;
     line-height:0;
