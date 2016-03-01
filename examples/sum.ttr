@@ -19,3 +19,5 @@ def sum(numbers [int]) int:
 # print the sum of the first 100 natural numbers
 def main( ):
   print(sum([1 ... 100]))
+
+
