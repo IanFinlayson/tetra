@@ -28,7 +28,10 @@ from a broken link, or if something is missing, please <a href="contact">
 let us know.</p>';
 
 if ($_GET["page"]) {
-    $fname = 'content/' . $_GET["page"] . '.html';
+    /* trim off the / if present! */
+    $pagename = rtrim($_GET["page"], '/');
+
+    $fname = 'content/' . $pagename . '.html';
 
     if (file_exists($fname)) {
         include $fname;
