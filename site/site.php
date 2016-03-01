@@ -42,7 +42,7 @@ if ($_GET["page"]) {
     echo $msg404;
 }
 
-echo '</main></div>';
+echo '</div></main>';
 
 include 'structure/sidebar.html';
 include 'structure/postamble.html';
