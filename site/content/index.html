@@ -1,0 +1,55 @@
+
+<h1>Tetra is...</h1>
+<p>A high-level parallel programming language that is designed to make parallel 
+programs easy to write, visualize, debug, and optimize. Its goals are to make 
+parallel programming easier and more fun to teach and learn.</p>
+
+<hr /> 
+<h3>Easy Parallelism</h3>
+<p>Tetra includes built-in syntax for writing parallel programs.  Launching
+tasks in the background, executing multiple statements in parallel,
+parallelizing for loop iterations, and specifying critical sections can all be
+done with a single line of code.  This makes writing correct parallel code
+easier and less error-prone then in most languages.</p>
+
+<hr />
+<h3>Simple Syntax</h3>
+<p>The syntax of Tetra is based off of Python which makes it easy to read, and
+familiar to most students, as Python is the most popular language for teaching
+computer science in the United States.  Tetra inherits most of its structured
+and procedural programming concepts from Python, though the language is
+different in several ways too.</p>
+
+<hr />
+<h3>Strong Type System</h3>
+<p>Tetra has a strong, static type system.  All types in Tetra programs are
+known at compile time, though the compiler does most of the work for you.
+Tetra uses type inference for variables, so the only types you need to manually
+declare are function parameter and return types.  All other variables types are
+inferred by the compiler giving you the safety of a static type system with
+most of the convenience of a dynamic one.</p>
+
+<hr />
+<h3>Bundled IDE</h3>
+<p>Tetra comes bundled with an IDE which can be used to write, execute and test
+Tetra programs.  The IDE includes a debugger which can step through parallel
+code.  This makes getting started with Tetra easy for beginning
+programmers.</p>
+
+
+
+
+<pre style="background: #F5F5F5; color: #333; font-family: 'Fira Mono', 'monospace';"><span style="color:#070;"># Tetra has an easy to read Python-like syntax</span>
+<span style="color:#004896;">def</span> findMax(values [<span style="color:#c78000;">int</span>]) <span style="color:#c78000;">int</span>:
+    <span style="color:#070;"># Tetra is statically typed, but</span>
+    <span style="color:#070;"># infers types automatically</span>
+    max = <span style="color:#b00;">0</span>
+    <span style="color:#070;"># Tetra makes it easy to write parallel code</span>
+    <span style="color:#004896;">parallel</span> <span style="color:#004896;">for</span> v <span style="color:#004896;">in</span> values:
+        <span style="color:#070;"># Tetra includes familiar control flow</span>
+        <span style="color:#004896;">if</span> v &gt; max:
+            <span style="color:#070;"># Tetra includes synchronization logic</span>
+            <span style="color:#004896;">lock</span> max:
+                max = v
+    <span style="color:#004896;">return</span> max</pre>
+

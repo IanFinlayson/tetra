@@ -1,0 +1,6 @@
+# set up URL rewriting so that root/foobar becomes root/site.php?page=foobar
+RewriteEngine On
+RewriteBase /~finlayson/tetra/
+RewriteRule ^([a-z]+)/?$ site.php?page=$1 [NC,L,QSA]
+RewriteRule ^$ site.php?page=index [NC,L,QSA]
+

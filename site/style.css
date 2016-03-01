@@ -1,0 +1,81 @@
+@charset "utf-8";
+
+/* font choices */
+body {
+    font-family: 'Lora', serif;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Fira Sans', sans-serif;
+}
+pre {
+    font-family: 'Fira Mono', monospace;
+}
+
+/* make body take up less space */
+body {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* the top bar */
+div.topbar {
+    padding: 5px;
+}
+div.logo {
+    float: left;
+}
+div.menu {
+    float: right;
+}
+
+/* the list of links in the topbar */
+div.topbar li,
+div.topbar ul {
+    display: inline-block;
+    font-family: 'Fira Sans', sans-serif;
+}
+div.topbar a {
+    font-size: 150%;
+    text-decoration: none;
+    padding: 10px;
+}
+a:link {
+    color:#1A5D11;
+}
+a:visited {
+    color:#1A5D11;
+}
+a.menu:hover {
+    color:#1A5D11;
+    background: #eee;
+}
+a:active {
+    color:#2CA119;
+}
+
+/* used for clearing the floats after the menu bar */
+.clear {
+    clear:both;
+    line-height:0;
+}
+
+/* used for main content on a page */
+div.main {
+    width:75%;
+    float: left;
+}
+
+/* used for the sidebar of links */
+div.sidebar {
+    width:20%;
+    float:right;
+}
+
+/* used for copyright info */
+div.footer {
+    text-align: center;
+    font-size: 85%;
+}
+
+
