@@ -2,10 +2,10 @@
 
 /* font choices */
 body {
-    font-family: 'Lora', serif;
+    font-family: 'Fira Sans', sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fira Sans', sans-serif;
+    font-family: 'Roboto Slab', serif;
 }
 pre {
     font-family: 'Fira Mono', monospace;
