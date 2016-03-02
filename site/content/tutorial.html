@@ -1,0 +1,339 @@
+<h1>Tetra Tutorial</h1>
+
+<p>This page contains a tutorial introduction to the Tetra programming
+Language.  Its intent is to be a quick and straightforward introduction to
+Tetra for experienced programmers.</p>
+
+
+<hr />
+<h3>Hello World</h3>
+
+<p>By law and custom, we will begin with the "Hello world" program
+which in Tetra can be written as:</p>
+
+<pre>
+def main():
+    print("Hello World!")
+</pre>
+
+<p>Every Tetra program must contain a function called <tt>main</tt> which
+defines where the program begins executing.  Functions are defined with the
+<tt>def</tt> keyword, then the name of the function, followed by the list of
+parameters.  The main function takes no parameters.  The colon character is
+used to mark the beginning of the function body which must be indented one
+level over.</p>
+
+<p>The <tt>print</tt> function is used for printing things, so we pass the
+string "Hello World!" into it to print it to the screen.</p>
+
+
+
+<hr />
+<h3>Simple Types</h3>
+
+<p>Tetra contains four simple types.  Each of these is indivisible, but
+can be combined up in arrays, maps, classes etc. as discussed later on.
+The simple types are:</p>
+
+<ul>
+<li><p><b>int</b></p><p>
+An integer type variable which can be positive or negative, but cannot contain
+a fractional part.  These are signed 64-bit values.
+
+</p></li>
+<li><p><b>real</b></p><p>
+A real (floating point) number variable which can contain a fractional part.
+These are 64-bit values following the IEEE double-precision standard.
+
+</p></li>
+<li><p><b>bool</b></p><p>
+A single boolean value which can store the values either <tt>true</tt> or
+false.
+
+</p></li>
+<li><p><b>string</b></p><p>
+A string is a piece of text.  Strings are stored as a sequence of Unicode
+characters.
+
+</p></li></ul>
+
+
+
+
+
+
+
+
+<hr />
+<h3>Functions</h3>
+
+<p>As described above, functions are introduced with the <tt>def</tt> keyword,
+and also have names and parameter lists.  Functions can also return values, and
+there return type (if any) goes after the parameter list, but before the
+colon.</p>
+
+<p>Below is a function which computes the average of three parameters:</p>
+
+<pre>
+def average_of_three(v1 real, v2 real, v3 real) real:
+    return (v1 + v2 + v3) / 3.0;
+</pre>
+
+<p>Note that types go <i>after</i> their variables and not before.  The
+<tt>return</tt> statement is used to specify the return value of a function
+and return control back to the caller.</p>
+
+<p>Functions are called similarly to how they are in most programming
+languages, with the values of parameters passed in at the call.  The
+<tt>average_of_three</tt> function above might be called as follows in
+main:</p>
+
+<pre>
+def main():
+    avg = average_of_three(4.5, 7.2, 6.3)
+    print(avg)
+</pre>
+
+
+
+
+<hr />
+<h3>Variables</h3>
+
+<p>If you look at the example call to <tt>average_of_three</tt> above, you will
+notice that there is no declaration of the type of the <tt>avg</tt> variable.
+Local variables (those which exist only inside of a function) do not need type
+declarations in Tetra, the compiler will figure out the type of each based on
+how the variable is used.  Only function parameters and return types need to be
+given values.</p>
+
+<p>Global variables can also be created, by using the <tt>global</tt> keyword,
+as shown in the following example:</p>
+
+<pre>
+global count = 0
+
+def increment():
+    count += 1
+
+def main( ):
+    increment()
+    increment()
+    increment()
+    print(count)
+</pre>
+
+<p>Of course global variables should be avoided in general!</p>
+
+<p>Tetra also allows constant variables to be created with the <tt>constant</tt>
+keyword:</p>
+
+<pre>
+constant PI = 3.141592653589
+</pre>
+
+<p>Notice that globals and constants also do not need type declarations.</p>
+
+
+
+
+<hr />
+<h3>Operators</h3>
+
+<p>Tetra supports many common operators.  The following chart shows the
+operators that Tetra supports organized by precedence levels, from highest
+precedence to lowest, along with the associativity:</p>
+
+<table cellpadding="5" border="1">
+<tr><td><b>Operator</b></td><td><b>Meaning</b></td><td><b>Associativity</b></td></tr>
+<tr><td>**</td><td>Exponentiation</td><td>Right</td></tr>
+<tr><td>+ - ~</td><td>Unary plus, unary minus, and unary bitwise not</td><td>Unary</td></tr>
+<tr><td>% / *</td><td>Modulus, division, multiplication</td><td>Left</td></tr>
+<tr><td>+ -</td><td>Addition and subtraction</td><td>Left</td></tr>
+<tr><td>&lt;&lt; &gt;&gt;</td><td>Bitwise left shift and right shift</td><td>Left</td></tr>
+<tr><td>&amp;</td><td>Bitwise and</td><td>Left</td></tr>
+<tr><td>^</td><td>Bitwise xor</td><td>Left</td></tr>
+<tr><td>&#124;</td><td>Bitwise or</td><td>Left</td></tr>
+<tr><td>&lt; &lt;= &gt; &gt;= == !=</td><td>Comparison operators</td><td>Left</td></tr>
+<tr><td>and</td><td>Logical and</td><td>Left</td></tr>
+<tr><td>or</td><td>Logical or</td><td>Left</td></tr>
+<tr><td>=</td><td>Assignment (including +=, -= etc)</td><td>Right</td></tr>
+</table>
+
+
+
+
+
+
+
+
+<hr />
+<h3>Selection Statements</h3>
+
+<p>Tetra provides the if, elif, else statements, which work similarly to other
+programming languages.  Below is a program which prints out whether a number is
+positive, negative, or zero:</p>
+
+<pre>
+def print_sign(val int):
+    if val &lt; 0:
+        print(val, " is negative")
+    elif val &gt; 0:
+        print(val, " is positive")
+    else:
+        print(val, " is zero")
+
+def main( ):
+    print("Enter a value: ")
+    val = read_int()
+    print_sign(val)
+</pre>
+
+<P>Notice that the keyword is <tt>elif</tt> all as one word, and not "else if".
+Also, notice that print can take multiple parameters, and that the
+<tt>read_int</tt> function can be used to read an int from the user.</p>
+
+
+
+
+
+<hr />
+<h3>Arrays</h3>
+
+<p>Arrays package together multiple variables of the same type, such that they
+can be accessed by an integer index.  Arrays are indexed by placing the index
+between square brackets after the name of the array.  The following example
+program counts the number of times a string appears in an array of strings:</p>
+
+<pre>
+def main( ):
+    numbers = [10, 20, 30]
+    total = numbers[0] + numbers[1] + numbers[2]
+    print(total)
+</pre>
+
+<p>Data type declarations, such as with function parameters, with arrays are
+done by placing the type of each element in brackets.  For example, the
+following function takes an array of numbers and returns whether or not
+the length of it is even:</p>
+
+<pre>
+def even_length(values [int]) bool:
+    if len(values) % 2 == 0:
+        return true
+    else:
+        return false
+</pre>
+
+<p>Multi-dimensional arrays can also be created.  In this case, you would simply
+increase the number of brackets in the type.  For example, a 2D array of reals
+would be declared as having type <tt>[[real]]</tt>.</p>
+
+
+
+
+
+
+<hr />
+<h3>Loops</h3>
+
+
+
+
+
+<hr />
+<h3>Parallel Execution</h3>
+
+
+
+
+
+<hr />
+<h3>Parallel Loops</h3>
+
+
+
+<hr />
+<h3>Background Execution</h3>
+
+
+
+
+<hr />
+<h3>Waiting</h3>
+
+
+
+
+
+
+
+<hr />
+<h3>Locks</h3>
+
+
+
+
+
+<hr />
+<h3>Tuples</h3>
+
+
+
+
+
+
+
+<hr />
+<h3>Maps</h3>
+
+
+
+
+
+
+
+<hr />
+<h3>Classes</h3>
+
+
+
+
+
+
+<hr />
+<h3>Modules</h3>
+
+
+
+
+
+
+<hr />
+<h3>Function Types</h3>
+
+
+
+
+
+
+
+<hr />
+<h3>Lambda Functions</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
