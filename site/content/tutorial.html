@@ -12,9 +12,14 @@ Tetra for experienced programmers.</p>
 which in Tetra can be written as:</p>
 
 <pre>
+# hello world example
 def main():
     print("Hello World!")
 </pre>
+
+<p>Comments in Tetra begin with the <tt>#</tt> character and continue to the
+end of the line.  The first line of this program is a comment, and the rest is
+the body of the program.</p>
 
 <p>Every Tetra program must contain a function called <tt>main</tt> which
 defines where the program begins executing.  Functions are defined with the
@@ -167,6 +172,9 @@ precedence to lowest, along with the associativity:</p>
 
 
 
+
+
+
 <hr />
 <h3>Selection Statements</h3>
 
@@ -193,6 +201,80 @@ def main( ):
 Also, notice that print can take multiple parameters, and that the
 <tt>read_int</tt> function can be used to read an int from the user.</p>
 
+
+
+<hr />
+<h3>While Loops</h3>
+
+<p>While loops are blocks of code that continue to execute while some condition
+is true.  For example, the following function returns the factorial of a number
+using a while loop:</p>
+
+<pre>
+def fact(x int) int:
+    result = 1
+    while x &gt; 0:
+        result *= x
+        x -= 1
+    return result
+</pre>
+
+<p>The while loop starts by evaluating its condition and, if true, executes the
+body of the loop.  It continues to do this until the condition is false at which
+point it will continue to the code after the loop.</p>
+
+
+
+
+
+<hr />
+<h3>Parallel Execution</h3>
+
+<p>Normally, Tetra functions are executed sequentially line by line, following
+the control flow as dictated by function calls and returns, loops, and selection
+statements.  However, we can also specify that statements should be executed
+in parallel.</p>
+
+<p>This is done using the <tt>parallel</tt> keyword, followed by a number of
+statements in the parallel block.  For example, this program calls the print
+function two times in parallel, and then calls it a third time:</p>
+
+<pre>
+def main():
+    parallel:
+        print("Print statement number 1!\n")
+        print("Print statement number 2!\n")
+    print("Print statement number 3!\n")
+</pre>
+
+<p>When this program is run, the two print statements will be executed at the
+same time.  This program may print the first two messages in any order.
+Sometimes the first message appears first, and other times the second one will
+appear first.  It is even possible that they will appear inter-leaved, with the
+beginning of one message, followed by the beginning of the other, followed by
+the ends of each of them</p>
+
+<p>Because the third print call is <i>outside</i> of the parallel block, it will
+not start executing until the other two have both completed.</p>
+
+<p>Of course normally we would only execute different pieces of code in parallel
+if they can be executed together in any order without changing the behavior of
+the program.  For example, we might call multiple functions in parallel to
+compute values which are independent of each other:</p>
+
+<pre>
+def main():
+    parallel:
+        result1 = process(data_set1)
+        result2 = process(data_set2)
+        result3 = process(data_set3)
+    display_results(result1, result2, result3)
+</pre>
+
+<p>Here, the three calls to a function called "process" will proceed in
+parallel independently of each other.  When all three have returned, the
+program will move past the parallel block to call the "display_results"
+function.</p>
 
 
 
@@ -230,26 +312,88 @@ increase the number of brackets in the type.  For example, a 2D array of reals
 would be declared as having type <tt>[[real]]</tt>.</p>
 
 
+<hr />
+<h3>For Loops</h3>
 
+<p>Arrays lead us naturally to the Tetra <tt>for</tt> loop which loop over each
+item in an array.  For example, the following function loops over the array it
+is given and prints each element:</p>
+
+<pre>
+def print_all(values [int]):
+    for value in values:
+        print(value, "\n")
+</pre>
+
+<p>This for loop assigns each element in the array that it is given to the loop
+variable one by one, then executes the loop body for that particular value.</p>
 
 
 
 <hr />
-<h3>Loops</h3>
+<h3>Parallel For Loops</h3>
+
+<p>We can also use the parallel for loop which is similar to the for loop as
+described above, except that it is preceded with the <tt>parallel</tt> keyword,
+and each of its loop iterations can be executed in parallel.</p>
+
+<p>If we make the for loop above into a parallel for loop, then the calls to
+print can be executed all at the same time and so can appear inter-leaved and
+in any order.  Calling the function with the values 1 through 100, as in this
+program:</p>
+
+<pre>
+def print_all(values [int]):
+    parallel for value in values:
+        print(value, "\n")
+
+def main():
+    print_all([1 ... 100])
+</pre>
+
+<p>Produces different results at each run.  The beginning of one run is shown
+below:</p>
+
+<pre>
+13
+4
+2
+6
+
+7
+8
+10
+11
+12
+91314
+
+15
+16
+</pre>
+
+<p>Notice that the results are not only out of order, but in this case
+inter-leaved since sometimes multiple numbers get printed back to back, and
+sometimes multiple new lines are printed back to back.</p>
+
+<p>We would only want to use parallel for loops when the order of the loop
+iterations is not important for the program to be correct.  As an example,
+suppose we are writing a function which takes an array of numbers and returns
+an array of those numbers squared.  Here, each of the elements can be computed
+independently, and so could be done with a parallel for loop:</p>
+
+<pre>
+def square_all(values [real]):
+    squares [real] = array(len(values))
+    i = 0
+    parallel for val in values:
+        squares[i] = val * val
+        i += 1
+    return squares
+</pre>
 
 
 
 
-
-<hr />
-<h3>Parallel Execution</h3>
-
-
-
-
-
-<hr />
-<h3>Parallel Loops</h3>
 
 
 
