@@ -28,7 +28,8 @@ div.logo {
     vertical-align: center;
 }
 
-div.logo a {
+div.logotext {
+    float: left;
     color: black;
 }
 div.menu {
