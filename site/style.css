@@ -24,12 +24,12 @@ div.topbar {
 }
 div.logo {
     float: left;
+    display: inline-block;
+    vertical-align: center;
 }
 
 div.logo a {
-    vertical-align: center;
     color: black;
-    font-size: 500%;
 }
 div.menu {
     float: right;
