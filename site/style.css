@@ -79,4 +79,11 @@ div.footer {
     font-size: 85%;
 }
 
+/* get rid of garish borders around images in IE */
+a, img {
+    border:none;
+    outline:none
+}
+
+
 
