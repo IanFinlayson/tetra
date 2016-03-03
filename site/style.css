@@ -24,6 +24,9 @@ div.topbar {
 }
 div.logo {
     float: left;
+    vertical-align: center;
+    color: black;
+    font-size: 200%;
 }
 div.menu {
     float: right;
