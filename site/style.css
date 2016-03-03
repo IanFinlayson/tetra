@@ -25,13 +25,6 @@ div.topbar {
 div.logo {
     float: left;
     display: inline-block;
-    vertical-align: top;
-}
-
-div.logotext {
-    float: left;
-    color: black;
-    vertical-align: top;
 }
 div.menu {
     float: right;
