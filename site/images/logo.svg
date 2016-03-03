@@ -10,15 +10,15 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="941.35999"
-   height="281"
+   width="360"
+   height="285"
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="logo-text.svg"
-   inkscape:export-filename="/home/finlayson/imgs/tetra/logo2"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90">
+   sodipodi:docname="logo.svg"
+   inkscape:export-filename="/home/finlayson/tetra/logos/logosss.png"
+   inkscape:export-xdpi="129.94"
+   inkscape:export-ydpi="129.94">
   <defs
      id="defs4">
     <linearGradient
@@ -37,18 +37,20 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.69999999"
-     inkscape:cx="540.35543"
-     inkscape:cy="235.69003"
+     inkscape:zoom="0.98994949"
+     inkscape:cx="101.12592"
+     inkscape:cy="151.11331"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:snap-global="false"
-     inkscape:window-width="1280"
-     inkscape:window-height="814"
-     inkscape:window-x="0"
-     inkscape:window-y="33"
-     inkscape:window-maximized="0">
+     inkscape:window-width="1230"
+     inkscape:window-height="616"
+     inkscape:window-x="16"
+     inkscape:window-y="94"
+     inkscape:window-maximized="0"
+     fit-margin-right="-4.9"
+     width="1259px">
     <inkscape:grid
        type="xygrid"
        id="grid5235"
@@ -65,7 +67,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -73,10 +75,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-771.36218)">
+     transform="translate(0,-767.36218)">
     <g
        id="g3344"
-       transform="matrix(-1,0,0,1,386.41161,259.99984)">
+       transform="matrix(-1,0,0,1,390.2683,257.42857)">
       <rect
          transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,0,0)"
          y="483.41736"
@@ -126,16 +128,5 @@
          id="rect3773-1"
          style="fill:#227814;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.22530425px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1" />
     </g>
-    <text
-       xml:space="preserve"
-       style="font-size:237.5px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:Fira Sans;-inkscape-font-specification:Fira Sans"
-       x="386.14331"
-       y="983.79059"
-       id="text3349"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3351"
-         x="386.14331"
-         y="983.79059">tetra</tspan></text>
   </g>
 </svg>
