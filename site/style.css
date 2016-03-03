@@ -2,13 +2,13 @@
 
 /* font choices */
 body {
-    font-family: 'Droid Sans', monospace;
+    font-family: 'Droid Sans', sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Oxygen', 'Droid Serif', monospace;
+    font-family: 'Droid Serif', serif;
 }
 pre {
-    font-family: 'Droid Sans Mono', serif;
+    font-family: 'Droid Sans Mono', monospace;
 }
 
 /* make body take up less space */
