@@ -8,8 +8,8 @@ Tetra for experienced programmers.</p>
 <hr />
 <h3>Hello World</h3>
 
-<p>By law and custom, we will begin with the "Hello world" program
-which in Tetra can be written as:</p>
+<p>By law and custom, we will begin with the "Hello world" program which in
+Tetra can be written as:</p>
 
 <pre>
 # hello world example
@@ -36,9 +36,9 @@ string "Hello World!" into it to print it to the screen.</p>
 <hr />
 <h3>Simple Types</h3>
 
-<p>Tetra contains four simple types.  Each of these is indivisible, but
-can be combined up in arrays, maps, classes etc. as discussed later on.
-The simple types are:</p>
+<p>Tetra contains six simple types.  Each of these is indivisible, but can be
+combined up in arrays, maps, classes etc. as discussed later on.  The simple
+types are:</p>
 
 <ul>
 <li><p><b>int</b></p><p>
@@ -59,6 +59,21 @@ false.
 <li><p><b>string</b></p><p>
 A string is a piece of text.  Strings are stored as a sequence of Unicode
 characters.
+
+
+</p></li>
+<li><p><b>task</b></p><p>
+A task is an executing thread of execution.  We can wait for a task to complete
+as described under the background execution section.
+
+
+</p></li>
+<li><p><b>lock</b></p><p>
+A lock is used to coordinate between multiple parallel tasks.  We can use them
+to prevent threads from interfering with each other as described in the section
+on locks.
+
+
 
 </p></li></ul>
 
@@ -85,8 +100,8 @@ def average_of_three(v1 real, v2 real, v3 real) real:
 </pre>
 
 <p>Note that types go <i>after</i> their variables and not before.  The
-<tt>return</tt> statement is used to specify the return value of a function
-and return control back to the caller.</p>
+<tt>return</tt> statement is used to specify the return value of a function and
+return control back to the caller.</p>
 
 <p>Functions are called similarly to how they are in most programming
 languages, with the values of parameters passed in at the call.  The
@@ -130,8 +145,8 @@ def main( ):
 
 <p>Of course global variables should be avoided in general!</p>
 
-<p>Tetra also allows constant variables to be created with the <tt>constant</tt>
-keyword:</p>
+<p>Tetra also allows constant variables to be created with the
+<tt>constant</tt> keyword:</p>
 
 <pre>
 constant PI = 3.141592653589
@@ -220,8 +235,8 @@ def fact(x int) int:
 </pre>
 
 <p>The while loop starts by evaluating its condition and, if true, executes the
-body of the loop.  It continues to do this until the condition is false at which
-point it will continue to the code after the loop.</p>
+body of the loop.  It continues to do this until the condition is false at
+which point it will continue to the code after the loop.</p>
 
 
 
@@ -231,9 +246,9 @@ point it will continue to the code after the loop.</p>
 <h3>Parallel Execution</h3>
 
 <p>Normally, Tetra functions are executed sequentially line by line, following
-the control flow as dictated by function calls and returns, loops, and selection
-statements.  However, we can also specify that statements should be executed
-in parallel.</p>
+the control flow as dictated by function calls and returns, loops, and
+selection statements.  However, we can also specify that statements should be
+executed in parallel.</p>
 
 <p>This is done using the <tt>parallel</tt> keyword, followed by a number of
 statements in the parallel block.  For example, this program calls the print
@@ -254,13 +269,13 @@ appear first.  It is even possible that they will appear inter-leaved, with the
 beginning of one message, followed by the beginning of the other, followed by
 the ends of each of them</p>
 
-<p>Because the third print call is <i>outside</i> of the parallel block, it will
-not start executing until the other two have both completed.</p>
+<p>Because the third print call is <i>outside</i> of the parallel block, it
+will not start executing until the other two have both completed.</p>
 
-<p>Of course normally we would only execute different pieces of code in parallel
-if they can be executed together in any order without changing the behavior of
-the program.  For example, we might call multiple functions in parallel to
-compute values which are independent of each other:</p>
+<p>Of course normally we would only execute different pieces of code in
+parallel if they can be executed together in any order without changing the
+behavior of the program.  For example, we might call multiple functions in
+parallel to compute values which are independent of each other:</p>
 
 <pre>
 def main():
@@ -276,6 +291,28 @@ parallel independently of each other.  When all three have returned, the
 program will move past the parallel block to call the "display_results"
 function.</p>
 
+<p>Note that the parallel works with <i>statements</i>.  Often the statements
+will be function calls, but they do not have to be.  We could run two while
+loops in parallel for instance:</p>
+
+<pre>
+def main():
+    i = 1
+    j = 1
+    sum = 0
+    product = 1
+    parallel:
+        while i &lt; 10:
+            sum += i
+            i += 1
+        while j &lt; 10:
+            product *= j
+            j += 1
+</pre>
+
+<p>Here, the two while loops are executed in two parallel threads.  Each while
+loop itself is implemented sequentially, so this program will compute the sum
+and product of the numbers 1-10 in two parallel loops.</p>
 
 
 
@@ -296,8 +333,8 @@ def main( ):
 
 <p>Data type declarations, such as with function parameters, with arrays are
 done by placing the type of each element in brackets.  For example, the
-following function takes an array of numbers and returns whether or not
-the length of it is even:</p>
+following function takes an array of numbers and returns whether or not the
+length of it is even:</p>
 
 <pre>
 def even_length(values [int]) bool:
@@ -307,9 +344,9 @@ def even_length(values [int]) bool:
         return false
 </pre>
 
-<p>Multi-dimensional arrays can also be created.  In this case, you would simply
-increase the number of brackets in the type.  For example, a 2D array of reals
-would be declared as having type <tt>[[real]]</tt>.</p>
+<p>Multi-dimensional arrays can also be created.  In this case, you would
+simply increase the number of brackets in the type.  For example, a 2D array of
+reals would be declared as having type <tt>[[real]]</tt>.</p>
 
 
 <hr />
@@ -391,7 +428,7 @@ def square_all(values [real]):
     return squares
 </pre>
 
-
+<p>The <tt>array</tt> function creates an array of a given size.</p>
 
 
 
@@ -400,13 +437,73 @@ def square_all(values [real]):
 <hr />
 <h3>Background Execution</h3>
 
+<p>The <tt>parallel</tt> keyword can be used to launch multiple statements at
+the same time, which allows the original thread to launch multiple tasks at
+once, and pause until they are done.</p>
 
+<p>Something else we might want to do is have a thread launch one task which
+begins executing, but the returns control back to the original thread
+immediately.  For instance, we may want to launch a long-running task, but not
+wait for it to finish immediately so we can move on to other things, such as
+handling user input.</p>
+
+<p>This can be done with Tetra using the <tt>background</tt> statement.  The
+following program shows how this may be done to write a simple server type of
+program:</p>
+
+<pre>
+def main():
+    while true:
+        request = wait_for_request()
+        background:
+            print("Handling a request!")
+            handle_request(request)
+</pre>
+
+<p>This program uses a background block to handle each request it receives in a
+separate thread of execution.  After the wait_for_request function returns, the
+program will launch a thread to handle the background block's body, and then
+immediately call wait_for_request again.</p>
+
+<p>Note that the two statements inside the background block are executed
+serially: first the print will execute and then the handle_request function
+will be called.</p>
 
 
 <hr />
 <h3>Waiting</h3>
 
+<p>Sometimes we may want to launch a thread in the background, but then wait
+for it to finish executing at some later point in time.  For instance, suppose
+we are writing a program which needs to download some data for use, but that it
+can start the download before it really needs the data.  We can use a
+background block with <tt>wait</tt> statement to implement this:</p>
 
+<pre>
+def main():
+    background download_task:
+        data = download_data()
+
+    # do other things that don't need the data
+    # ...
+    
+    wait download_task
+
+    # now we use the data we got
+</pre>
+
+<p>Here we have given the background block a name, "download_task".  After
+launching the task in the background, we can carry on doing things which don't
+require the data.  Once we <i>do</i> need the data, we wait for it with the
+<tt>wait</tt> statement which takes the task we wish to wait for.</p>
+
+<p>If the task has finished already, the wait statement takes no time at all.
+If it hasn't finished, it will not complete until the task we're waiting for
+has completed.</p>
+
+<p>The named background statement creates a variable of type <tt>task</tt>
+which is first class data type in Tetra.  This means we can return tasks from
+functions, put them in data structures etc.</p>
 
 
 
@@ -415,7 +512,101 @@ def square_all(values [real]):
 <hr />
 <h3>Locks</h3>
 
+<p>Sometimes when we have parallel code, we will need to prevent the threads
+from interfering with each other.  For instance, if we are trying to find the
+largest value in an array, we may keep track of the largest value we have seen
+so far:</p>
 
+<pre>
+# find the max of an array
+def max(nums [int]) int:
+    largest = 0
+    parallel for num in nums:
+        if num &gt; largest:
+            largest = num
+    return largest
+</pre>
+
+<p>However, this program may produce the wrong answer because two threads may
+execute the if condition at the same time, and both may find they have a value
+which is larger than then current largest.  We would then have a situation
+where only one of the threads actually writes its value, meaning one will be
+lost, which may in fact have been the maximum.</p>
+
+<p>To get around this, we put a lock statement around the code which updates
+the largest:</p>
+
+<pre>
+# find the max of an array
+def max(nums [int]) int:
+    largest = 0
+    parallel for num in nums:
+        if num &gt; largest:
+            lock:
+                if num &gt; largest:
+                    largest = num
+    return largest
+</pre>
+
+<p>The lock statement creates a block of code which only one thread can enter
+at a time.  Now, all of the threads can check if their value is larger than the
+current largest, in parallel.  Once one finds that its value is in fact larger,
+it tries to enter the block of code under the lock.  If another thread is
+already in the block, the thread waits until it has finished before entering.
+The thread then checks if its value is <i>still</i> larger than the current
+largest (because it's possible a thread which just left the lock has modified
+it since the last check) and then overwrites the largest variable.</p>
+
+<p>The lock statement allows creating sections of our program which only one
+thread can enter at a time which is often necessary when writing parallel
+code.</P>
+
+
+
+<hr />
+<h3>Named Locks</h3>
+
+<p>Sometimes it is necessary to have multiple sections of code which are locked
+together.  For instance if we have a variable or resource that is being
+accessed at multiple points in the program, we would want to have those locks
+linked together, such that no more than one thread can be in <i>any</i> of
+those sections at a time.</p>
+
+<p>For instance the following program uses a global lock variable to prevent
+two functions from over-writing the "negatives" value at the same time:</p>
+
+<pre>
+def main():
+    negatives = 0
+
+    parallel:
+        for i in data1:
+            if i &lt; 0:
+                lock neg_lock:
+                    negatives += 1
+        for i in data2:
+            if i &lt; 0:
+                lock neg_lock:
+                    negatives += 1
+    print("There were ", negatives, " negative values.")
+</pre>
+
+<p>In this example, we are checking two sets of values for negative numbers in
+parallel.  We have to protect the negatives variable, but it is accessed in two
+distinct places in the code.  The fact that the locks are both named "neg_lock"
+ensures that they are linked together.  Only one thread can be in <i>either</i>
+block at the same time.</p>
+
+<p>The named lock statement actually creates a variable of the <tt>lock</tt>
+type. FUCK same keyword
+
+
+
+<p>For instance, if we want to ensure that our output is never inter-leaved, we
+will need to prevent multiple calls to print at the same time.  We can't do this
+with the simple lock as shown above because that creates an independent locked
+section.  Instead we can create named locks which are linked together by their
+name.</p>
 
 
 
