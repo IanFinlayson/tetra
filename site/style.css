@@ -85,21 +85,3 @@ a, img {
     outline:none
 }
 
-
-tetra_val {
-    color: red;
-}
-tetra_bracket {
-    color: purple;
-}
-tetra_var {
-    color: orange;
-}
-tetra_op {
-    color: green;
-}
-tetra_key {
-    color: blue;
-}
-
-
