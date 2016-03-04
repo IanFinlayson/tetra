@@ -68,10 +68,10 @@ as described under the background execution section.
 
 
 </p></li>
-<li><p><b>lock</b></p><p>
-A lock is used to coordinate between multiple parallel tasks.  We can use them
+<li><p><b>mutex</b></p><p>
+A mutex is used to coordinate between multiple parallel tasks.  We can use them
 to prevent threads from interfering with each other as described in the section
-on locks.
+on locks.  mutex stands for "mutual exclusion".
 
 
 
@@ -127,6 +127,26 @@ declarations in Tetra, the compiler will figure out the type of each based on
 how the variable is used.  Only function parameters and return types need to be
 given values.</p>
 
+<p>We can declare the type of local variables.  Sometimes this is needed, for
+example if we want to create a variable, but don't want to give it an initial
+value, we would need to declare the type:</p>
+
+<pre>
+# Tetra will figure out the type
+value1 = 5
+
+# we tell Tetra the type
+value2 int
+</pre>
+
+<p>We can also declare multiple variables of the same type in one line:</p>
+
+<pre>
+x, y, z real
+</pre>
+
+
+
 <p>Global variables can also be created, by using the <tt>global</tt> keyword,
 as shown in the following example:</p>
 
@@ -155,6 +175,8 @@ constant PI = 3.141592653589
 <p>Notice that globals and constants also do not need type declarations.</p>
 
 
+<p>When declaring variables, we can 
+
 
 
 <hr />
@@ -179,8 +201,6 @@ precedence to lowest, along with the associativity:</p>
 <tr><td>or</td><td>Logical or</td><td>Left</td></tr>
 <tr><td>=</td><td>Assignment (including +=, -= etc)</td><td>Right</td></tr>
 </table>
-
-
 
 
 
@@ -218,6 +238,8 @@ Also, notice that print can take multiple parameters, and that the
 
 
 
+
+
 <hr />
 <h3>While Loops</h3>
 
@@ -238,6 +260,11 @@ def fact(x int) int:
 body of the loop.  It continues to do this until the condition is false at
 which point it will continue to the code after the loop.</p>
 
+
+<p>Tetra also includes the <tt>break</tt> keyword, which causes a loop to
+immediately exit, the <tt>continue</tt> keyword, which causes a loop to abort
+the current iteration and move on to the next one, and the <tt>pass</tt>
+keyword which has no effect but can be used where a statement is needed.</p>
 
 
 
@@ -349,6 +376,7 @@ simply increase the number of brackets in the type.  For example, a 2D array of
 reals would be declared as having type <tt>[[real]]</tt>.</p>
 
 
+
 <hr />
 <h3>For Loops</h3>
 
@@ -364,6 +392,8 @@ def print_all(values [int]):
 
 <p>This for loop assigns each element in the array that it is given to the loop
 variable one by one, then executes the loop body for that particular value.</p>
+
+
 
 
 
@@ -468,6 +498,7 @@ immediately call wait_for_request again.</p>
 <p>Note that the two statements inside the background block are executed
 serially: first the print will execute and then the handle_request function
 will be called.</p>
+
 
 
 <hr />
@@ -597,22 +628,102 @@ distinct places in the code.  The fact that the locks are both named "neg_lock"
 ensures that they are linked together.  Only one thread can be in <i>either</i>
 block at the same time.</p>
 
-<p>The named lock statement actually creates a variable of the <tt>lock</tt>
-type. FUCK same keyword
+<p>The named lock statement actually creates a variable of the <tt>mutex</tt>
+type.  We can lock an existing mutex variable which has been declared elsewhere.
+For instance the following program uses a global mutex to allow two separate
+functions to make sure that they call print separately to avoid the issue of
+inter-leaved output:
+
+<pre>
+global print_lock mutex
+
+def f1():
+    # ...
+    lock print_lock:
+        print("Function 1 says hi!")
+    # ...
+
+def f2():
+    # ...
+    lock print_lock:
+        print("Function 2 says hi!")
+    # ...
+</pre>
 
 
-
-<p>For instance, if we want to ensure that our output is never inter-leaved, we
-will need to prevent multiple calls to print at the same time.  We can't do this
-with the simple lock as shown above because that creates an independent locked
-section.  Instead we can create named locks which are linked together by their
-name.</p>
 
 
 
 <hr />
 <h3>Tuples</h3>
 
+<p>In addition to arrays, Tetra includes a tuple type which can also group
+multiple pieces of data together.  Unlike an array, a tuple can contain elements
+of different types.  For example, we cannot store an int and a string together
+in an array, but we can in a tuple.</p>
+
+<p>Another difference between arrays and tuples is that arrays of any length
+can be passed into a function, defined as variables etc. while tuples have the
+number (and type) of their elements fixed as part of their type.  For instance,
+we can write a function which takes an array of strings of any size, but a
+function which takes a tuple must specify its length.</p>
+
+<p>Below we have a function which takes a tuple containing a string and an int,
+and then call it in main:</p>
+
+<pre>
+def print_info(info (string, int)):
+    print("Name is ", info[0])
+    print("Age is ", info[1])
+
+def main():
+    info = ("Bob", 42)
+    print_info(info)
+</pre>
+
+<p>Notice that parentheses are used to declare the type of a tuple, and also
+to give the value of one.</p>
+
+<p>Tuples can also be returned from a function which allows functions to
+effectively have multiple return values.  The following function returns a tuple
+of two real values representing the roots of a quadratic function, and also a
+bool which indicates if the results are valid (e.g. if the function has no
+real roots this will be false):</p>
+
+<pre>
+def roots(a real, b real, c real) (real, real, bool):
+    rad = b*b - 4*a*c
+    if rad &lt; 0:
+        return (0.0, 0.0, false)
+    else:
+        return ((-b + sqrt(rad)) / 2*a, (-b - sqrt(rad)) / 2*a, true)
+</pre>
+
+<p>When calling this function, we can put the results into a tuple as
+follows:</p>
+
+<pre>
+def main():
+    results = roots(1, 0, -16)
+
+    if results[2]:
+        print("Roots are ", results[0], " and ", results[1])
+    else:
+        print("No real roots!")
+</pre>
+
+<p>However, we can "unpack" the tuple right away by assigning the result of the
+function call into separate variables:</p>
+
+<pre>
+def main():
+    root1, root2, valid = roots(1, 0, -16)
+
+    if valid:
+        print("Roots are ", root1, " and ", root2)
+    else:
+        print("No real roots!")
+</pre>
 
 
 
@@ -622,8 +733,46 @@ name.</p>
 <hr />
 <h3>Maps</h3>
 
+<p>The last built in data structure in Tetra is the map, which other languages
+call associative arrays, hashes or dictionaries.</p>
 
+<p>Maps in Tetra create a map from one set of values (the keys) to another set
+(the values).  For example, the following program creates a phone book which
+maps names to phone numbers:</p>
 
+<pre>
+def main():
+    phone_book = {"alice" : "555-5555", "bob" : "123-4567", "claire" : "765-4321"}
+</pre>
+
+<p>The curly braces contain all elements in the map.  Each element contains the
+key (on the left of the colon) and the value (on the right of the colon).  The
+elements are separated by commas.</p>
+
+<p>To access the elements of a map, we place the key we want to look up inside
+of brackets:</p>
+
+<pre>
+def main():
+    phone_book = {"Alice" : "555-5555", "Bob" : "123-4567", "Claire" : "765-4321"}
+    print("Bob's phone number is ", phone_book["Bob"]
+</pre>
+
+<p>When declaring the type of a map, such as in a function parameter or return
+type declaration, we place the key type and the value type inside of curly
+braces, separated by a colon.  For instance, the following function takes a map
+from string to int as a parameter which represents the ages of a group of
+people and prints them out:</p>
+
+<pre>
+def function(ages {string:int}):
+    for person in keys(ages):
+        print(person, " is ", ages[person], " years old.")
+</pre>
+
+<p>This function uses the <tt>keys</tt> function which returns an array of all
+of the keys in a map.  This can be used to loop over all of the elements in a
+map.</p>
 
 
 
@@ -631,6 +780,98 @@ name.</p>
 <hr />
 <h3>Classes</h3>
 
+<p>Classes in Tetra are created with the class keyword, followed by the name of
+the class followed by a colon.  Classes can contain variable declarations.
+These declarations must have a type declaration, and cannot be given a
+value.</P>
+
+<p>Class blocks can contain also function definitions, which are just like
+regular functions except they can reference any variables declared inside of
+the class.</p>
+
+<p>For example, the following class represents a square:</p>
+
+<pre>
+class Square:
+    # the size of the square
+    size real
+
+    # member function to compute the area
+    def area():
+        return s ** 2
+</pre>
+
+<p>We can create a Square object by using the name of class as if it were a
+function which returns an object of that class:</p>
+
+<pre>
+def main():
+    s = Square()
+    s.size = 5.0
+    print("Size = ", s.area())
+</pre>
+
+
+<hr />
+<h3>Constructors</h3>
+
+<p>Constructors are functions included in a class with the name
+<tt>construct</tt> which allow class objects to be initialized based on certain
+parameters.  For instance, we may want to allow the user to pass in the size of
+a square when they create one:</p>
+
+<pre>
+class Square:
+    # the size of the square
+    size real
+
+    # a constructor
+    def construct(size real):
+        self.size = size
+
+    # member function to compute the area
+    def area():
+        return s ** 2
+</pre>
+
+<p>Notice that the construct function uses the <tt>self</tt> keyword to specify
+the size belonging to the object as opposed to the local parameter called
+size.</p>
+
+<p>When creating a square object now, we must pass in the size:</p>
+
+<pre>
+def main():
+    s = Square(5.0)
+    print("Size = ", s.area())
+</pre>
+
+<p>If any constructors are defined, we must call one of them.  With the class
+definition above, we would not be able to forgo supplying the size.  We can
+however have multiple constructors with different parameter lists.  Below we
+add in a constructor which takes no parameters:</p>
+
+<pre>
+class Square:
+    # the size of the square
+    size real
+
+    # a constructor with a real parameter
+    def construct(size real):
+        self.size = size
+
+    # a constructor with no parameters
+    def construct():
+        self.size = 0.0
+
+    # member function to compute the area
+    def area():
+        return s ** 2
+</pre>
+
+<p>Tetra allows multiple functions with the same name in other contexts as well.
+We can have regular functions or class member functions with the same names as
+long as they have different parameter lists.</p>
 
 
 
@@ -639,7 +880,73 @@ name.</p>
 <hr />
 <h3>Modules</h3>
 
+<p>Modules in Tetra allow for packaging related code together.  Each module is
+a separate Tetra file.  All code in a module can access the rest of the code in
+that same module transparently.  For instance the programs above are each
+assumed to be in the same file, so the main functions can call the other
+functions in that same file (module) just by name.</p>
 
+<p>We can also write code which accessed code in other modules, but must do so
+explicitly.  This is done with either the <tt>import</tt> or <tt>open</tt>
+keyword.  Each statement is given a module name.  For instance, if we have a
+file called "fact.ttr" which contains the following code:</p>
+
+<pre>
+# fact.ttr
+
+def factorial(x int):
+    if x == 0:
+        return 1
+    else
+        return x * fact(x - 1)
+</pre>
+
+<p>Then we can access this function from another file called "program.ttr"
+which contains a main function using import:</p>
+
+<pre>
+# program.ttr
+
+import fact
+
+def main():
+    value = fact.factorial(5)
+    print("5! = ", value)
+</pre>
+
+<p>The import statement will fail if the fact.ttr file can not be found, but if
+it is found, then all definitions in that file are available.  To access them,
+we prefix the reference with the name of the module, as seen above.</p>
+
+<p>The open statement is similar except that it does not require the references
+to be prefaced with the name of the module.  We could write the program.ttr
+file as follows instead:</p>
+
+
+<pre>
+# program.ttr
+
+open fact
+
+def main():
+    value = factorial(5)
+    print("5! = ", value)
+</pre>
+
+<p>We can now call the factorial function directly.  open can be used when there
+are no naming conflicts amongst the file(s) being opened, whereas import avoids
+any naming conflicts.</p>
+
+<p>When using import or open, Tetra will search in the TETRAPATH environment
+variable which should include the Tetra standard library location and also the
+current directory, but can include other directories as well.</p>
+
+<p>All Tetra modules can have a main function which is never included when that
+module is imported or opened.  The main function is only used when a module is
+executed directly.  For example, we could add a main function to the fact.ttr
+file which tests out the factorial function.  To test the module, we can run it
+directly.  When importing the module, the main is not used and does not conflict
+with a main function in the file which is importing fact.</p>
 
 
 
@@ -647,7 +954,38 @@ name.</p>
 <hr />
 <h3>Function Types</h3>
 
+<p>Tetra also has first-class functions which means that functions can be
+passed to and from other functions, stored in variables and data structures
+etc.  When declaring a function type, the parameter types are listed in
+parentheses, followed by the <tt>-&gt;</tt> symbol, followed by the return type
+of the function.</p>
 
+<p>The following example shows how a function in Tetra can be written which
+takes a function as a parameter.  This is done to implement the "reduce" function
+of "map reduce" fame:</p>
+
+<pre>
+def add(a int, b int) int:
+    return a + b
+
+def mult(a int, b int) int:
+    return a * b
+
+def reduce(data [int], initial int, f (int, int) -&gt; int)) int:
+    result = initial
+    for d in data:
+        result = f(result, d)
+    return result
+
+def main():
+    data = [1 .. 10]
+
+    # calculate the sum
+    sum = reduce(data, 0, add)
+
+    # calculate the product
+    product = reduce(data, 1, mult)
+</pre>
 
 
 
@@ -656,10 +994,28 @@ name.</p>
 <hr />
 <h3>Lambda Functions</h3>
 
+<p>Tetra supports lambda functions which are functions created anonymously
+inside of an expression.  This can be done to avoid having to define very small
+functions.  For instance, we could use a lambda to specify the addition and
+multiplication functions directly in the call to reduce:</p>
 
+<pre>
+def main():
+    data = [1 .. 10]
 
+    # calculate the sum
+    sum = reduce(data, 0, lambda a int, b int: a + b)
 
+    # calculate the product
+    product = reduce(data, 1, lambda a int, b int: a * b)
+</pre>
 
+<p>The syntax for a lambda function is shown above.  It begins with the lambda
+keyword, followed by the parameter list, then a colon, and then the function
+expression.</p>
+
+<p>Lambda functions cannot contain statements or span multiple lines.  If a
+larger or more complex function is needed, you must use <tt>def</tt>.</p>
 
 
 
