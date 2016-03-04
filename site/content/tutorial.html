@@ -12,9 +12,11 @@ Tetra for experienced programmers.</p>
 Tetra can be written as:</p>
 
 <pre>
+<code>
 # hello world example
 def main():
     print("Hello World!")
+</code>
 </pre>
 
 <p>Comments in Tetra begin with the <tt>#</tt> character and continue to the
@@ -218,6 +220,7 @@ programming languages.  Below is a program which prints out whether a number is
 positive, negative, or zero:</p>
 
 <pre>
+<code>
 def print_sign(val int):
     if val &lt; 0:
         print(val, " is negative")
@@ -230,6 +233,7 @@ def main( ):
     print("Enter a value: ")
     val = read_int()
     print_sign(val)
+</code>
 </pre>
 
 <P>Notice that the keyword is <tt>elif</tt> all as one word, and not "else if".
@@ -1000,6 +1004,7 @@ functions.  For instance, we could use a lambda to specify the addition and
 multiplication functions directly in the call to reduce:</p>
 
 <pre>
+<code>
 def main():
     data = [1 .. 10]
 
@@ -1008,6 +1013,7 @@ def main():
 
     # calculate the product
     product = reduce(data, 1, lambda a int, b int: a * b)
+</code>
 </pre>
 
 <p>The syntax for a lambda function is shown above.  It begins with the lambda
