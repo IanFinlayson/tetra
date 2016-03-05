@@ -13,6 +13,7 @@ function applySyntax() {
         var text = node.textContent;
         highlighted = text.replace(/def/g, "heyoo");
         snippet.innerHTML = highlighted;
+        alert(highlighted);
     }
 }
 
