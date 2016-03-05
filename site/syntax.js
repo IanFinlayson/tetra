@@ -10,10 +10,10 @@ function applySyntax() {
 
     /* highlight each one */
     for (snippet in snippets) {
-        //var text = node.textContent;
-        alert("hi");
-        //highlighted = text.replace(/def/g, "heyoo");
-        //snippet.innerHTML = highlighted;
+        var text = snippet.textContent;
+        //alert(text);
+        highlighted = text.replace(/def/g, "heyoo");
+        snippet.innerHTML = highlighted;
         //alert(highlighted);
     }
 }
