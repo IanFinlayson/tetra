@@ -10,7 +10,9 @@ function applySyntax() {
 
     /* highlight each one */
     for (snippet in snippets) {
-        alert(snippet);
+        var text = node.textContent;
+        highlighted = text.replace(/def/g, heyoo);
+        snippet.innerHTML = highlighted;
     }
 }
 
