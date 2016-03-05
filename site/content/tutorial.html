@@ -12,9 +12,11 @@ Tetra for experienced programmers.</p>
 Tetra can be written as:</p>
 
 <pre>
+<code class="tetra">
 # hello world example
 def main():
     print("Hello World!")
+</code>
 </pre>
 
 <p>Comments in Tetra begin with the <tt>#</tt> character and continue to the
@@ -95,8 +97,10 @@ colon.</p>
 <p>Below is a function which computes the average of three parameters:</p>
 
 <pre>
+<code class="tetra">
 def average_of_three(v1 real, v2 real, v3 real) real:
     return (v1 + v2 + v3) / 3.0;
+</code>
 </pre>
 
 <p>Note that types go <i>after</i> their variables and not before.  The
@@ -109,9 +113,11 @@ languages, with the values of parameters passed in at the call.  The
 main:</p>
 
 <pre>
+<code class="tetra">
 def main():
     avg = average_of_three(4.5, 7.2, 6.3)
     print(avg)
+</code>
 </pre>
 
 
@@ -132,17 +138,21 @@ example if we want to create a variable, but don't want to give it an initial
 value, we would need to declare the type:</p>
 
 <pre>
+<code class="tetra">
 # Tetra will figure out the type
 value1 = 5
 
 # we tell Tetra the type
 value2 int
+</code>
 </pre>
 
 <p>We can also declare multiple variables of the same type in one line:</p>
 
 <pre>
+<code class="tetra">
 x, y, z real
+</code>
 </pre>
 
 
@@ -151,6 +161,7 @@ x, y, z real
 as shown in the following example:</p>
 
 <pre>
+<code class="tetra">
 global count = 0
 
 def increment():
@@ -161,6 +172,7 @@ def main( ):
     increment()
     increment()
     print(count)
+</code>
 </pre>
 
 <p>Of course global variables should be avoided in general!</p>
@@ -169,7 +181,9 @@ def main( ):
 <tt>constant</tt> keyword:</p>
 
 <pre>
+<code class="tetra">
 constant PI = 3.141592653589
+</code>
 </pre>
 
 <p>Notice that globals and constants also do not need type declarations.</p>
@@ -218,6 +232,7 @@ programming languages.  Below is a program which prints out whether a number is
 positive, negative, or zero:</p>
 
 <pre>
+<code class="tetra">
 def print_sign(val int):
     if val &lt; 0:
         print(val, " is negative")
@@ -230,6 +245,7 @@ def main( ):
     print("Enter a value: ")
     val = read_int()
     print_sign(val)
+</code>
 </pre>
 
 <P>Notice that the keyword is <tt>elif</tt> all as one word, and not "else if".
@@ -248,12 +264,14 @@ is true.  For example, the following function returns the factorial of a number
 using a while loop:</p>
 
 <pre>
+<code class="tetra">
 def fact(x int) int:
     result = 1
     while x &gt; 0:
         result *= x
         x -= 1
     return result
+</code>
 </pre>
 
 <p>The while loop starts by evaluating its condition and, if true, executes the
@@ -282,11 +300,13 @@ statements in the parallel block.  For example, this program calls the print
 function two times in parallel, and then calls it a third time:</p>
 
 <pre>
+<code class="tetra">
 def main():
     parallel:
         print("Print statement number 1!\n")
         print("Print statement number 2!\n")
     print("Print statement number 3!\n")
+</code>
 </pre>
 
 <p>When this program is run, the two print statements will be executed at the
@@ -305,12 +325,14 @@ behavior of the program.  For example, we might call multiple functions in
 parallel to compute values which are independent of each other:</p>
 
 <pre>
+<code class="tetra">
 def main():
     parallel:
         result1 = process(data_set1)
         result2 = process(data_set2)
         result3 = process(data_set3)
     display_results(result1, result2, result3)
+</code>
 </pre>
 
 <p>Here, the three calls to a function called "process" will proceed in
@@ -323,6 +345,7 @@ will be function calls, but they do not have to be.  We could run two while
 loops in parallel for instance:</p>
 
 <pre>
+<code class="tetra">
 def main():
     i = 1
     j = 1
@@ -335,6 +358,7 @@ def main():
         while j &lt; 10:
             product *= j
             j += 1
+</code>
 </pre>
 
 <p>Here, the two while loops are executed in two parallel threads.  Each while
@@ -352,10 +376,12 @@ between square brackets after the name of the array.  The following example
 program counts the number of times a string appears in an array of strings:</p>
 
 <pre>
+<code class="tetra">
 def main( ):
     numbers = [10, 20, 30]
     total = numbers[0] + numbers[1] + numbers[2]
     print(total)
+</code>
 </pre>
 
 <p>Data type declarations, such as with function parameters, with arrays are
@@ -364,11 +390,13 @@ following function takes an array of numbers and returns whether or not the
 length of it is even:</p>
 
 <pre>
+<code class="tetra">
 def even_length(values [int]) bool:
     if len(values) % 2 == 0:
         return true
     else:
         return false
+</code>
 </pre>
 
 <p>Multi-dimensional arrays can also be created.  In this case, you would
@@ -385,9 +413,11 @@ item in an array.  For example, the following function loops over the array it
 is given and prints each element:</p>
 
 <pre>
+<code class="tetra">
 def print_all(values [int]):
     for value in values:
         print(value, "\n")
+</code>
 </pre>
 
 <p>This for loop assigns each element in the array that it is given to the loop
@@ -410,18 +440,21 @@ in any order.  Calling the function with the values 1 through 100, as in this
 program:</p>
 
 <pre>
+<code class="tetra">
 def print_all(values [int]):
     parallel for value in values:
         print(value, "\n")
 
 def main():
     print_all([1 ... 100])
+</code>
 </pre>
 
 <p>Produces different results at each run.  The beginning of one run is shown
 below:</p>
 
 <pre>
+<code class="tetra">
 13
 4
 2
@@ -436,6 +469,7 @@ below:</p>
 
 15
 16
+</code>
 </pre>
 
 <p>Notice that the results are not only out of order, but in this case
@@ -449,6 +483,7 @@ an array of those numbers squared.  Here, each of the elements can be computed
 independently, and so could be done with a parallel for loop:</p>
 
 <pre>
+<code class="tetra">
 def square_all(values [real]):
     squares [real] = array(len(values))
     i = 0
@@ -456,6 +491,7 @@ def square_all(values [real]):
         squares[i] = val * val
         i += 1
     return squares
+</code>
 </pre>
 
 <p>The <tt>array</tt> function creates an array of a given size.</p>
@@ -482,12 +518,14 @@ following program shows how this may be done to write a simple server type of
 program:</p>
 
 <pre>
+<code class="tetra">
 def main():
     while true:
         request = wait_for_request()
         background:
             print("Handling a request!")
             handle_request(request)
+</code>
 </pre>
 
 <p>This program uses a background block to handle each request it receives in a
@@ -511,6 +549,7 @@ can start the download before it really needs the data.  We can use a
 background block with <tt>wait</tt> statement to implement this:</p>
 
 <pre>
+<code class="tetra">
 def main():
     background download_task:
         data = download_data()
@@ -521,6 +560,7 @@ def main():
     wait download_task
 
     # now we use the data we got
+</code>
 </pre>
 
 <p>Here we have given the background block a name, "download_task".  After
@@ -549,6 +589,7 @@ largest value in an array, we may keep track of the largest value we have seen
 so far:</p>
 
 <pre>
+<code class="tetra">
 # find the max of an array
 def max(nums [int]) int:
     largest = 0
@@ -556,6 +597,7 @@ def max(nums [int]) int:
         if num &gt; largest:
             largest = num
     return largest
+</code>
 </pre>
 
 <p>However, this program may produce the wrong answer because two threads may
@@ -568,6 +610,7 @@ lost, which may in fact have been the maximum.</p>
 the largest:</p>
 
 <pre>
+<code class="tetra">
 # find the max of an array
 def max(nums [int]) int:
     largest = 0
@@ -577,6 +620,7 @@ def max(nums [int]) int:
                 if num &gt; largest:
                     largest = num
     return largest
+</code>
 </pre>
 
 <p>The lock statement creates a block of code which only one thread can enter
@@ -607,6 +651,7 @@ those sections at a time.</p>
 two functions from over-writing the "negatives" value at the same time:</p>
 
 <pre>
+<code class="tetra">
 def main():
     negatives = 0
 
@@ -620,6 +665,7 @@ def main():
                 lock neg_lock:
                     negatives += 1
     print("There were ", negatives, " negative values.")
+</code>
 </pre>
 
 <p>In this example, we are checking two sets of values for negative numbers in
@@ -635,6 +681,7 @@ functions to make sure that they call print separately to avoid the issue of
 inter-leaved output:
 
 <pre>
+<code class="tetra">
 global print_lock mutex
 
 def f1():
@@ -648,6 +695,7 @@ def f2():
     lock print_lock:
         print("Function 2 says hi!")
     # ...
+</code>
 </pre>
 
 
@@ -672,6 +720,7 @@ function which takes a tuple must specify its length.</p>
 and then call it in main:</p>
 
 <pre>
+<code class="tetra">
 def print_info(info (string, int)):
     print("Name is ", info[0])
     print("Age is ", info[1])
@@ -679,6 +728,7 @@ def print_info(info (string, int)):
 def main():
     info = ("Bob", 42)
     print_info(info)
+</code>
 </pre>
 
 <p>Notice that parentheses are used to declare the type of a tuple, and also
@@ -691,18 +741,21 @@ bool which indicates if the results are valid (e.g. if the function has no
 real roots this will be false):</p>
 
 <pre>
+<code class="tetra">
 def roots(a real, b real, c real) (real, real, bool):
     rad = b*b - 4*a*c
     if rad &lt; 0:
         return (0.0, 0.0, false)
     else:
         return ((-b + sqrt(rad)) / 2*a, (-b - sqrt(rad)) / 2*a, true)
+</code>
 </pre>
 
 <p>When calling this function, we can put the results into a tuple as
 follows:</p>
 
 <pre>
+<code class="tetra">
 def main():
     results = roots(1, 0, -16)
 
@@ -710,12 +763,14 @@ def main():
         print("Roots are ", results[0], " and ", results[1])
     else:
         print("No real roots!")
+</code>
 </pre>
 
 <p>However, we can "unpack" the tuple right away by assigning the result of the
 function call into separate variables:</p>
 
 <pre>
+<code class="tetra">
 def main():
     root1, root2, valid = roots(1, 0, -16)
 
@@ -723,6 +778,7 @@ def main():
         print("Roots are ", root1, " and ", root2)
     else:
         print("No real roots!")
+</code>
 </pre>
 
 
@@ -741,8 +797,10 @@ call associative arrays, hashes or dictionaries.</p>
 maps names to phone numbers:</p>
 
 <pre>
+<code class="tetra">
 def main():
     phone_book = {"alice" : "555-5555", "bob" : "123-4567", "claire" : "765-4321"}
+</code>
 </pre>
 
 <p>The curly braces contain all elements in the map.  Each element contains the
@@ -753,9 +811,11 @@ elements are separated by commas.</p>
 of brackets:</p>
 
 <pre>
+<code class="tetra">
 def main():
     phone_book = {"Alice" : "555-5555", "Bob" : "123-4567", "Claire" : "765-4321"}
     print("Bob's phone number is ", phone_book["Bob"]
+</code>
 </pre>
 
 <p>When declaring the type of a map, such as in a function parameter or return
@@ -765,9 +825,11 @@ from string to int as a parameter which represents the ages of a group of
 people and prints them out:</p>
 
 <pre>
+<code class="tetra">
 def function(ages {string:int}):
     for person in keys(ages):
         print(person, " is ", ages[person], " years old.")
+</code>
 </pre>
 
 <p>This function uses the <tt>keys</tt> function which returns an array of all
@@ -792,6 +854,7 @@ the class.</p>
 <p>For example, the following class represents a square:</p>
 
 <pre>
+<code class="tetra">
 class Square:
     # the size of the square
     size real
@@ -799,16 +862,19 @@ class Square:
     # member function to compute the area
     def area():
         return s ** 2
+</code>
 </pre>
 
 <p>We can create a Square object by using the name of class as if it were a
 function which returns an object of that class:</p>
 
 <pre>
+<code class="tetra">
 def main():
     s = Square()
     s.size = 5.0
     print("Size = ", s.area())
+</code>
 </pre>
 
 
@@ -821,6 +887,7 @@ parameters.  For instance, we may want to allow the user to pass in the size of
 a square when they create one:</p>
 
 <pre>
+<code class="tetra">
 class Square:
     # the size of the square
     size real
@@ -832,6 +899,7 @@ class Square:
     # member function to compute the area
     def area():
         return s ** 2
+</code>
 </pre>
 
 <p>Notice that the construct function uses the <tt>self</tt> keyword to specify
@@ -841,9 +909,11 @@ size.</p>
 <p>When creating a square object now, we must pass in the size:</p>
 
 <pre>
+<code class="tetra">
 def main():
     s = Square(5.0)
     print("Size = ", s.area())
+</code>
 </pre>
 
 <p>If any constructors are defined, we must call one of them.  With the class
@@ -852,6 +922,7 @@ however have multiple constructors with different parameter lists.  Below we
 add in a constructor which takes no parameters:</p>
 
 <pre>
+<code class="tetra">
 class Square:
     # the size of the square
     size real
@@ -867,6 +938,7 @@ class Square:
     # member function to compute the area
     def area():
         return s ** 2
+</code>
 </pre>
 
 <p>Tetra allows multiple functions with the same name in other contexts as well.
@@ -892,6 +964,7 @@ keyword.  Each statement is given a module name.  For instance, if we have a
 file called "fact.ttr" which contains the following code:</p>
 
 <pre>
+<code class="tetra">
 # fact.ttr
 
 def factorial(x int):
@@ -899,12 +972,14 @@ def factorial(x int):
         return 1
     else
         return x * fact(x - 1)
+</code>
 </pre>
 
 <p>Then we can access this function from another file called "program.ttr"
 which contains a main function using import:</p>
 
 <pre>
+<code class="tetra">
 # program.ttr
 
 import fact
@@ -912,6 +987,7 @@ import fact
 def main():
     value = fact.factorial(5)
     print("5! = ", value)
+</code>
 </pre>
 
 <p>The import statement will fail if the fact.ttr file can not be found, but if
@@ -924,6 +1000,7 @@ file as follows instead:</p>
 
 
 <pre>
+<code class="tetra">
 # program.ttr
 
 open fact
@@ -931,6 +1008,7 @@ open fact
 def main():
     value = factorial(5)
     print("5! = ", value)
+</code>
 </pre>
 
 <p>We can now call the factorial function directly.  open can be used when there
@@ -965,6 +1043,7 @@ takes a function as a parameter.  This is done to implement the "reduce" functio
 of "map reduce" fame:</p>
 
 <pre>
+<code class="tetra">
 def add(a int, b int) int:
     return a + b
 
@@ -985,6 +1064,7 @@ def main():
 
     # calculate the product
     product = reduce(data, 1, mult)
+</code>
 </pre>
 
 
@@ -1000,6 +1080,7 @@ functions.  For instance, we could use a lambda to specify the addition and
 multiplication functions directly in the call to reduce:</p>
 
 <pre>
+<code class="tetra">
 def main():
     data = [1 .. 10]
 
@@ -1008,6 +1089,7 @@ def main():
 
     # calculate the product
     product = reduce(data, 1, lambda a int, b int: a * b)
+</code>
 </pre>
 
 <p>The syntax for a lambda function is shown above.  It begins with the lambda
