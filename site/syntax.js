@@ -32,9 +32,7 @@ function applySyntax() {
             text = text.replace(re, "<span class=\"tetra-builtin\">$&</span>");
         }
         /* comments */
-        var retext = "#.*$";
-        var re = new RegExp(retext, "g");
-        text = text.replace(re, "<span class=\"tetra-comment\">$&</span>");
+        text = text.replace(/#.*$/g, "<span class=\"tetra-comment\">$&</span>");
 
 
         /* write it back */
