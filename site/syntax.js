@@ -21,7 +21,7 @@ function applySyntax() {
         }
 
         /* write it back */
-        snippets[i].textContent = text;
+        snippets[i].innerHTML = text;
     }
 }
 
