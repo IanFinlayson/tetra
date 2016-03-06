@@ -17,7 +17,7 @@ function applySyntax() {
         for (j = 0; j < keywords.length; j++) {
             var retext = "\\b" + keywords[j] + "\\b";
             var re = new RegExp(retext, "g");
-            text = text.replace(re, "-$&-");
+            text = text.replace(re, "<span class=\"tetra-key\">$&</span>");
         }
 
         /* write it back */
