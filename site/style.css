@@ -95,5 +95,9 @@ a, img {
 .tetra-builtin {
     color: purple;
 }
+.tetra-comment {
+    color: green;
+}
+
 
 

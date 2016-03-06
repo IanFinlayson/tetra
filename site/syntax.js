@@ -2,7 +2,7 @@
  * apply simple syntax highlighting to Tetra code
  */
 
-keywords = ["def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "construct"];
+keywords = ["def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "construct", "global", "constant"];
 types = ["int", "real", "string", "bool", "task", "mutex"];
 builtins = ["print", "len", "read_int"];
 
@@ -31,6 +31,10 @@ function applySyntax() {
             var re = new RegExp(retext, "g");
             text = text.replace(re, "<span class=\"tetra-builtin\">$&</span>");
         }
+        /* comments */
+        var retext = "#.*$";
+        var re = new RegExp(retext, "g");
+        text = text.replace(re, "<span class=\"tetra-comment\">$&</span>");
 
 
         /* write it back */
