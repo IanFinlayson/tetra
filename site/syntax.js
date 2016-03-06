@@ -14,8 +14,8 @@ function applySyntax() {
         var text = snippets[i].textContent;
         
         /* apply the replacements */
-        for (k in keywords) {
-            var re = new RegExp(k, "g");
+        for (j = 0; j < keywords.length; j++) {
+            var re = new RegExp(keywords[j], "g");
             text = text.replace(re, "<bold>\1</bold>");
         }
 
