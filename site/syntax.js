@@ -2,7 +2,9 @@
  * apply simple syntax highlighting to Tetra code
  */
 
-keywords = ["def", "if", "elif", "else", "while", "for", "in", "parallel"];
+keywords = ["def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "class", "construct"];
+types = ["int", "real", "string", "bool", "task", "mutex"];
+builtins = ["print", "len", "read_int"];
 
 function applySyntax() {
     /* find all the <pre><code> blocks */
@@ -19,6 +21,17 @@ function applySyntax() {
             var re = new RegExp(retext, "g");
             text = text.replace(re, "<span class=\"tetra-key\">$&</span>");
         }
+        for (j = 0; j < types.length; j++) {
+            var retext = "\\b" + types[j] + "\\b";
+            var re = new RegExp(retext, "g");
+            text = text.replace(re, "<span class=\"tetra-type\">$&</span>");
+        }
+        for (j = 0; j < builtins.length; j++) {
+            var retext = "\\b" + builtins[j] + "\\b";
+            var re = new RegExp(retext, "g");
+            text = text.replace(re, "<span class=\"tetra-builtin\">$&</span>");
+        }
+
 
         /* write it back */
         snippets[i].innerHTML = text;

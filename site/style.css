@@ -89,3 +89,10 @@ a, img {
     color: blue;
 }
 
+.tetra-type {
+    color: orange;
+}
+.tetra-builtin {
+    color: purple;
+}
+
