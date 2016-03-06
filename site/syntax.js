@@ -2,7 +2,7 @@
  * apply simple syntax highlighting to Tetra code
  */
 
-keywords = ["def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "class", "construct"];
+keywords = ["def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "construct"];
 types = ["int", "real", "string", "bool", "task", "mutex"];
 builtins = ["print", "len", "read_int"];
 

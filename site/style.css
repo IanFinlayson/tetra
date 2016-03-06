@@ -85,14 +85,15 @@ a, img {
     outline:none
 }
 
+/* syntax highlighting stuff */
 .tetra-key {
     color: blue;
 }
-
 .tetra-type {
     color: orange;
 }
 .tetra-builtin {
     color: purple;
 }
+
 
