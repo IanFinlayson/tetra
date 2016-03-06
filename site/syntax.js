@@ -15,7 +15,7 @@ function applySyntax() {
         
         /* apply the replacements */
         for (j = 0; j < keywords.length; j++) {
-            var re = new RegExp("\b" + keywords[j] + "\b", "g");
+            var re = new RegExp(keywords[j], "g");
             text = text.replace(re, "-&-");
         }
 
