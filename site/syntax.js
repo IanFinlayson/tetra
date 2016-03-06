@@ -11,6 +11,7 @@ function applySyntax() {
     /* highlight each one */
     for (snippet in snippets) {
         var text = snippet.textContent;
+        snippet.textContent = "Heyyo";
         alert(text);
         //highlighted = text.replace(/def/g, "heyoo");
         //snippet.innerHTML = highlighted;
