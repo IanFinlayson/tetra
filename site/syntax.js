@@ -14,7 +14,10 @@ function applySyntax() {
         var text = snippets[i].textContent;
         
         /* apply the replacements */
-        highlighted = text.replace(/def/g, "heyoo");
+        for (k in keywords) {
+            var re = new RegExp(k, "g");
+            highlighted = text.replace(re, "<bold>\1</bold>");
+        }
 
         /* write it back */
         snippets[i].textContent = highlighted;
