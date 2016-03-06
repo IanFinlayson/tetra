@@ -17,7 +17,7 @@ function applySyntax() {
         for (j = 0; j < keywords.length; j++) {
             var retext = "(" + keywords[j] + ")";
             var re = new RegExp(retext, "g");
-            text = text.replace(re, "-$1-");
+            text = text.replace(re, "-$&-");
         }
 
         /* write it back */
