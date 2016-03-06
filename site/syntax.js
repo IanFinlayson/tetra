@@ -16,11 +16,11 @@ function applySyntax() {
         /* apply the replacements */
         for (k in keywords) {
             var re = new RegExp(k, "g");
-            highlighted = text.replace(re, "<bold>\1</bold>");
+            text = text.replace(re, "<bold>\1</bold>");
         }
 
         /* write it back */
-        snippets[i].textContent = highlighted;
+        snippets[i].textContent = text;
     }
 }
 
