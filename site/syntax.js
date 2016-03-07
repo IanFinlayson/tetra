@@ -41,6 +41,7 @@ function applySyntax() {
         /* numbers */
         text = text.replace(/\b\d+\.\d+\b/g, "<span class=\"tetra-value\">$&</span>"); 
         text = text.replace(/\b\d+\b/g, "<span class=\"tetra-value\">$&</span>"); 
+        text = text.replace(/\b(true|false)\b/g, "<span class=\"tetra-value\">$&</span>"); 
 
         /* write it back */
         snippets[i].innerHTML = text;

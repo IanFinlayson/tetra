@@ -3,6 +3,23 @@
 programs easy to write, visualize, debug, and optimize. Its goals are to make 
 parallel programming easier and more fun to teach and learn.</p>
 
+<pre>
+<code>
+# easy to read Python-like syntax
+def findMax(values [int]) int:
+    # statically typed, but infers types automatically
+    max = 0
+
+    # makes it easy to parallelize code
+    parallel for v in values:
+        if v &gt; max:
+            # synchronization logic built in
+            lock max:
+                max = v
+    return max
+</code>
+</pre>
+
 <hr /> 
 <h3>Easy Parallelism</h3>
 <p>Tetra includes built-in syntax for writing parallel programs.  Launching
@@ -34,41 +51,6 @@ most of the convenience of a dynamic one.</p>
 Tetra programs.  The IDE includes a debugger which can step through parallel
 code.  This makes getting started with Tetra easy for beginning
 programmers.</p>
-
-
-
-<pre>
-<code>
-global something bool
-
-def hello():
-    if something:
-        print("ya")
-    else:
-        while true:
-            print("na")
-
-def main():
-    something = false
-    hello() 
-</code>
-</pre>
-
-<!--
-<pre style="background: #F5F5F5; color: #333; font-family: 'Fira Mono', 'monospace';"><span style="color:#070;"># Tetra has an easy to read Python-like syntax</span>
-<span style="color:#004896;">def</span> findMax(values [<span style="color:#c78000;">int</span>]) <span style="color:#c78000;">int</span>:
-    <span style="color:#070;"># Tetra is statically typed, but</span>
-    <span style="color:#070;"># infers types automatically</span>
-    max = <span style="color:#b00;">0</span>
-    <span style="color:#070;"># Tetra makes it easy to write parallel code</span>
-    <span style="color:#004896;">parallel</span> <span style="color:#004896;">for</span> v <span style="color:#004896;">in</span> values:
-        <span style="color:#070;"># Tetra includes familiar control flow</span>
-        <span style="color:#004896;">if</span> v &gt; max:
-            <span style="color:#070;"># Tetra includes synchronization logic</span>
-            <span style="color:#004896;">lock</span> max:
-                max = v
-    <span style="color:#004896;">return</span> max</pre>
--->
 
 
 

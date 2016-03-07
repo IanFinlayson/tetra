@@ -2,13 +2,13 @@
 
 /* font choices */
 body {
-    font-family: 'Droid Sans', sans-serif;
+    font-family: 'PT Sans', sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Droid Serif', serif;
+    font-family: 'PT Serif', serif;
 }
 pre code {
-    font-family: 'Inconsolata', monospace;
+    font-family: 'PT Mono', monospace;
 }
 
 /* make body take up less space */
@@ -86,7 +86,7 @@ a, img {
 }
 
 /* syntax highlighting stuff */
-pre code {
+pre {
     background: #FAFAF0;
     color: #333;
     display: block;
