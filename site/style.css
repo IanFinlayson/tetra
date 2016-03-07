@@ -2,13 +2,13 @@
 
 /* font choices */
 body {
-    font-family: 'Lora', serif;
+    font-family: 'Droid Sans', sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fira Sans', sans-serif;
+    font-family: 'Droid Serif', serif;
 }
 pre {
-    font-family: 'Fira Mono', monospace;
+    font-family: 'Droid Sans Mono', monospace;
 }
 
 /* make body take up less space */
@@ -24,6 +24,7 @@ div.topbar {
 }
 div.logo {
     float: left;
+    display: inline-block;
 }
 div.menu {
     float: right;
@@ -77,5 +78,26 @@ div.footer {
     text-align: center;
     font-size: 85%;
 }
+
+/* get rid of garish borders around images in IE */
+a, img {
+    border:none;
+    outline:none
+}
+
+/* syntax highlighting stuff */
+.tetra-key {
+    color: blue;
+}
+.tetra-type {
+    color: orange;
+}
+.tetra-builtin {
+    color: purple;
+}
+.tetra-comment {
+    color: green;
+}
+
 
 
