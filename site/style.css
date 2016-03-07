@@ -7,8 +7,8 @@ body {
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Droid Serif', serif;
 }
-pre {
-    font-family: 'Droid Sans Mono', monospace;
+pre code {
+    font-family: 'Inconsolata', monospace;
 }
 
 /* make body take up less space */
@@ -86,18 +86,29 @@ a, img {
 }
 
 /* syntax highlighting stuff */
-.tetra-key {
-    color: blue;
-}
-.tetra-type {
-    color: orange;
-}
-.tetra-builtin {
-    color: purple;
-}
-.tetra-comment {
-    color: green;
+pre code {
+    background: #FAFAF0;
+    color: #333;
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    font-size: 110%;
 }
 
+.tetra-key {
+    color: #004896;
+}
+.tetra-type {
+    color: #c78000;
+}
+.tetra-builtin {
+    color: #8300bb;
+}
+.tetra-comment {
+    color: #070;
+}
+.tetra-value {
+    color: #b00;
+}
 
 
