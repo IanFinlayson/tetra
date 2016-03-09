@@ -7,7 +7,7 @@ body {
 h1, h2, h3, h4, h5, h6 {
     font-family: 'PT Serif', serif;
 }
-pre code {
+pre, code {
     font-family: 'PT Mono', monospace;
 }
 
@@ -49,7 +49,7 @@ a:visited {
 }
 a.menu:hover {
     color:#1A5D11;
-    background: #eee;
+    background: #FAFAF0;
 }
 a:active {
     color:#2CA119;
