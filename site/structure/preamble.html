@@ -9,8 +9,10 @@
 
 <!-- load style and scripts -->
 <link rel="stylesheet" type="text/css" href="/style.css" />
-<script src="/syntax.js"></script>
-<script src="preCode.js"></script>
+<script src="/scripts/syntax.js"></script>
+<script src="/scripts/preCode.js"></script>
+<script src="/scripts/smartquotes.min.js"></script>
+
 
 <!-- load fonts -->
 <link href='https://fonts.googleapis.com/css?family=PT+Mono' rel='stylesheet' type='text/css'>
@@ -38,9 +40,18 @@
 <meta name="msapplication-square150x150logo" content="/images/mstile-150x150.png" />
 <meta name="msapplication-wide310x150logo" content="/images/mstile-310x150.png" />
 <meta name="msapplication-square310x310logo" content="/images/mstile-310x310.png" />
+
+<script>
+function initPage() {
+    smartquotes();
+    applySyntax();
+
+}
+</script>
 </head>
 
-<body onload="applySyntax()">
+
+<body onload="initPage()">
 
 
 
