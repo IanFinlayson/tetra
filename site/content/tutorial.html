@@ -39,7 +39,7 @@ string "Hello World!" into it to print it to the screen.</p>
 <h3>Simple Types</h3>
 
 <p>Tetra contains six simple types.  Each of these is indivisible, but can be
-combined up in arrays, maps, classes etc. as discussed later on.  The simple
+combined up in lists, dictionaries, classes etc. as discussed later on.  The simple
 types are:</p>
 
 <ul>
@@ -62,21 +62,6 @@ false.
 A string is a piece of text.  Strings are stored as a sequence of Unicode
 characters.
 
-
-</p></li>
-<li><p><b>task</b></p><p>
-A task is an executing thread of execution.  We can wait for a task to complete
-as described under the background execution section.
-
-
-</p></li>
-<li><p><b>mutex</b></p><p>
-A mutex is used to coordinate between multiple parallel tasks.  We can use them
-to prevent threads from interfering with each other as described in the section
-on locks.  mutex stands for "mutual exclusion".
-
-
-
 </p></li></ul>
 
 
@@ -91,7 +76,7 @@ on locks.  mutex stands for "mutual exclusion".
 
 <p>As described above, functions are introduced with the <tt>def</tt> keyword,
 and also have names and parameter lists.  Functions can also return values, and
-there return type (if any) goes after the parameter list, but before the
+their return type (if any) goes after the parameter list, but before the
 colon.</p>
 
 <p>Below is a function which computes the average of three parameters:</p>
@@ -189,14 +174,12 @@ constant PI = 3.141592653589
 <p>Notice that globals and constants also do not need type declarations.</p>
 
 
-<p>When declaring variables, we can 
-
 
 
 <hr />
 <h3>Operators</h3>
 
-<p>Tetra supports many common operators.  The following chart shows the
+<p>Tetra supports many common operators.  The following table shows the
 operators that Tetra supports organized by precedence levels, from highest
 precedence to lowest, along with the associativity:</p>
 
@@ -211,6 +194,7 @@ precedence to lowest, along with the associativity:</p>
 <tr><td>^</td><td>Bitwise xor</td><td>Left</td></tr>
 <tr><td>&#124;</td><td>Bitwise or</td><td>Left</td></tr>
 <tr><td>&lt; &lt;= &gt; &gt;= == !=</td><td>Comparison operators</td><td>Left</td></tr>
+<tr><td>not</td><td>Logical not</td><td>Unary</td></tr>
 <tr><td>and</td><td>Logical and</td><td>Left</td></tr>
 <tr><td>or</td><td>Logical or</td><td>Left</td></tr>
 <tr><td>=</td><td>Assignment (including +=, -= etc)</td><td>Right</td></tr>
@@ -368,12 +352,12 @@ and product of the numbers 1-10 in two parallel loops.</p>
 
 
 <hr />
-<h3>Arrays</h3>
+<h3>Lists</h3>
 
-<p>Arrays package together multiple variables of the same type, such that they
-can be accessed by an integer index.  Arrays are indexed by placing the index
-between square brackets after the name of the array.  The following example
-program counts the number of times a string appears in an array of strings:</p>
+<p>Lists package together multiple variables of the same type, such that they
+can be accessed by an integer index.  Lists are indexed by placing the index
+between square brackets after the name of the list.  The following example
+program counts the number of times a string appears in a list of strings:</p>
 
 <pre>
 <code>
@@ -384,9 +368,9 @@ def main( ):
 </code>
 </pre>
 
-<p>Data type declarations, such as with function parameters, with arrays are
+<p>Data type declarations, such as with function parameters, with lists are
 done by placing the type of each element in brackets.  For example, the
-following function takes an array of numbers and returns whether or not the
+following function takes a list of numbers and returns whether or not the
 length of it is even:</p>
 
 <pre>
@@ -399,17 +383,44 @@ def even_length(values [int]) bool:
 </code>
 </pre>
 
-<p>Multi-dimensional arrays can also be created.  In this case, you would
-simply increase the number of brackets in the type.  For example, a 2D array of
+<p>Multi-dimensional lists can also be created.  In this case, you would
+simply increase the number of brackets in the type.  For example, a 2D list of
 reals would be declared as having type <tt>[[real]]</tt>.</p>
+
+
+<hr />
+<h3>Ranges</h3>
+
+<p>We can create lists containing ranges of integers using the <tt>...</tt>
+operator.  For instance, we can create a list containing the values one to ten
+inclusive with:</p>
+
+<pre>
+<code>
+numbers = [1 ... 10]
+</code>
+</pre>
+
+<p>We can leave off either end by using parentheses instead of square
+brackets.  For instance, we can create a list of the numbers 0 through
+<tt>n - 1</tt> with:</p>
+
+<pre>
+<code>
+numbers = [1 ... n)
+</code>
+</pre>
+
+<p>This follows the interval notation used in mathematics.</p>
+
 
 
 
 <hr />
 <h3>For Loops</h3>
 
-<p>Arrays lead us naturally to the Tetra <tt>for</tt> loop which loop over each
-item in an array.  For example, the following function loops over the array it
+<p>Lists lead us naturally to the Tetra <tt>for</tt> loop which loop over each
+item in a list.  For example, the following function loops over the list it
 is given and prints each element:</p>
 
 <pre>
@@ -420,7 +431,7 @@ def print_all(values [int]):
 </code>
 </pre>
 
-<p>This for loop assigns each element in the array that it is given to the loop
+<p>This for loop assigns each element in the list that it is given to the loop
 variable one by one, then executes the loop body for that particular value.</p>
 
 
@@ -476,14 +487,14 @@ sometimes multiple new lines are printed back to back.</p>
 
 <p>We would only want to use parallel for loops when the order of the loop
 iterations is not important for the program to be correct.  As an example,
-suppose we are writing a function which takes an array of numbers and returns
-an array of those numbers squared.  Here, each of the elements can be computed
+suppose we are writing a function which takes a list of numbers and returns
+a list of those numbers squared.  Here, each of the elements can be computed
 independently, and so could be done with a parallel for loop:</p>
 
 <pre>
 <code>
 def square_all(values [real]):
-    squares [real] = array(len(values))
+    squares [real] = list(len(values))
     i = 0
     parallel for val in values:
         squares[i] = val * val
@@ -492,7 +503,7 @@ def square_all(values [real]):
 </code>
 </pre>
 
-<p>The <tt>array</tt> function creates an array of a given size.</p>
+<p>The <tt>list</tt> function creates a list of a given size.</p>
 
 
 
@@ -583,12 +594,12 @@ functions, put them in data structures etc.</p>
 
 <p>Sometimes when we have parallel code, we will need to prevent the threads
 from interfering with each other.  For instance, if we are trying to find the
-largest value in an array, we may keep track of the largest value we have seen
+largest value in a list, we may keep track of the largest value we have seen
 so far:</p>
 
 <pre>
 <code>
-# find the max of an array
+# find the max of a list
 def max(nums [int]) int:
     largest = 0
     parallel for num in nums:
@@ -609,7 +620,7 @@ the largest:</p>
 
 <pre>
 <code>
-# find the max of an array
+# find the max of a list
 def max(nums [int]) int:
     largest = 0
     parallel for num in nums:
@@ -703,15 +714,15 @@ def f2():
 <hr />
 <h3>Tuples</h3>
 
-<p>In addition to arrays, Tetra includes a tuple type which can also group
-multiple pieces of data together.  Unlike an array, a tuple can contain elements
+<p>In addition to lists, Tetra includes a tuple type which can also group
+multiple pieces of data together.  Unlike a list, a tuple can contain elements
 of different types.  For example, we cannot store an int and a string together
-in an array, but we can in a tuple.</p>
+in a list, but we can in a tuple.</p>
 
-<p>Another difference between arrays and tuples is that arrays of any length
+<p>Another difference between lists and tuples is that lists of any length
 can be passed into a function, defined as variables etc. while tuples have the
 number (and type) of their elements fixed as part of their type.  For instance,
-we can write a function which takes an array of strings of any size, but a
+we can write a function which takes a list of strings of any size, but a
 function which takes a tuple must specify its length.</p>
 
 <p>Below we have a function which takes a tuple containing a string and an int,
@@ -785,14 +796,14 @@ def main():
 
 
 <hr />
-<h3>Maps</h3>
+<h3>Dictionaries</h3>
 
-<p>The last built in data structure in Tetra is the map, which other languages
-call associative arrays, hashes or dictionaries.</p>
+<p>The last built in data structure in Tetra is the dictionary, which other languages
+call associative arrays, hashes or maps.</p>
 
-<p>Maps in Tetra create a map from one set of values (the keys) to another set
+<p>Dictionaries in Tetra create a dictionary from one set of values (the keys) to another set
 (the values).  For example, the following program creates a phone book which
-maps names to phone numbers:</p>
+dictionaries names to phone numbers:</p>
 
 <pre>
 <code>
@@ -801,11 +812,11 @@ def main():
 </code>
 </pre>
 
-<p>The curly braces contain all elements in the map.  Each element contains the
+<p>The curly braces contain all elements in the dictionary.  Each element contains the
 key (on the left of the colon) and the value (on the right of the colon).  The
 elements are separated by commas.</p>
 
-<p>To access the elements of a map, we place the key we want to look up inside
+<p>To access the elements of a dictionary, we place the key we want to look up inside
 of brackets:</p>
 
 <pre>
@@ -816,9 +827,9 @@ def main():
 </code>
 </pre>
 
-<p>When declaring the type of a map, such as in a function parameter or return
+<p>When declaring the type of a dictionary, such as in a function parameter or return
 type declaration, we place the key type and the value type inside of curly
-braces, separated by a colon.  For instance, the following function takes a map
+braces, separated by a colon.  For instance, the following function takes a dictionary
 from string to int as a parameter which represents the ages of a group of
 people and prints them out:</p>
 
@@ -830,9 +841,9 @@ def function(ages {string:int}):
 </code>
 </pre>
 
-<p>This function uses the <tt>keys</tt> function which returns an array of all
-of the keys in a map.  This can be used to loop over all of the elements in a
-map.</p>
+<p>This function uses the <tt>keys</tt> function which returns a list of all
+of the keys in a dictionary.  This can be used to loop over all of the elements in a
+dictionary.</p>
 
 
 
@@ -877,10 +888,10 @@ def main():
 
 
 <hr />
-<h3>Constructors</h3>
+<h3>Initializers</h3>
 
-<p>Constructors are functions included in a class with the name
-<tt>construct</tt> which allow class objects to be initialized based on certain
+<p>Initializers are functions included in a class with the name
+<tt>init</tt> which allow class objects to be initialized based on certain
 parameters.  For instance, we may want to allow the user to pass in the size of
 a square when they create one:</p>
 
@@ -890,8 +901,8 @@ class Square:
     # the size of the square
     size real
 
-    # a constructor
-    def construct(size real):
+    # an initializer
+    def init(size real):
         self.size = size
 
     # member function to compute the area
@@ -900,7 +911,7 @@ class Square:
 </code>
 </pre>
 
-<p>Notice that the construct function uses the <tt>self</tt> keyword to specify
+<p>Notice that the init function uses the <tt>self</tt> keyword to specify
 the size belonging to the object as opposed to the local parameter called
 size.</p>
 
@@ -914,10 +925,10 @@ def main():
 </code>
 </pre>
 
-<p>If any constructors are defined, we must call one of them.  With the class
+<p>If any initializers are defined, we must call one of them.  With the class
 definition above, we would not be able to forgo supplying the size.  We can
-however have multiple constructors with different parameter lists.  Below we
-add in a constructor which takes no parameters:</p>
+however have multiple initializers with different parameter lists.  Below we
+add in a initializer which takes no parameters:</p>
 
 <pre>
 <code>
@@ -925,12 +936,12 @@ class Square:
     # the size of the square
     size real
 
-    # a constructor with a real parameter
-    def construct(size real):
+    # an initializer with a real parameter
+    def init(size real):
         self.size = size
 
-    # a constructor with no parameters
-    def construct():
+    # an initializer with no parameters
+    def init():
         self.size = 0.0
 
     # member function to compute the area
@@ -1055,7 +1066,7 @@ def reduce(data [int], initial int, f (int, int) -&gt; int)) int:
     return result
 
 def main():
-    data = [1 .. 10]
+    data = [1 ... 10]
 
     # calculate the sum
     sum = reduce(data, 0, add)
@@ -1080,7 +1091,7 @@ multiplication functions directly in the call to reduce:</p>
 <pre>
 <code>
 def main():
-    data = [1 .. 10]
+    data = [1 ... 10]
 
     # calculate the sum
     sum = reduce(data, 0, lambda a int, b int: a + b)

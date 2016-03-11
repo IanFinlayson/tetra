@@ -2,13 +2,13 @@
 
 /* font choices */
 body {
-    font-family: 'PT Sans', sans-serif;
+    font-family: 'Open Sans', sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'PT Serif', serif;
+    font-family: 'Droid Serif', monospace;
 }
-pre, code {
-    font-family: 'PT Mono', monospace;
+pre, code, tt {
+    font-family: 'Droid Sans Mono', monospace;
 }
 
 /* make body take up less space */
@@ -34,7 +34,6 @@ div.menu {
 div.topbar li,
 div.topbar ul {
     display: inline-block;
-    font-family: 'Fira Sans', sans-serif;
 }
 div.topbar a {
     font-size: 150%;
@@ -92,7 +91,6 @@ pre {
     display: block;
     overflow-x: auto;
     padding: 0.5em;
-    font-size: 110%;
 }
 
 .tetra-key {

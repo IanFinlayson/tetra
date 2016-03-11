@@ -2,9 +2,9 @@
  * apply simple syntax highlighting to Tetra code
  */
 
-keywords = ["class", "def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "construct", "global", "constant"];
+keywords = ["class", "def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "init", "global", "init", "self"];
 types = ["int", "real", "string", "bool", "task", "mutex"];
-builtins = ["print", "len", "read_int"];
+builtins = ["print", "len", "read_int", "read_string", "read_bool", "read_real", "array", "keys"];
 
 
 function applySyntax() {
