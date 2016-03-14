@@ -5,7 +5,7 @@ body {
     font-family: 'Open Sans', sans-serif;
 }
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Droid Serif', monospace;
+    font-family: 'Droid Serif', serif;
 }
 pre, code, tt {
     font-family: 'Droid Sans Mono', monospace;
@@ -16,6 +16,7 @@ body {
     width: 90%;
     margin-left: auto;
     margin-right: auto;
+    background: #fcfcfc;
 }
 
 /* the top bar */
@@ -84,7 +85,7 @@ a, img {
     outline:none
 }
 
-/* syntax highlighting stuff */
+/* pre box styles */
 pre {
     background: #FAFAF0;
     color: #333;
@@ -93,19 +94,25 @@ pre {
     padding: 0.5em;
 }
 
+/* syntax highlighting colors */
 .tetra-key {
+    /* blue */
     color: #004896;
 }
 .tetra-type {
+    /* yellow */
     color: #c78000;
 }
 .tetra-builtin {
+    /* purple */
     color: #8300bb;
 }
 .tetra-comment {
+    /* green */
     color: #070;
 }
 .tetra-value {
+    /* red */
     color: #b00;
 }
 
