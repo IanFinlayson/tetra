@@ -22,7 +22,7 @@ include 'structure/nav.html';
 echo '<main>
 <div class="main">';
 
-$msg404 = '<h1>Page not found!</h1>
+$msg404 = '<h2>Page not found!</h2>
 <p>There does not seem to be anything here.  If you got here
 from a broken link, or if something is missing, please <a href="contact">
 let us know.</p>';
