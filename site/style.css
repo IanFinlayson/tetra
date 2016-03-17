@@ -2,10 +2,10 @@
 
 /* font choices */
 body {
-    font-family: 'Open Sans', sans-serif;
+    font-family: 'Fira Sans', sans-serif;
 }
 pre, code, tt {
-    font-family: 'Droid Sans Mono', monospace;
+    font-family: 'Fira Mono', monospace;
 }
 
 /* make body take up less space */
