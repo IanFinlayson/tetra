@@ -401,17 +401,20 @@ numbers = [1 ... 10]
 </code>
 </pre>
 
-<p>We can leave off either end by using parentheses instead of square
-brackets.  For instance, we can create a list of the numbers 0 through
-<tt>n - 1</tt> with:</p>
+<p>This can be done with variables as well.  We could write use a range to
+write our factorial function as:</p>
 
 <pre>
 <code>
-numbers = [1 ... n)
+def fact(x int) int:
+    result = 1
+    for num in [1 ... n]:
+        result *= num
+    return result
 </code>
 </pre>
 
-<p>This follows the interval notation used in mathematics.</p>
+
 
 
 
