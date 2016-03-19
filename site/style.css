@@ -1,7 +1,5 @@
 @charset "utf-8";
 
-
-
 /* specify the charter type face */
 @font-face {
     font-family: 'Bitstream Charter';
@@ -45,20 +43,17 @@
     url('/fonts/inconsolata-dz.ttf')  format('truetype');
 }
 
-
-
-
 /* font choices */
 body {
-    font-family: 'Bitstream Charter', sans-serif;
+    font-family: 'Bitstream Charter', serif;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Open Sans', serif;
+    font-family: 'Open Sans', sans-serif;
 }
 
 pre, code, tt {
-    font-family: 'Inconsolata DZ', serif;
+    font-family: 'Inconsolata DZ', monospace;
 }
 
 /* make body take up less space */
@@ -90,6 +85,7 @@ div.topbar a {
     font-size: 150%;
     text-decoration: none;
     padding: 10px;
+    font-family: 'Open Sans', sans-serif;
 }
 a:link {
     color:#1A5D11;
