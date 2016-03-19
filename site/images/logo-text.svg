@@ -10,7 +10,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="932.35999"
+   width="950"
    height="281"
    id="svg2"
    version="1.1"
@@ -38,17 +38,17 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.69999999"
-     inkscape:cx="548.92685"
+     inkscape:cx="551.78399"
      inkscape:cy="235.69003"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:snap-global="false"
-     inkscape:window-width="1280"
-     inkscape:window-height="814"
+     inkscape:window-width="1440"
+     inkscape:window-height="863"
      inkscape:window-x="0"
      inkscape:window-y="33"
-     inkscape:window-maximized="0">
+     inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
        id="grid5235"
@@ -128,14 +128,14 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-size:256px;font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Fira Sans;-inkscape-font-specification:Fira Sans Semi-Bold"
-       x="362.14331"
+       style="font-size:256px;font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Open Sans;-inkscape-font-specification:Open Sans Semi-Bold"
+       x="350.14331"
        y="983.79059"
        id="text3349"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3351"
-         x="362.14331"
+         x="350.14331"
          y="983.79059">tetra</tspan></text>
   </g>
 </svg>
