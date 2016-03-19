@@ -1,39 +1,5 @@
 @charset "utf-8";
 
-/* specify the charter type face */
-@font-face {
-    font-family: 'Bitstream Charter';
-    src: url('/fonts/charter-regular.eot');
-    src: url('/fonts/charter-regular.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/charter-regular.woff') format('woff'),
-    url('/fonts/charter-regular.ttf')  format('truetype');
-}
-@font-face {
-    font-family: 'Bitstream Charter';
-    src: url('/fonts/charter-bold.eot');
-    src: url('/fonts/charter-bold.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/charter-bold.woff') format('woff'),
-    url('/fonts/charter-bold.ttf')  format('truetype');
-    font-weight: bold;
-}
-@font-face {
-    font-family: 'Bitstream Charter';
-    src: url('/fonts/charter-bold-italic.eot');
-    src: url('/fonts/charter-bold-italic.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/charter-bold-italic.woff') format('woff'),
-    url('/fonts/charter-bold-italic.ttf')  format('truetype');
-    font-weight: bold;
-    font-style: italic;
-}
-@font-face {
-    font-family: 'Bitstream Charter';
-    src: url('/fonts/charter-italic.eot');
-    src: url('/fonts/charter-italic.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/charter-italic.woff') format('woff'),
-    url('/fonts/charter-italic.ttf')  format('truetype');
-    font-style: italic;
-}
-
 /* specify the Inconsolata DZ font (Inconsolata with straight quotes) */
 @font-face {
     font-family: 'Inconsolata DZ';
@@ -45,10 +11,6 @@
 
 /* font choices */
 body {
-    font-family: 'Bitstream Charter', serif;
-}
-
-h1, h2, h3, h4, h5, h6 {
     font-family: 'Open Sans', sans-serif;
 }
 
@@ -85,7 +47,6 @@ div.topbar a {
     font-size: 150%;
     text-decoration: none;
     padding: 10px;
-    font-family: 'Open Sans', sans-serif;
 }
 a:link {
     color:#1A5D11;
