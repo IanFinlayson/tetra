@@ -5,44 +5,44 @@
 /* specify the charter type face */
 @font-face {
     font-family: 'Bitstream Charter';
-    src: url('/~finlayson/fonts/charter-regular.eot');
-    src: url('/~finlayson/fonts/charter-regular.eot?#iefix') format('embedded-opentype'),
-    url('/~finlayson/fonts/charter-regular.woff') format('woff'),
-    url('/~finlayson/fonts/charter-regular.ttf')  format('truetype');
+    src: url('/fonts/charter-regular.eot');
+    src: url('/fonts/charter-regular.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/charter-regular.woff') format('woff'),
+    url('/fonts/charter-regular.ttf')  format('truetype');
 }
 @font-face {
     font-family: 'Bitstream Charter';
-    src: url('/~finlayson/fonts/charter-bold.eot');
-    src: url('/~finlayson/fonts/charter-bold.eot?#iefix') format('embedded-opentype'),
-    url('/~finlayson/fonts/charter-bold.woff') format('woff'),
-    url('/~finlayson/fonts/charter-bold.ttf')  format('truetype');
+    src: url('/fonts/charter-bold.eot');
+    src: url('/fonts/charter-bold.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/charter-bold.woff') format('woff'),
+    url('/fonts/charter-bold.ttf')  format('truetype');
     font-weight: bold;
 }
 @font-face {
     font-family: 'Bitstream Charter';
-    src: url('/~finlayson/fonts/charter-bold-italic.eot');
-    src: url('/~finlayson/fonts/charter-bold-italic.eot?#iefix') format('embedded-opentype'),
-    url('/~finlayson/fonts/charter-bold-italic.woff') format('woff'),
-    url('/~finlayson/fonts/charter-bold-italic.ttf')  format('truetype');
+    src: url('/fonts/charter-bold-italic.eot');
+    src: url('/fonts/charter-bold-italic.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/charter-bold-italic.woff') format('woff'),
+    url('/fonts/charter-bold-italic.ttf')  format('truetype');
     font-weight: bold;
     font-style: italic;
 }
 @font-face {
     font-family: 'Bitstream Charter';
-    src: url('/~finlayson/fonts/charter-italic.eot');
-    src: url('/~finlayson/fonts/charter-italic.eot?#iefix') format('embedded-opentype'),
-    url('/~finlayson/fonts/charter-italic.woff') format('woff'),
-    url('/~finlayson/fonts/charter-italic.ttf')  format('truetype');
+    src: url('/fonts/charter-italic.eot');
+    src: url('/fonts/charter-italic.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/charter-italic.woff') format('woff'),
+    url('/fonts/charter-italic.ttf')  format('truetype');
     font-style: italic;
 }
 
 /* specify the Inconsolata DZ font (Inconsolata with straight quotes) */
 @font-face {
     font-family: 'Inconsolata DZ';
-    src: url('/~finlayson/fonts/inconsolata-dz.eot');
-    src: url('/~finlayson/fonts/inconsolata-dz.eot?#iefix') format('embedded-opentype'),
-    url('/~finlayson/fonts/inconsolata-dz.woff') format('woff'),
-    url('/~finlayson/fonts/inconsolata-dz.ttf')  format('truetype');
+    src: url('/fonts/inconsolata-dz.eot');
+    src: url('/fonts/inconsolata-dz.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/inconsolata-dz.woff') format('woff'),
+    url('/fonts/inconsolata-dz.ttf')  format('truetype');
 }
 
 
