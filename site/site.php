@@ -23,9 +23,9 @@ echo '<main>
 <div class="main">';
 
 $msg404 = '<h1>Page not found!</h1>
-<p>There does not seem to be anything here.  If you got here
-from a broken link, or if something is missing, please <a href="contact">
-let us know.</p>';
+<p>There does not seem to be anything here.
+You can try to go back to <a href="/">the home page</a>.
+</p>';
 
 if ($_GET["page"]) {
     /* trim off the / if present! */
