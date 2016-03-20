@@ -1,4 +1,4 @@
-<h1>Tutorial</h2>
+<h1>Tutorial</h1>
 
 <p>This page contains a tutorial introduction to the Tetra programming
 Language.  Its intent is to be a quick and straightforward introduction to
@@ -83,6 +83,7 @@ colon.</p>
 
 <pre>
 <code>
+# return the average of three parameters
 def average_of_three(v1 real, v2 real, v3 real) real:
     return (v1 + v2 + v3) / 3.0;
 </code>
@@ -99,6 +100,7 @@ main:</p>
 
 <pre>
 <code>
+# test of the average_of_three function
 def main():
     avg = average_of_three(4.5, 7.2, 6.3)
     print(avg)
@@ -136,6 +138,7 @@ value2 int
 
 <pre>
 <code>
+# declare three variables of the real type
 x, y, z real
 </code>
 </pre>
@@ -147,6 +150,7 @@ as shown in the following example:</p>
 
 <pre>
 <code>
+# declare a global variable
 global count = 0
 
 def increment():
@@ -217,6 +221,7 @@ positive, negative, or zero:</p>
 
 <pre>
 <code>
+# print the sign of the parameter
 def print_sign(val int):
     if val &lt; 0:
         print(val, " is negative")
@@ -249,6 +254,7 @@ using a while loop:</p>
 
 <pre>
 <code>
+# calculate the factorial of a parameter
 def fact(x int) int:
     result = 1
     while x &gt; 0:
