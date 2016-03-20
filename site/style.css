@@ -11,7 +11,7 @@ pre, code, tt {
 
 /* make body take up less space */
 body {
-    width: 90%;
+    width: 92%;
     margin-left: auto;
     margin-right: auto;
     background: #fcfcfc;
@@ -74,7 +74,7 @@ div.sidebar {
 /* used for copyright info */
 div.footer {
     text-align: center;
-    font-size: 85%;
+    font-size: 90%;
 }
 
 /* get rid of garish borders around images in IE */
@@ -113,5 +113,4 @@ pre {
     /* red */
     color: #b00;
 }
-
 
