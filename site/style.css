@@ -61,9 +61,8 @@ a:active {
 
 /* make tables prettier */
 table {
-    border-radius: 5px;
-    border: 1px solid #999;
-    border-spacing:0;
+    border-radius: 10px;
+    border: 1px solid #666;
 }
 
 th, td {
