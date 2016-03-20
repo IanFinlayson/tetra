@@ -73,8 +73,6 @@ th, td {
 tr:nth-child(even){background-color: #f2f2f2}
 
 th {
-    background-color: #1A5D11;
-    color: white;
 }
 
 /* used for clearing the floats after they have been laid out */
