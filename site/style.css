@@ -83,12 +83,6 @@ div.footer {
     font-size: 90%;
 }
 
-/* get rid of garish borders around images in IE */
-a, img {
-    border:none;
-    outline:none
-}
-
 /* pre box styles */
 pre {
     background: #FAFAF0;
