@@ -153,9 +153,11 @@ as shown in the following example:</p>
 # declare a global variable
 global count = 0
 
+# access the global
 def increment():
     count += 1
 
+# should print 3
 def main( ):
     increment()
     increment()
@@ -292,6 +294,7 @@ function two times in parallel, and then calls it a third time:</p>
 <pre>
 <code>
 def main():
+    # each statement directly under the parallel block executed in parallel
     parallel:
         print("Print statement number 1!\n")
         print("Print statement number 2!\n")
@@ -341,6 +344,7 @@ def main():
     j = 1
     sum = 0
     product = 1
+    # each while loop is done in parallel
     parallel:
         while i &lt; 10:
             sum += i
@@ -381,6 +385,7 @@ length of it is even:</p>
 
 <pre>
 <code>
+# return true if the length of the list is even
 def even_length(values [int]) bool:
     if len(values) % 2 == 0:
         return true
@@ -412,6 +417,7 @@ write our factorial function as:</p>
 
 <pre>
 <code>
+# calculate the factorial using a range
 def fact(x int) int:
     result = 1
     for num in [1 ... n]:
@@ -434,6 +440,7 @@ is given and prints each element:</p>
 
 <pre>
 <code>
+# print all values in a list being passed in
 def print_all(values [int]):
     for value in values:
         print(value, "\n")
@@ -461,6 +468,7 @@ program:</p>
 
 <pre>
 <code>
+# print all values in a list in parallel
 def print_all(values [int]):
     parallel for value in values:
         print(value, "\n")
@@ -502,12 +510,11 @@ independently, and so could be done with a parallel for loop:</p>
 
 <pre>
 <code>
-def square_all(values [real]):
+# returns the squares of an array as another array
+def square_all(values [real]) [real]:
     squares [real] = list(len(values))
-    i = 0
-    parallel for val in values:
-        squares[i] = val * val
-        i += 1
+    parallel for i in [0 ... len(values) - 1]:
+        squares[i] = values[i] * values[i]
     return squares
 </code>
 </pre>
@@ -537,6 +544,7 @@ program:</p>
 
 <pre>
 <code>
+# a simple server type program
 def main():
     while true:
         request = wait_for_request()
@@ -670,6 +678,7 @@ two functions from over-writing the "negatives" value at the same time:</p>
 
 <pre>
 <code>
+# demonstrates a named lock
 def main():
     negatives = 0
 
@@ -700,6 +709,7 @@ inter-leaved output:
 
 <pre>
 <code>
+# here the named lock is shared amongst functions, so is global
 global print_lock mutex
 
 def f1():
@@ -715,8 +725,6 @@ def f2():
     # ...
 </code>
 </pre>
-
-
 
 
 
@@ -739,6 +747,7 @@ and then call it in main:</p>
 
 <pre>
 <code>
+# takes a tuple and prints it to the screen
 def print_info(info (string, int)):
     print("Name is ", info[0])
     print("Age is ", info[1])
@@ -760,6 +769,7 @@ real roots this will be false):</p>
 
 <pre>
 <code>
+# function which returns a tuple of three values
 def roots(a real, b real, c real) (real, real, bool):
     rad = b*b - 4*a*c
     if rad &lt; 0:
@@ -775,6 +785,7 @@ follows:</p>
 <pre>
 <code>
 def main():
+    # results is the tuple which was returned
     results = roots(1, 0, -16)
 
     if results[2]:
@@ -790,6 +801,7 @@ function call into separate variables:</p>
 <pre>
 <code>
 def main():
+    # the tuple is now unpacked
     root1, root2, valid = roots(1, 0, -16)
 
     if valid:
@@ -816,6 +828,7 @@ dictionaries names to phone numbers:</p>
 
 <pre>
 <code>
+# create a dictionary modeling a phone book
 def main():
     phone_book = {"alice" : "555-5555", "bob" : "123-4567", "claire" : "765-4321"}
 </code>
@@ -844,7 +857,8 @@ people and prints them out:</p>
 
 <pre>
 <code>
-def function(ages {string:int}):
+# function which prints the whole dictionary passed in
+def print_book(ages {string:int}):
     for person in keys(ages):
         print(person, " is ", ages[person], " years old.")
 </code>
@@ -873,6 +887,7 @@ the class.</p>
 
 <pre>
 <code>
+# creates a class representing a square shape
 class Square:
     # the size of the square
     size real
@@ -888,6 +903,7 @@ function which returns an object of that class:</p>
 
 <pre>
 <code>
+# test out the class
 def main():
     s = Square()
     s.size = 5.0
@@ -929,6 +945,7 @@ size.</p>
 <pre>
 <code>
 def main():
+    # now we pass the initializer the size
     s = Square(5.0)
     print("Size = ", s.area())
 </code>
@@ -1062,19 +1079,24 @@ of "map reduce" fame:</p>
 
 <pre>
 <code>
+# just add two numbers
 def add(a int, b int) int:
     return a + b
 
+# just multiply two numbers
 def mult(a int, b int) int:
     return a * b
 
+# reduce a list to one value using some function
 def reduce(data [int], initial int, f (int, int) -&gt; int)) int:
     result = initial
     for d in data:
         result = f(result, d)
     return result
 
+# test out reduce
 def main():
+    # our data
     data = [1 ... 10]
 
     # calculate the sum
