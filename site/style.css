@@ -11,11 +11,11 @@
 
 /* font choices */
 body {
-    font-family: 'Source Sans Pro', sans-serif;
+    font-family: 'Fira Sans', sans-serif;
 }
 
 pre, code, tt {
-    font-family: 'Inconsolata DZ', monospace;
+    font-family: 'Fira Mono', monospace;
 }
 
 /* make body take up less space */
