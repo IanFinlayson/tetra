@@ -19,18 +19,18 @@ def main():
 </code>
 </pre>
 
-<p>Comments in Tetra begin with the <tt>#</tt> character and continue to the
+<p>Comments in Tetra begin with the <code>#</code> character and continue to the
 end of the line.  The first line of this program is a comment, and the rest is
 the body of the program.</p>
 
-<p>Every Tetra program must contain a function called <tt>main</tt> which
+<p>Every Tetra program must contain a function called <code>main</code> which
 defines where the program begins executing.  Functions are defined with the
-<tt>def</tt> keyword, then the name of the function, followed by the list of
+<code>def</code> keyword, then the name of the function, followed by the list of
 parameters.  The main function takes no parameters.  The colon character is
 used to mark the beginning of the function body which must be indented one
 level over.</p>
 
-<p>The <tt>print</tt> function is used for printing things, so we pass the
+<p>The <code>print</code> function is used for printing things, so we pass the
 string "Hello World!" into it to print it to the screen.</p>
 
 
@@ -54,7 +54,7 @@ These are 64-bit values following the IEEE double-precision standard.
 
 </p></li>
 <li><p><b>bool</b></p><p>
-A single boolean value which can store the values either <tt>true</tt> or
+A single boolean value which can store the values either <code>true</code> or
 false.
 
 </p></li>
@@ -74,7 +74,7 @@ characters.
 <hr />
 <h3>Functions</h3>
 
-<p>As described above, functions are introduced with the <tt>def</tt> keyword,
+<p>As described above, functions are introduced with the <code>def</code> keyword,
 and also have names and parameter lists.  Functions can also return values, and
 their return type (if any) goes after the parameter list, but before the
 colon.</p>
@@ -90,12 +90,12 @@ def average_of_three(v1 real, v2 real, v3 real) real:
 </pre>
 
 <p>Note that types go <i>after</i> their variables and not before.  The
-<tt>return</tt> statement is used to specify the return value of a function and
+<code>return</code> statement is used to specify the return value of a function and
 return control back to the caller.</p>
 
 <p>Functions are called similarly to how they are in most programming
 languages, with the values of parameters passed in at the call.  The
-<tt>average_of_three</tt> function above might be called as follows in
+<code>average_of_three</code> function above might be called as follows in
 main:</p>
 
 <pre>
@@ -113,8 +113,8 @@ def main():
 <hr />
 <h3>Variables</h3>
 
-<p>If you look at the example call to <tt>average_of_three</tt> above, you will
-notice that there is no declaration of the type of the <tt>avg</tt> variable.
+<p>If you look at the example call to <code>average_of_three</code> above, you will
+notice that there is no declaration of the type of the <code>avg</code> variable.
 Local variables (those which exist only inside of a function) do not need type
 declarations in Tetra, the compiler will figure out the type of each based on
 how the variable is used.  Only function parameters and return types need to be
@@ -145,7 +145,7 @@ x, y, z real
 
 
 
-<p>Global variables can also be created, by using the <tt>global</tt> keyword,
+<p>Global variables can also be created, by using the <code>global</code> keyword,
 as shown in the following example:</p>
 
 <pre>
@@ -169,7 +169,7 @@ def main( ):
 <p>Of course global variables should be avoided in general!</p>
 
 <p>Tetra also allows constant variables to be created with the
-<tt>constant</tt> keyword:</p>
+<code>constant</code> keyword:</p>
 
 <pre>
 <code>
@@ -239,9 +239,9 @@ def main( ):
 </code>
 </pre>
 
-<P>Notice that the keyword is <tt>elif</tt> all as one word, and not "else if".
+<P>Notice that the keyword is <code>elif</code> all as one word, and not "else if".
 Also, notice that print can take multiple parameters, and that the
-<tt>read_int</tt> function can be used to read an int from the user.</p>
+<code>read_int</code> function can be used to read an int from the user.</p>
 
 
 
@@ -271,9 +271,9 @@ body of the loop.  It continues to do this until the condition is false at
 which point it will continue to the code after the loop.</p>
 
 
-<p>Tetra also includes the <tt>break</tt> keyword, which causes a loop to
-immediately exit, the <tt>continue</tt> keyword, which causes a loop to abort
-the current iteration and move on to the next one, and the <tt>pass</tt>
+<p>Tetra also includes the <code>break</code> keyword, which causes a loop to
+immediately exit, the <code>continue</code> keyword, which causes a loop to abort
+the current iteration and move on to the next one, and the <code>pass</code>
 keyword which has no effect but can be used where a statement is needed.</p>
 
 
@@ -287,7 +287,7 @@ the control flow as dictated by function calls and returns, loops, and
 selection statements.  However, we can also specify that statements should be
 executed in parallel.</p>
 
-<p>This is done using the <tt>parallel</tt> keyword, followed by a number of
+<p>This is done using the <code>parallel</code> keyword, followed by a number of
 statements in the parallel block.  For example, this program calls the print
 function two times in parallel, and then calls it a third time:</p>
 
@@ -396,13 +396,13 @@ def even_length(values [int]) bool:
 
 <p>Multi-dimensional lists can also be created.  In this case, you would
 simply increase the number of brackets in the type.  For example, a 2D list of
-reals would be declared as having type <tt>[[real]]</tt>.</p>
+reals would be declared as having type <code>[[real]]</code>.</p>
 
 
 <hr />
 <h3>Ranges</h3>
 
-<p>We can create lists containing ranges of integers using the <tt>...</tt>
+<p>We can create lists containing ranges of integers using the <code>...</code>
 operator.  For instance, we can create a list containing the values one to ten
 inclusive with:</p>
 
@@ -434,7 +434,7 @@ def fact(x int) int:
 <hr />
 <h3>For Loops</h3>
 
-<p>Lists lead us naturally to the Tetra <tt>for</tt> loop which loop over each
+<p>Lists lead us naturally to the Tetra <code>for</code> loop which loop over each
 item in a list.  For example, the following function loops over the list it
 is given and prints each element:</p>
 
@@ -458,7 +458,7 @@ variable one by one, then executes the loop body for that particular value.</p>
 <h3>Parallel For Loops</h3>
 
 <p>We can also use the parallel for loop which is similar to the for loop as
-described above, except that it is preceded with the <tt>parallel</tt> keyword,
+described above, except that it is preceded with the <code>parallel</code> keyword,
 and each of its loop iterations can be executed in parallel.</p>
 
 <p>If we make the for loop above into a parallel for loop, then the calls to
@@ -519,7 +519,7 @@ def square_all(values [real]) [real]:
 </code>
 </pre>
 
-<p>The <tt>list</tt> function creates a list of a given size.</p>
+<p>The <code>list</code> function creates a list of a given size.</p>
 
 
 
@@ -528,7 +528,7 @@ def square_all(values [real]) [real]:
 <hr />
 <h3>Background Execution</h3>
 
-<p>The <tt>parallel</tt> keyword can be used to launch multiple statements at
+<p>The <code>parallel</code> keyword can be used to launch multiple statements at
 the same time, which allows the original thread to launch multiple tasks at
 once, and pause until they are done.</p>
 
@@ -538,7 +538,7 @@ immediately.  For instance, we may want to launch a long-running task, but not
 wait for it to finish immediately so we can move on to other things, such as
 handling user input.</p>
 
-<p>This can be done with Tetra using the <tt>background</tt> statement.  The
+<p>This can be done with Tetra using the <code>background</code> statement.  The
 following program shows how this may be done to write a simple server type of
 program:</p>
 
@@ -572,7 +572,7 @@ will be called.</p>
 for it to finish executing at some later point in time.  For instance, suppose
 we are writing a program which needs to download some data for use, but that it
 can start the download before it really needs the data.  We can use a
-background block with <tt>wait</tt> statement to implement this:</p>
+background block with <code>wait</code> statement to implement this:</p>
 
 <pre>
 <code>
@@ -592,13 +592,13 @@ def main():
 <p>Here we have given the background block a name, "download_task".  After
 launching the task in the background, we can carry on doing things which don't
 require the data.  Once we <i>do</i> need the data, we wait for it with the
-<tt>wait</tt> statement which takes the task we wish to wait for.</p>
+<code>wait</code> statement which takes the task we wish to wait for.</p>
 
 <p>If the task has finished already, the wait statement takes no time at all.
 If it hasn't finished, it will not complete until the task we're waiting for
 has completed.</p>
 
-<p>The named background statement creates a variable of type <tt>task</tt>
+<p>The named background statement creates a variable of type <code>task</code>
 which is first class data type in Tetra.  This means we can return tasks from
 functions, put them in data structures etc.</p>
 
@@ -701,7 +701,7 @@ distinct places in the code.  The fact that the locks are both named "neg_lock"
 ensures that they are linked together.  Only one thread can be in <i>either</i>
 block at the same time.</p>
 
-<p>The named lock statement actually creates a variable of the <tt>mutex</tt>
+<p>The named lock statement actually creates a variable of the <code>mutex</code>
 type.  We can lock an existing mutex variable which has been declared elsewhere.
 For instance the following program uses a global mutex to allow two separate
 functions to make sure that they call print separately to avoid the issue of
@@ -864,7 +864,7 @@ def print_book(ages {string:int}):
 </code>
 </pre>
 
-<p>This function uses the <tt>keys</tt> function which returns a list of all
+<p>This function uses the <code>keys</code> function which returns a list of all
 of the keys in a dictionary.  This can be used to loop over all of the elements in a
 dictionary.</p>
 
@@ -916,7 +916,7 @@ def main():
 <h3>Initializers</h3>
 
 <p>Initializers are functions included in a class with the name
-<tt>init</tt> which allow class objects to be initialized based on certain
+<code>init</code> which allow class objects to be initialized based on certain
 parameters.  For instance, we may want to allow the user to pass in the size of
 a square when they create one:</p>
 
@@ -936,7 +936,7 @@ class Square:
 </code>
 </pre>
 
-<p>Notice that the init function uses the <tt>self</tt> keyword to specify
+<p>Notice that the init function uses the <code>self</code> keyword to specify
 the size belonging to the object as opposed to the local parameter called
 size.</p>
 
@@ -994,7 +994,7 @@ assumed to be in the same file, so the main functions can call the other
 functions in that same file (module) just by name.</p>
 
 <p>We can also write code which accessed code in other modules, but must do so
-explicitly.  This is done with either the <tt>import</tt> or <tt>open</tt>
+explicitly.  This is done with either the <code>import</code> or <code>open</code>
 keyword.  Each statement is given a module name.  For instance, if we have a
 file called "fact.ttr" which contains the following code:</p>
 
@@ -1070,7 +1070,7 @@ with a main function in the file which is importing fact.</p>
 <p>Tetra also has first-class functions which means that functions can be
 passed to and from other functions, stored in variables and data structures
 etc.  When declaring a function type, the parameter types are listed in
-parentheses, followed by the <tt>-&gt;</tt> symbol, followed by the return type
+parentheses, followed by the <code>-&gt;</code> symbol, followed by the return type
 of the function.</p>
 
 <p>The following example shows how a function in Tetra can be written which
@@ -1137,7 +1137,7 @@ keyword, followed by the parameter list, then a colon, and then the function
 expression.</p>
 
 <p>Lambda functions cannot contain statements or span multiple lines.  If a
-larger or more complex function is needed, you must use <tt>def</tt>.</p>
+larger or more complex function is needed, you must use <code>def</code>.</p>
 
 
 
