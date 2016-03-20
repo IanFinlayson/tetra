@@ -15,7 +15,6 @@ body {
     margin-left: auto;
     margin-right: auto;
     background: #fbfbfb;
-    font-size: 110%;
 }
 
 /* use medium boldness for headings and bold tags */
@@ -45,6 +44,8 @@ div.topbar a {
     text-decoration: none;
     padding: 10px;
 }
+
+/* link colors */
 a:link {
     color:#1A5D11;
 }
@@ -64,16 +65,12 @@ table {
     border-radius: 10px;
     border: 1px solid #666;
 }
-
 th, td {
     text-align: left;
     padding: 8px;
 }
-
 tr:nth-child(even){background-color: #f2f2f2}
 
-th {
-}
 
 /* used for clearing the floats after they have been laid out */
 .clear {
