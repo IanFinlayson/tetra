@@ -10,7 +10,7 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="950"
+   width="915"
    height="281"
    id="svg2"
    version="1.1"
@@ -45,7 +45,7 @@
      showgrid="false"
      inkscape:snap-global="false"
      inkscape:window-width="1440"
-     inkscape:window-height="863"
+     inkscape:window-height="899"
      inkscape:window-x="0"
      inkscape:window-y="33"
      inkscape:window-maximized="1">
@@ -128,7 +128,7 @@
     </g>
     <text
        xml:space="preserve"
-       style="font-size:256px;font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Open Sans;-inkscape-font-specification:Open Sans Semi-Bold"
+       style="font-size:256px;font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;font-family:Fira Sans;-inkscape-font-specification:Fira Sans Semi-Bold"
        x="350.14331"
        y="983.79059"
        id="text3349"
