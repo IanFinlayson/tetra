@@ -51,7 +51,7 @@ a:link {
 a:visited {
     color:#1A5D11;
 }
-a.menu:hover {
+a:hover {
     color:#1A5D11;
     background: #FAFAF0;
 }
