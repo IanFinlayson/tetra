@@ -2,11 +2,12 @@
  * apply simple syntax highlighting to Tetra code
  */
 
+/* lists of highlighted elements */
 keywords = ["class", "def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "init", "global", "init", "self", "constant"];
 types = ["int", "real", "string", "bool", "task", "mutex"];
 builtins = ["print", "len", "read_int", "read_string", "read_bool", "read_real", "array", "keys"];
 
-
+/* apply syntax to the page */
 function applySyntax() {
     /* find all the <pre><code> blocks */
     var snippets = document.querySelectorAll('pre code');

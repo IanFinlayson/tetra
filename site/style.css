@@ -115,3 +115,13 @@ pre {
     color: #b00;
 }
 
+/* make nested ones just the outer */
+.tetra-comment .tetra-key,
+.tetra-comment .tetra-type,
+.tetra-comment .tetra-builtin,
+.tetra-comment .tetra-value {
+    /* green */
+    color: #070;
+}
+
+
