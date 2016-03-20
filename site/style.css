@@ -18,6 +18,11 @@ body {
     font-size: 110%;
 }
 
+h3 {
+    font-size: 120%;
+    font-weight: 80%;
+}
+
 /* the top bar */
 div.topbar {
     padding: 5px;
