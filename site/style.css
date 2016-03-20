@@ -91,7 +91,9 @@ pre {
     display: block;
     overflow-x: auto;
     padding: 0.5em;
-    border-style: groove;
+    border-radius: 25px;
+    border: 2px solid #73AD21;
+
 }
 
 /* syntax highlighting colors */
