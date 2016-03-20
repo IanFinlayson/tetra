@@ -1,14 +1,5 @@
 @charset "utf-8";
 
-/* specify the Inconsolata DZ font (Inconsolata with straight quotes) */
-@font-face {
-    font-family: 'Inconsolata DZ';
-    src: url('/fonts/inconsolata-dz.eot');
-    src: url('/fonts/inconsolata-dz.eot?#iefix') format('embedded-opentype'),
-    url('/fonts/inconsolata-dz.woff') format('woff'),
-    url('/fonts/inconsolata-dz.ttf')  format('truetype');
-}
-
 /* font choices */
 body {
     font-family: 'Fira Sans', sans-serif;
