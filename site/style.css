@@ -1,10 +1,5 @@
 @charset "utf-8";
 
-/* font choices */
-body {
-    font-family: 'Lato', sans-serif;
-}
-
 /* specify the Inconsolata DZ font (Inconsolata with straight quotes) */
 @font-face {
     font-family: 'Inconsolata DZ';
@@ -12,6 +7,14 @@ body {
     src: url('/fonts/inconsolata-dz.eot?#iefix') format('embedded-opentype'),
     url('/fonts/inconsolata-dz.woff') format('woff'),
     url('/fonts/inconsolata-dz.ttf')  format('truetype');
+}
+
+/* font choices */
+body {
+    font-family: 'Source Sans Pro', monospace;
+}
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Roboto Slab', serif; 
 }
 pre, code {
     font-family: 'Inconsolata DZ', monospace;
@@ -22,13 +25,9 @@ body {
     width: 92%;
     margin-left: auto;
     margin-right: auto;
-    background: #fcfcfc;
+    background: #fdfdfd;
     color: #151515;
-}
-
-/* use medium boldness for headings and bold tags */
-h1, h2, h3, h4, h5, h6, b, strong {
-    font-weight: 700;
+    font-size: 105%;
 }
 
 /* the top bar */
@@ -62,8 +61,7 @@ a:visited {
     color:#1A5D11;
 }
 a:hover {
-    color:#1A5D11;
-    background: #FAFAF0;
+    color:#227814;
 }
 a:active {
     color:#2CA119;
@@ -78,7 +76,7 @@ th, td {
     text-align: left;
     padding: 8px;
 }
-tr:nth-child(even){background-color: #f2f2f2}
+tr:nth-child(even){background-color: #fafaf5}
 
 
 /* used for clearing the floats after they have been laid out */
@@ -107,7 +105,7 @@ div.footer {
 
 /* pre box styles */
 pre {
-    background: #FAFAF0;
+    background: #fafaf5;
     color: #333;
     display: block;
     overflow-x: auto;
@@ -155,5 +153,4 @@ pre {
     /* red */
     color: #a00;
 }
-
 
