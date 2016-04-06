@@ -2,11 +2,19 @@
 
 /* font choices */
 body {
-    font-family: 'Fira Sans', sans-serif;
+    font-family: 'Lato', sans-serif;
 }
 
+/* specify the Inconsolata DZ font (Inconsolata with straight quotes) */
+@font-face {
+    font-family: 'Inconsolata DZ';
+    src: url('/fonts/inconsolata-dz.eot');
+    src: url('/fonts/inconsolata-dz.eot?#iefix') format('embedded-opentype'),
+    url('/fonts/inconsolata-dz.woff') format('woff'),
+    url('/fonts/inconsolata-dz.ttf')  format('truetype');
+}
 pre, code {
-    font-family: 'Fira Mono', monospace;
+    font-family: 'Inconsolata DZ', monospace;
 }
 
 /* make body take up less space */
@@ -14,12 +22,13 @@ body {
     width: 92%;
     margin-left: auto;
     margin-right: auto;
-    background: #fbfbfb;
+    background: #fcfcfc;
+    color: #151515;
 }
 
 /* use medium boldness for headings and bold tags */
 h1, h2, h3, h4, h5, h6, b, strong {
-    font-weight: 500;
+    font-weight: 700;
 }
 
 /* the top bar */
@@ -62,7 +71,7 @@ a:active {
 
 /* make tables prettier */
 table {
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #666;
 }
 th, td {
@@ -103,7 +112,7 @@ pre {
     display: block;
     overflow-x: auto;
     padding: 0.5em;
-    border-radius: 10px;
+    border-radius: 5px;
     border: 1px solid #666;
 
 }
@@ -146,6 +155,5 @@ pre {
     /* red */
     color: #a00;
 }
-
 
 
