@@ -1,0 +1,41 @@
+@charset "utf-8";
+
+/* syntax highlighting colors */
+.tetra-key {
+    /* blue */
+    color: #004088;
+}
+.tetra-type {
+    /* yellow */
+    color: #b28c10;
+}
+.tetra-builtin {
+    /* purple */
+    color: #73378c;
+}
+.tetra-comment {
+    /* green */
+    color: #1A5D11;
+}
+.tetra-value {
+    /* red */
+    color: #a00;
+}
+
+/* make things nested in omments just the comment */
+.tetra-comment .tetra-key,
+.tetra-comment .tetra-type,
+.tetra-comment .tetra-builtin,
+.tetra-comment .tetra-value {
+    /* green */
+    color: #1A5D11;
+}
+
+/* same for in values (for strings) */
+.tetra-value .tetra-key,
+.tetra-value .tetra-type,
+.tetra-value .tetra-builtin {
+    /* red */
+    color: #a00;
+}
+
