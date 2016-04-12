@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Tetra Programming Language</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Tetra Programming Language Site">
+<meta name="keywords" content="Tetra, Parallel Programming">
+<meta name="author" content="Ian Finlayson">
+
+<!-- load fonts -->
+<link href='https://fonts.googleapis.com/css?family=Fira+Sans:400,700,500,400italic,500italic,700italic,300italic,300|Fira+Mono:400,700' rel='stylesheet' type='text/css'>
+
+<!-- load styles sheets -->
+<link rel="stylesheet" href="style/theme.min.css">
+<link rel="stylesheet" href="style/code.css">
+
+<!-- load scripts -->
+<script src="scripts/jquery.min.js"></script>
+<script src="scripts/bootstrap.min.js"></script>
+<script src="scripts/syntax.js"></script>
+<script src="scripts/preCode.js"></script>
+<script src="scripts/smartquotes.min.js"></script>
+
+<!-- favicons -->
+<link rel="apple-touch-icon-precomposed" sizes="57x57" href="/images/apple-touch-icon-57x57.png" />
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/images/apple-touch-icon-114x114.png" />
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/images/apple-touch-icon-72x72.png" />
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="/images/apple-touch-icon-144x144.png" />
+<link rel="apple-touch-icon-precomposed" sizes="60x60" href="/images/apple-touch-icon-60x60.png" />
+<link rel="apple-touch-icon-precomposed" sizes="120x120" href="/images/apple-touch-icon-120x120.png" />
+<link rel="apple-touch-icon-precomposed" sizes="76x76" href="/images/apple-touch-icon-76x76.png" />
+<link rel="apple-touch-icon-precomposed" sizes="152x152" href="/images/apple-touch-icon-152x152.png" />
+<link rel="icon" type="image/png" href="/images/favicon-196x196.png" sizes="196x196" />
+<link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
+<link rel="icon" type="image/png" href="/images/favicon-32x32.png" sizes="32x32" />
+<link rel="icon" type="image/png" href="/images/favicon-16x16.png" sizes="16x16" />
+<link rel="icon" type="image/png" href="/images/favicon-128.png" sizes="128x128" />
+<meta name="application-name" content="Tetra Site"/>
+<meta name="msapplication-TileColor" content="#FFFFFF" />
+<meta name="msapplication-TileImage" content="/images/mstile-144x144.png" />
+<meta name="msapplication-square70x70logo" content="/images/mstile-70x70.png" />
+<meta name="msapplication-square150x150logo" content="/images/mstile-150x150.png" />
+<meta name="msapplication-square310x310logo" content="/images/mstile-310x310.png" />
+
+<script>
+/* on page load, we apply smart quotes, then do syntax highlighting */
+function initPage() {
+    smartquotes();
+    applySyntax();
+}
+
+/* make the search box work */
+function doSearch() {
+    url = "https://www.google.com/search?q=" + document.getElementById("searchbox").value + "%20site%3Atetra-lang.org";
+    window.location = url;
+}
+</script>
+</head>
+
+<body onload="initPage()">
+

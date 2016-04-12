@@ -1,0 +1,76 @@
+<!-- the navigation bar on top of the page -->
+<nav role="navigation" class="navbar navbar-default">
+
+    <div class="navbar-header">
+        <!-- the collapsed menu thing -->
+        <button type="button" data-target="#navbarCollapse" data-toggle="collapse" class="navbar-toggle">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+
+        <!-- the logo in the upper left -->
+        <a href="/" class="pull-left"><img src="images/header.svg" width="115" class="img-responsive" /></a>
+    </div>
+
+    <!-- the full menu content -->
+    <div id="navbarCollapse" class="collapse navbar-collapse">
+       <ul class="nav navbar-nav">
+            <!-- single items -->
+            <li><a href="news">News</a></li>
+            <li><a href="download">Downloads</a></li>
+
+            <!-- learn menu -->
+            <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Learn<b class="caret"></b></a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="overview">Overview</a></li>
+                    <li><a href="tutorial">Tutorial</a></li>
+                    <li><a href="book">Book</a></li>
+                </ul>
+            </li>
+
+            <!-- docs menu -->
+            <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Documentation<b class="caret"></b></a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="lang-reference">Language Reference</a></li>
+                    <li><a href="lib-reference">Library Reference</a></li>
+                    <li><a href="papers">Papers</a></li>
+                </ul>
+            </li>
+
+            <!-- contribute menu -->
+            <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#">Contribute<b class="caret"></b></a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="https://github.com/IanFinlayson/tetra">Source Code</a></li>
+                    <li><a href="https://github.com/IanFinlayson/tetra/issues">Issue Tracker</a></li>
+                    <li><a href="qa">Q &amp; A Site</a></li>
+                </ul>
+            </li>
+            </ul>
+
+            <!-- search box -->
+            <ul class="nav navbar-nav navbar-right">
+            <li class="dropdown">
+                <a data-toggle="dropdown" class="dropdown-toggle" href="#"><span class="glyphicon glyphicon-search"></span><b class="caret"></b></a>
+              <ul role="menu" class="dropdown-menu">
+                <li>
+                  <form class="navbar-form  " role="search" onSubmit="javascript:doSearch()" action="javascript:void(0)">
+                    <div class="form-group search-phone2">
+                      <input type="text" class="form-control" placeholder="Search" name="search" id="searchbox">
+                    </div>      
+                  </form>
+                </li>
+              </ul>
+            </li>
+
+        <!-- end of menu content -->
+        </ul>
+    </div>
+
+<!-- end of the top bar -->
+</nav>
+
