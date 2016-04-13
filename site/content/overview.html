@@ -1,0 +1,187 @@
+<div class="container">
+
+
+<h1>Overview</h1>
+
+<p>This page gives a brief overview of the Tetra programming language
+including the motivation for creating it, as well as the overall design
+of the language and features.</p>
+
+
+<hr />
+<h3>Motivation</h3>
+
+<p>We are now firmly in the multi core world.  It is virtually impossible to
+buy a new computer with only a single processor core in it.  New phones and
+tablets have either two or four processor cores, and even small computers such
+as the Raspberry Pi now come with four cores.  Nearly every computer that we
+interact with is a parallel machine.</p>
+
+<p>Despite this huge shift in the hardware world towards parallelism, there has
+not been a similar shift in the software world.  Most programs are still
+written in a single-threaded manner with parallel programming relegated to
+niches such as scientific computing, systems development and high performance
+games.</p>
+
+<p>There are several reasons for this.  One of them is that our programming
+languages and tools are, for the most part, still geared towards sequential
+programming.  Most languages do not include syntax support for parallel
+programming which makes it more difficult than it should be.  Tools like
+debuggers are also geared primarily for single-threaded programming.  Some
+aspects of parallel programming are inherently difficult, but some of the
+difficulty comes from our tools not being suited to the task.</p>
+
+<hr />
+<h3>Parallelism Built In</h3>
+
+<p>The main feature that distinguishes Tetra from most programming languages is
+that parallelism is a first-class language feature.  It has syntax support for
+specifying that statements run in parallel, or in the background.  Most
+languages instead use libraries to support parallelism.  To see why this makes
+a difference, consider the following Python program which computes the sum of a
+range of numbers:</P>
+
+<pre>
+total = 0
+
+def sum_range(numbers, a, b):
+    i = a
+    while i &lt;= b:
+        global total
+        total = total + numbers[i]
+        i = i + 1
+
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+sum_range(numbers, 0, 9)
+print(total)
+</pre>
+
+<p>Now suppose we wish to parallelize this so that two threads each added
+half of the numbers.  In Python, we'd have to use the threading library
+like so:</p>
+
+<pre>
+<b>from threading import Thread, Lock</b>
+
+total = 0
+<b>lock = Lock( )</b>
+
+def sum_range(numbers, a, b):
+    i = a
+    while i &lt;= b:
+        global total
+        <b>lock.acquire( )</b>
+        total = total + numbers[i]
+        <b>lock.release( )</b>
+        i = i + 1
+
+numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+<b>t1 = Thread(target = sum_range, args = (numbers, 0, 4))</b>
+<b>t1.start( )</b>
+
+<b>t2 = Thread(target = sum_range, args = (numbers, 5, 9))</b>
+<b>t2.start( )</b>
+
+<b>t1.join( )</b>
+<b>t2.join( )</b>
+print(total)
+</pre>
+
+<p>The code related to specifying what should be done in parallel,
+and what cannot be is in bold.  Notice that it takes over twice as
+many lines as the original sequential program.  Not only is this
+rather tedious, but it is also error-prone.  If we forget to join
+one of the threads, we will have a race condition which is quite
+difficult to debug.</p>
+
+<p>Now, consider the same sequential sum program, but in Tetra:</p>
+
+<pre>
+<code>
+global total = 0
+
+def sum_range(numbers [int], a int, b int):
+    i = a
+    while i &lt;= b:
+        total = total + numbers[i]
+        i = i + 1
+
+def main( ):
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    sum_range(numbers, 0, 9)
+    print(total)
+</code>
+</pre>
+
+<p>The syntax of Tetra is quite close to that of Python.  The major
+differences are that Tetra requires a main function, and Tetra is
+statically typed.</p>
+
+<p>The bigger difference, however, is that parallelizing this Tetra
+program is much easier.  It can be done as follows:</p>
+
+<!-- hard coded syntax due to bolds :( -->
+
+<!--
+global total = 0
+
+def sum_range(numbers [int], a int, b int):
+    i = a
+    while i &lt;= b:
+        lock total_lock:
+        total = total + numbers[i]
+        i = i + 1
+
+def main( ):
+    numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    parallel:
+        sum_range(numbers, 0, 4)
+        sum_range(numbers, 5, 9)
+    print(total)
+-->
+<pre>
+<span class='tetra-key'>global</span> total = <span class="tetra-value">0</span>
+
+<span class='tetra-key'>def</span> sum_range(numbers [<span class='tetra-type'>int</span>], a <span class='tetra-type'>int</span>, b <span class='tetra-type'>int</span>):
+    i = a
+    <span class='tetra-key'>while</span> i &lt;= b:
+        <b><span class='tetra-key'>lock</span> total_lock:</b>
+            total = total + numbers[i]
+            i = i + <span class="tetra-value">1</span>
+
+<span class='tetra-key'>def</span> main( ):
+    numbers = [<span class="tetra-value">1</span>, <span class="tetra-value">2</span>, <span class="tetra-value">3</span>, <span class="tetra-value">4</span>, <span class="tetra-value">5</span>, <span class="tetra-value">6</span>, <span class="tetra-value">7</span>, <span class="tetra-value">8</span>, <span class="tetra-value">9</span>, <span class="tetra-value">10</span>]
+    <b><span class='tetra-key'>parallel</span>:</b>
+        sum_range(numbers, <span class="tetra-value">0</span>, <span class="tetra-value">4</span>)
+        sum_range(numbers, <span class="tetra-value">5</span>, <span class="tetra-value">9</span>)
+    <span class='tetra-builtin'>print</span>(total)
+</pre>
+
+<p>Again, the added lines appear in bold.  Because Tetra has built-in syntax
+for parallelism, there are only two lines to add.  The parallel keyword creates
+a new block of code.  Each statement in that block is launched in a new thread.
+Each thread is automatically joined at the end of the parallel block.  The lock
+statement also creates a new block which gives a critical section.  There is no
+need to explicitly release the lock - it is automatically released at the end
+of the block.</p>
+
+<p>Having syntactical support for parallelism makes it easier and less error-prone
+to use.</p>
+
+
+
+<hr />
+<h3>Designed for Education</h3>
+
+<p>Another reason that parallelism hasn't been widely embraced
+by the software world is that it is still not a large part of
+most computer science curriculum.</p>
+
+
+
+
+
+
+
+</div>
+
