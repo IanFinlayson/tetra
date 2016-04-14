@@ -3,9 +3,9 @@
 
 <h1>Overview</h1>
 
-<p>This page gives a brief overview of the Tetra programming language
-including the motivation for creating it, as well as the overall design
-of the language and features.</p>
+<p>This page gives a brief overview of the Tetra programming language including
+the motivation for creating it, as well as the overall design of the language
+and features.</p>
 
 
 <hr />
@@ -56,9 +56,8 @@ sum_range(numbers, 0, 9)
 print(total)
 </pre>
 
-<p>Now suppose we wish to parallelize this so that two threads each added
-half of the numbers.  In Python, we'd have to use the threading library
-like so:</p>
+<p>Now suppose we wish to parallelize this so that two threads each added half
+of the numbers.  In Python, we'd have to use the threading library like so:</p>
 
 <pre>
 <b>from threading import Thread, Lock</b>
@@ -87,12 +86,11 @@ numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 print(total)
 </pre>
 
-<p>The code related to specifying what should be done in parallel,
-and what cannot be is in bold.  Notice that it takes over twice as
-many lines as the original sequential program.  Not only is this
-rather tedious, but it is also error-prone.  If we forget to join
-one of the threads, we will have a race condition which is quite
-difficult to debug.</p>
+<p>The code related to specifying what should be done in parallel, and what
+cannot be is in bold.  Notice that it takes over twice as many lines as the
+original sequential program.  Not only is this rather tedious, but it is also
+error-prone.  If we forget to join one of the threads, we will have a race
+condition which is quite difficult to debug.</p>
 
 <p>Now, consider the same sequential sum program, but in Tetra:</p>
 
@@ -113,12 +111,11 @@ def main( ):
 </code>
 </pre>
 
-<p>The syntax of Tetra is quite close to that of Python.  The major
-differences are that Tetra requires a main function, and Tetra is
-statically typed.</p>
+<p>The syntax of Tetra is quite close to that of Python.  The major differences
+are that Tetra requires a main function, and Tetra is statically typed.</p>
 
-<p>The bigger difference, however, is that parallelizing this Tetra
-program is much easier.  It can be done as follows:</p>
+<p>The bigger difference, however, is that parallelizing this Tetra program is
+much easier.  It can be done as follows:</p>
 
 <!-- hard coded syntax due to bolds :( -->
 
@@ -165,22 +162,33 @@ statement also creates a new block which gives a critical section.  There is no
 need to explicitly release the lock - it is automatically released at the end
 of the block.</p>
 
-<p>Having syntactical support for parallelism makes it easier and less error-prone
-to use.</p>
+<p>Having syntactical support for parallelism makes it easier and less
+error-prone to use.</p>
 
 
 
 <hr />
 <h3>Designed for Education</h3>
 
-<p>Another reason that parallelism hasn't been widely embraced
-by the software world is that it is still not a large part of
-most computer science curriculum.</p>
+<p>Another reason that parallelism hasn't been widely embraced by the software
+world is that it is still not a large part of most computer science
+curriculums, despite several calls for it to be emphasized more.</p>
 
+<p>One barrier to doing this is that most programming languages used for
+teaching programming, such as Python and Java, do not include parallelism as a
+built-in feature.  The most widely used language, Python, is especially bad for
+parallelism because, in addition to lacking syntax for it, Python uses a
+"global interpreter lock" which actually prevents multiple threads from running
+at the same time.</p>
 
+<p>On the other side of things, the languages which <i>do</i> have good support
+for parallelism, such as C and Fortran, are not widely used for introductory
+classes and can be difficult even for experienced programmers.</p>
 
-
-
+<p>Tetra is designed to fill the niche of a language that is designed with
+parallel programming in mind, but which prioritizes ease of use over
+performance.  It does this by including built-in data structures, garbage
+collection, and a simple syntax.</p>
 
 
 </div>
