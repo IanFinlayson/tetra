@@ -4,5 +4,5 @@ ErrorDocument 404 /404
 # set up URL rewriting so that root/foobar becomes root/site.php?page=foobar
 RewriteEngine On
 RewriteBase /
-RewriteRule ^([a-z0-9]+)/?$ site.php?page=$1 [NC,L,QSA]
+RewriteRule ^([a-z0-9-]+)/?$ site.php?page=$1 [NC,L,QSA]
 RewriteRule ^$ site.php?page=home [NC,L,QSA]
