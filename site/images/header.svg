@@ -10,8 +10,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="140"
-   height="60"
+   width="35"
+   height="28"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
@@ -37,17 +37,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:zoom="4.6301655"
-     inkscape:cx="18.311434"
-     inkscape:cy="28.394604"
+     inkscape:zoom="9.260331"
+     inkscape:cx="17.029992"
+     inkscape:cy="17.769561"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:snap-global="false"
-     inkscape:window-width="1351"
-     inkscape:window-height="750"
-     inkscape:window-x="2059"
-     inkscape:window-y="104"
+     inkscape:window-width="1916"
+     inkscape:window-height="1056"
+     inkscape:window-x="1920"
+     inkscape:window-y="20"
      inkscape:window-maximized="0">
     <inkscape:grid
        type="xygrid"
@@ -65,7 +65,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -73,10 +73,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(0,-992.36218)">
+     transform="translate(0,-1024.3622)">
     <g
        id="g4196"
-       transform="matrix(0.21952,0,0,0.21952,-7.389317,806.83579)">
+       transform="matrix(0.21952,0,0,0.21952,-21.549067,824.39045)">
       <rect
          transform="matrix(-0.70710678,-0.70710678,-0.70710678,0.70710678,0,0)"
          y="509.79361"
@@ -151,16 +151,5 @@
          d="m 115.55651,957.86566 -14.29569,-14.30076 14.18821,-14.18821 14.18821,-14.18822 14.30074,14.30075 14.30075,14.30074 -14.19327,14.18823 -14.19327,14.18823 -14.29568,-14.30076 z"
          style="fill:#ffffff;stroke-width:1.23399997;stroke-miterlimit:4;stroke-dasharray:none" />
     </g>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30px;line-height:125%;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="55.277718"
-       y="1030.7498"
-       id="text3348"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan3350"
-         x="55.277718"
-         y="1030.7498">tetra</tspan></text>
   </g>
 </svg>
