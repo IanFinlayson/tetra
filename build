@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd source/interpreter && make && cd ../..
+cd source/ide && qmake tetra.pro && make
+
