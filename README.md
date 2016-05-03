@@ -31,12 +31,13 @@ Installation
 
 Tetra has thus far only works on Linux systems.  To install:
 
-1. Download Tetra, either by cloning the repository, or by downloading a zip file.
-2. Install dependencies
+1 Download Tetra, either by cloning the repository, or by downloading a zip file.
+
+2 Install dependencies
 ```
 sudo apt-get install build-essential clang bison qt5-default
 ```
-3. Compile it:
+3 Compile it:
 ```
 cd tetra
 ./build
