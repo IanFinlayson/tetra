@@ -24,6 +24,10 @@ DEPENDPATH += $$PWD/../interpreter
 PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
 LIBS += -L$$PWD/../interpreter/ -ltetra
 
+# add target to reformat code
+format.commands = clang-format -i -style=Google *.cpp *.h
+QMAKE_EXTRA_TARGETS += format
+
 # specify all the files we need
 SOURCES += main.cpp\
     mainwindow.cpp \

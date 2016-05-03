@@ -4,25 +4,24 @@
  * access to a method which will build and run the program
  */
 
-#include <iostream>
-#include <cstdlib>
 #include <argp.h>
-#include "frontend.h"
+#include <cstdlib>
+#include <iostream>
 #include "backend.h"
 #include "commandObserver.h"
+#include "frontend.h"
 
 /* the info for the command line parameters */
 const char* argp_program_version = "tetra 0.1";
 const char* argp_program_bug_address = "<finlayson@umw.edu>";
-const char doc [] = "The Tetra Interpreter";
+const char doc[] = "The Tetra Interpreter";
 const char args_doc[] = "FILE";
 
 /* the command line options for the compiler */
 const struct argp_option options[] = {
-  {"debug",  'd', 0, 0, "Start in debugging mode", 0},
-  {"threads", 't', "NUM", 0, "Specify NUM threads maximum", 0},
-  {0, 0, 0, 0, 0, 0}
-};
+    {"debug", 'd', 0, 0, "Start in debugging mode", 0},
+    {"threads", 't', "NUM", 0, "Specify NUM threads maximum", 0},
+    {0, 0, 0, 0, 0, 0}};
 
 /* used by main to communicate with parse_opt */
 struct arguments {
@@ -32,10 +31,9 @@ struct arguments {
 };
 
 /* the function which parses command line options */
-error_t parse_opt (int key, char* arg, struct argp_state* state) {
-
+error_t parse_opt(int key, char* arg, struct argp_state* state) {
   /* get the input argument from argp_parse */
-  struct arguments *arguments = (struct arguments*) state->input;
+  struct arguments* arguments = (struct arguments*)state->input;
 
   /* switch on the command line option that was passed in */
   switch (key) {
@@ -97,7 +95,7 @@ int main(int argc, char** argv) {
   FILE* input = fopen(args.input_file_name, "r");
   if (!input) {
     fprintf(stderr, "Error, can not open %s for reading!\n",
-        args.input_file_name);
+            args.input_file_name);
   }
 
   ConsoleArray console;
@@ -112,30 +110,30 @@ int main(int argc, char** argv) {
 
   Node* tree;
 
-  // Parse file, and check for initial errors. Print out and exit if an error was found
+  // Parse file, and check for initial errors. Print out and exit if an error
+  // was found
   try {
     // File is last parameter
     tree = parseFile(args.input_file_name);
-  } catch(Error e) {
-    std::cout << "The following error was detected in your program:\n" << e << "\nExecution aborted" << std::endl;
+  } catch (Error e) {
+    std::cout << "The following error was detected in your program:\n"
+              << e << "\nExecution aborted" << std::endl;
     exit(EXIT_FAILURE);
   }
   int ret = 0;
-  try {   
+  try {
     ret = interpret(tree, args.debug, args.threads);
-  }
-  catch (SystemError e) {
+  } catch (SystemError e) {
     cout << "The interpreter has entered an undefined state: " << endl;
     cout << e << endl;
     exit(EXIT_FAILURE);
-  }
-  catch (RuntimeError e) {
-    cout << "The following error was detected while running your program: " << endl;
+  } catch (RuntimeError e) {
+    cout << "The following error was detected while running your program: "
+         << endl;
     cout << e << endl;
     e.getContext().printStackTrace();
     exit(EXIT_FAILURE);
-  }
-  catch (Error e) {
+  } catch (Error e) {
     cout << "The following error was detected in your program: " << endl;
     cout << e << endl;
     exit(EXIT_FAILURE);
@@ -144,5 +142,3 @@ int main(int argc, char** argv) {
   std::cout << std::endl;
   return ret;
 }
-
-

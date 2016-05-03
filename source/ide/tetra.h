@@ -1,10 +1,9 @@
 #ifndef TETRA_H
 #define TETRA_H
 
-class Tetra
-{
-public:
-    Tetra();
+class Tetra {
+ public:
+  Tetra();
 };
 
-#endif // TETRA_H
+#endif  // TETRA_H

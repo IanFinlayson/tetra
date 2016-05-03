@@ -40,9 +40,13 @@ parser.gencpp parser.genh: parser.y $(HDRS) Makefile
 tags: $(SRCS) $(HDRS) parser.y
 	ctags $(SRCS) $(HDRS) parser.y
 
+# reformat all code
+format:
+	clang-format -i -style=Google $(SRCS) $(HDRS)
+
 # tidy up
 clean:
-	rm -f libtetra.a tetra $(OBJS) parser.genh parser.gencpp parser.output
+	rm -f libtetra.a tetra $(OBJS) parser.genh parser.gencpp parser.output tree.gv tree.png
 
-.PHONY: all clean
+.PHONY: all clean format
 

@@ -1,19 +1,19 @@
 /* functions for error reporting */
 
-#include <string>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
-#include <cstdlib>
-#include <cstdio>
-#include "frontend.h"
+#include <string>
 #include "backend.h"
+#include "frontend.h"
 #include "parser.genh"
 
 /* this function search and replaces a string in place */
 void replace(string& str, const string& from, const string& to) {
   size_t start_pos = str.find(from);
-  if(start_pos != string::npos) {
-    str.replace(start_pos, from.length( ), to);
+  if (start_pos != string::npos) {
+    str.replace(start_pos, from.length(), to);
     replace(str, from, to);
   }
 }
@@ -65,39 +65,37 @@ Error::Error(const string& mesg, int lineno) {
   this->lineno = lineno;
 }
 
-string Error::getMessage( ) const {
-  return mesg;
-}
+string Error::getMessage() const { return mesg; }
 
-int Error::getLine( ) const {
-  return lineno;
-}
+int Error::getLine() const { return lineno; }
 
 /* print an error */
 ostream& operator<<(ostream& out, const Error& error) {
   out << "Error: ";
-  if (error.getLine( )) {
-    out << "(line " << error.getLine( ) << ") ";
+  if (error.getLine()) {
+    out << "(line " << error.getLine() << ") ";
   }
 
-  out << error.getMessage( ) << endl;
+  out << error.getMessage() << endl;
   return out;
 }
 
 /* the runtime error class */
-RuntimeError::RuntimeError(const std::string& pMessage, int pLine, TetraContext& pContext) : Error(pMessage,pLine), context(pContext) {
-  //nothing else
+RuntimeError::RuntimeError(const std::string& pMessage, int pLine,
+                           TetraContext& pContext)
+    : Error(pMessage, pLine), context(pContext) {
+  // nothing else
 }
 
-TetraContext& RuntimeError::getContext() {
-  return context;
-}
+TetraContext& RuntimeError::getContext() { return context; }
 
 /* the system error class */
-SystemError::SystemError(const std::string& pMessage, int pLine, const Node* pNode) : Error(pMessage,pLine), node(pNode) {
-	//nothing else
+SystemError::SystemError(const std::string& pMessage, int pLine,
+                         const Node* pNode)
+    : Error(pMessage, pLine), node(pNode) {
+  // nothing else
 }
 
-const Node* SystemError::getNode() {
-	return node;
-}
+const Node* SystemError::getNode() { return node; }
+
+

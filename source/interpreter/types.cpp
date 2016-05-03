@@ -1,10 +1,10 @@
 /* functions for type handling and inference */
 
-#include <string>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
-#include <cstdlib>
-#include <cstdio>
+#include <string>
 #include "frontend.h"
 #include "parser.genh"
 
@@ -17,20 +17,26 @@ map<string, Symbol> globals;
 string itoa(int num) {
   stringstream ss;
   ss << num;
-  return ss.str( );
+  return ss.str();
 }
 
 /* return a string of a data type */
 string typeToString(DataType* t) {
-  switch (t->getKind( )) {
-    case TYPE_INT: return "int";
-    case TYPE_REAL: return "real";
-    case TYPE_STRING: return "string";
-    case TYPE_BOOL: return "bool";
-    case TYPE_VOID: return "void";
+  switch (t->getKind()) {
+    case TYPE_INT:
+      return "int";
+    case TYPE_REAL:
+      return "real";
+    case TYPE_STRING:
+      return "string";
+    case TYPE_BOOL:
+      return "bool";
+    case TYPE_VOID:
+      return "void";
     case TYPE_VECTOR:
-                    return "[" + typeToString(t->getSub( )) + "]";
-    default: throw Error("typeToString: Unknown data type");
+      return "[" + typeToString(t->getSub()) + "]";
+    default:
+      throw Error("typeToString: Unknown data type");
   }
 }
 
@@ -40,37 +46,30 @@ DataType::DataType(DataTypeKind kind) {
   subtype = NULL;
 }
 
-DataTypeKind DataType::getKind( ) const {
-  return kind;
-}
+DataTypeKind DataType::getKind() const { return kind; }
 
-DataType* DataType::getSub( ) const {
-  return subtype;
-}
+DataType* DataType::getSub() const { return subtype; }
 
-void DataType::setSubType(DataType* subtype) {
-  this->subtype = subtype;
-}
+void DataType::setSubType(DataType* subtype) { this->subtype = subtype; }
 
 /* find the base type of a data type */
 DataTypeKind baseType(DataType* t) {
-  if (t->getKind( ) == TYPE_VECTOR)
-    return baseType(t->getSub( ));
+  if (t->getKind() == TYPE_VECTOR)
+    return baseType(t->getSub());
   else
-    return t->getKind( );
+    return t->getKind();
 }
-
 
 /* compare two data types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're not the same kind, fail */
-  if (lhs.getKind( ) != rhs.getKind( )) {
+  if (lhs.getKind() != rhs.getKind()) {
     return false;
   }
 
   /* if they're vectors, recursively ensure the subtypes match */
-  if (lhs.getKind( ) == TYPE_VECTOR) {
-    return (*(lhs.getSub( )) == *(rhs.getSub( )));
+  if (lhs.getKind() == TYPE_VECTOR) {
+    return (*(lhs.getSub()) == *(rhs.getSub()));
   }
 
   /* otherwise return true */
@@ -87,14 +86,15 @@ void addParams(Node* params, Node* func) {
   if (!params) return;
 
   /* if it's more than one, recurse on both */
-  if (params->kind( ) == NODE_FORMAL_PARAM_LIST) {
+  if (params->kind() == NODE_FORMAL_PARAM_LIST) {
     addParams(params->child(0), func);
     addParams(params->child(1), func);
 
-  } 
+  }
   /* else if it's just one param, handle it */
-  else if (params->kind( ) == NODE_FORMAL_PARAM) {
-    func->insertSymbol(Symbol(params->getString( ), params->type( ), params->getLine( )));
+  else if (params->kind() == NODE_FORMAL_PARAM) {
+    func->insertSymbol(
+        Symbol(params->getString(), params->type(), params->getLine()));
   }
 }
 
@@ -110,9 +110,8 @@ DataType* inferPrint(Node* pcall, Node* func) {
 
   /* while there are arguments */
   while (arg) {
-
     /* if this arg is a param, check the child */
-    if ((arg->kind( ) == NODE_ACTUAL_PARAM_LIST) && (arg->numChildren( ) >= 1)) {
+    if ((arg->kind() == NODE_ACTUAL_PARAM_LIST) && (arg->numChildren() >= 1)) {
       inferExpression(arg->child(0), func);
     }
     /* else if it's some other child, check it itself */
@@ -121,12 +120,13 @@ DataType* inferPrint(Node* pcall, Node* func) {
     }
 
     /* if the next arg is another arg, move on */
-    if ((arg->numChildren( ) >= 2) && (arg->child(1)->kind( ) == NODE_ACTUAL_PARAM_LIST)) {
+    if ((arg->numChildren() >= 2) &&
+        (arg->child(1)->kind() == NODE_ACTUAL_PARAM_LIST)) {
       arg = arg->child(1);
     }
 
     /* else just check it and we're done */
-    else if (arg->numChildren( ) >= 2) {
+    else if (arg->numChildren() >= 2) {
       inferExpression(arg->child(1), func);
       arg = NULL;
     } else {
@@ -137,57 +137,57 @@ DataType* inferPrint(Node* pcall, Node* func) {
   return NULL;
 }
 
-
 DataType* inferLen(Node* funcall, Node* func) {
   /* check that there is one argument */
-  if (funcall->numChildren( ) != 1) {
-    throw Error("len function expects one argument", funcall->getLine( ));
+  if (funcall->numChildren() != 1) {
+    throw Error("len function expects one argument", funcall->getLine());
   }
 
   /* infer the argument and capture its type */
   DataType* t = inferExpression(funcall->child(0), func);
 
   /* check that it is a vector or a string */
-  if ((t->getKind( ) != TYPE_VECTOR) && (t->getKind( ) != TYPE_STRING)) {
-    throw Error("len function must be called with either a string or a vector", funcall->getLine( ));
+  if ((t->getKind() != TYPE_VECTOR) && (t->getKind() != TYPE_STRING)) {
+    throw Error("len function must be called with either a string or a vector",
+                funcall->getLine());
   }
 
   /* should return an int */
   return new DataType(TYPE_INT);
 }
 
-
 DataType* inferRead(Node* funcall) {
   /* make sure there are no parameters */
-  if (funcall->numChildren( ) > 0) {
-    throw Error(funcall->getString( ) + " should not have any parameters", funcall->getLine( ));
+  if (funcall->numChildren() > 0) {
+    throw Error(funcall->getString() + " should not have any parameters",
+                funcall->getLine());
   }
 
   /* get the return type right */
-  if (funcall->getString( ) == "read_string") return new DataType(TYPE_STRING);
-  if (funcall->getString( ) == "read_int") return new DataType(TYPE_INT);
-  if (funcall->getString( ) == "read_real") return new DataType(TYPE_REAL);
-  if (funcall->getString( ) == "read_bool") return new DataType(TYPE_BOOL);
+  if (funcall->getString() == "read_string") return new DataType(TYPE_STRING);
+  if (funcall->getString() == "read_int") return new DataType(TYPE_INT);
+  if (funcall->getString() == "read_real") return new DataType(TYPE_REAL);
+  if (funcall->getString() == "read_bool") return new DataType(TYPE_BOOL);
 
-  throw Error("This should not happen!", funcall->getLine( ));
+  throw Error("This should not happen!", funcall->getLine());
 }
 
-
-/* this function checks if a function call is part of the standard library and infers it */
+/* this function checks if a function call is part of the standard library and
+ * infers it */
 DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
   is_stdlib = true;
-  if (funcall->getString( ) == "print") {
+  if (funcall->getString() == "print") {
     return inferPrint(funcall, func);
   }
 
-  if (funcall->getString( ) == "len") {
+  if (funcall->getString() == "len") {
     return inferLen(funcall, func);
   }
 
-  if ((funcall->getString( ) == "read_string") ||
-      (funcall->getString( ) == "read_int") ||
-      (funcall->getString( ) == "read_real") ||
-      (funcall->getString( ) == "read_bool")) {
+  if ((funcall->getString() == "read_string") ||
+      (funcall->getString() == "read_int") ||
+      (funcall->getString() == "read_real") ||
+      (funcall->getString() == "read_bool")) {
     return inferRead(funcall);
   }
 
@@ -195,15 +195,14 @@ DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
   return NULL;
 }
 
-
 /* count the number of indices used in an index operation */
 int countIndices(Node* idx, Node* func) {
   if (!idx) return 0;
 
   /* check the index for being an int */
   DataType* itype = inferExpression(idx->child(0), func);
-  if (itype->getKind( ) != TYPE_INT) {
-    throw Error("Index must be integral", idx->getLine( ));
+  if (itype->getKind() != TYPE_INT) {
+    throw Error("Index must be integral", idx->getLine());
   }
 
   /* return 1 for this, and recurse */
@@ -212,8 +211,8 @@ int countIndices(Node* idx, Node* func) {
 
 /* count the number of dimensions in a data type */
 int countDimensions(DataType* t) {
-  if (t->getKind( ) == TYPE_VECTOR) {
-    return 1 + countDimensions(t->getSub( ));
+  if (t->getKind() == TYPE_VECTOR) {
+    return 1 + countDimensions(t->getSub());
   } else {
     return 0;
   }
@@ -222,21 +221,21 @@ int countDimensions(DataType* t) {
 /* this do checking of types on a vector reference */
 DataType* checkVector(Node* vec, Node* func) {
   /* look up the left hand side */
-  Symbol sym = func->lookupSymbol(vec->child(0)->getString( ), vec->getLine( ));
+  Symbol sym = func->lookupSymbol(vec->child(0)->getString(), vec->getLine());
 
   /* count the indices on the right (also ensure they are ints! */
   int levels = countIndices(vec->child(1), func);
 
   /* count the dimension of a vector */
-  int dim = countDimensions(sym.getType( ));
+  int dim = countDimensions(sym.getType());
 
   /* make sure dim is at least big enough for this many indexes */
   if (dim < levels) {
-    throw Error("Too many indexes on vector", vec->getLine( ));
+    throw Error("Too many indexes on vector", vec->getLine());
   }
 
   /* the base type is that of the symbol  */
-  DataType* result = new DataType(baseType(sym.getType( )));
+  DataType* result = new DataType(baseType(sym.getType()));
 
   /* add veector wrapper for dim-levels times */
   for (int i = 0; i < (dim - levels); i++) {
@@ -252,9 +251,9 @@ DataType* checkVector(Node* vec, Node* func) {
 Node* findFunction(const string& name, int lineno) {
   Node* f = root;
 
-  while (f && (f->numChildren( ) > 0)) {
+  while (f && (f->numChildren() > 0)) {
     /* see if this node is the thing */
-    if (f->child(0)->getString( ) == name) {
+    if (f->child(0)->getString() == name) {
       return f->child(0);
     }
 
@@ -265,10 +264,8 @@ Node* findFunction(const string& name, int lineno) {
   throw Error("Function '" + name + "' not defined", lineno);
 }
 
-
 /* infer the function of a function call and check the types */
 DataType* inferFuncall(Node* funcall, Node* func) {
-
   /* check for stdlib functions */
   bool is_stdlib;
   DataType* t = inferStdlib(funcall, func, is_stdlib);
@@ -277,16 +274,17 @@ DataType* inferFuncall(Node* funcall, Node* func) {
   }
 
   /* find the function node this thing matches */
-  Node* f = findFunction(funcall->getString( ), funcall->getLine( ));
+  Node* f = findFunction(funcall->getString(), funcall->getLine());
 
   /* if the call has no parameters, make sure the function doesn't expect any */
-  if (funcall->numChildren( ) == 0) {
-    if (f->numChildren( ) > 1) {
-      throw Error("Funcion called with no parameters, but expects some", funcall->getLine( ));
+  if (funcall->numChildren() == 0) {
+    if (f->numChildren() > 1) {
+      throw Error("Funcion called with no parameters, but expects some",
+                  funcall->getLine());
     }
 
     /* return from here as the below code expects >= 1 param */
-    return f->type( );
+    return f->type();
   }
 
   /* for each param, and also for each expression, make sure they match up */
@@ -295,39 +293,40 @@ DataType* inferFuncall(Node* funcall, Node* func) {
 
   int p = 1;
   while (formal && actual) {
-    DataType* t1, * t2;
+    DataType *t1, *t2;
 
     /* it could be a list, or an actual param */
-    if (actual->kind( ) == NODE_ACTUAL_PARAM_LIST)  {
+    if (actual->kind() == NODE_ACTUAL_PARAM_LIST) {
       t1 = inferExpression(actual->child(0), func);
     } else {
       t1 = inferExpression(actual, func);
     }
 
     /* same for formal */
-    if (formal->kind( ) == NODE_FORMAL_PARAM_LIST)  {
-      t2 = formal->child(0)->type( );
+    if (formal->kind() == NODE_FORMAL_PARAM_LIST) {
+      t2 = formal->child(0)->type();
     } else {
-      t2 = formal->type( );
+      t2 = formal->type();
     }
 
     /* check for type mismatch */
     if (*t1 != *t2) {
-      throw Error("Function '" + funcall->getString( ) + "' expected " + 
-          typeToString(t2) + " but was called with " + typeToString(t1) + 
-          " for parameter " + itoa(p), funcall->getLine( ));
+      throw Error("Function '" + funcall->getString() + "' expected " +
+                      typeToString(t2) + " but was called with " +
+                      typeToString(t1) + " for parameter " + itoa(p),
+                  funcall->getLine());
     }
     p++;
 
     /* move on to the next one */
-    if (formal->kind( ) == NODE_FORMAL_PARAM_LIST) {
+    if (formal->kind() == NODE_FORMAL_PARAM_LIST) {
       formal = formal->child(1);
     } else {
       formal = NULL;
     }
 
     /* move on to the next one */
-    if (actual->kind( ) == NODE_ACTUAL_PARAM_LIST) {
+    if (actual->kind() == NODE_ACTUAL_PARAM_LIST) {
       actual = actual->child(1);
     } else {
       actual = NULL;
@@ -336,13 +335,16 @@ DataType* inferFuncall(Node* funcall, Node* func) {
 
   /* if there are any left, the arity mismatched */
   if (formal) {
-    throw Error("Too few parameters to function '" + funcall->getString( ) + "'", funcall->getLine( ));
+    throw Error("Too few parameters to function '" + funcall->getString() + "'",
+                funcall->getLine());
   } else if (actual) {
-    throw Error("Too many parameters to function '" + funcall->getString( ) + "'", funcall->getLine( ));
+    throw Error(
+        "Too many parameters to function '" + funcall->getString() + "'",
+        funcall->getLine());
   }
 
   /* return the type of function itself */
-  return f->type( );
+  return f->type();
 }
 
 /* infer the types of an expression, and also return the type */
@@ -353,37 +355,42 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
   DataType *lhs, *rhs;
 
   /* switch on the type of expression */
-  switch (expr->kind( )) {
+  switch (expr->kind()) {
     case NODE_ASSIGN: {
       /* get the type of the right hand side */
       rhs = inferExpression(expr->child(1), func);
 
       /* check if this symbol exists and check that the types match */
-      if (func->hasSymbol(expr->child(0)->getString( ))) {
-        Symbol sym = func->lookupSymbol(expr->child(0)->getString( ), 0);
-        if (*sym.getType( ) != *rhs) {
-          throw Error("Assigning '" + expr->child(0)->getString( ) + "' to a new type", expr->getLine( ));
+      if (func->hasSymbol(expr->child(0)->getString())) {
+        Symbol sym = func->lookupSymbol(expr->child(0)->getString(), 0);
+        if (*sym.getType() != *rhs) {
+          throw Error(
+              "Assigning '" + expr->child(0)->getString() + "' to a new type",
+              expr->getLine());
         }
         /* set the node type as well */
         expr->child(0)->setType(rhs);
       } else {
         /* it's not there, so we should insert a new one */
-        func->insertSymbol(Symbol(expr->child(0)->getString( ), rhs, expr->getLine( )));
+        func->insertSymbol(
+            Symbol(expr->child(0)->getString(), rhs, expr->getLine()));
         /* set the node type as well */
         expr->child(0)->setType(rhs);
       }
 
       /* return the type of the rhs */
       return rhs;
-      break;}
+      break;
+    }
 
     case NODE_OR:
     case NODE_AND:
       /* check that both children are bools */
       lhs = inferExpression(expr->child(0), func);
       rhs = inferExpression(expr->child(1), func);
-      if ((lhs->getKind( ) != TYPE_BOOL) || (rhs->getKind( ) != TYPE_BOOL)) {
-        throw Error("Only bool values may be used with and/or", expr->getLine( ));
+      if ((lhs->getKind() != TYPE_BOOL) || (rhs->getKind() != TYPE_BOOL)) {
+        throw Error("Only bool values may be used with and/or",
+                    expr->getLine());
       }
       /* the result is a bool as well */
       return new DataType(TYPE_BOOL);
@@ -400,7 +407,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
       if (*lhs != *rhs) {
         cout << "A = " << typeToString(lhs) << endl;
         cout << "B = " << typeToString(rhs) << endl;
-        throw Error("Only matching types can be compared", expr->getLine( ));
+        throw Error("Only matching types can be compared", expr->getLine());
       }
 
       /* the result is a bool */
@@ -409,8 +416,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_NOT:
       /* check that the operand is bool */
       lhs = inferExpression(expr->child(0), func);
-      if (lhs->getKind( ) != TYPE_BOOL) {
-        throw Error("Operand of not must be a bool", expr->getLine( ));
+      if (lhs->getKind() != TYPE_BOOL) {
+        throw Error("Operand of not must be a bool", expr->getLine());
       }
       return new DataType(TYPE_BOOL);
 
@@ -423,8 +430,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
       lhs = inferExpression(expr->child(0), func);
       rhs = inferExpression(expr->child(1), func);
 
-      if ((lhs->getKind( ) != TYPE_INT) || (rhs->getKind( ) != TYPE_INT)) {
-        throw Error("Operands to bitwise operator must be integer", expr->getLine( ));
+      if ((lhs->getKind() != TYPE_INT) || (rhs->getKind() != TYPE_INT)) {
+        throw Error("Operands to bitwise operator must be integer",
+                    expr->getLine());
       }
 
       /* returns an integer back */
@@ -433,8 +441,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_BITNOT:
       /* check that the operand is an int */
       lhs = inferExpression(expr->child(0), func);
-      if (lhs->getKind( ) != TYPE_INT) {
-        throw Error("Operand to bitwise not must be an integer", expr->getLine( ));
+      if (lhs->getKind() != TYPE_INT) {
+        throw Error("Operand to bitwise not must be an integer",
+                    expr->getLine());
       }
       return new DataType(TYPE_INT);
 
@@ -444,47 +453,48 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_DIVIDE:
     case NODE_MODULUS:
     case NODE_EXP:
-      /* check that both operands match and that they are int/real 
+      /* check that both operands match and that they are int/real
        * TODO at some point add in int->real promotion... */
       lhs = inferExpression(expr->child(0), func);
       rhs = inferExpression(expr->child(1), func);
 
       if (*lhs != *rhs) {
-        throw Error("In binary operator, the types " + typeToString(lhs) + " and " +
-            typeToString(rhs) + " are not compatible", expr->getLine( ));
+        throw Error("In binary operator, the types " + typeToString(lhs) +
+                        " and " + typeToString(rhs) + " are not compatible",
+                    expr->getLine());
       }
 
-      if ((lhs->getKind( ) != TYPE_INT) && (rhs->getKind( ) != TYPE_REAL)) {
+      if ((lhs->getKind() != TYPE_INT) && (rhs->getKind() != TYPE_REAL)) {
         /* special case: adding strings and vectors is OK */
-        if ((expr->kind( ) == NODE_PLUS) &&
-            ((lhs->getKind( ) == TYPE_STRING) || (lhs->getKind( ) == TYPE_VECTOR))) {
+        if ((expr->kind() == NODE_PLUS) && ((lhs->getKind() == TYPE_STRING) ||
+                                            (lhs->getKind() == TYPE_VECTOR))) {
           /* s'alright */
         } else {
-          throw Error("Numeric type required", expr->getLine( ));
+          throw Error("Numeric type required", expr->getLine());
         }
       }
 
       /* if it's a vector, we need to copy the type! */
-      if (lhs->getKind( ) == TYPE_VECTOR) {
+      if (lhs->getKind() == TYPE_VECTOR) {
         DataType* vec = new DataType(TYPE_VECTOR);
 
         /* copy subs all the way */
-        DataType* sub = lhs->getSub( );
+        DataType* sub = lhs->getSub();
         DataType* ptr = vec;
         while (sub) {
           /* set current one */
           ptr->setSubType(sub);
-          
+
           /* move to next */
-          sub = sub->getSub( );
-          ptr = ptr->getSub( );
+          sub = sub->getSub();
+          ptr = ptr->getSub();
         }
 
         return vec;
       }
 
       /* return the same type back */
-      return new DataType(lhs->getKind( ));
+      return new DataType(lhs->getKind());
 
     case NODE_VECREF:
       /* check vector */
@@ -496,9 +506,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
       DataType* t = new DataType(TYPE_VECTOR);
       t->setSubType(new DataType(TYPE_INT));
       return t;
-
-
-    } case NODE_FUNCALL:
+    }
+    case NODE_FUNCALL:
       return inferFuncall(expr, func);
     case NODE_ACTUAL_PARAM_LIST:
       throw Error("inferExpression: should not a param list here");
@@ -506,18 +515,18 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_IDENTIFIER: {
       /* check if it's a global first */
-      if (globals.count(expr->getString( )) > 0) {
-        Symbol sym = globals.find(expr->getString( ))->second;
-        return sym.getType( );
+      if (globals.count(expr->getString()) > 0) {
+        Symbol sym = globals.find(expr->getString())->second;
+        return sym.getType();
       }
 
-
       /* look it up and return that type */
-      Symbol sym = func->lookupSymbol(expr->getString( ), expr->getLine( ));
-      return sym.getType( );
-      break;}
+      Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+      return sym.getType();
+      break;
+    }
 
-      /* return these types */
+    /* return these types */
     case NODE_INTVAL:
       return new DataType(TYPE_INT);
     case NODE_REALVAL:
@@ -532,12 +541,12 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
       dt->setSubType(inferExpression(expr->child(0), func));
 
       /* if there are more than one child, recurse on them too */
-      for (int i = 1; i < expr->numChildren( ); i++) {
+      for (int i = 1; i < expr->numChildren(); i++) {
         DataType* other = inferExpression(expr->child(i), func);
 
         /* check that they match! */
         if (*other != *dt) {
-          throw Error("Mismatched vector types", expr->getLine( ));
+          throw Error("Mismatched vector types", expr->getLine());
         }
       }
 
@@ -545,7 +554,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     }
 
     default:
-      cout << expr->kind( ) << endl;
+      cout << expr->kind() << endl;
       throw Error("inferExpression: unknown node type");
       break;
   }
@@ -570,7 +579,7 @@ void inferBlock(Node* block, Node* func) {
   if (!block) return;
 
   /* switch on the different types */
-  switch (block->kind( )) {
+  switch (block->kind()) {
     case NODE_STATEMENT:
       /* handle both children */
       inferBlock(block->child(0), func);
@@ -586,23 +595,26 @@ void inferBlock(Node* block, Node* func) {
       }
 
       /* check that it matches the return type */
-      if (*ret != *(func->type( ))) {
-        throw Error("Return value type does not match function's declared type", block->getLine( ));
+      if (*ret != *(func->type())) {
+        throw Error("Return value type does not match function's declared type",
+                    block->getLine());
       }
-      break;}
+      break;
+    }
     case NODE_IF: {
       /* infer the type of the expression */
       DataType* cond = inferExpression(block->child(0), func);
 
       /* check that it is a BOOL */
-      if (cond->getKind( ) != TYPE_BOOL) {
-        throw Error("if condition must be a bool", block->getLine( ));
+      if (cond->getKind() != TYPE_BOOL) {
+        throw Error("if condition must be a bool", block->getLine());
       }
 
       /* infer both the then and else blocks */
       inferBlock(block->child(1), func);
       inferBlock(block->child(2), func);
-      break;}
+      break;
+    }
     case NODE_ELIF:
       /* check the first child which is the first elf clause */
       inferBlock(block->child(0), func);
@@ -623,44 +635,48 @@ void inferBlock(Node* block, Node* func) {
       DataType* cond = inferExpression(block->child(0), func);
 
       /* check that it is a BOOL */
-      if (cond->getKind( ) != TYPE_BOOL) {
-        throw Error("elif condition must be a bool", block->getLine( ));
+      if (cond->getKind() != TYPE_BOOL) {
+        throw Error("elif condition must be a bool", block->getLine());
       }
 
       /* check the statements on the right */
       inferBlock(block->child(1), func);
-      break;}
+      break;
+    }
     case NODE_WHILE: {
       /* infer the type of the expression */
       DataType* cond = inferExpression(block->child(0), func);
 
       /* check that it is a BOOL */
-      if (cond->getKind( ) != TYPE_BOOL) {
-        throw Error("while condition must be a bool", block->getLine( ));
+      if (cond->getKind() != TYPE_BOOL) {
+        throw Error("while condition must be a bool", block->getLine());
       }
 
       /* infer the body */
       inferBlock(block->child(1), func);
-      break;}
+      break;
+    }
     case NODE_PARFOR:
     case NODE_FOR: {
       /* infer the type of the expression */
       DataType* expr_type = inferExpression(block->child(1), func);
 
       /* make sure it is some type of vector */
-      if (expr_type->getKind( ) != TYPE_VECTOR) {
-        throw Error("for expression must have vector type", block->getLine( ));
+      if (expr_type->getKind() != TYPE_VECTOR) {
+        throw Error("for expression must have vector type", block->getLine());
       }
 
       /* put the identifier in the func */
-      func->insertSymbol(Symbol(block->child(0)->getString( ), expr_type->getSub( ), block->getLine( )));
+      func->insertSymbol(Symbol(block->child(0)->getString(),
+                                expr_type->getSub(), block->getLine()));
 
       /* set the type of the node too */
-      block->child(0)->setDataType(expr_type->getSub( ));
+      block->child(0)->setDataType(expr_type->getSub());
 
       /* check the block under this */
       inferBlock(block->child(2), func);
-      break;}
+      break;
+    }
     case NODE_PARALLEL:
     case NODE_BACKGROUND:
       /* check the sub-block */
@@ -671,7 +687,7 @@ void inferBlock(Node* block, Node* func) {
       inferBlock(block->child(1), func);
       break;
 
-      /* these require no work... */
+    /* these require no work... */
     case NODE_PASS:
     case NODE_BREAK:
     case NODE_CONTINUE:
@@ -686,12 +702,12 @@ void inferBlock(Node* block, Node* func) {
 /* infer types based on a single function */
 void inferFunction(Node* node) {
   /* only works on functions */
-  if (!node || (node->kind( ) != NODE_FUNCTION)) {
+  if (!node || (node->kind() != NODE_FUNCTION)) {
     return;
   }
 
   /* if there is a block for parameters */
-  if (node->numChildren( ) > 1) {
+  if (node->numChildren() > 1) {
     /* add the parameters into the table */
     addParams(node->child(0), node);
     inferBlock(node->child(1), node);
@@ -707,11 +723,14 @@ void inferConst(Node* node) {
   DataType* rhs = inferExpression(node->child(1), NULL);
 
   /* check if this symbol exists and check that the types match */
-  if (globals.count(node->child(0)->getString( )) > 0) {
-    throw Error("Constant '" + node->child(0)->getString( ) + "' has been defined.");
+  if (globals.count(node->child(0)->getString()) > 0) {
+    throw Error("Constant '" + node->child(0)->getString() +
+                "' has been defined.");
   } else {
     /* add it in */
-    globals.insert(pair<string, Symbol>(node->child(0)->getString( ), Symbol(node->child(0)->getString( ), rhs, node->getLine( ))));
+    globals.insert(pair<string, Symbol>(
+        node->child(0)->getString(),
+        Symbol(node->child(0)->getString(), rhs, node->getLine())));
 
     /* set the node type as well */
     node->child(0)->setType(rhs);
@@ -724,11 +743,14 @@ void inferGlobal(Node* node) {
   DataType* rhs = inferExpression(node->child(1), NULL);
 
   /* check if this symbol exists and check that the types match */
-  if (globals.count(node->child(0)->getString( )) > 0) {
-    throw Error("Global '" + node->child(0)->getString( ) + "' has been defined.");
+  if (globals.count(node->child(0)->getString()) > 0) {
+    throw Error("Global '" + node->child(0)->getString() +
+                "' has been defined.");
   } else {
     /* add it in */
-    globals.insert(pair<string, Symbol>(node->child(0)->getString( ), Symbol(node->child(0)->getString( ), rhs, node->getLine( ))));
+    globals.insert(pair<string, Symbol>(
+        node->child(0)->getString(),
+        Symbol(node->child(0)->getString(), rhs, node->getLine())));
 
     /* set the node type as well */
     node->child(0)->setType(rhs);
@@ -738,13 +760,13 @@ void inferGlobal(Node* node) {
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node) {
   /* infer each function */
-  if (node && (node->kind( ) == NODE_TOPLEVEL_LIST)) {
+  if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
     /* infer child 0 based on its kind */
-    if (node->child(0)->kind( ) == NODE_FUNCTION) {
+    if (node->child(0)->kind() == NODE_FUNCTION) {
       inferFunction(node->child(0));
-    } else if (node->child(0)->kind( ) == NODE_CONST) {
+    } else if (node->child(0)->kind() == NODE_CONST) {
       inferConst(node->child(0));
-    } else if (node->child(0)->kind( ) == NODE_GLOBAL) {
+    } else if (node->child(0)->kind() == NODE_GLOBAL) {
       inferGlobal(node->child(0));
     }
 
@@ -752,4 +774,3 @@ void inferTypes(Node* node) {
     inferTypes(node->child(1));
   }
 }
-

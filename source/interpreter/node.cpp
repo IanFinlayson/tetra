@@ -1,10 +1,10 @@
 /* functions for dealing with node creation, management etc. */
 
-#include <string>
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <sstream>
-#include <cstdlib>
-#include <cstdio>
+#include <string>
 #include "frontend.h"
 #include "parser.genh"
 
@@ -19,7 +19,7 @@ Node::Node(NodeKind node_type) {
   realval = 0.0;
   boolval = false;
   symtable = NULL;
-  lineno = yylineno;  /* this is often inaccurate! */
+  lineno = yylineno; /* this is often inaccurate! */
   num_children = 0;
 }
 
@@ -30,71 +30,44 @@ void Node::addChild(Node* child) {
   }
 }
 
-void Node::setDataType(DataType* data_type) {
-  this->data_type = data_type;
-}
+void Node::setDataType(DataType* data_type) { this->data_type = data_type; }
 
 void Node::setStringval(const string& stringval) {
   this->stringval = stringval;
 }
 
-void Node::setIntval(int intval) {
-  this->intval = intval;
-}
+void Node::setIntval(int intval) { this->intval = intval; }
 
-void Node::setBoolval(bool boolval) {
-  this->boolval = boolval;
-}
+void Node::setBoolval(bool boolval) { this->boolval = boolval; }
 
-void Node::setRealval(double realval) {
-  this->realval = realval;
-}
+void Node::setRealval(double realval) { this->realval = realval; }
 
-void Node::setLine(int lineno) {
-  this->lineno = lineno;
-}
+void Node::setLine(int lineno) { this->lineno = lineno; }
 
-int Node::getLine( ) const {
-  return lineno;
-}
-string Node::getString( ) const {
-  return stringval;
-}
-int Node::getInt( ) const {
-  return intval;
-}
-double Node::getReal( ) const {
-  return realval;
-}
-bool Node::getBool( ) const {
-  return boolval;
-}
-NodeKind Node::kind( ) const {
-  return node_type;
-}
-DataType* Node::type( ) const {
-  return data_type;
-}
-void Node::setType(DataType* t) {
-  data_type = t;
-}
-int Node::numChildren( ) const {
-  return num_children;
-}
+int Node::getLine() const { return lineno; }
+string Node::getString() const { return stringval; }
+int Node::getInt() const { return intval; }
+double Node::getReal() const { return realval; }
+bool Node::getBool() const { return boolval; }
+NodeKind Node::kind() const { return node_type; }
+DataType* Node::type() const { return data_type; }
+void Node::setType(DataType* t) { data_type = t; }
+int Node::numChildren() const { return num_children; }
 /* insert a symbol into the symtable */
 void Node::insertSymbol(Symbol sym) {
   /* create symtable if needed */
   if (!symtable) {
-    symtable = new map<string, Symbol>( );
+    symtable = new map<string, Symbol>();
   }
 
   /* check if it's there first */
-  if (symtable->count(sym.getName( )) > 0) {
-    throw Error("'" + sym.getName( ) + "' has already been declared", sym.getLine( ));
+  if (symtable->count(sym.getName()) > 0) {
+    throw Error("'" + sym.getName() + "' has already been declared",
+                sym.getLine());
   }
 
   /* add it in */
-  symtable->insert(pair<string, Symbol>(sym.getName( ), sym));
+  symtable->insert(pair<string, Symbol>(sym.getName(), sym));
 }
 
 /* lookup a symbol from a symbol table */
@@ -106,7 +79,7 @@ Symbol Node::lookupSymbol(string name, int lineno) const {
 
   map<string, Symbol>::iterator it = symtable->find(name);
 
-  if (it == symtable->end( )) {
+  if (it == symtable->end()) {
     throw Error("Symbol '" + name + "' not found!", lineno);
   }
 
@@ -128,19 +101,12 @@ Symbol::Symbol(string name, DataType* type, int lineno) {
   this->lineno = lineno;
 }
 
-int Symbol::getLine( ) const {
-  return lineno;
-}
-string Symbol::getName( ) const {
-  return name;
-}
-DataType* Symbol::getType( ) const {
-  return type;
-}
+int Symbol::getLine() const { return lineno; }
+string Symbol::getName() const { return name; }
+DataType* Symbol::getType() const { return type; }
 
-Symbol::Symbol( ) {
+Symbol::Symbol() {
   name = "";
   type = NULL;
   lineno = 0;
 }
-

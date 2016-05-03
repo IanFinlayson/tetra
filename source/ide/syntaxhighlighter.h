@@ -48,36 +48,33 @@ QT_BEGIN_NAMESPACE
 class QTextDocument;
 QT_END_NAMESPACE
 
+class Highlighter : public QSyntaxHighlighter {
+  Q_OBJECT
 
-class Highlighter : public QSyntaxHighlighter
-{
-    Q_OBJECT
+ public:
+  Highlighter(QTextDocument *parent = 0);
 
-public:
-    Highlighter(QTextDocument *parent = 0);
+ protected:
+  void highlightBlock(const QString &text);
 
-protected:
-    void highlightBlock(const QString &text);
+ private:
+  struct HighlightingRule {
+    QRegExp pattern;
+    QTextCharFormat format;
+  };
+  QVector<HighlightingRule> highlightingRules;
 
-private:
-    struct HighlightingRule
-    {
-        QRegExp pattern;
-        QTextCharFormat format;
-    };
-    QVector<HighlightingRule> highlightingRules;
+  QRegExp commentStartExpression;
+  QRegExp commentEndExpression;
 
-    QRegExp commentStartExpression;
-    QRegExp commentEndExpression;
-
-    QTextCharFormat typeFormat;
-    QTextCharFormat keywordFormat;
-    QTextCharFormat classFormat;
-    QTextCharFormat singleLineCommentFormat;
-    QTextCharFormat multiLineCommentFormat;
-    QTextCharFormat quotationFormat;
-    QTextCharFormat valueFormat;
-    QTextCharFormat parallelFormat;
+  QTextCharFormat typeFormat;
+  QTextCharFormat keywordFormat;
+  QTextCharFormat classFormat;
+  QTextCharFormat singleLineCommentFormat;
+  QTextCharFormat multiLineCommentFormat;
+  QTextCharFormat quotationFormat;
+  QTextCharFormat valueFormat;
+  QTextCharFormat parallelFormat;
 };
 
-#endif // HIGHLIGHTER_H
+#endif  // HIGHLIGHTER_H

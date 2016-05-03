@@ -78,14 +78,14 @@ enum NodeKind {
 
 /* any type of error is handled with this exception */
 class Error {
-  public:
-    Error(const string& mesg, int lineno = 0);
-    string getMessage( ) const;
-    int getLine( ) const;
+ public:
+  Error(const string& mesg, int lineno = 0);
+  string getMessage() const;
+  int getLine() const;
 
-  private:
-    string mesg;
-    int lineno;
+ private:
+  string mesg;
+  int lineno;
 };
 
 /* print an error */
@@ -104,15 +104,15 @@ enum DataTypeKind {
 /* a data type contains the above enum, along with a pointer to the "sub" type
  * currently this is only used for vectors */
 class DataType {
-  public:
-    DataType(DataTypeKind kind);
-    void setSubType(DataType* subtype);
-    DataTypeKind getKind( ) const;
-    DataType* getSub( ) const;
+ public:
+  DataType(DataTypeKind kind);
+  void setSubType(DataType* subtype);
+  DataTypeKind getKind() const;
+  DataType* getSub() const;
 
-  private:
-    DataTypeKind kind;
-    DataType* subtype;
+ private:
+  DataTypeKind kind;
+  DataType* subtype;
 };
 
 /* operators for comparing types for equality */
@@ -124,90 +124,91 @@ string typeToString(DataType* t);
 
 /* an entry in the symbol table */
 class Symbol {
-  public:
-    Symbol( );
-    Symbol(string name, DataType* type, int lineno);
-    int getLine( ) const;
-    string getName( ) const;
-    DataType* getType( ) const;
+ public:
+  Symbol();
+  Symbol(string name, DataType* type, int lineno);
+  int getLine() const;
+  string getName() const;
+  DataType* getType() const;
 
-  private:
-    string name;
-    DataType* type;
-    int lineno;
+ private:
+  string name;
+  DataType* type;
+  int lineno;
 };
 
 const int MAX_CHILDREN = 3;
 
 /* the node class represents one element of a parse tree */
 class Node {
-  public:
-    /* constructor and modifiers */
-    Node(NodeKind type);
-    void setDataType(DataType* data_type);
-    void setStringval(const string& stringval);
-    void setIntval(int intval);
-    void setBoolval(bool boolval);
-    void setRealval(double realval);
-    void setLine(int lineno);
-    void setType(DataType* t);
+ public:
+  /* constructor and modifiers */
+  Node(NodeKind type);
+  void setDataType(DataType* data_type);
+  void setStringval(const string& stringval);
+  void setIntval(int intval);
+  void setBoolval(bool boolval);
+  void setRealval(double realval);
+  void setLine(int lineno);
+  void setType(DataType* t);
 
-    /* accessors */
-    int getLine( ) const;
-    string getString( ) const;
-    int getInt( ) const;
-    double getReal( ) const;
-    bool getBool( ) const;
-    NodeKind kind( ) const;
-    DataType* type( ) const;
+  /* accessors */
+  int getLine() const;
+  string getString() const;
+  int getInt() const;
+  double getReal() const;
+  bool getBool() const;
+  NodeKind kind() const;
+  DataType* type() const;
 
-    /* children functions */
-    void addChild(Node* child);
-    int numChildren( ) const;
+  /* children functions */
+  void addChild(Node* child);
+  int numChildren() const;
 
-    /* inlined for performance */
-    Node* child(int which) const {
-      if (which < 0 || which >= num_children) {
-        return NULL;
-      } else {
-        return children[which];
-      }
+  /* inlined for performance */
+  Node* child(int which) const {
+    if (which < 0 || which >= num_children) {
+      return NULL;
+    } else {
+      return children[which];
     }
+  }
 
-    /* symbol functions */
-    void insertSymbol(Symbol sym);
-    Symbol lookupSymbol(string name, int lineno) const;
-    bool hasSymbol(const string& name) const;
+  /* symbol functions */
+  void insertSymbol(Symbol sym);
+  Symbol lookupSymbol(string name, int lineno) const;
+  bool hasSymbol(const string& name) const;
 
-  private:
-    /* the children nodes of this node */
-    Node* children[MAX_CHILDREN];
-    int num_children;
+ private:
+  /* the children nodes of this node */
+  Node* children[MAX_CHILDREN];
+  int num_children;
 
-    /* the symbol table used for this Node - currently only function nodes have one */
-    map<string, Symbol>* symtable;
+  /* the symbol table used for this Node - currently only function nodes have
+   * one */
+  map<string, Symbol>* symtable;
 
-    /* the type of node it is (eg plus vs stmt vs intval etc.) */
-    NodeKind node_type;
+  /* the type of node it is (eg plus vs stmt vs intval etc.) */
+  NodeKind node_type;
 
-    /* the data type of the node (NULL if not applicable) */
-    DataType* data_type;
+  /* the data type of the node (NULL if not applicable) */
+  DataType* data_type;
 
-    /* the values associated with the node (many will be blank) */
-    string stringval;
-    double realval;
-    int intval;
-    bool boolval;
+  /* the values associated with the node (many will be blank) */
+  string stringval;
+  double realval;
+  int intval;
+  bool boolval;
 
-    /* the line number most closely associated with this node */
-    int lineno;
+  /* the line number most closely associated with this node */
+  int lineno;
 };
 
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node);
 
 /* reset lexer internal state */
-void reset_lexer( );
+void reset_lexer();
 
 /* function which parses a file and returns the parse tree */
 Node* parseFile(const string& fname);
@@ -216,5 +217,3 @@ Node* parseFile(const string& fname);
 extern map<string, Symbol> globals;
 
 #endif
-
-
