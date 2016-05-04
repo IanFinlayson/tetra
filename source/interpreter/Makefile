@@ -10,9 +10,9 @@ HDRS := $(wildcard *.h)
 OBJS := $(patsubst %.cpp,%.o,$(SRCS))
 OBJS += parser.o
 
-# build the interpter executable, the library and tags
+# build the interpreter executable, the library and tags
 all: tetra libtetra.a tags
-	@echo "All Done :)"
+	@echo "Finished Building Interpreter"
 
 # build the tetra executable
 tetra: $(OBJS)

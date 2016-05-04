@@ -52,5 +52,5 @@ RESOURCES += \
     resources.qrc
 
 # add a post compile step to copy the file
-QMAKE_POST_LINK  = "cp tetraide ../../bin && echo 'All Done :)'"
+QMAKE_POST_LINK  = "cp tetraide ../../bin && echo 'Finished Building IDE'"
 

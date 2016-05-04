@@ -1,5 +1,21 @@
 #!/bin/bash
 
-cd source/interpreter && make && cd ../..
-cd source/ide && qmake tetra.pro && make
+# build the library
+cd source/interpreter
+make -q
+if [ $? -ne 0 ]
+then
+    make || exit 1
+fi
+
+
+cd ../ide
+qmake tetra.pro
+make -q
+if [ $? -ne 0 ]
+then
+    make
+fi
+
+echo "Finished Building Tetra!"
 
