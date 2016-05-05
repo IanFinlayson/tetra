@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   menuBar()->setNativeMenuBar(true);
   ui->setupUi(this);
-  setWindowTitle(tr("Tetra"));
+  setWindowTitle(tr("Tetra[*]"));
 
   setupEditor();
   setupShortcuts();

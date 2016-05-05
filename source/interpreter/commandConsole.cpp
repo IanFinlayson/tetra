@@ -12,3 +12,4 @@ std::string CommandConsole::receiveStandardInput() const {
 void CommandConsole::processStandardOutput(const std::string output) const {
   std::cout << output;
 }
+
