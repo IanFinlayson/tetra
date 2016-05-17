@@ -113,6 +113,7 @@ Node* parseFile(const string& fname);
 %token <lineno> TOK_TASK 179
 %token <lineno> TOK_NONE 180
 %token <lineno> TOK_RIGHTARROW 181
+%token <lineno> TOK_DOT 182
 
 /* typed tokens */
 %token <intval> TOK_INTVAL 161

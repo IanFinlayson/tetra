@@ -385,8 +385,13 @@ int yylex() {
   }
 
   /* if it's a number or decimal point, we have a number of some kind */
-  if (isdigit(next) || next == '.') {
+  if (isdigit(next) || (next == '.' && isdigit(in->peek()))) {
     return lexNumber(next);
+  }
+
+  /* check for the dot operator */
+  if (next == '.') {
+    return TOK_DOT; 
   }
 
   /* handle comments */
