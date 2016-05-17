@@ -100,6 +100,19 @@ Node* parseFile(const string& fname);
 %token <lineno> TOK_LOCK 158
 %token <lineno> TOK_CONST 159
 %token <lineno> TOK_GLOBAL 160
+%token <lineno> TOK_RIGHTBRACE 169
+%token <lineno> TOK_LEFTBRACE 170
+%token <lineno> TOK_INIT 171
+%token <lineno> TOK_LAMBDA 172
+%token <lineno> TOK_WAIT 173
+%token <lineno> TOK_SELF 174
+%token <lineno> TOK_CLASS 175
+%token <lineno> TOK_OPEN 176
+%token <lineno> TOK_IMPORT 177
+%token <lineno> TOK_MUTEX 178
+%token <lineno> TOK_TASK 179
+%token <lineno> TOK_NONE 180
+%token <lineno> TOK_RIGHTARROW 181
 
 /* typed tokens */
 %token <intval> TOK_INTVAL 161

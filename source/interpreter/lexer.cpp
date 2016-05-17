@@ -116,6 +116,36 @@ int lookupId(const string& id) {
   if (id == "string") {
     return TOK_STRING;
   }
+  if (id == "init") {
+    return TOK_INIT;
+  }
+  if (id == "none") {
+    return TOK_NONE;
+  }
+  if (id == "lambda") {
+    return TOK_LAMBDA;
+  }
+  if (id == "wait") {
+    return TOK_WAIT;
+  }
+  if (id == "self") {
+    return TOK_SELF;
+  }
+  if (id == "class") {
+    return TOK_CLASS;
+  }
+  if (id == "open") {
+    return TOK_OPEN;
+  }
+  if (id == "import") {
+    return TOK_IMPORT;
+  }
+  if (id == "mutex") {
+    return TOK_MUTEX;
+  }
+  if (id == "task") {
+    return TOK_TASK;
+  }
   if (id == "true") {
     yylval.boolval = true;
     return TOK_BOOLVAL;
@@ -399,6 +429,11 @@ int yylex() {
       return TOK_LEFTBRACKET;
     case ']':
       return TOK_RIGHTBRACKET;
+    case '{':
+      return TOK_LEFTBRACE;
+    case '}':
+      return TOK_RIGHTBRACE;
+
     /* ones that have some single and double ones */
     case '=':
       if (in->peek() == '=') {
@@ -418,6 +453,9 @@ int yylex() {
       if (in->peek() == '=') {
         in->get();
         return TOK_MINUSEQ;
+      } else if (in->peek() == '>') {
+        in->get();
+        return TOK_RIGHTARROW;
       } else {
         return TOK_MINUS;
       }
