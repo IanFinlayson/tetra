@@ -39,79 +39,79 @@ Node* parseFile(const string& fname);
 }
 
 /* typless tokens */
-%token <lineno> TOK_IF
-%token <lineno> TOK_ELIF
-%token <lineno> TOK_ELSE
-%token <lineno> TOK_FOR
-%token <lineno> TOK_IN
-%token <lineno> TOK_PARALLEL
-%token <lineno> TOK_WHILE
-%token <lineno> TOK_CONTINUE
-%token <lineno> TOK_BREAK
-%token <lineno> TOK_DEF
-%token <lineno> TOK_OR
-%token <lineno> TOK_AND
-%token <lineno> TOK_NOT
-%token <lineno> TOK_PASS
-%token <lineno> TOK_RETURN
-%token <lineno> TOK_INT
-%token <lineno> TOK_REAL
-%token <lineno> TOK_BOOL
-%token <lineno> TOK_STRING
-%token <lineno> TOK_ASSIGN
-%token <lineno> TOK_PLUS
-%token <lineno> TOK_MINUS
-%token <lineno> TOK_TIMES
-%token <lineno> TOK_DIVIDE
-%token <lineno> TOK_MODULUS
-%token <lineno> TOK_BITXOR
-%token <lineno> TOK_BITAND
-%token <lineno> TOK_BITOR
-%token <lineno> TOK_BITNOT
-%token <lineno> TOK_LEFTPARENS
-%token <lineno> TOK_RIGHTPARENS
-%token <lineno> TOK_LEFTBRACKET
-%token <lineno> TOK_RIGHTBRACKET
-%token <lineno> TOK_COMMA
-%token <lineno> TOK_SEMICOLON
-%token <lineno> TOK_COLON
-%token <lineno> TOK_LSHIFT
-%token <lineno> TOK_RSHIFT
-%token <lineno> TOK_EXP
-%token <lineno> TOK_LTE
-%token <lineno> TOK_GTE
-%token <lineno> TOK_EQ
-%token <lineno> TOK_NEQ
-%token <lineno> TOK_LT
-%token <lineno> TOK_GT
-%token <lineno> TOK_PLUSEQ
-%token <lineno> TOK_MINUSEQ
-%token <lineno> TOK_TIMESEQ
-%token <lineno> TOK_DIVIDEEQ
-%token <lineno> TOK_MODULUSEQ
-%token <lineno> TOK_EXPEQ
-%token <lineno> TOK_RSHIFTEQ
-%token <lineno> TOK_LSHIFTEQ
-%token <lineno> TOK_ANDEQ
-%token <lineno> TOK_XOREQ
-%token <lineno> TOK_OREQ
-%token <lineno> TOK_ELLIPSIS
-%token <lineno> TOK_BACKGROUND
-%token <lineno> TOK_LOCK
-%token <lineno> TOK_CONST
-%token <lineno> TOK_GLOBAL
+%token <lineno> TOK_IF 100
+%token <lineno> TOK_ELIF 101
+%token <lineno> TOK_ELSE 102
+%token <lineno> TOK_FOR 103
+%token <lineno> TOK_IN 104
+%token <lineno> TOK_PARALLEL 105
+%token <lineno> TOK_WHILE 106
+%token <lineno> TOK_CONTINUE 107
+%token <lineno> TOK_BREAK 108
+%token <lineno> TOK_DEF 109
+%token <lineno> TOK_OR 110
+%token <lineno> TOK_AND 111
+%token <lineno> TOK_NOT 112
+%token <lineno> TOK_PASS 113
+%token <lineno> TOK_RETURN 114
+%token <lineno> TOK_INT 115
+%token <lineno> TOK_REAL 116
+%token <lineno> TOK_BOOL 117
+%token <lineno> TOK_STRING 118
+%token <lineno> TOK_ASSIGN 119
+%token <lineno> TOK_PLUS 120
+%token <lineno> TOK_MINUS 121
+%token <lineno> TOK_TIMES 122
+%token <lineno> TOK_DIVIDE 123
+%token <lineno> TOK_MODULUS 124
+%token <lineno> TOK_BITXOR 125
+%token <lineno> TOK_BITAND 126
+%token <lineno> TOK_BITOR 127
+%token <lineno> TOK_BITNOT 128
+%token <lineno> TOK_LEFTPARENS 129
+%token <lineno> TOK_RIGHTPARENS 130
+%token <lineno> TOK_LEFTBRACKET 131
+%token <lineno> TOK_RIGHTBRACKET 132
+%token <lineno> TOK_COMMA 133
+%token <lineno> TOK_SEMICOLON 134
+%token <lineno> TOK_COLON 135
+%token <lineno> TOK_LSHIFT 136
+%token <lineno> TOK_RSHIFT 137
+%token <lineno> TOK_EXP 138
+%token <lineno> TOK_LTE 139
+%token <lineno> TOK_GTE 140
+%token <lineno> TOK_EQ 141
+%token <lineno> TOK_NEQ 142
+%token <lineno> TOK_LT 143
+%token <lineno> TOK_GT 144
+%token <lineno> TOK_PLUSEQ 145
+%token <lineno> TOK_MINUSEQ 146
+%token <lineno> TOK_TIMESEQ 147
+%token <lineno> TOK_DIVIDEEQ 148
+%token <lineno> TOK_MODULUSEQ 149
+%token <lineno> TOK_EXPEQ 150
+%token <lineno> TOK_RSHIFTEQ 151
+%token <lineno> TOK_LSHIFTEQ 152
+%token <lineno> TOK_ANDEQ 153
+%token <lineno> TOK_XOREQ 154
+%token <lineno> TOK_OREQ 155
+%token <lineno> TOK_ELLIPSIS 156
+%token <lineno> TOK_BACKGROUND 157
+%token <lineno> TOK_LOCK 158
+%token <lineno> TOK_CONST 159
+%token <lineno> TOK_GLOBAL 160
 
 /* typed tokens */
-%token <intval> TOK_INTVAL
-%token <realval> TOK_REALVAL
-%token <boolval> TOK_BOOLVAL
-%token <stringval> TOK_STRINGVAL
-%token <stringval> TOK_IDENTIFIER
+%token <intval> TOK_INTVAL 161
+%token <realval> TOK_REALVAL 162
+%token <boolval> TOK_BOOLVAL 163
+%token <stringval> TOK_STRINGVAL 164
+%token <stringval> TOK_IDENTIFIER 165
 
 /* dummy tokens */
-%token TOK_INDENT
-%token TOK_DEDENT
-%token TOK_NEWLINE
+%token TOK_INDENT 166
+%token TOK_DEDENT 167
+%token TOK_NEWLINE 168
 
 /* types */
 %type <node> toplevels function formal_param_list statements statement block formal_params
