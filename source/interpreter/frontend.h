@@ -216,4 +216,7 @@ Node* parseFile(const string& fname);
 /* the global symbol table */
 extern map<string, Symbol> globals;
 
+/* the lexer function */
+int yylex( );
+
 #endif

@@ -813,6 +813,7 @@ void yyerror(const char* str) {
 /* parse from a file */
 extern istream* in;
 Node* parseFile(const string& fname) {
+
     reset_lexer( );
 
     /* open the file */
@@ -826,8 +827,14 @@ Node* parseFile(const string& fname) {
     /* set the in stream (defined in lexer.cpp) */
     in = &file;
 
+    int token;
+    while ((token = yylex())) {
+      printf("%d\n", token); 
+    }
+    exit(0);
+
     /* call yyparse */
-    yyparse( );
+    //yyparse( );
 
     /* return the root of the parse tree */
     return root;

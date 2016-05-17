@@ -11,6 +11,7 @@
 #include "commandObserver.h"
 #include "frontend.h"
 
+
 /* the info for the command line parameters */
 const char* argp_program_version = "tetra 0.1";
 const char* argp_program_bug_address = "<finlayson@umw.edu>";
@@ -115,6 +116,7 @@ int main(int argc, char** argv) {
   try {
     // File is last parameter
     tree = parseFile(args.input_file_name);
+
   } catch (Error e) {
     std::cout << "The following error was detected in your program:\n"
               << e << "\nExecution aborted" << std::endl;
