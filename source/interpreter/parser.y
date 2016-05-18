@@ -180,6 +180,9 @@ datadecl: TOK_CONST identifier TOK_ASSIGN expression {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->addChild($4);
+} | TOK_GLOBAL identifier{
+  $$ = new Node(NODE_GLOBAL);
+  $$->addChild($2);
 }
 
 /* a single function */
