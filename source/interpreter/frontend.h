@@ -33,6 +33,7 @@ enum NodeKind {
   NODE_LOCK,
   NODE_CONST,
   NODE_GLOBAL,
+  NODE_WAIT,
 
   /* operator nodes */
   NODE_ASSIGN,
@@ -98,7 +99,10 @@ enum DataTypeKind {
   TYPE_STRING,
   TYPE_BOOL,
   TYPE_VOID,
-  TYPE_VECTOR
+  TYPE_VECTOR,
+  TYPE_TUPLE,
+  TYPE_MUTEX,
+  TYPE_TASK
 };
 
 /* a data type contains the above enum, along with a pointer to the "sub" type
@@ -106,13 +110,13 @@ enum DataTypeKind {
 class DataType {
  public:
   DataType(DataTypeKind kind);
-  void setSubType(DataType* subtype);
+  void addSubtype(DataType* subtype);
   DataTypeKind getKind() const;
-  DataType* getSub() const;
+  DataType* vectorSub() const;
 
  private:
   DataTypeKind kind;
-  DataType* subtype;
+  std::vector<DataType>* subtypes;
 };
 
 /* operators for comparing types for equality */
@@ -218,5 +222,8 @@ extern map<string, Symbol> globals;
 
 /* the lexer function */
 int yylex( );
+
+/* dump-tree prototype */
+void dumpTreeGraphviz(Node*);
 
 #endif

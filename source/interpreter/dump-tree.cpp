@@ -31,6 +31,8 @@ string stringType(Node* node) {
       return "PARAMS";
     case NODE_PASS:
       return "PASS";
+    case NODE_WAIT:
+      return "WAIT";
     case NODE_RETURN:
       return "RETURN";
     case NODE_BREAK:
@@ -224,5 +226,3 @@ void dumpTreeStdout(Node* node, int level = 0) {
     dumpTreeStdout(node->child(i), level + 1);
   }
 }
-
-

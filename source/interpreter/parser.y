@@ -134,9 +134,10 @@ Node* parseFile(const string& fname);
 %type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
 %type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
 %type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-%type <node> background lock_statement index indices vector_value vector_values datadecl
+%type <node> background lock_statement index indices vector_value vector_values datadecl 
+%type <node> wait_statement
 
-%type <data_type> return_type type
+%type <data_type> return_type type tuple_types tuple_type_list
 
 %error-verbose
 
@@ -145,8 +146,6 @@ Node* parseFile(const string& fname);
 /* a program is a list of functions */
 program: toplevels {
   root = $1;
-  /* check and infer the types in the tree */
-  inferTypes(root);
 }
 
 /* zero or more new lines */
@@ -192,7 +191,7 @@ function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
   $$->setLine($1);
 }
 
-/* a parameter list (with bannanas) */
+/* a parameter list (with bananas) */
 formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
   $$ = $2;
   $$->setLine(yylineno);
@@ -218,6 +217,21 @@ formal_param: TOK_IDENTIFIER type {
   $$->setDataType($2);
 }
 
+/* tuple types */
+tuple_type_list: TOK_LEFTPARENS tuple_types TOK_RIGHTPARENS {
+ /* TODO */ 
+  $$ = new DataType(TYPE_TUPLE);
+} | TOK_LEFTPARENS TOK_RIGHTPARENS {
+  $$ = NULL;
+}
+
+/* a list of at least one parameter */
+tuple_types: type TOK_COMMA tuple_types {
+ /* TODO */ 
+} | type {
+ /* TODO */ 
+}
+
 /* types just primitives and vectors for now */
 type: TOK_INT {
   $$ = new DataType(TYPE_INT);
@@ -227,9 +241,15 @@ type: TOK_INT {
   $$ = new DataType(TYPE_STRING);
 } | TOK_BOOL {
   $$ = new DataType(TYPE_BOOL);
+} | TOK_MUTEX {
+  $$ = new DataType(TYPE_MUTEX);
+} | TOK_TASK {
+  $$ = new DataType(TYPE_TASK);
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
   $$ = new DataType(TYPE_VECTOR);
-  $$->setSubType($2);
+  $$->addSubtype($2);
+} | tuple_type_list{
+  $$ = $1;
 }
 
 /* a return type is either a simple type or none which means void */
@@ -275,6 +295,7 @@ simple_statement: pass_statement
   | return_statement
   | break_statement
   | continue_statement
+  | wait_statement
   | expression {
   $$ = $1;
   $$->setLine(yylineno);
@@ -300,6 +321,7 @@ pass_statement: TOK_PASS {
 return_statement: TOK_RETURN {
   $$ = new Node(NODE_RETURN);
   $$->setLine(yylineno);
+
 } | TOK_RETURN expression {
   $$ = new Node(NODE_RETURN);
   $$->addChild($2);
@@ -311,6 +333,11 @@ break_statement: TOK_BREAK {
 }
 continue_statement: TOK_CONTINUE {
   $$ = new Node(NODE_CONTINUE);
+  $$->setLine(yylineno);
+}
+wait_statement: TOK_WAIT identifier{
+  $$ = new Node(NODE_WAIT);
+  $$->addChild($2);
   $$->setLine(yylineno);
 }
 
@@ -406,9 +433,21 @@ background: TOK_BACKGROUND TOK_COLON block {
   $$ = new Node(NODE_BACKGROUND);
   $$->addChild($3);
   $$->setLine($1);
+
+} | TOK_BACKGROUND identifier TOK_COLON block {
+  $$ = new Node(NODE_BACKGROUND);
+  $$->addChild($2);
+  $$->addChild($4);
+  $$->setLine($1);
 }
 
 /* a lock statement */
+lock_statement: TOK_LOCK TOK_COLON block {
+  $$ = new Node(NODE_LOCK);
+  $$->addChild($3);
+  $$->setLine($1);
+}
+
 lock_statement: TOK_LOCK identifier TOK_COLON block {
   $$ = new Node(NODE_LOCK);
   $$->addChild($2);
@@ -723,24 +762,16 @@ vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
   /* an empty vector definition */
   $$ = new Node(NODE_VECVAL);
 
-} | TOK_LEFTBRACKET TOK_INTVAL TOK_ELLIPSIS TOK_INTVAL TOK_RIGHTBRACKET {
+} | TOK_LEFTBRACKET expression TOK_ELLIPSIS expression TOK_RIGHTBRACKET {
   /* a vector with elipsis eg [1 .. 5] */
 /* create a range node for these (this code used to build up a chain of VECVAL's manually, but that
        killed memory when we did [1 ... 100000] */
   $$ = new Node(NODE_VECRANGE);
 
   /* check that the values are legit */
-  if ($2 == $4) {
-    throw Error("Cannot have a range of one item", yylineno);
-  }
+  $$->addChild($2);
+  $$->addChild($4);
 
-    Node* a = new Node(NODE_INTVAL);
-    a->setIntval($2);
-    Node* b = new Node(NODE_INTVAL);
-    b->setIntval($4);
-
-    $$->addChild(a);
-    $$->addChild(b);
 } | TOK_LEFTBRACKET vector_values TOK_RIGHTBRACKET {
   /* a set of one or more vector initializers */
   $$ = $2;
@@ -796,6 +827,7 @@ funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = new Node(NODE_FUNCALL);
   $$->setStringval($1);
   $$->setLine($2);
+
 } | TOK_IDENTIFIER TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
   $$ = new Node(NODE_FUNCALL);
   $$->setStringval($1);
@@ -841,16 +873,21 @@ Node* parseFile(const string& fname) {
     /* set the in stream (defined in lexer.cpp) */
     in = &file;
 
-    int token;
+    /* Check parsing only */
+    /*int token;
     while ((token = yylex())) {
       printf("%d\n", token); 
     }
+    */
+    
+    /* call yyparse */
+    yyparse();
+
+    dumpTreeGraphviz(root);
     exit(0);
 
-    /* call yyparse */
-    //yyparse( );
-
+    /* check and infer the types in the tree */
+    inferTypes(root);
     /* return the root of the parse tree */
     return root;
 }
-

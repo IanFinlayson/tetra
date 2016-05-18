@@ -214,11 +214,18 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
         break;
       case TYPE_VECTOR:
         signature += "_V";
+      case TYPE_MUTEX:
+        signature += "_M";
+        break;
+      case TYPE_TASK:
+        signature += "_T";
+        break;
+
         // Must also fill in subtype information
         // While loop allows for accounting for vectors containing vectors
         // (containing vectors...)
-        while (argType->getSub() != NULL) {
-          argType = argType->getSub();
+        while (argType->vectorSub() != NULL) {
+          argType = argType->vectorSub();
           switch (argType->getKind()) {
             case TYPE_INT:
               signature += "I";
@@ -234,6 +241,12 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
               break;
             case TYPE_VECTOR:
               signature += "V";
+              break;
+            case TYPE_MUTEX:
+              signature += "M";
+              break;
+            case TYPE_TASK:
+              signature += "T";
               break;
             default:
               std::stringstream message;
