@@ -136,7 +136,7 @@ Node* parseFile(const string& fname);
              expterm funcall simple_statements actual_param_list variable assignterm
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index indices vector_value vector_values datadecl 
-             wait_statement declaration
+             wait_statement declaration 
 
 %type <data_type> return_type type tuple_types tuple_type_list
 
@@ -192,6 +192,12 @@ function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
   $$->setDataType($4);
   $$->addChild($3);
   $$->addChild($6);
+  $$->setLine($1);
+} | TOK_LAMBDA TOK_IDENTIFIER formal_param_list TOK_COLON expression{
+  $$ = new Node(NODE_FUNCTION);
+  $$->setStringval("lambda");
+  $$->addChild($3);
+  $$->addChild($5);
   $$->setLine($1);
 }
 
