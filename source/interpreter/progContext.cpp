@@ -385,7 +385,7 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
       paramNode = paramNode->child(1);
     }
     // Push on final parameter (if it exists)
-    if (paramNode->kind() == NODE_FORMAL_PARAM) {
+    if (paramNode->kind() == NODE_DECLARATION) {
       refTables->top()[paramNode->getString()] = paramNode->getInt();
     }
 

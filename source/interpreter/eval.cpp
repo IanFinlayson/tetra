@@ -510,7 +510,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
   // the LHS first
   // Must check type so we can cast the info from lookupVar to the appropriate
   // type
-  if (node->kind() == NODE_IDENTIFIER || node->kind() == NODE_FORMAL_PARAM) {
+  if (node->kind() == NODE_IDENTIFIER || node->kind() == NODE_DECLARATION) {
     assert(node->type() != NULL);
 
     switch (node->type()->getKind()) {
@@ -910,7 +910,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
     case NODE_FUNCALL:
       evaluateFunction<T>(node, ret, context);
       break;
-    case NODE_FORMAL_PARAM:
+    case NODE_DECLARATION:
     case NODE_INTVAL:
     case NODE_REALVAL:
     case NODE_BOOLVAL:

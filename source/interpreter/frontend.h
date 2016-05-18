@@ -15,7 +15,6 @@ enum NodeKind {
   NODE_FUNCTION,
   NODE_TOPLEVEL_LIST,
   NODE_STATEMENT,
-  NODE_FORMAL_PARAM,
   NODE_FORMAL_PARAM_LIST,
   NODE_PASS,
   NODE_RETURN,
@@ -34,6 +33,7 @@ enum NodeKind {
   NODE_CONST,
   NODE_GLOBAL,
   NODE_WAIT,
+  NODE_DECLARATION,
 
   /* operator nodes */
   NODE_ASSIGN,
@@ -154,7 +154,6 @@ class Node {
   void setBoolval(bool boolval);
   void setRealval(double realval);
   void setLine(int lineno);
-  void setType(DataType* t);
 
   /* accessors */
   int getLine() const;

@@ -114,6 +114,7 @@ Node* parseFile(const string& fname);
 %token <lineno> TOK_NONE 180
 %token <lineno> TOK_RIGHTARROW 181
 %token <lineno> TOK_DOT 182
+%token <lineno> TOK_DECLARE 183
 
 /* typed tokens */
 %token <intval> TOK_INTVAL 161
@@ -129,13 +130,13 @@ Node* parseFile(const string& fname);
 
 /* types */
 %type <node> toplevels function formal_param_list statements statement block formal_params
-%type <node> compound_statement simple_statement pass_statement return_statement break_statement
-%type <node> continue_statement expression if_statement while_statement else_option orterm andterm
-%type <node> notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
-%type <node> expterm funcall formal_param simple_statements actual_param_list variable assignterm
-%type <node> elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-%type <node> background lock_statement index indices vector_value vector_values datadecl 
-%type <node> wait_statement
+             compound_statement simple_statement pass_statement return_statement break_statement
+             continue_statement expression if_statement while_statement else_option orterm andterm
+             notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
+             expterm funcall simple_statements actual_param_list variable assignterm
+             elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
+             background lock_statement index indices vector_value vector_values datadecl 
+             wait_statement declaration
 
 %type <data_type> return_type type tuple_types tuple_type_list
 
@@ -200,18 +201,18 @@ formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
 }
 
 /* a list of at least one parameter */
-formal_params: formal_param TOK_COMMA formal_params {
+formal_params: declaration TOK_COMMA formal_params {
   $$ = new Node(NODE_FORMAL_PARAM_LIST);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
-} | formal_param {
+} | declaration{
   $$ = $1;
 }
 
 /* a single parameter */
-formal_param: TOK_IDENTIFIER type {
-  $$ = new Node(NODE_FORMAL_PARAM);
+declaration: TOK_IDENTIFIER type {
+  $$ = new Node(NODE_DECLARATION);
   $$->setLine(yylineno);
   $$->setStringval(string($1));
   $$->setDataType($2);
@@ -298,6 +299,9 @@ simple_statement: pass_statement
   | wait_statement
   | expression {
   $$ = $1;
+  $$->setLine(yylineno);
+} | TOK_DECLARE declaration{
+  $$ = $2;
   $$->setLine(yylineno);
 }
 

@@ -112,7 +112,7 @@ void FunctionMap::optimizeFunctionLookup(Node* start) {
 void optimize(Node* node, std::map<std::string, int>& refer, int& nextNum,
               std::map<std::string, int>& globRefer) {
   // If the node is a variable identifier, give it a numerical value
-  if (node->kind() == NODE_IDENTIFIER || node->kind() == NODE_FORMAL_PARAM) {
+  if (node->kind() == NODE_IDENTIFIER || node->kind() == NODE_DECLARATION) {
     std::string name = node->getString();
 
     // Check if it is a global variable

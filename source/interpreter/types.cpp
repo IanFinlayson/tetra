@@ -108,7 +108,7 @@ void addParams(Node* params, Node* func) {
 
   }
   /* else if it's just one param, handle it */
-  else if (params->kind() == NODE_FORMAL_PARAM) {
+  else if (params->kind() == NODE_DECLARATION) {
     func->insertSymbol(
         Symbol(params->getString(), params->type(), params->getLine()));
   }
@@ -385,13 +385,13 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
               expr->getLine());
         }
         /* set the node type as well */
-        expr->child(0)->setType(rhs);
+        expr->child(0)->setDataType(rhs);
       } else {
         /* it's not there, so we should insert a new one */
         func->insertSymbol(
             Symbol(expr->child(0)->getString(), rhs, expr->getLine()));
         /* set the node type as well */
-        expr->child(0)->setType(rhs);
+        expr->child(0)->setDataType(rhs);
       }
 
       /* return the type of the rhs */
@@ -584,7 +584,7 @@ DataType* inferExpression(Node* expr, Node* func) {
   DataType* t = inferExpressionPrime(expr, func);
 
   /* assign it into this node */
-  expr->setType(t);
+  expr->setDataType(t);
 
   /* return it */
   return t;
@@ -749,7 +749,7 @@ void inferConst(Node* node) {
         Symbol(node->child(0)->getString(), rhs, node->getLine())));
 
     /* set the node type as well */
-    node->child(0)->setType(rhs);
+    node->child(0)->setDataType(rhs);
   }
 }
 
@@ -769,7 +769,7 @@ void inferGlobal(Node* node) {
         Symbol(node->child(0)->getString(), rhs, node->getLine())));
 
     /* set the node type as well */
-    node->child(0)->setType(rhs);
+    node->child(0)->setDataType(rhs);
   }
 }
 

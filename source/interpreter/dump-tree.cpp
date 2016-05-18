@@ -25,8 +25,6 @@ string stringType(Node* node) {
       return "TOP LEVELS";
     case NODE_STATEMENT:
       return "STMTS";
-    case NODE_FORMAL_PARAM:
-      return "PARAM: " + node->getString();
     case NODE_FORMAL_PARAM_LIST:
       return "PARAMS";
     case NODE_PASS:
@@ -63,6 +61,8 @@ string stringType(Node* node) {
       return "CONST";
     case NODE_GLOBAL:
       return "GLOBAL";
+    case NODE_DECLARATION:
+      return "DECLARATION: " + node->getString();
 
     /* operators */
     case NODE_ASSIGN:

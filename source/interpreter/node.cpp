@@ -51,7 +51,6 @@ double Node::getReal() const { return realval; }
 bool Node::getBool() const { return boolval; }
 NodeKind Node::kind() const { return node_type; }
 DataType* Node::type() const { return data_type; }
-void Node::setType(DataType* t) { data_type = t; }
 int Node::numChildren() const { return num_children; }
 /* insert a symbol into the symtable */
 void Node::insertSymbol(Symbol sym) {
