@@ -35,6 +35,9 @@ enum NodeKind {
   NODE_WAIT,
   NODE_DECLARATION,
   NODE_LAMBDA,
+  NODE_IDENTIFIERS,
+  NODE_OPEN,
+  NODE_IMPORT,
 
   /* operator nodes */
   NODE_ASSIGN,
@@ -69,6 +72,7 @@ enum NodeKind {
 
   /* vector constants */
   NODE_VECVAL,
+  NODE_TUPVAL,
 
   /* leafy nodes */
   NODE_INTVAL,

@@ -27,6 +27,12 @@ string stringType(Node* node) {
       return "STMTS";
     case NODE_FORMAL_PARAM_LIST:
       return "PARAMS";
+    case NODE_IDENTIFIERS:
+      return "IDENTIFIERS";
+    case NODE_OPEN:
+      return "OPEN";
+    case NODE_IMPORT:
+      return "IMPORT";
     case NODE_PASS:
       return "PASS";
     case NODE_WAIT:
@@ -125,6 +131,8 @@ string stringType(Node* node) {
       return "INDEX";
     case NODE_VECVAL:
       return "VECVAL";
+    case NODE_TUPVAL:
+      return "TUPVAL";
     case NODE_VECRANGE:
       return "VECRANGE";
 

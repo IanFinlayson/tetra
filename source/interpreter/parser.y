@@ -136,9 +136,9 @@ Node* parseFile(const string& fname);
              expterm funcall simple_statements actual_param_list variable assignterm
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index indices vector_value vector_values datadecl 
-             wait_statement declaration lambda 
+             wait_statement declaration lambda identifiers module tuple_value tuple_values
 
-%type <data_type> return_type type type_decs type_dec_tuple function_type
+%type <data_type> return_type type type_decs type_dec_tuple function_type dict_type
 
 %error-verbose
 
@@ -167,9 +167,41 @@ toplevels: newl_star function toplevels {
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
-} | {
+} | newl_star module toplevels { 
+  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$->setLine(0);
+  $$->addChild($2);
+  $$->addChild($3);
+}| {
   $$ = NULL;
 }
+
+/* modules */
+identifiers: identifier TOK_COMMA identifiers {
+  $$ = new Node(NODE_IDENTIFIERS);
+  $$->setLine(yylineno);
+  $$->addChild($1);
+  $$->addChild($3);
+} | identifier {
+  $$ = new Node(NODE_IDENTIFIERS);
+  $$->setLine(yylineno);
+  $$->addChild($1);
+}
+
+module: TOK_OPEN identifiers{
+  $$ = new Node(NODE_OPEN); 
+  $$->setLine(yylineno);
+  $$->addChild($2);
+
+  } | TOK_IMPORT identifiers{
+  $$ = new Node(NODE_IMPORT); 
+  $$->setLine(yylineno);
+  $$->addChild($2);
+}
+
+
+
+
 
 /* a data declaration - either a constant or global */
 datadecl: TOK_CONST identifier TOK_ASSIGN expression {
@@ -252,15 +284,23 @@ type: TOK_INT {
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
   $$ = new DataType(TYPE_VECTOR);
   $$->addSubtype($2);
-} | type_dec_tuple{
+} | type_dec_tuple {
   $$ = $1;
-} | function_type{
+} | function_type {
   $$ = $1;
-} 
+} | dict_type { 
+  $$ = $1;
+}
 
 /* function_type */
 function_type: type_dec_tuple TOK_RIGHTARROW type{
 /* TODO */ 
+}
+
+/* dict_type */
+dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
+/* TODO */
+/* 2 subtypes */
 }
 
 /* a return type is either a simple type or none which means void */
@@ -782,10 +822,11 @@ expterm: funcall {
   $$->setStringval($1);
 } | vector_value {
   $$ = $1;
+} | tuple_value {
+  $$ = $1;
 } | variable {
   $$ = $1;
 }
-
 /* a vector literal */
 vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
   /* an empty vector definition */
@@ -816,9 +857,34 @@ vector_values: expression TOK_COMMA vector_values {
   $$->addChild($1);
 }
 
+/* a tuple literal */
+tuple_value: TOK_LEFTPARENS TOK_RIGHTPARENS {
+  /* an empty vector definition */
+  $$ = new Node(NODE_TUPVAL);
+
+} | TOK_LEFTPARENS expression TOK_COMMA TOK_RIGHTPARENS {
+  /* one tuple initializer */
+  $$ = new Node(NODE_TUPVAL); 
+  $$->addChild($2);
+} | TOK_LEFTPARENS expression TOK_COMMA tuple_values TOK_RIGHTPARENS{
+  /* a set of two or more tuple initializers */
+  $$ = new Node(NODE_TUPVAL); 
+  $$->addChild($2);
+  $$->addChild($4);
+} 
+
+/* zero or more expressions to be made into a tuple */
+tuple_values: expression TOK_COMMA tuple_values {
+  $$ = new Node(NODE_TUPVAL);
+  $$->addChild($1);
+  $$->addChild($3);
+} | expression{
+  $$ = new Node(NODE_TUPVAL);
+  $$->addChild($1);
+}
 
 
-/* an l-value - any identifier with any number of indexes after it */
+/* an l-value - any identifier with any number of indices after it */
 variable: identifier indices {
   /* if it's a vector reference */
   if ($2) {
