@@ -63,6 +63,8 @@ string stringType(Node* node) {
       return "GLOBAL";
     case NODE_DECLARATION:
       return "DECLARATION: " + node->getString();
+    case NODE_LAMBDA:
+      return "LAMBDA";
 
     /* operators */
     case NODE_ASSIGN:

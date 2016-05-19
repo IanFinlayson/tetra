@@ -34,6 +34,7 @@ enum NodeKind {
   NODE_GLOBAL,
   NODE_WAIT,
   NODE_DECLARATION,
+  NODE_LAMBDA,
 
   /* operator nodes */
   NODE_ASSIGN,

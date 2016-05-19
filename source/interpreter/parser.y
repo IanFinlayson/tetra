@@ -136,9 +136,9 @@ Node* parseFile(const string& fname);
              expterm funcall simple_statements actual_param_list variable assignterm
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index indices vector_value vector_values datadecl 
-             wait_statement declaration 
+             wait_statement declaration lambda 
 
-%type <data_type> return_type type tuple_types tuple_type_list
+%type <data_type> return_type type type_decs type_dec_tuple function_type
 
 %error-verbose
 
@@ -193,13 +193,7 @@ function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
   $$->addChild($3);
   $$->addChild($6);
   $$->setLine($1);
-} | TOK_LAMBDA TOK_IDENTIFIER formal_param_list TOK_COLON expression{
-  $$ = new Node(NODE_FUNCTION);
-  $$->setStringval("lambda");
-  $$->addChild($3);
-  $$->addChild($5);
-  $$->setLine($1);
-}
+} 
 
 /* a parameter list (with bananas) */
 formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
@@ -225,10 +219,10 @@ declaration: TOK_IDENTIFIER type {
   $$->setLine(yylineno);
   $$->setStringval(string($1));
   $$->setDataType($2);
-}
+} 
 
 /* tuple types */
-tuple_type_list: TOK_LEFTPARENS tuple_types TOK_RIGHTPARENS {
+type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
  /* TODO */ 
   $$ = new DataType(TYPE_TUPLE);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
@@ -236,7 +230,7 @@ tuple_type_list: TOK_LEFTPARENS tuple_types TOK_RIGHTPARENS {
 }
 
 /* a list of at least one parameter */
-tuple_types: type TOK_COMMA tuple_types {
+type_decs: type TOK_COMMA type_decs {
  /* TODO */ 
 } | type {
  /* TODO */ 
@@ -258,8 +252,15 @@ type: TOK_INT {
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
   $$ = new DataType(TYPE_VECTOR);
   $$->addSubtype($2);
-} | tuple_type_list{
+} | type_dec_tuple{
   $$ = $1;
+} | function_type{
+  $$ = $1;
+} 
+
+/* function_type */
+function_type: type_dec_tuple TOK_RIGHTARROW type{
+/* TODO */ 
 }
 
 /* a return type is either a simple type or none which means void */
@@ -575,6 +576,8 @@ expression: variable TOK_ASSIGN assignterm {
   $$->addChild(rhs);
 } | assignterm {
   $$ = $1;
+} | lambda{
+  $$ = $1;
 }
 
 assignterm: assignterm TOK_OR orterm {
@@ -585,6 +588,19 @@ assignterm: assignterm TOK_OR orterm {
 } | orterm {
   $$ = $1;
 }
+
+/* lambda function */
+lambda: TOK_LAMBDA formal_params TOK_COLON expression{
+  $$ = new Node(NODE_LAMBDA);
+  $$->addChild($2);
+  $$->addChild($4);
+  $$->setLine($1);
+} | TOK_LAMBDA TOK_COLON expression{
+  $$ = new Node(NODE_LAMBDA);
+  $$->addChild($3);
+  $$->setLine($1);
+}  
+
 
 /* and operator */
 orterm: orterm TOK_AND andterm {
