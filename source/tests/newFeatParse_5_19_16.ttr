@@ -1,0 +1,44 @@
+# A more robust test file to check parsing for new language features
+# that were added May 2016 including:
+#   1) declarations without assignment 
+#   2) vector ranges that use
+#   3) non-literals as endpoints
+#   4) types for task, mutex, tuple, and dictionaries
+#   5) import and open statements
+#   6) functions as arguments and returns
+#   7) lambda expressions 
+
+def main():
+
+  # Tests for #1
+  declare one string
+  declare two int
+  declare three bool
+  declare four real
+  declare fivepointone mutex
+  declare fivepointtwo task
+
+  declare five [string]
+  declare six[string]
+  declare seven [int]
+  declare eight[int]
+  declare nine [bool]
+  declare ninepointone[bool]
+  declare ten [real]
+  declare eleven[real]
+  declare elevenpointone [mutex]
+  declare elevenpointtwo [task]
+  declare twelve [[real]]
+  declare thirteen[[real]]
+
+  declare fourteen(int)
+  declare fifteen(int,int)
+  declare sixteen (int,(int), real, (string,string), [int],{string:int})
+   
+  declare seventeen [(int, bool, mutex, task)]
+  declare eighteen [[(int, bool, mutex, task)]]
+  declare nineteen [()->int]  
+  declare twenty [(int)->string]  
+  declare twentyone[ (int,string,bool)->string ]  
+
+
