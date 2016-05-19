@@ -125,14 +125,16 @@ string stringType(Node* node) {
       return "ARGS";
 
     /* vectors */
-    case NODE_VECREF:
-      return "VECREF";
+    case NODE_INDREF:
+      return "INDREF";
     case NODE_INDEX:
       return "INDEX";
     case NODE_VECVAL:
       return "VECVAL";
     case NODE_TUPVAL:
       return "TUPVAL";
+    case NODE_DICTVAL:
+      return "DICTVAL";
     case NODE_VECRANGE:
       return "VECRANGE";
 

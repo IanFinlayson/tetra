@@ -62,7 +62,7 @@ enum NodeKind {
   NODE_DIVIDE,
   NODE_MODULUS,
   NODE_EXP,
-  NODE_VECREF,
+  NODE_INDREF,
   NODE_VECRANGE,
   NODE_INDEX,
 
@@ -73,6 +73,7 @@ enum NodeKind {
   /* vector constants */
   NODE_VECVAL,
   NODE_TUPVAL,
+  NODE_DICTVAL,
 
   /* leafy nodes */
   NODE_INTVAL,

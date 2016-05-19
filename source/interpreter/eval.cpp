@@ -200,7 +200,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
         evaluateNode<T>(node->child(1), ret, context);
       }
     } break;
-    case NODE_VECREF: {
+    case NODE_INDREF: {
       // Here, T should be the type that needs to be returned, if not, then we
       // really didn;t need it anyways
       TArray* lookupArray =
@@ -217,7 +217,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       // Check to see if the array can be evaluated by reference, or see if it
       // is a literal that must be evaluated before we can use it
       if (node->child(1)->kind() == NODE_IDENTIFIER ||
-          node->child(1)->kind() == NODE_VECREF) {
+          node->child(1)->kind() == NODE_INDREF) {
         // Put the address of the addressable vector into collection
         evaluateAddress<TArray*>(node->child(1), collection, context);
         // aliasArray(node->child(0), collection.getData(), context);
@@ -536,7 +536,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
         SystemError e(message.str(), node->getLine(), node);
         throw e;
     }
-  } else if (node->kind() == NODE_VECREF) {  // If LHS is an array index (i.e.
+  } else if (node->kind() == NODE_INDREF) {  // If LHS is an array index (i.e.
                                              // x[12]), then we must evaluate
                                              // its address before we can paste
                                              // to it
@@ -556,7 +556,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 // used for performing assignment
 // Returns the value of the assignment, with an eye towards chaining assignments
 // (x = y = 2)
-// Assumes that node1 is a NODE_IDENTIFIER or NODE_VECREF, and node2 is an
+// Assumes that node1 is a NODE_IDENTIFIER or NODE_INDREF, and node2 is an
 // appropriate value
 template <typename T>
 T paste(const Node* node1, const Node* node2, TetraContext& context) {
@@ -577,7 +577,7 @@ T paste(const Node* node1, const Node* node2, TetraContext& context) {
 // This method overloads the basic paste(Node*, Node*, TetraContext*) function,
 // except that it is made for cross-scope assignment (i.e. function calls)
 // node1 is assumed to be a NODE_FORMAL_PARAM while node2 is a NODE_ACTUAL_PARAM
-// Because of this, we don;t have to check for NODE_VECREF or the likes that
+// Because of this, we don;t have to check for NODE_INDREF or the likes that
 // evaluateAddress provides us with
 template <typename T>
 T paste(const Node* node1, const Node* node2, TetraScope& destinationScope,
@@ -948,7 +948,7 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
     case NODE_ELIF_CLAUSE:
     case NODE_WHILE:
     case NODE_FOR:
-    case NODE_VECREF:
+    case NODE_INDREF:
     case NODE_INDEX:
     case NODE_ACTUAL_PARAM_LIST:
       evaluateStatement<T>(node, ret, context);

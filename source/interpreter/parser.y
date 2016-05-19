@@ -137,6 +137,7 @@ Node* parseFile(const string& fname);
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index indices vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
+             dict_value dict_values
 
 %type <data_type> return_type type type_decs type_dec_tuple function_type dict_type
 
@@ -824,6 +825,8 @@ expterm: funcall {
   $$ = $1;
 } | tuple_value {
   $$ = $1;
+} | dict_value {
+  $$ = $1;
 } | variable {
   $$ = $1;
 }
@@ -883,12 +886,33 @@ tuple_values: expression TOK_COMMA tuple_values {
   $$->addChild($1);
 }
 
+/* a dictionary literal */
+dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
+  /* an empty dictionary */
+  $$ = new Node(NODE_DICTVAL);
+
+} | TOK_LEFTBRACE dict_values TOK_RIGHTBRACE {
+  /* a literal dictionary with one or more key-val pairs */
+  $$ = $2;
+}
+
+/* one or more expressions to be made into a vector */
+dict_values: expression TOK_COLON expression TOK_COMMA dict_values {
+  $$ = new Node(NODE_DICTVAL);
+  $$->addChild($1);
+  $$->addChild($3);
+  $$->addChild($5);
+} | expression TOK_COLON expression {
+  $$ = new Node(NODE_DICTVAL);
+  $$->addChild($1);
+  $$->addChild($3);
+}
 
 /* an l-value - any identifier with any number of indices after it */
 variable: identifier indices {
   /* if it's a vector reference */
   if ($2) {
-    $$ = new Node(NODE_VECREF);
+    $$ = new Node(NODE_INDREF);
     $$->addChild($1);
     $$->addChild($2);
   } else {

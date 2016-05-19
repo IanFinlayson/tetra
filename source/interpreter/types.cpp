@@ -512,7 +512,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
       /* return the same type back */
       return new DataType(lhs->getKind());
 
-    case NODE_VECREF:
+    case NODE_INDREF:
       /* check vector */
       return checkVector(expr, func);
     case NODE_INDEX:
