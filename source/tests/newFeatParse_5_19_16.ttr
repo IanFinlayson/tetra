@@ -1,16 +1,20 @@
 # A more robust test file to check parsing for new language features
 # that were added May 2016 including:
-#   1) declarations without assignment 
-#   2) vector ranges that use
-#   3) non-literals as endpoints
+#   1) import and open statements
+#   2) declarations without assignment 
+#   3) vector ranges that use non-literals as endpoints
 #   4) types for task, mutex, tuple, and dictionaries
-#   5) import and open statements
+#   5) lambda expressions 
 #   6) functions as arguments and returns
-#   7) lambda expressions 
+
+# Tests for #1
+import zero
+import zeropointone, zeropointtwo,zeropointthree, zeropointfour
+open zeropintfive, zeropointsix,zeropointseven, zeropointeight
 
 def main():
-
-  # Tests for #1
+  
+  # Tests for #2 (also includes a bit of testing for #4)
   declare one string
   declare two int
   declare three bool
@@ -40,5 +44,46 @@ def main():
   declare nineteen [()->int]  
   declare twenty [(int)->string]  
   declare twentyone[ (int,string,bool)->string ]  
+  
+  declare twentytwo {string:int}
+  declare twentythree{ int:(int,string,int)}
+  declare twentyfour {([int],string):mutex} 
+
+  global twentyfourpointone int
+  global twentyfourpointtwo {string:int}
+  global twentyfourpointthree mutex
+  global twentyfourpointfour bool
+  global twentyfourpointfive task
+  global twentyfourpointfive (int,int,int)
+  global twentyfourpointsix(int,int,int)
 
 
+  # Tests for #3
+  two = 5
+  twentyfive = [0 ... two]
+  twentysix = [two ... len(twentyfive)] 
+  twentyseven=[len(twentyfive)..len(twentysix)]
+  twentyeight = [len(twentyfive) ... 100]
+
+  # Additional tests for #4
+  twentynine = {"hi":"bye", "open": "close", "fire" : "ice" }
+  lock:
+    background thirty:
+      thirtyone={1:"hi",2:"bye",3:"sandwich"}
+      thirtytwo=(5,"squirrel",thirty)
+      thirtythree = (thirtytwo, ["frank","bob"],thirtyone)
+    
+  lock thirtythreepointone:
+    wait thirty
+    print(thirtyone[1])
+    thirtyone [1] = "hello"
+    thirtyone[2]=thirtytwo[1] 
+    thirtyone[3] = thirtythree[1][0]
+
+
+# Tests for #5 & #6  
+def thirtytwo(thirtythree mutex, thirtyfour task, thirtyfive(int) -> int) (int)->int:
+  return thirtyfive
+
+def thirtysix() int:
+  thirtyseven = thirtytwo(thirtythreepointone, thirty, lambda x int: x)  
