@@ -554,6 +554,16 @@ int yylex() {
       } else {
         return TOK_GT;
       }
+    case '\\':
+      if (in->peek() == '\n'){
+        in->get();
+        while(in->peek() == ' '){
+          in->get();
+        }
+        
+        /* recurse to skip it */
+        return yylex();
+      }
   }
 
   /* if we get down here, there must be a lexer error :( */
