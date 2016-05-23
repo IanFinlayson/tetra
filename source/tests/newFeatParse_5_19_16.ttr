@@ -11,9 +11,16 @@
 import zero
 import zeropointone, zeropointtwo,zeropointthree, zeropointfour
 open zeropintfive, zeropointsix,zeropointseven, zeropointeight
+global twentyfourpointone int
+global twentyfourpointtwo {string:int}
+global twentyfourpointthree mutex
+global twentyfourpointfour bool
+global twentyfourpointfive task
+global twentyfourpointfive (int,int,int)
+global twentyfourpointsix(int,int,int)
+
 
 def main():
-  
   # Tests for #2 (also includes a bit of testing for #4)
   declare one string
   declare two int
@@ -38,7 +45,7 @@ def main():
   declare fourteen(int)
   declare fifteen(int,int)
   declare sixteen (int,(int), real, (string,string), [int],{string:int})
-   
+
   declare seventeen [(int, bool, mutex, task)]
   declare eighteen [[(int, bool, mutex, task)]]
   declare nineteen [()->int]  
@@ -49,20 +56,12 @@ def main():
   declare twentythree{ int:(int,string,int)}
   declare twentyfour {([int],string):mutex} 
 
-  global twentyfourpointone int
-  global twentyfourpointtwo {string:int}
-  global twentyfourpointthree mutex
-  global twentyfourpointfour bool
-  global twentyfourpointfive task
-  global twentyfourpointfive (int,int,int)
-  global twentyfourpointsix(int,int,int)
-
 
   # Tests for #3
   two = 5
   twentyfive = [0 ... two]
   twentysix = [two ... len(twentyfive)] 
-  twentyseven=[len(twentyfive)..len(twentysix)]
+  twentyseven=[len(twentyfive)...len(twentysix)]
   twentyeight = [len(twentyfive) ... 100]
 
   # Additional tests for #4
@@ -72,7 +71,6 @@ def main():
       thirtyone={1:"hi",2:"bye",3:"sandwich"}
       thirtytwo=(5,"squirrel",thirty)
       thirtythree = (thirtytwo, ["frank","bob"],thirtyone)
-    
   lock thirtythreepointone:
     wait thirty
     print(thirtyone[1])
