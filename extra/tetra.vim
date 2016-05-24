@@ -11,7 +11,8 @@ endif
 " keywords
 syn keyword tetraKeyword if elif else for in parallel while continue break def
 syn keyword tetraKeyword or and not pass return background lock constant global
-syn keyword tetraType int real string bool
+syn keyword tetraKeyword declare open import
+syn keyword tetraType int real string bool mutex task none
 
 " comments and TODOs
 syn keyword tetraTodo contained TODO FIXME
