@@ -114,7 +114,7 @@ Node* parseFile(const string& fname);
 %token <lineno> TOK_NONE 180
 %token <lineno> TOK_RIGHTARROW 181
 %token <lineno> TOK_DOT 182
-%token <lineno> TOK_DECLARE 183
+%token <lineno> TOK_AS 183
 
 /* typed tokens */
 %token <intval> TOK_INTVAL 161
@@ -137,7 +137,7 @@ Node* parseFile(const string& fname);
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index indices vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
-             dict_value dict_values
+             dict_value dict_values typed_identifier
 
 %type <data_type> return_type type type_decs type_dec_tuple function_type dict_type
 
@@ -273,9 +273,7 @@ type_decs: type TOK_COMMA type_decs {
 }
 
 /* types just primitives and vectors for now */
-type: TOK_NONE { 
-  $$ = new DataType(TYPE_NONE);
-} | TOK_INT {
+type: TOK_INT {
   $$ = new DataType(TYPE_INT);
 } | TOK_REAL {
   $$ = new DataType(TYPE_REAL);
@@ -312,8 +310,10 @@ dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
 /* a return type is either a simple type or none which means void */
 return_type: type {
   $$ = $1;
-} | {
-  $$ = new DataType(TYPE_VOID);
+} | TOK_NONE {
+  $$ = new DataType(TYPE_NONE);
+}  | {
+  $$ = new DataType(TYPE_NONE);
 }
 
 /* a block is a set of statements, indented over */
@@ -356,9 +356,14 @@ simple_statement: pass_statement
   | expression {
   $$ = $1;
   $$->setLine(yylineno);
-} | TOK_DECLARE declaration{
-  $$ = $2;
+} | typed_identifier {
+  $$ = $1;
+}
+
+typed_identifier: identifier TOK_AS type {
+  $$ = $1;
   $$->setLine(yylineno);
+  $1->setDataType($3);
 }
 
 /* a compound statement is one which has a block of code under it */
@@ -516,7 +521,13 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
 }
 
 /* expressions - assignments first */
-expression: variable TOK_ASSIGN assignterm {
+expression: typed_identifier TOK_ASSIGN assignterm{
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  $$->addChild($3);
+  $$->setLine($2);
+}
+  | variable TOK_ASSIGN assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
@@ -826,6 +837,8 @@ expterm: funcall {
 } | TOK_STRINGVAL {
   $$ = new Node(NODE_STRINGVAL);
   $$->setStringval($1);
+} | TOK_NONE {
+  $$ = new Node(NODE_NONEVAL);
 } | vector_value {
   $$ = $1;
 } | tuple_value {
@@ -886,7 +899,7 @@ tuple_values: expression TOK_COMMA tuple_values {
   $$ = new Node(NODE_TUPVAL);
   $$->addChild($1);
   $$->addChild($3);
-} | expression{
+} | expression {
   $$ = new Node(NODE_TUPVAL);
   $$->addChild($1);
 }
@@ -936,9 +949,7 @@ indices: index indices {
 }
 
 /* a single index */
-index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
-  $$ = $2;
-}
+index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET { $$ = $2; }
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {

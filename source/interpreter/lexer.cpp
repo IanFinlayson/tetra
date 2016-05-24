@@ -86,6 +86,9 @@ int lookupId(const string& id) {
   if (id == "not") {
     return TOK_NOT;
   }
+  if (id == "as") {
+    return TOK_AS;
+  }
   if (id == "pass") {
     return TOK_PASS;
   }
@@ -145,9 +148,6 @@ int lookupId(const string& id) {
   }
   if (id == "task") {
     return TOK_TASK;
-  }
-  if (id == "declare") {
-    return TOK_DECLARE;
   }
   if (id == "true") {
     yylval.boolval = true;

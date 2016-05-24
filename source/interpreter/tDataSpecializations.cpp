@@ -11,7 +11,7 @@ template <>
 TData<void*>::TData(const TData<void*>& other)
     : pointedTo(other.pointedTo.getKind()) {
   // if the data points to something, we must perform a deep copy
-  if (other.pointedTo != TYPE_VOID) {
+  if (other.pointedTo != TYPE_NONE) {
     // cout <<"Utilizing new" << endl;
     // Check the type so we know how much memory needs to be allocated, and copy
     // the value into the new memory location
@@ -48,7 +48,7 @@ TData<void*>::TData(const TData<void*>& other)
 template <>
 TData<void*>::~TData() {
   // if the data points to something, we must delete it
-  if (pointedTo != TYPE_VOID) {
+  if (pointedTo != TYPE_NONE) {
     switch (pointedTo.getKind()) {
       case TYPE_INT:
         delete (static_cast<int*>(data));
@@ -195,7 +195,7 @@ void TData<void*>::setDeletableType<TArray>() {
 template <>
 template <>
 void TData<void*>::setDeletableType<void>() {
-  pointedTo = DataType(TYPE_VOID);
+  pointedTo = DataType(TYPE_NONE);
 }
 
 // Specialization of assignment when data is a pointer type
@@ -211,7 +211,7 @@ TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
   }
 
   // if the data points to something, we must perform a deep copy
-  if (other.pointedTo != TYPE_VOID) {
+  if (other.pointedTo != TYPE_NONE) {
     // Must typecheck to see what we must delete, and what we must allocate
     // std::cout << "Utilizing new" << std::endl;
     switch (other.pointedTo.getKind()) {

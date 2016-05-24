@@ -403,7 +403,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
                   // message << " (vector): ";
                   message << *static_cast<TArray*>(var);
                   break;
-                case TYPE_VOID:
+                case TYPE_NONE:
                   // message << " (void): ";
                   message << var;
                   break;

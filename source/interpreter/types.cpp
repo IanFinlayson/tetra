@@ -33,8 +33,6 @@ string typeToString(DataType* t) {
       return "string";
     case TYPE_BOOL:
       return "bool";
-    case TYPE_VOID:
-      return "void";
     case TYPE_MUTEX:
       return "mutex";
     case TYPE_TASK:
@@ -609,7 +607,7 @@ void inferBlock(Node* block, Node* func) {
                         if (block->child(0)) {
                           ret = inferExpression(block->child(0), func);
                         } else {
-                          ret = new DataType(TYPE_VOID);
+                          ret = new DataType(TYPE_NONE);
                         }
 
                         /* check that it matches the return type */

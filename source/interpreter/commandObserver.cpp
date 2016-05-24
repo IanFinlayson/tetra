@@ -448,7 +448,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
                   // message << " (vector): ";
                   message << *static_cast<TArray*>(var);
                   break;
-                case TYPE_VOID:
+                case TYPE_NONE:
                   // message << " (void): ";
                   message << var;
                   break;

@@ -80,6 +80,7 @@ enum NodeKind {
   NODE_REALVAL,
   NODE_BOOLVAL,
   NODE_STRINGVAL,
+  NODE_NONEVAL,
   NODE_IDENTIFIER
 };
 
@@ -100,12 +101,11 @@ ostream& operator<<(ostream& out, const Error& error);
 
 /* the different possibilities a data type can be */
 enum DataTypeKind {
-  TYPE_NONE,
   TYPE_INT,
   TYPE_REAL,
   TYPE_STRING,
   TYPE_BOOL,
-  TYPE_VOID,
+  TYPE_NONE,
   TYPE_VECTOR,
   TYPE_TUPLE,
   TYPE_MUTEX,

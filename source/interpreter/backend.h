@@ -87,10 +87,10 @@ class TData {
 };
 
 template <typename T>
-TData<T>::TData() : data(), pointedTo(TYPE_VOID) {}
+TData<T>::TData() : data(), pointedTo(TYPE_NONE) {}
 
 template <typename T>
-TData<T>::TData(const T& pData) : data(pData), pointedTo(TYPE_VOID) {}
+TData<T>::TData(const T& pData) : data(pData), pointedTo(TYPE_NONE) {}
 
 /* default copy constructor is fine for ordinary case */
 template <typename T>

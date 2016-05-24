@@ -155,6 +155,8 @@ string stringType(Node* node) {
       } else {
         return "false";
       }
+    case NODE_NONEVAL:
+      return "NONE";
     default:
       throw Error("Unsupported node type!");
   }
