@@ -100,6 +100,7 @@ ostream& operator<<(ostream& out, const Error& error);
 
 /* the different possibilities a data type can be */
 enum DataTypeKind {
+  TYPE_NONE,
   TYPE_INT,
   TYPE_REAL,
   TYPE_STRING,

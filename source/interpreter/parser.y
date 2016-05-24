@@ -258,6 +258,9 @@ declaration: TOK_IDENTIFIER type {
 type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
  /* TODO */ 
   $$ = new DataType(TYPE_TUPLE);
+} | TOK_LEFTPARENS type TOK_COMMA TOK_RIGHTPARENS {
+  /* TODO */ 
+  $$ = new DataType(TYPE_TUPLE);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = NULL;
 }
@@ -270,7 +273,9 @@ type_decs: type TOK_COMMA type_decs {
 }
 
 /* types just primitives and vectors for now */
-type: TOK_INT {
+type: TOK_NONE { 
+  $$ = new DataType(TYPE_NONE);
+} | TOK_INT {
   $$ = new DataType(TYPE_INT);
 } | TOK_REAL {
   $$ = new DataType(TYPE_REAL);

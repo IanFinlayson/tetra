@@ -23,6 +23,8 @@ string itoa(int num) {
 /* return a string of a data type */
 string typeToString(DataType* t) {
   switch (t->getKind()) {
+    case TYPE_NONE:
+      return "none";
     case TYPE_INT:
       return "int";
     case TYPE_REAL:
