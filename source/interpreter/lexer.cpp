@@ -314,15 +314,30 @@ int yylex() {
       in->get();
       spaces++;
     }
+
+    start_of_line = 0;
+
     /* handle the case where there is nothing but spaces */
     if(in->peek() == '\n'){
       in->get();
       start_of_line = 1;
       yylineno++;
       return TOK_NEWLINE;
+    } 
+    
+    /* handle the case where it is just a comment */
+    if(in->peek() == '#'){
+      in->get();
+      while(in->peek() != '\n'){
+        in->get();
+      }
+      in->get();
+      yylineno++;
+      start_of_line = 1;
+      return yylex();
     }
+    
 
-    start_of_line = 0;
     /* if this is the first one, treat it as the level */
     if (spaces_per_indent == 0) {
       spaces_per_indent = spaces;
