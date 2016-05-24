@@ -72,6 +72,9 @@ two elements:
  - TYPE_BOOL
  - TYPE_VOID
  - TYPE_VECTOR
+ - TYPE_MUTEX
+ - TYPE_TASK
+ - TYPE_TUPLE
 - The *subtype* which is only used TYPE_VECTOR types.  The subtype is another
 pointer to a DataType object.
 

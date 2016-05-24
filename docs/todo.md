@@ -33,7 +33,7 @@ but [1 ... N] is not.
 ### Parser
 - Add memory de-allocation for parse tree nodes and related structures.
 - Improve error message clarity.
-- Imporve the accuracy of the line numbers associated with nodes.
+- Improve the accuracy of the line numbers associated with nodes.
 - Allow for the automatic promotion of ints to reals.
 - Improve type checking on binary operators.
 

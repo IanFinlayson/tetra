@@ -415,7 +415,7 @@ numbers = [1 ... 10]
 </code>
 </pre>
 
-<p>This can be done with variables as well.  We could write use a range to
+<p>This can be done with variables as well.  We could use a range to
 write our factorial function as:</p>
 
 <pre>
@@ -602,7 +602,7 @@ If it hasn't finished, it will not complete until the task we're waiting for
 has completed.</p>
 
 <p>The named background statement creates a variable of type <code>task</code>
-which is first class data type in Tetra.  This means we can return tasks from
+which is a first class data type in Tetra.  This means we can return tasks from
 functions, put them in data structures etc.</p>
 
 
@@ -901,7 +901,7 @@ class Square:
 </code>
 </pre>
 
-<p>We can create a Square object by using the name of class as if it were a
+<p>We can create a Square object by using the name of the class as if it were a
 function which returns an object of that class:</p>
 
 <pre>
@@ -957,7 +957,7 @@ def main():
 <p>If any initializers are defined, we must call one of them.  With the class
 definition above, we would not be able to forgo supplying the size.  We can
 however have multiple initializers with different parameter lists.  Below we
-add in a initializer which takes no parameters:</p>
+add in an initializer which takes no parameters:</p>
 
 <pre>
 <code>
@@ -998,7 +998,7 @@ that same module transparently.  For instance the programs above are each
 assumed to be in the same file, so the main functions can call the other
 functions in that same file (module) just by name.</p>
 
-<p>We can also write code which accessed code in other modules, but must do so
+<p>We can also write code which accesses code in other modules, but must do so
 explicitly.  This is done with either the <code>import</code> or <code>open</code>
 keyword.  Each statement is given a module name.  For instance, if we have a
 file called "fact.ttr" which contains the following code:</p>
