@@ -27,7 +27,7 @@ contains the following functions:
 ```cpp
 Error(const string& mesg, int lineno = 0); 
 ```
-Theructor is used when throwing an Error.  The message and line number
+The constructor is used when throwing an Error.  The message and line number
 describe the error.
 
 ```cpp
@@ -82,7 +82,7 @@ Data types have the following functions:
 ```cpp
 DataType(DataTypeKind kind);
 ```
-Theructor takes the kind of type (one of the above enumeration values).
+The constructor takes the kind of type (one of the above enumeration values).
 
 ```cpp
 void setSubType(DataType* subtype);
@@ -118,7 +118,7 @@ nodes produced.
 ```cpp
 Node(NodeKind type);
 ```
-Theructor takes the *kind* of node to be created.  This is an enum whose
+The constructor takes the *kind* of node to be created.  This is an enum whose
 values are described at the end of this document.
 
 ```cpp
@@ -137,7 +137,7 @@ These functions set the string, int, real and bool values associated with
 nodes.
 
 Most types of nodes do not have any of these values associated with them.
-Identifiers, functions and stringants do have string values, and nodes
+Identifiers, functions and strings do have string values, and nodes
 representing numeric or boolean literals have the appropriate value set.
 
 ```cpp
