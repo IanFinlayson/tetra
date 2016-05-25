@@ -40,8 +40,11 @@ enum NodeKind {
   NODE_IMPORT,
   NODE_CLASS,
   NODE_CLASS_PART,
+  NODE_METHOD_CALL,
+  NODE_SELF,
 
   /* operator nodes */
+  NODE_DOT,
   NODE_ASSIGN,
   NODE_OR,
   NODE_AND,

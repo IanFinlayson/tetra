@@ -75,6 +75,12 @@ string stringType(Node* node) {
       return "CLASS " + node->getString();
     case NODE_CLASS_PART:
       return "CLASS PART";
+    case NODE_DOT:
+      return "DOT";
+    case NODE_METHOD_CALL:
+      return "METHOD CALL";
+    case NODE_SELF:
+      return "SELF";
 
     /* operators */
     case NODE_ASSIGN:

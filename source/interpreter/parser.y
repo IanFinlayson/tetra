@@ -133,12 +133,12 @@ Node* parseFile(const string& fname);
              compound_statement simple_statement pass_statement return_statement break_statement
              continue_statement expression if_statement while_statement else_option orterm andterm
              notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
-             expterm funcall simple_statements actual_param_list variable assignterm
+             expterm funcall simple_statements actual_param_list rvalue assignterm
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-             background lock_statement index indices vector_value vector_values datadecl 
+             background lock_statement index vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
-             init_function 
+             init_function lvalue
 
 %type <data_type> return_type type type_decs type_dec_tuple function_type dict_type
 
@@ -232,8 +232,7 @@ class_parts: class_part class_parts {
 class_part: function 
   | typed_identifier newl_plus
   | init_function {
-  $$ = new Node(NODE_CLASS_PART);
-  $$->addChild($1);
+  $$ = $1;
 }
 
 init_function: TOK_DEF TOK_INIT formal_param_list return_type TOK_COLON block {
@@ -335,6 +334,8 @@ type: TOK_INT {
   $$ = $1;
 } | dict_type { 
   $$ = $1;
+} | TOK_IDENTIFIER {
+  /* TODO */
 }
 
 /* function_type */
@@ -568,12 +569,12 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   $$->addChild($3);
   $$->setLine($2);
 }
-  | variable TOK_ASSIGN assignterm {
+  | lvalue TOK_ASSIGN assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
-} | variable TOK_PLUSEQ assignterm {
+} | lvalue TOK_PLUSEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -582,7 +583,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_MINUSEQ assignterm {
+} | lvalue TOK_MINUSEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -591,7 +592,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_TIMESEQ assignterm {
+} | lvalue TOK_TIMESEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -600,7 +601,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_DIVIDEEQ assignterm {
+} | lvalue TOK_DIVIDEEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -609,7 +610,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_MODULUSEQ assignterm {
+} | lvalue TOK_MODULUSEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -618,7 +619,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_EXPEQ assignterm {
+} | lvalue TOK_EXPEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -627,7 +628,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_LSHIFTEQ assignterm {
+} | lvalue TOK_LSHIFTEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -636,7 +637,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_RSHIFTEQ assignterm {
+} | lvalue TOK_RSHIFTEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -645,7 +646,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_ANDEQ assignterm {
+} | lvalue TOK_ANDEQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -654,7 +655,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_OREQ assignterm {
+} | lvalue TOK_OREQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -663,7 +664,7 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
-} | variable TOK_XOREQ assignterm {
+} | lvalue TOK_XOREQ assignterm {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
@@ -861,8 +862,19 @@ unaryterm: expterm TOK_EXP unaryterm {
   $$ = $1;
 }
 
+/* expterm */
+expterm: expterm TOK_DOT funcall {
+  $$ = new Node(NODE_METHOD_CALL);
+  $$->addChild($1);
+  $$->addChild($3);
+  $$->setLine($2);
+} | rvalue {
+  $$ = $1;
+} 
+
+
 /* indivisible thing */
-expterm: funcall {
+rvalue: funcall {
   $$ = $1;
 } | TOK_LEFTPARENS expression TOK_RIGHTPARENS {
   $$ = $2;
@@ -886,8 +898,22 @@ expterm: funcall {
   $$ = $1;
 } | dict_value {
   $$ = $1;
-} | variable {
+} | lvalue {
   $$ = $1;
+} 
+
+lvalue: expterm index {
+  $$ = $1;
+} |   
+ expterm TOK_DOT identifier { 
+  $$ = new Node(NODE_DOT);
+  $$->addChild($1);
+  $$->addChild($3);
+  $$->setLine($2);
+} | identifier {
+  $$ = $1;
+} | TOK_SELF { 
+  $$ = new Node(NODE_SELF);
 }
 
 /* a vector literal */
@@ -968,28 +994,6 @@ dict_values: expression TOK_COLON expression TOK_COMMA dict_values {
   $$->addChild($3);
 }
 
-/* an l-value - any identifier with any number of indices after it */
-variable: identifier indices {
-  /* if it's a vector reference */
-  if ($2) {
-    $$ = new Node(NODE_INDREF);
-    $$->addChild($1);
-    $$->addChild($2);
-  } else {
-    /* just a humble identifier */
-    $$ = $1;
-  }
-}
-
-/* any number of indices */
-indices: index indices {
-  $$ = new Node(NODE_INDEX);
-  $$->addChild($1);
-  $$->addChild($2);
-} | {
-  $$ = NULL;
-}
-
 /* a single index */
 index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET { $$ = $2; }
 
@@ -997,7 +1001,7 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET { $$ = $2; }
 identifier: TOK_IDENTIFIER {
   $$ = new Node(NODE_IDENTIFIER);
   $$->setStringval($1);
-}
+}  
 
 /* a function call */
 funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
@@ -1010,7 +1014,7 @@ funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$->setStringval($1);
   $$->addChild($3);
   $$->setLine($2);
-}
+  }
 
 /* a list of at least one parameter */
 actual_param_list: expression TOK_COMMA actual_param_list {
