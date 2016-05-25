@@ -71,6 +71,10 @@ string stringType(Node* node) {
       return "DECLARATION: " + node->getString();
     case NODE_LAMBDA:
       return "LAMBDA";
+    case NODE_CLASS:
+      return "CLASS " + node->getString();
+    case NODE_CLASS_PART:
+      return "CLASS PART";
 
     /* operators */
     case NODE_ASSIGN:

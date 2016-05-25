@@ -137,7 +137,8 @@ Node* parseFile(const string& fname);
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index indices vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
-             dict_value dict_values typed_identifier
+             dict_value dict_values typed_identifier class class_block class_parts class_part
+             init_function 
 
 %type <data_type> return_type type type_decs type_dec_tuple function_type dict_type
 
@@ -173,6 +174,11 @@ toplevels: newl_star function toplevels {
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
+} | newl_star class toplevels {
+  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$->setLine(0);
+  $$->addChild($2);
+  $$->addChild($3);
 }| {
   $$ = NULL;
 }
@@ -189,20 +195,55 @@ identifiers: identifier TOK_COMMA identifiers {
   $$->addChild($1);
 }
 
-module: TOK_OPEN identifiers{
+module: TOK_OPEN identifiers {
   $$ = new Node(NODE_OPEN); 
   $$->setLine(yylineno);
   $$->addChild($2);
 
-  } | TOK_IMPORT identifiers{
+  } | TOK_IMPORT identifiers {
   $$ = new Node(NODE_IMPORT); 
   $$->setLine(yylineno);
   $$->addChild($2);
 }
 
 
+/* class */
+class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
+  $$ = new Node(NODE_CLASS);
+  $$->setStringval(string($2));
+  $$->addChild($5);
+}
 
+class_block: TOK_INDENT class_parts TOK_DEDENT {
+  $$ = $2;
+} | TOK_INDENT pass_statement TOK_DEDENT{
+  $$ = $2;
+}
 
+class_parts: class_part class_parts {
+  $$ = new Node(NODE_CLASS_PART);
+  $$->addChild($1);
+  $$->addChild($2);
+  $$->setLine($1->getLine( ));
+} | class_part {
+  $$ = $1;
+}
+
+class_part: function 
+  | typed_identifier newl_plus
+  | init_function {
+  $$ = new Node(NODE_CLASS_PART);
+  $$->addChild($1);
+}
+
+init_function: TOK_DEF TOK_INIT formal_param_list return_type TOK_COLON block {
+  $$ = new Node(NODE_FUNCTION);
+  $$->setStringval("init");
+  $$->setDataType($4);
+  $$->addChild($3);
+  $$->addChild($6);
+  $$->setLine($1);
+} 
 
 /* a data declaration - either a constant or global */
 datadecl: TOK_CONST identifier TOK_ASSIGN expression {
@@ -848,6 +889,7 @@ expterm: funcall {
 } | variable {
   $$ = $1;
 }
+
 /* a vector literal */
 vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
   /* an empty vector definition */

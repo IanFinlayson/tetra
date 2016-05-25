@@ -38,6 +38,8 @@ enum NodeKind {
   NODE_IDENTIFIERS,
   NODE_OPEN,
   NODE_IMPORT,
+  NODE_CLASS,
+  NODE_CLASS_PART,
 
   /* operator nodes */
   NODE_ASSIGN,

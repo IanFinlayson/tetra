@@ -11,7 +11,7 @@ endif
 " keywords
 syn keyword tetraKeyword if elif else for in parallel while continue break def
 syn keyword tetraKeyword or and not pass return background lock constant global
-syn keyword tetraKeyword declare open import lambda wait self class
+syn keyword tetraKeyword as open import lambda wait self class
 syn keyword tetraKeyword init 
 syn keyword tetraType int real string bool mutex task none
 
