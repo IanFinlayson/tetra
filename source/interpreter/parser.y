@@ -898,6 +898,8 @@ rvalue: funcall {
   $$ = $1;
 } | dict_value {
   $$ = $1;
+} | TOK_SELF { 
+  $$ = new Node(NODE_SELF);
 } | lvalue {
   $$ = $1;
 } 
@@ -912,10 +914,7 @@ lvalue: expterm index {
   $$->setLine($2);
 } | identifier {
   $$ = $1;
-} | TOK_SELF { 
-  $$ = new Node(NODE_SELF);
-}
-
+} 
 /* a vector literal */
 vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
   /* an empty vector definition */
