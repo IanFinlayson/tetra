@@ -113,6 +113,9 @@ enum DataTypeKind {
   TYPE_NONE,
   TYPE_VECTOR,
   TYPE_TUPLE,
+  TYPE_DICT,
+  TYPE_FUNCTION,
+  TYPE_CLASS,
   TYPE_MUTEX,
   TYPE_TASK
 };
@@ -122,13 +125,13 @@ enum DataTypeKind {
 class DataType {
  public:
   DataType(DataTypeKind kind);
-  void addSubtype(DataType* subtype);
+  ~DataType();
   DataTypeKind getKind() const;
-  DataType* vectorSub() const;
+  std::vector<DataType>* subtypes;
+  std::string* className;
 
  private:
   DataTypeKind kind;
-  std::vector<DataType>* subtypes;
 };
 
 /* operators for comparing types for equality */

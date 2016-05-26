@@ -38,7 +38,38 @@ string typeToString(DataType* t) {
     case TYPE_TASK:
       return "task";
     case TYPE_VECTOR:
-      return "[" + typeToString(t->vectorSub()) + "]";
+      return "[" + typeToString(&((*(t->subtypes))[0])) + "]";
+    case TYPE_DICT:
+      return "{" + typeToString(&((*(t->subtypes))[0])) + ":" 
+        + typeToString(&((*(t->subtypes))[1])) + "}";
+    case TYPE_TUPLE:{
+      std::string typeString = "(";
+      for(int i = 0; i < t->subtypes->size(); i++){
+        typeString += typeToString(&((*(t->subtypes))[i])) + ","; 
+      }
+      /* if the tuple has more than one element ... */
+      if(t->subtypes->size() > 1)
+        /* then get rid of the trailing comma */
+        typeString[typeString.size()-1] = '\0';
+
+      return typeString + ")";
+    }
+    case TYPE_CLASS:
+      return *(t->className);
+    case TYPE_FUNCTION:{
+      /* get the param list */
+      std::string typeString = "(";
+      for(int i=1; i<t->subtypes->size(); i++){
+        typeString += typeToString(&((*(t->subtypes))[i])) + ",";
+      }
+      /* if the tuple has more than one element ... */
+      if(t->subtypes->size() > 2)
+        /* then get rid of the trailing comma */
+        typeString[typeString.size()-1] = '\0';
+
+      /* add return type and return the whole thing*/
+      return typeString += ")->" + typeToString(&((*(t->subtypes))[0]));
+    }
     default:
       throw Error("typeToString: Unknown data type");
   }
@@ -47,31 +78,21 @@ string typeToString(DataType* t) {
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
-  subtypes = NULL;
+  this->subtypes = new std::vector<DataType>;
+}
+
+DataType::~DataType() {
+  delete(&this->kind);
+  delete(&this->className);
+  delete(&this->subtypes);
 }
 
 DataTypeKind DataType::getKind() const { return kind; }
 
-DataType* DataType::vectorSub() const { 
-  if(subtypes == NULL)
-    return NULL; 
-
-  return &(*subtypes)[0]; 
-}
-
-
-void DataType::addSubtype(DataType* subtype) { 
-
-  //if(subtypes == NULL)
-  // subtypes = new vector<DataType>;
-
-  //subtypes->push_back(*subtype); 
-}
-
 /* find the base type of a data type */
 DataTypeKind baseType(DataType* t) {
   if (t->getKind() == TYPE_VECTOR)
-    return baseType(t->vectorSub());
+    return baseType(&((*(t->subtypes))[0]));
   else
     return t->getKind();
 }
@@ -81,13 +102,45 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're not the same kind, fail */
   if (lhs.getKind() != rhs.getKind()) {
     return false;
-  }
+  } 
 
   /* if they're vectors, recursively ensure the subtypes match */
   if (lhs.getKind() == TYPE_VECTOR) {
-    return (*(lhs.vectorSub()) == *(rhs.vectorSub()));
+    return (lhs.subtypes[0] == rhs.subtypes[0]);
+  }
+  
+  /* for dictionaries, recursively check the key and value types */
+  if (lhs.getKind() == TYPE_DICT) {
+    return (lhs.subtypes[0] == rhs.subtypes[0])
+      && (lhs.subtypes[1] == rhs.subtypes[1]);
   }
 
+  /* for classes, just check the names */
+  if (lhs.getKind() == TYPE_CLASS) {
+    return lhs.className == rhs.className;
+  }
+
+  /* for tuples and functions, check that they have the same
+   * number of subtypes */
+  if ((lhs.subtypes->size() && rhs.subtypes->size()) 
+      && lhs.subtypes->size() != rhs.subtypes->size()){
+    return false;
+  }
+
+  /* if they are both tuple or both functions and we made it 
+   * here, then they have the same number of subtypes, 
+   * so we need to compare the subtypes recursively. */
+  if (lhs.getKind() == TYPE_TUPLE 
+      || lhs.getKind() == TYPE_FUNCTION) {
+    bool same = true;
+    int i = 0;
+    while (same && i < lhs.subtypes->size()) {
+      same = (lhs.subtypes[i] == rhs.subtypes[i]);
+      i++;
+    }
+    return same;
+  }
+   
   /* otherwise return true */
   return true;
 }
@@ -228,7 +281,7 @@ int countIndices(Node* idx, Node* func) {
 /* count the number of dimensions in a data type */
 int countDimensions(DataType* t) {
   if (t->getKind() == TYPE_VECTOR) {
-    return 1 + countDimensions(t->vectorSub());
+    return 1 + countDimensions(&((*(t->subtypes))[0]));
   } else {
     return 0;
   }
@@ -256,7 +309,7 @@ DataType* checkVector(Node* vec, Node* func) {
   /* add veector wrapper for dim-levels times */
   for (int i = 0; i < (dim - levels); i++) {
     DataType* r = new DataType(TYPE_VECTOR);
-    r->addSubtype(result);
+    r->subtypes->push_back(*result);
     result = r;
   }
 
@@ -495,15 +548,15 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         DataType* vec = new DataType(TYPE_VECTOR);
 
                         /* copy subs all the way */
-                        DataType* sub = lhs->vectorSub();
+                        DataType* sub = &(*(lhs->subtypes))[0];
                         DataType* ptr = vec;
                         while (sub) {
                           /* set current one */
-                          ptr->addSubtype(sub);
+                          ptr->subtypes->push_back(*sub);
 
                           /* move to next */
-                          sub = sub->vectorSub();
-                          ptr = ptr->vectorSub();
+                          sub = &(*(sub->subtypes))[0];
+                          ptr = &(*(ptr->subtypes))[0];
                         }
 
                         return vec;
@@ -520,7 +573,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_VECRANGE: {
                           /* a vecrange can only possibly be a vector of ints */
                           DataType* t = new DataType(TYPE_VECTOR);
-                          t->addSubtype(new DataType(TYPE_INT));
+                          t->subtypes->push_back(*new DataType(TYPE_INT));
                           return t;
                         }
     case NODE_FUNCALL:
@@ -554,7 +607,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_VECVAL: {
                         DataType* dt = new DataType(TYPE_VECTOR);
-                        dt->addSubtype(inferExpression(expr->child(0), func));
+                        dt->subtypes->push_back(*inferExpression(expr->child(0), func));
 
                         /* if there are more than one child, recurse on them too */
                         for (int i = 1; i < expr->numChildren(); i++) {
@@ -684,10 +737,10 @@ void inferBlock(Node* block, Node* func) {
 
                      /* put the identifier in the func */
                      func->insertSymbol(Symbol(block->child(0)->getString(),
-                           expr_type->vectorSub(), block->getLine()));
+                           &(*(expr_type->subtypes))[0], block->getLine()));
 
                      /* set the type of the node too */
-                     block->child(0)->setDataType(expr_type->vectorSub());
+                     block->child(0)->setDataType(&(*(expr_type->subtypes))[0]);
 
                      /* check the block under this */
                      inferBlock(block->child(2), func);

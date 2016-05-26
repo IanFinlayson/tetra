@@ -224,8 +224,8 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
         // Must also fill in subtype information
         // While loop allows for accounting for vectors containing vectors
         // (containing vectors...)
-        while (argType->vectorSub() != NULL) {
-          argType = argType->vectorSub();
+        while (argType->subtypes->size()) {
+          argType = &((*(argType->subtypes))[0]);
           switch (argType->getKind()) {
             case TYPE_INT:
               signature += "I";

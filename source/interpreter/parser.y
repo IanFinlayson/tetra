@@ -235,12 +235,11 @@ class_part: function
   $$ = $1;
 }
 
-init_function: TOK_DEF TOK_INIT formal_param_list return_type TOK_COLON block {
+init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
   $$->setStringval("init");
-  $$->setDataType($4);
   $$->addChild($3);
-  $$->addChild($6);
+  $$->addChild($5);
   $$->setLine($1);
 } 
 
@@ -327,7 +326,7 @@ type: TOK_INT {
   $$ = new DataType(TYPE_TASK);
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
   $$ = new DataType(TYPE_VECTOR);
-  $$->addSubtype($2);
+  $$->subtypes->push_back(*$2);
 } | type_dec_tuple {
   $$ = $1;
 } | function_type {
@@ -905,7 +904,9 @@ rvalue: funcall {
 } 
 
 lvalue: expterm index {
-  $$ = $1;
+  $$ = new Node(NODE_INDEX);
+  $$->addChild($1);
+  $$->addChild($2);
 } |   
  expterm TOK_DOT identifier { 
   $$ = new Node(NODE_DOT);
@@ -994,7 +995,9 @@ dict_values: expression TOK_COLON expression TOK_COMMA dict_values {
 }
 
 /* a single index */
-index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET { $$ = $2; }
+index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET { 
+     $$ = $2; 
+}
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
