@@ -22,40 +22,39 @@ global twentyfourpointsix(int,int,int)
 
 def main():
   # Tests for #2 (also includes a bit of testing for #4)
-  declare one string
-  declare two int
-  declare three bool
-  declare four real
-  declare fivepointone mutex
-  declare fivepointtwo task
+  one as string
+  two as int
+  three as bool
+  four as real
+  fivepointone as mutex
+  fivepointtwo as task
 
-  declare five [string]
-  declare six[string]
-  declare seven [int]
-  declare eight[int]
-  declare nine [bool]
-  declare ninepointone[bool]
-  declare ten [real]
-  declare eleven[real]
-  declare elevenpointone [mutex]
-  declare elevenpointtwo [task]
-  declare twelve [[real]]
-  declare thirteen[[real]]
+  five as [string]
+  six as [string]
+  seven as [int]
+  eight as [int]
+  nine as [bool]
+  ninepointone as [bool]
+  ten as [real]
+  eleven as [real]
+  elevenpointone as [mutex]
+  elevenpointtwo as [task]
+  twelve as [[real]]
+  thirteen as [[real]]
 
-  declare fourteen(int)
-  declare fifteen(int,int)
-  declare sixteen (int,(int), real, (string,string), [int],{string:int})
+  fourteen as (int)
+  fifteen as (int,int)
+  sixteen as (int,(int), real, (string,string), [int],{string:int})
 
-  declare seventeen [(int, bool, mutex, task)]
-  declare eighteen [[(int, bool, mutex, task)]]
-  declare nineteen [()->int]  
-  declare twenty [(int)->string]  
-  declare twentyone[ (int,string,bool)->string ]  
+  seventeen as [(int, bool, mutex, task)]
+  eighteen as [[(int, bool, mutex, task)]]
+  nineteen as [()->int]  
+  twenty as [(int)->string]  
+  twentyone as [ (int,string,bool)->string ]  
   
-  declare twentytwo {string:int}
-  declare twentythree{ int:(int,string,int)}
-  declare twentyfour {([int],string):mutex} 
-
+  twentytwo as {string:int}
+  twentythree as { int:(int,string,int)}
+  twentyfour as {([int],string):mutex} 
 
   # Tests for #3
   two = 5

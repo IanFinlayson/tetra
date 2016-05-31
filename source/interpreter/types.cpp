@@ -216,8 +216,9 @@ DataType* inferLen(Node* funcall, Node* func) {
   DataType* t = inferExpression(funcall->child(0), func);
 
   /* check that it is a vector or a string */
-  if ((t->getKind() != TYPE_VECTOR) && (t->getKind() != TYPE_STRING)) {
-    throw Error("len function must be called with either a string or a vector",
+  if ((t->getKind() != TYPE_VECTOR) && (t->getKind() != TYPE_STRING)
+      && (t->getKind() != TYPE_TUPLE) && (t->getKind() != TYPE_DICT)) {
+    throw Error("len function must be called on string, vector, tuple, or dictionary",
         funcall->getLine());
   }
 
@@ -285,35 +286,6 @@ int countDimensions(DataType* t) {
   } else {
     return 0;
   }
-}
-
-/* this do checking of types on a vector reference */
-DataType* checkVector(Node* vec, Node* func) {
-  /* look up the left hand side */
-  Symbol sym = func->lookupSymbol(vec->child(0)->getString(), vec->getLine());
-
-  /* count the indices on the right (also ensure they are ints! */
-  int levels = countIndices(vec->child(1), func);
-
-  /* count the dimension of a vector */
-  int dim = countDimensions(sym.getType());
-
-  /* make sure dim is at least big enough for this many indexes */
-  if (dim < levels) {
-    throw Error("Too many indexes on vector", vec->getLine());
-  }
-
-  /* the base type is that of the symbol  */
-  DataType* result = new DataType(baseType(sym.getType()));
-
-  /* add veector wrapper for dim-levels times */
-  for (int i = 0; i < (dim - levels); i++) {
-    DataType* r = new DataType(TYPE_VECTOR);
-    r->subtypes->push_back(*result);
-    result = r;
-  }
-
-  return result;
 }
 
 /* find a function by name in the parse tree */
@@ -429,22 +401,26 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* get the type of the right hand side */
                         rhs = inferExpression(expr->child(1), func);
 
-                        /* check if this symbol exists and check that the types match */
-                        if (func->hasSymbol(expr->child(0)->getString())) {
-                          Symbol sym = func->lookupSymbol(expr->child(0)->getString(), 0);
-                          if (*sym.getType() != *rhs) {
-                            throw Error(
-                                "Assigning '" + expr->child(0)->getString() + "' to a new type",
+                        /* get the type of the left hand side */
+                        lhs = inferExpression(expr->child(0), func);
+
+                        /* make sure they are the same */
+                        if(*rhs != *lhs)
+                          throw Error("Assignment of incompatible types.", expr->getLine()); 
+
+                        /* if there is an index on the left... */
+                        if (expr->child(0)->kind() == NODE_INDEX){
+                          /* then check for immutable types */  
+                          DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
+                          if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
+                            throw Error("Cannot assign to immutable types (string or tuple).",
                                 expr->getLine());
                           }
-                          /* set the node type as well */
-                          expr->child(0)->setDataType(rhs);
-                        } else {
-                          /* it's not there, so we should insert a new one */
-                          func->insertSymbol(
-                              Symbol(expr->child(0)->getString(), rhs, expr->getLine()));
-                          /* set the node type as well */
-                          expr->child(0)->setDataType(rhs);
+                         
+                        }
+
+                        if (*lhs != *rhs){
+                          throw Error("Assignment with incompatible types.", expr->getLine());
                         }
 
                         /* return the type of the rhs */
@@ -470,7 +446,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_EQ:
     case NODE_NEQ:
                       /* check that both sides have the same type
-                       * TODO ar some point add in int->real promotion */
+                       * TODO at some point add in int->real promotion */
                       lhs = inferExpression(expr->child(0), func);
                       rhs = inferExpression(expr->child(1), func);
                       if (*lhs != *rhs) {
@@ -565,11 +541,28 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       /* return the same type back */
                       return new DataType(lhs->getKind());
 
-    case NODE_INDREF:
-                      /* check vector */
-                      return checkVector(expr, func);
-    case NODE_INDEX:
-                      throw Error("inferExpression: should not an index here");
+    case NODE_INDEX: {
+                      /* check children */
+                      lhs = inferExpression(expr->child(0), func);
+                      rhs = inferExpression(expr->child(1), func);
+
+                      /* Do I exist (is my left child indexable)?*/ 
+                      DataTypeKind kind = lhs->getKind();
+                      if(!(kind == TYPE_VECTOR || kind == TYPE_TUPLE || kind == TYPE_DICT
+                            || kind == TYPE_STRING)) {
+                        throw Error("Index performed on unindexable type.", expr->getLine());
+                      }
+
+                      /* make sure the index type is correct (matches key type 
+                       * for dictionaries, ints elsewhere)*/
+                      if ((kind == TYPE_DICT && (*(lhs->subtypes))[0] != *rhs) 
+                          || (kind != TYPE_DICT && rhs->getKind() != TYPE_INT)){
+                          throw Error("Key has incompatible type.", expr->getLine());
+                      } 
+
+                      return rhs; 
+                      
+                     }
     case NODE_VECRANGE: {
                           /* a vecrange can only possibly be a vector of ints */
                           DataType* t = new DataType(TYPE_VECTOR);
@@ -579,7 +572,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_FUNCALL:
                         return inferFuncall(expr, func);
     case NODE_ACTUAL_PARAM_LIST:
-                        throw Error("inferExpression: should not a param list here");
+                        throw Error("inferExpression: should not be a param list here");
                         break;
 
     case NODE_IDENTIFIER: {
@@ -786,6 +779,11 @@ void inferFunction(Node* node) {
   }
 }
 
+/* infer types for class declaration */
+void inferClass(Node* node){
+
+}
+
 /* infer a constant definition */
 void inferConst(Node* node) {
   /* get the type of the right hand side */
@@ -826,6 +824,9 @@ void inferGlobal(Node* node) {
   }
 }
 
+
+
+
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node) {
   /* infer each function */
@@ -837,6 +838,8 @@ void inferTypes(Node* node) {
       inferConst(node->child(0));
     } else if (node->child(0)->kind() == NODE_GLOBAL) {
       inferGlobal(node->child(0));
+    } else if (node->child(0)->kind() == NODE_CLASS) { 
+      inferClass(node->child(0));
     }
 
     /* recursively infer any other functions */

@@ -135,8 +135,6 @@ string stringType(Node* node) {
       return "ARGS";
 
     /* vectors */
-    case NODE_INDREF:
-      return "INDREF";
     case NODE_INDEX:
       return "INDEX";
     case NODE_VECVAL:
