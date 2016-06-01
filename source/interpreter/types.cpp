@@ -13,6 +13,9 @@ extern Node* root;
 /* the symbol table for storing constants and globals */
 map<string, Symbol> globals;
 
+/* prototype */
+void inferBlock(Node*, Node* );
+
 /* return a string of an int */
 string itoa(int num) {
   stringstream ss;
@@ -636,6 +639,63 @@ DataType* inferExpression(Node* expr, Node* func) {
   return t;
 }
 
+/* infer/ type check function for tasks and locks */
+void checkMuTasks(Node* block, Node* func) {
+  /* is it a task or a mutex? */
+  DataTypeKind kind;
+  /* task */
+  if (block->kind() == NODE_BACKGROUND){
+    kind = TYPE_TASK; 
+  /* mutex */
+  } else if (block->kind() == NODE_LOCK) {
+    kind = TYPE_MUTEX; 
+  /* some other type (this should never happen) */
+  } else {
+    throw Error("Something's wrotten in the state of Denmark!", 
+        block->getLine());
+  } 
+
+  /* if there are two children (it's named) */
+  if (block->child(1)){
+    /* check if the identifier exists */
+    DataType* type = NULL;
+    /* check if it's a global first */
+    if (globals.count(block->child(0)->getString())) {
+      type = (globals.find(block->child(0)->getString())->second).getType();
+
+    /* if not, check if it's local */
+    } else if (func->hasSymbol(block->child(0)->getString())) {
+      type = func->lookupSymbol(block->child(0)->getString(), 
+          block->getLine()).getType();
+
+    /* if we get here, the task doesn't exist yet */ 
+    } else {
+      /* add to this function's symtable */
+      type = new DataType(kind);
+      func->insertSymbol(Symbol(block->child(0)->getString(), 
+            type, block->child(0)->getLine()));  
+    }
+
+    /* if the type is wrong... */
+    if (type->getKind() != kind){
+      throw Error("Task identifier has improper type.", 
+          block->child(0)->getLine());
+    }
+
+    /* set the type */
+    block->child(0)->setDataType(type);
+
+    /* check the block */
+    inferBlock(block->child(1), func);
+
+  /* otherwise, it's an unnamed task */
+  } else{
+
+    /* check the sub-block */
+    inferBlock(block->child(0), func);
+  }
+}
+
 /* infer types in a block and add them into the symbol table */
 void inferBlock(Node* block, Node* func) {
   if (!block) return;
@@ -740,45 +800,11 @@ void inferBlock(Node* block, Node* func) {
                      break;
                    }
     case NODE_PARALLEL:
-    case NODE_BACKGROUND: {
-                           /* if there are two children (it's a named lock) */
-                           if (block->child(1)){
-                             /* check if the identifier exists */
-                             DataType* type = NULL;
-                             /* check if it's a global first */
-                             if (globals.count(block->child(0)->getString())) {
-                               type = (globals.find(block->child(0)->getString())->second).getType();
-
-                             /* if not, check if it's local */
-                             } else if (func->hasSymbol(block->child(0)->getString())) {
-                               type = func->lookupSymbol(block->child(0)->getString(), 
-                                   block->getLine()).getType();
-
-                             /* if we get here, the task doesn't exist yet */ 
-                             } else {
-                               /* add to this function's symtable */
-                               type = new DataType(TYPE_TASK);
-                               func->insertSymbol(Symbol(block->child(0)->getString(), 
-                                     type, block->child(0)->getLine()));  
-                             }
-
-                             /* if the type is wrong... */
-                             if (type->getKind() != TYPE_TASK){
-                               throw Error("Task identifier has improper type.", 
-                                   block->child(0)->getLine());
-                             }
-
-                             /* set the type */
-                             block->child(0)->setDataType(type);
-                           }
-
-                           /* check the sub-block */
-                           inferBlock(block->child(0), func);
-                           break;
-                          }
+                   inferBlock(block->child(0), func);
+                   break;
+    case NODE_BACKGROUND: 
     case NODE_LOCK:
-                   /* how will locks actually be implemented??? */
-                   inferBlock(block->child(1), func);
+                   checkMuTasks(block, func); 
                    break;
 
                    /* these require no work... */
