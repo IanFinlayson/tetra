@@ -42,6 +42,7 @@ enum NodeKind {
   NODE_CLASS_PART,
   NODE_METHOD_CALL,
   NODE_SELF,
+  NODE_TUPLE_TYPES,
 
   /* operator nodes */
   NODE_DOT,

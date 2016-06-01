@@ -278,6 +278,22 @@ int yylex() {
   /* read in the next character in the stream */
   int next = in->get();
 
+  /* handle comments */
+  if (next == '#') {
+    /* eat it all */
+    while (in->peek() != '\n') {
+      in->get();
+    }
+    /* get the new line */
+    in->get();
+    start_of_line = 1;
+    yylineno++;
+
+    /* skip it */
+    return yylex();
+  }
+
+
   /* check for EOF */
   if (in->eof()) {
     if (indent_level != 0) {
@@ -417,21 +433,6 @@ int yylex() {
   /* check for the dot operator */
   if (next == '.') {
     return TOK_DOT; 
-  }
-
-  /* handle comments */
-  if (next == '#') {
-    /* eat it all */
-    while (in->peek() != '\n') {
-      in->get();
-    }
-    /* get the new line */
-    in->get();
-    start_of_line = 1;
-    yylineno++;
-
-    /* skip it */
-    return yylex();
   }
 
   /* handle string constants */

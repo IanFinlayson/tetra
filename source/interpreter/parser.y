@@ -138,9 +138,9 @@ Node* parseFile(const string& fname);
              background lock_statement index vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
-             init_function lvalue
+             init_function lvalue type_decs lambdaterm
 
-%type <data_type> return_type type type_decs type_dec_tuple function_type dict_type
+%type <data_type> return_type type type_dec_tuple function_type dict_type
 
 %error-verbose
 
@@ -295,20 +295,27 @@ declaration: TOK_IDENTIFIER type {
 
 /* tuple types */
 type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
- /* TODO */ 
   $$ = new DataType(TYPE_TUPLE);
+  Node* decs = $2;
+  while(decs){
+    $$->subtypes->push_back(*decs->type());
+    decs = decs->child(0);
+  }
 } | TOK_LEFTPARENS type TOK_COMMA TOK_RIGHTPARENS {
-  /* TODO */ 
   $$ = new DataType(TYPE_TUPLE);
+  $$->subtypes->push_back(*$2);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
-  $$ = NULL;
+  $$ = new DataType(TYPE_TUPLE);
 }
 
 /* a list of at least one parameter */
 type_decs: type TOK_COMMA type_decs {
- /* TODO */ 
+  $$ = new Node(NODE_TUPLE_TYPES);
+  $$->setDataType($1);
+  $$->addChild($3);
 } | type {
- /* TODO */ 
+  $$ = new Node(NODE_TUPLE_TYPES);
+  $$->setDataType($1);
 }
 
 /* types just primitives and vectors for now */
@@ -339,13 +346,16 @@ type: TOK_INT {
 
 /* function_type */
 function_type: type_dec_tuple TOK_RIGHTARROW type{
-/* TODO */ 
+  $$ = new DataType(TYPE_FUNCTION);
+  $$->subtypes->push_back(*$1);
+  $$->subtypes->push_back(*$3);
 }
 
 /* dict_type */
 dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
-/* TODO */
-/* 2 subtypes */
+  $$ = new DataType(TYPE_DICT);
+  $$->subtypes->push_back(*$2);
+  $$->subtypes->push_back(*$4);
 }
 
 /* a return type is either a simple type or none which means void */
@@ -674,11 +684,14 @@ expression: typed_identifier TOK_ASSIGN assignterm{
   $$->addChild(rhs);
 } | assignterm {
   $$ = $1;
-} | lambda{
+}
+
+assignterm: lambda
+  | lambdaterm{
   $$ = $1;
 }
 
-assignterm: assignterm TOK_OR orterm {
+lambdaterm: lambdaterm TOK_OR orterm {
   $$ = new Node(NODE_OR);
   $$->addChild($1);
   $$->addChild($3);
