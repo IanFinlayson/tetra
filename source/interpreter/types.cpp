@@ -82,12 +82,20 @@ string typeToString(DataType* t) {
 DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
   this->subtypes = new std::vector<DataType>;
+  this->className = new std::string;
+}
+ 
+DataType::DataType(const DataType& other) {
+  this->kind = other.kind;  
+  this->subtypes = new std::vector<DataType>;
+  this->className = new std::string;
+  *this->subtypes = *other.subtypes;
+  *this->className = *other.className;
 }
 
 DataType::~DataType() {
-  delete(&this->kind);
-  delete(&this->className);
-  delete(&this->subtypes);
+  delete(className);
+  delete(subtypes);
 }
 
 DataTypeKind DataType::getKind() const { return kind; }
@@ -151,6 +159,13 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
 /* compare two data types for in-equality */
 bool operator!=(const DataType& lhs, const DataType& rhs) {
   return !(lhs == rhs);
+}
+
+DataType DataType::operator=(const DataType& other) {
+  kind = other.kind;  
+  *subtypes = *other.subtypes;
+  *className = *other.className;
+  return *this;
 }
 
 /* add the parameters of a function into its symtable */
@@ -643,20 +658,24 @@ DataType* inferExpression(Node* expr, Node* func) {
 void checkMuTasks(Node* block, Node* func) {
   /* is it a task or a mutex? */
   DataTypeKind kind;
-  /* task */
-  if (block->kind() == NODE_BACKGROUND){
-    kind = TYPE_TASK; 
-  /* mutex */
-  } else if (block->kind() == NODE_LOCK) {
-    kind = TYPE_MUTEX; 
-  /* some other type (this should never happen) */
-  } else {
-    throw Error("Something's wrotten in the state of Denmark!", 
+  switch (block->kind()){
+    /* task */
+    case NODE_BACKGROUND:
+    case NODE_WAIT:
+      kind = TYPE_TASK; 
+      break;
+    /* mutex */
+    case NODE_LOCK: 
+      kind = TYPE_MUTEX; 
+      break;
+    /* some other type (this should never happen) */
+    default:
+      throw Error("Something's wrotten in the state of Denmark!", 
         block->getLine());
   } 
 
-  /* if there are two children (it's named) */
-  if (block->child(1)){
+  /* if there are two children or it's a wait block, it's named */
+  if (block->child(1) || block->kind() == NODE_WAIT){
     /* check if the identifier exists */
     DataType* type = NULL;
     /* check if it's a global first */
@@ -668,27 +687,37 @@ void checkMuTasks(Node* block, Node* func) {
       type = func->lookupSymbol(block->child(0)->getString(), 
           block->getLine()).getType();
 
-    /* if we get here, the task doesn't exist yet */ 
-    } else {
+    /* if we get here, the identifier doesn't exist yet 
+     * and it's not a wait node*/ 
+    } else if (block->kind() != NODE_WAIT){
       /* add to this function's symtable */
       type = new DataType(kind);
       func->insertSymbol(Symbol(block->child(0)->getString(), 
             type, block->child(0)->getLine()));  
+    
+    /*if we get here, then it is a wait node and the identifier
+     * doesn't exist yet*/
+    } else {
+      throw Error("Cannot wait for task that has not been created",
+          block->child(0)->getLine());
     }
 
     /* if the type is wrong... */
     if (type->getKind() != kind){
-      throw Error("Task identifier has improper type.", 
+      throw Error("Task or mutex identifier has improper type.", 
           block->child(0)->getLine());
     }
 
     /* set the type */
     block->child(0)->setDataType(type);
 
-    /* check the block */
-    inferBlock(block->child(1), func);
+    /* if there is a block ... */
+    if (block->child(1)){
+      /* check the block */
+      inferBlock(block->child(1), func);
+    }
 
-  /* otherwise, it's an unnamed task */
+  /* otherwise, it's an unnamed task/lock */
   } else{
 
     /* check the sub-block */
@@ -804,9 +833,9 @@ void inferBlock(Node* block, Node* func) {
                    break;
     case NODE_BACKGROUND: 
     case NODE_LOCK:
+    case NODE_WAIT:
                    checkMuTasks(block, func); 
                    break;
-
                    /* these require no work... */
     case NODE_PASS:
     case NODE_BREAK:

@@ -125,10 +125,12 @@ enum DataTypeKind {
 class DataType {
  public:
   DataType(DataTypeKind kind);
+  DataType(const DataType& other);
   ~DataType();
   DataTypeKind getKind() const;
   std::vector<DataType>* subtypes;
   std::string* className;
+  DataType operator=(const DataType& other);
 
  private:
   DataTypeKind kind;
