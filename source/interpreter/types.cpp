@@ -44,7 +44,7 @@ string typeToString(DataType* t) {
         + typeToString(&((*(t->subtypes))[1])) + "}";
     case TYPE_TUPLE:{
       std::string typeString = "(";
-      for(int i = 0; i < t->subtypes->size(); i++){
+      for(unsigned long int i = 0; i < t->subtypes->size(); i++){
         typeString += typeToString(&((*(t->subtypes))[i])) + ","; 
       }
       /* if the tuple has more than one element ... */
@@ -59,7 +59,7 @@ string typeToString(DataType* t) {
     case TYPE_FUNCTION:{
       /* get the param list */
       std::string typeString = "(";
-      for(int i=1; i<t->subtypes->size(); i++){
+      for(unsigned long int i=1; i<t->subtypes->size(); i++){
         typeString += typeToString(&((*(t->subtypes))[i])) + ",";
       }
       /* if the tuple has more than one element ... */
@@ -133,7 +133,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
   if (lhs.getKind() == TYPE_TUPLE 
       || lhs.getKind() == TYPE_FUNCTION) {
     bool same = true;
-    int i = 0;
+    unsigned long int i = 0;
     while (same && i < lhs.subtypes->size()) {
       same = (lhs.subtypes[i] == rhs.subtypes[i]);
       i++;
@@ -740,10 +740,42 @@ void inferBlock(Node* block, Node* func) {
                      break;
                    }
     case NODE_PARALLEL:
-    case NODE_BACKGROUND:
-                   /* check the sub-block */
-                   inferBlock(block->child(0), func);
-                   break;
+    case NODE_BACKGROUND: {
+                           /* if there are two children (it's a named lock) */
+                           if (block->child(1)){
+                             /* check if the identifier exists */
+                             DataType* type = NULL;
+                             /* check if it's a global first */
+                             if (globals.count(block->child(0)->getString())) {
+                               type = (globals.find(block->child(0)->getString())->second).getType();
+
+                             /* if not, check if it's local */
+                             } else if (func->hasSymbol(block->child(0)->getString())) {
+                               type = func->lookupSymbol(block->child(0)->getString(), 
+                                   block->getLine()).getType();
+
+                             /* if we get here, the task doesn't exist yet */ 
+                             } else {
+                               /* add to this function's symtable */
+                               type = new DataType(TYPE_TASK);
+                               func->insertSymbol(Symbol(block->child(0)->getString(), 
+                                     type, block->child(0)->getLine()));  
+                             }
+
+                             /* if the type is wrong... */
+                             if (type->getKind() != TYPE_TASK){
+                               throw Error("Task identifier has improper type.", 
+                                   block->child(0)->getLine());
+                             }
+
+                             /* set the type */
+                             block->child(0)->setDataType(type);
+                           }
+
+                           /* check the sub-block */
+                           inferBlock(block->child(0), func);
+                           break;
+                          }
     case NODE_LOCK:
                    /* how will locks actually be implemented??? */
                    inferBlock(block->child(1), func);
