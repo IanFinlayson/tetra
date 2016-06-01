@@ -60,18 +60,8 @@ string typeToString(DataType* t) {
     case TYPE_CLASS:
       return *(t->className);
     case TYPE_FUNCTION:{
-      /* get the param list */
-      std::string typeString = "(";
-      for(unsigned long int i=1; i<t->subtypes->size(); i++){
-        typeString += typeToString(&((*(t->subtypes))[i])) + ",";
-      }
-      /* if the tuple has more than one element ... */
-      if(t->subtypes->size() > 2)
-        /* then get rid of the trailing comma */
-        typeString[typeString.size()-1] = '\0';
-
-      /* add return type and return the whole thing*/
-      return typeString += ")->" + typeToString(&((*(t->subtypes))[0]));
+      return typeToString(&((*(t->subtypes))[0])) + "->" 
+        + typeToString(&((*(t->subtypes))[1]));
     }
     default:
       throw Error("typeToString: Unknown data type");

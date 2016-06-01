@@ -345,7 +345,7 @@ type: TOK_INT {
 }
 
 /* function_type */
-function_type: type_dec_tuple TOK_RIGHTARROW type{
+function_type: type_dec_tuple TOK_RIGHTARROW return_type{
   $$ = new DataType(TYPE_FUNCTION);
   $$->subtypes->push_back(*$1);
   $$->subtypes->push_back(*$3);
