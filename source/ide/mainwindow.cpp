@@ -29,9 +29,6 @@ MainWindow::MainWindow(QWidget *parent)
 
   highlighter = new Highlighter(ui->input->document());
 
-  QIcon icon(":graphics/resources/icons/tetra squares.ico");
-  this->setWindowIcon(icon);
-
   tetraThread = new QThread;
   fileRunner = new FileRunner(this);
   mainValue = 0;

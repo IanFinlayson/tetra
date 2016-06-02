@@ -304,8 +304,9 @@ border: 1px solid grey;
   </widget>
   <action name="actionSave">
    <property name="icon">
-    <iconset>
-     <normaloff>:/icons/resources/icons/appbar.save.png</normaloff>:/icons/resources/icons/appbar.save.png</iconset>
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/icons/file-save.svg</normaloff>
+     <normalon>:/icons/resources/icons/file-save.svg</normalon>:/icons/resources/icons/file-save.svg</iconset>
    </property>
    <property name="text">
     <string>Save</string>

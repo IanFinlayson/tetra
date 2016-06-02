@@ -44,8 +44,7 @@ HEADERS  += \
     tetra.h
 
 FORMS    += \
-    mainwindow.ui \
-    openapp.ui
+    mainwindow.ui
 
 RESOURCES += \
     resources.qrc
