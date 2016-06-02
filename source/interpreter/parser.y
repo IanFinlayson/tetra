@@ -345,7 +345,7 @@ type: TOK_INT {
 }
 
 /* function_type */
-function_type: type_dec_tuple TOK_RIGHTARROW type{
+function_type: type_dec_tuple TOK_RIGHTARROW return_type{
   $$ = new DataType(TYPE_FUNCTION);
   $$->subtypes->push_back(*$1);
   $$->subtypes->push_back(*$3);
@@ -701,12 +701,12 @@ lambdaterm: lambdaterm TOK_OR orterm {
 }
 
 /* lambda function */
-lambda: TOK_LAMBDA formal_params TOK_COLON expression{
+lambda: TOK_LAMBDA formal_params TOK_COLON assignterm {
   $$ = new Node(NODE_LAMBDA);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
-} | TOK_LAMBDA TOK_COLON expression{
+} | TOK_LAMBDA TOK_COLON assignterm {
   $$ = new Node(NODE_LAMBDA);
   $$->addChild($3);
   $$->setLine($1);

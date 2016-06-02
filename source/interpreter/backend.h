@@ -941,6 +941,10 @@ class FunctionMap {
 
   // Release allocated resources from the instance
   static void cleanup();
+
+  // returns true if the map contains a function with the
+  // provided name, regardless of params and return types
+  static bool hasFuncNamed(std::string name);
 };
 
 /*

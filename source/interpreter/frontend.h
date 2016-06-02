@@ -148,14 +148,16 @@ string typeToString(DataType* t);
 class Symbol {
  public:
   Symbol();
-  Symbol(string name, DataType* type, int lineno);
+  Symbol(string name, DataType* type, int lineno, bool constant = false);
   int getLine() const;
   string getName() const;
   DataType* getType() const;
+  bool isConst();
 
  private:
   string name;
   DataType* type;
+  bool constant;
   int lineno;
 };
 

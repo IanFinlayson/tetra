@@ -7,14 +7,16 @@
 #include <string>
 #include "frontend.h"
 #include "parser.genh"
+#include "backend.h"
 
 extern Node* root;
 
 /* the symbol table for storing constants and globals */
 map<string, Symbol> globals;
 
-/* prototype */
+/* prototypes */
 void inferBlock(Node*, Node* );
+void inferFunction(Node* , Node* parent =  NULL); 
 
 /* return a string of an int */
 string itoa(int num) {
@@ -60,18 +62,8 @@ string typeToString(DataType* t) {
     case TYPE_CLASS:
       return *(t->className);
     case TYPE_FUNCTION:{
-      /* get the param list */
-      std::string typeString = "(";
-      for(unsigned long int i=1; i<t->subtypes->size(); i++){
-        typeString += typeToString(&((*(t->subtypes))[i])) + ",";
-      }
-      /* if the tuple has more than one element ... */
-      if(t->subtypes->size() > 2)
-        /* then get rid of the trailing comma */
-        typeString[typeString.size()-1] = '\0';
-
-      /* add return type and return the whole thing*/
-      return typeString += ")->" + typeToString(&((*(t->subtypes))[0]));
+      return typeToString(&((*(t->subtypes))[0])) + "->" 
+        + typeToString(&((*(t->subtypes))[1]));
     }
     default:
       throw Error("typeToString: Unknown data type");
@@ -186,7 +178,7 @@ void addParams(Node* params, Node* func) {
 }
 
 /* forward declaration needed as these are mutually-recursive */
-DataType* inferExpression(Node* expr, Node* func);
+DataType* inferExpression(Node* expr, Node* func, Node* lambda = NULL);
 
 /* infer the types of a print call */
 DataType* inferPrint(Node* pcall, Node* func) {
@@ -324,7 +316,7 @@ Node* findFunction(const string& name, int lineno) {
 }
 
 /* infer the function of a function call and check the types */
-DataType* inferFuncall(Node* funcall, Node* func) {
+DataType* inferFuncall(Node* funcall, Node* func, Node* lambda) {
   /* check for stdlib functions */
   bool is_stdlib;
   DataType* t = inferStdlib(funcall, func, is_stdlib);
@@ -407,7 +399,9 @@ DataType* inferFuncall(Node* funcall, Node* func) {
 }
 
 /* infer the types of an expression, and also return the type */
-DataType* inferExpressionPrime(Node* expr, Node* func) {
+DataType* inferExpressionPrime(Node* expr, Node* func, 
+    Node* lambda) {
+
   if (!expr) return NULL;
 
   /* the left hand side, right hand side, and result used below */
@@ -419,26 +413,45 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* get the type of the right hand side */
                         rhs = inferExpression(expr->child(1), func);
 
-                        /* get the type of the left hand side */
-                        lhs = inferExpression(expr->child(0), func);
-
-                        /* make sure they are the same */
-                        if(*rhs != *lhs)
-                          throw Error("Assignment of incompatible types.", expr->getLine()); 
-
-                        /* if there is an index on the left... */
+                        /* if the left hand side is an identifier... */
                         if (expr->child(0)->kind() == NODE_INDEX){
-                          /* then check for immutable types */  
-                          DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
-                          if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
-                            throw Error("Cannot assign to immutable types (string or tuple).",
-                                expr->getLine());
+                          /* check if it exists */
+                          /* check globals first */
+                          if (globals.count(expr->getString()) > 0) {
+                            /*set the lhs to the type of the existing global */
+                            lhs = globals.find(expr->getString())->second.getType();
+                          /* if it wasn't a global, check this function */
+                          } else if (func->hasSymbol(expr->child(0)->getString())){
+                            /* set lhs equal to the type of the existing local identifier */
+                            lhs = func->lookupSymbol(expr->child(0)->getString(), 
+                                expr->getLine()).getType();
+                          /* if we end up here, then it doesn't exist yet */
+                          } else {
+                            /* so add it! */
+                            lhs = rhs;
+                            func->insertSymbol(*new Symbol(expr->child(0)->getString(),
+                                  lhs,expr->child(0)->getLine()));
+                          } 
+
+                        /* if it's not directly and identifier.. */
+                        } else{
+                          /* if there is an index on the left... */
+                          if (expr->child(0)->kind() == NODE_INDEX){
+                            /* then check for immutable types */  
+                            DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
+                            if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
+                              throw Error("Cannot assign to immutable types (string or tuple).",
+                                  expr->getLine());
+                            }
                           }
-                         
+
+                          /* get the type of the left hand side */
+                          lhs = inferExpression(expr->child(0), func);
                         }
 
-                        if (*lhs != *rhs){
-                          throw Error("Assignment with incompatible types.", expr->getLine());
+                        /* make sure both sides are the same type */
+                        if(*rhs != *lhs){
+                          throw Error("Assignment of incompatible types.", expr->getLine()); 
                         }
 
                         /* return the type of the rhs */
@@ -449,8 +462,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_OR:
     case NODE_AND:
                       /* check that both children are bools */
-                      lhs = inferExpression(expr->child(0), func);
-                      rhs = inferExpression(expr->child(1), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
+                      rhs = inferExpression(expr->child(1), func, lambda);
                       if ((lhs->getKind() != TYPE_BOOL) || (rhs->getKind() != TYPE_BOOL)) {
                         throw Error("Only bool values may be used with and/or",
                             expr->getLine());
@@ -465,8 +478,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_NEQ:
                       /* check that both sides have the same type
                        * TODO at some point add in int->real promotion */
-                      lhs = inferExpression(expr->child(0), func);
-                      rhs = inferExpression(expr->child(1), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
+                      rhs = inferExpression(expr->child(1), func, lambda);
                       if (*lhs != *rhs) {
                         cout << "A = " << typeToString(lhs) << endl;
                         cout << "B = " << typeToString(rhs) << endl;
@@ -478,7 +491,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_NOT:
                       /* check that the operand is bool */
-                      lhs = inferExpression(expr->child(0), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
                       if (lhs->getKind() != TYPE_BOOL) {
                         throw Error("Operand of not must be a bool", expr->getLine());
                       }
@@ -490,8 +503,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_SHIFTL:
     case NODE_SHIFTR:
                       /* check that both operands are integers */
-                      lhs = inferExpression(expr->child(0), func);
-                      rhs = inferExpression(expr->child(1), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
+                      rhs = inferExpression(expr->child(1), func, lambda);
 
                       if ((lhs->getKind() != TYPE_INT) || (rhs->getKind() != TYPE_INT)) {
                         throw Error("Operands to bitwise operator must be integer",
@@ -503,7 +516,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_BITNOT:
                       /* check that the operand is an int */
-                      lhs = inferExpression(expr->child(0), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
                       if (lhs->getKind() != TYPE_INT) {
                         throw Error("Operand to bitwise not must be an integer",
                             expr->getLine());
@@ -518,8 +531,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_EXP:
                       /* check that both operands match and that they are int/real
                        * TODO at some point add in int->real promotion... */
-                      lhs = inferExpression(expr->child(0), func);
-                      rhs = inferExpression(expr->child(1), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
+                      rhs = inferExpression(expr->child(1), func, lambda);
 
                       if (*lhs != *rhs) {
                         throw Error("In binary operator, the types " + typeToString(lhs) +
@@ -561,8 +574,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_INDEX: {
                       /* check children */
-                      lhs = inferExpression(expr->child(0), func);
-                      rhs = inferExpression(expr->child(1), func);
+                      lhs = inferExpression(expr->child(0), func, lambda);
+                      rhs = inferExpression(expr->child(1), func, lambda);
 
                       /* Do I exist (is my left child indexable)?*/ 
                       DataTypeKind kind = lhs->getKind();
@@ -588,7 +601,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           return t;
                         }
     case NODE_FUNCALL:
-                        return inferFuncall(expr, func);
+                        return inferFuncall(expr, func, lambda);
     case NODE_ACTUAL_PARAM_LIST:
                         throw Error("inferExpression: should not be a param list here");
                         break;
@@ -598,11 +611,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             if (globals.count(expr->getString()) > 0) {
                               Symbol sym = globals.find(expr->getString())->second;
                               return sym.getType();
-                            }
 
-                            /* look it up and return that type */
-                            Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
-                            return sym.getType();
+                            /* if not, see if it's local to the function */
+                            } else if (func->hasSymbol(expr->getString())){
+
+                              /* look it up and return that type */
+                              Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+                              return sym.getType();
+
+                            /* if it wasn't local or glabal, and this is called from a lambda,
+                             * check for context local to the lambda declaration */
+                            }
                             break;
                           }
 
@@ -633,6 +652,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         return dt;
                       }
 
+    case NODE_LAMBDA: 
+                        inferFunction(expr,func);
+
     default:
                       cout << expr->kind() << endl;
                       throw Error("inferExpression: unknown node type");
@@ -643,9 +665,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 }
 
 /* infer an expression and assign it to the node */
-DataType* inferExpression(Node* expr, Node* func) {
+DataType* inferExpression(Node* expr, Node* func, Node* lambda) {
   /* do the inference */
-  DataType* t = inferExpressionPrime(expr, func);
+  DataType* t = inferExpressionPrime(expr, func, lambda);
 
   /* assign it into this node */
   expr->setDataType(t);
@@ -849,9 +871,10 @@ void inferBlock(Node* block, Node* func) {
 }
 
 /* infer types based on a single function */
-void inferFunction(Node* node) {
+void inferFunction(Node* node, Node* parent) {
   /* only works on functions */
-  if (!node || (node->kind() != NODE_FUNCTION)) {
+  if (!node || ((node->kind() != NODE_FUNCTION) 
+        && (node->kind() != NODE_LAMBDA))) {
     return;
   }
 
@@ -859,10 +882,20 @@ void inferFunction(Node* node) {
   if (node->numChildren() > 1) {
     /* add the parameters into the table */
     addParams(node->child(0), node);
-    inferBlock(node->child(1), node);
+    /* a proper function has a block */
+    if(node->kind() == NODE_FUNCTION){
+      inferBlock(node->child(1), node);
+    /* lambda functions only have one expression */
+    } else {
+      inferExpression(node->child(1), parent,node);
+    }
   } else {
     /* just infer the body of the function */
-    inferBlock(node->child(0), node);
+    if(node->kind() == NODE_FUNCTION) {
+      inferBlock(node->child(0), node);
+    } else {
+      inferExpression(node->child(0), parent,node);
+    }
   }
 }
 
@@ -871,14 +904,20 @@ void inferClass(Node* node){
 
 }
 
-/* infer a constant definition */
-void inferConst(Node* node) {
+/* infer a global/const definition */
+void inferGlobal(Node* node, bool isConst = false) {
+
   /* get the type of the right hand side */
   DataType* rhs = inferExpression(node->child(1), NULL);
 
+  /* name for errors */
+  string varType;
+  isConst ? varType = "Constant" : varType = "Global";
+
   /* check if this symbol exists and check that the types match */
-  if (globals.count(node->child(0)->getString()) > 0) {
-    throw Error("Constant '" + node->child(0)->getString() +
+  if (globals.count(node->child(0)->getString()) > 0
+      || FunctionMap::hasFuncNamed(node->child(0)->getString())) {
+    throw Error(varType + " '" + node->child(0)->getString() +
         "' has been defined.");
   } else {
     /* add it in */
@@ -890,41 +929,24 @@ void inferConst(Node* node) {
     node->child(0)->setDataType(rhs);
   }
 }
-
-/* infer a global definition */
-void inferGlobal(Node* node) {
-  /* get the type of the right hand side */
-  DataType* rhs = inferExpression(node->child(1), NULL);
-
-  /* check if this symbol exists and check that the types match */
-  if (globals.count(node->child(0)->getString()) > 0) {
-    throw Error("Global '" + node->child(0)->getString() +
-        "' has been defined.");
-  } else {
-    /* add it in */
-    globals.insert(pair<string, Symbol>(
-          node->child(0)->getString(),
-          Symbol(node->child(0)->getString(), rhs, node->getLine())));
-
-    /* set the node type as well */
-    node->child(0)->setDataType(rhs);
-  }
-}
-
 
 
 
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node) {
+
+  /* Traverse the tree and add all the function defs to the function map*/
+  FunctionMap::build(node);
+
   /* infer each function */
   if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
     /* infer child 0 based on its kind */
     if (node->child(0)->kind() == NODE_FUNCTION) {
       inferFunction(node->child(0));
     } else if (node->child(0)->kind() == NODE_CONST) {
-      inferConst(node->child(0));
-    } else if (node->child(0)->kind() == NODE_GLOBAL) {
       inferGlobal(node->child(0));
+    } else if (node->child(0)->kind() == NODE_GLOBAL) {
+      inferGlobal(node->child(0), true);
     } else if (node->child(0)->kind() == NODE_CLASS) { 
       inferClass(node->child(0));
     }
