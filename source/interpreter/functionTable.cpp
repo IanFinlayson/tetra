@@ -55,6 +55,24 @@ void FunctionMap::build(const Node* tree) {
   }
 }
 
+
+bool FunctionMap::hasFuncNamed(std::string name){
+  //loop through all elements in the map
+  for (std::map<std::string, Node*>::iterator it = instance.lookup.begin(); 
+      it != instance.lookup.end(); it ++){
+
+    //check for a name match
+    if (name == it->first.substr(0, 
+          (it->first).find_first_of("#"))) { 
+
+      return true;
+    }
+
+  }
+  //if we got through the list and didn't find a name match
+  return false;
+}
+
 void optimizeFunction(Node* base, Node** funcs,
                       std::map<std::string, Node*>& lookup) {
   if (base->kind() == NODE_FUNCALL) {

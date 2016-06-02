@@ -94,10 +94,11 @@ bool Node::hasSymbol(const string& name) const {
 }
 
 /* these are also here */
-Symbol::Symbol(string name, DataType* type, int lineno) {
+Symbol::Symbol(string name, DataType* type, int lineno, bool constant) {
   this->name = name;
   this->type = type;
   this->lineno = lineno;
+  this->constant = constant;
 }
 
 int Symbol::getLine() const { return lineno; }
