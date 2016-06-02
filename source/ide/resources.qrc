@@ -1,25 +1,31 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>resources/icons/appbar.bug.png</file>
-        <file>resources/icons/appbar.control.play.png</file>
-        <file>resources/icons/appbar.control.stop.png</file>
-        <file>resources/icons/appbar.redo.png</file>
-        <file>resources/icons/appbar.save.png</file>
-        <file>resources/icons/appbar.undo.png</file>
-        <file>resources/icons/appbar.printer.text.png</file>
-        <file>resources/icons/appbar.protractor.png</file>
-        <file>resources/icons/logo_squares.ico</file>
-        <file>resources/icons/appbar.arrow.down.png</file>
-        <file>resources/icons/appbar.arrow.up.png</file>
-        <file>resources/icons/appbar.debug.step.over.png</file>
-        <file>resources/icons/appbar.debug.step.out.png</file>
-        <file>resources/icons/appbar.debug.step.into.png</file>
-        <file>resources/icons/appbar.control.resume.png</file>
-        <file>resources/icons/appbar.bug.remove.png</file>
-        <file>resources/icons/appbar.control.pause.png</file>
-        <file>resources/icons/appbar.navigate.next.png</file>
-    </qresource>
-    <qresource prefix="/graphics">
-        <file>resources/logo.png</file>
+        <file>resources/icons/debug-down.svg</file>
+        <file>resources/icons/debug-next.svg</file>
+        <file>resources/icons/debug-pause.svg</file>
+        <file>resources/icons/debug-run.svg</file>
+        <file>resources/icons/debug-step.svg</file>
+        <file>resources/icons/debug-stop.svg</file>
+        <file>resources/icons/debug-up.svg</file>
+        <file>resources/icons/edit-copy.svg</file>
+        <file>resources/icons/edit-cut.svg</file>
+        <file>resources/icons/edit-find.svg</file>
+        <file>resources/icons/edit-paste.svg</file>
+        <file>resources/icons/edit-redo.svg</file>
+        <file>resources/icons/edit-replace.svg</file>
+        <file>resources/icons/edit-undo.svg</file>
+        <file>resources/icons/file-new.svg</file>
+        <file>resources/icons/file-open.svg</file>
+        <file>resources/icons/file-print.svg</file>
+        <file>resources/icons/file-quit.svg</file>
+        <file>resources/icons/file-saveas.svg</file>
+        <file>resources/icons/file-save.svg</file>
+        <file>resources/icons/file-settings.svg</file>
+        <file>resources/icons/help-about.svg</file>
+        <file>resources/icons/help-contents.svg</file>
+        <file>resources/icons/line-breakpoint.svg</file>
+        <file>resources/icons/line-current.svg</file>
+        <file>resources/icons/line-error.svg</file>
+        <file>resources/icons/line-warning.svg</file>
     </qresource>
 </RCC>
