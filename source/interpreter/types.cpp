@@ -13,8 +13,9 @@ extern Node* root;
 /* the symbol table for storing constants and globals */
 map<string, Symbol> globals;
 
-/* prototype */
+/* prototypes */
 void inferBlock(Node*, Node* );
+void inferFunction(Node* ); 
 
 /* return a string of an int */
 string itoa(int num) {
@@ -176,7 +177,7 @@ void addParams(Node* params, Node* func) {
 }
 
 /* forward declaration needed as these are mutually-recursive */
-DataType* inferExpression(Node* expr, Node* func);
+DataType* inferExpression(Node* expr, Node* func, Node* lambda = NULL);
 
 /* infer the types of a print call */
 DataType* inferPrint(Node* pcall, Node* func) {
@@ -397,7 +398,9 @@ DataType* inferFuncall(Node* funcall, Node* func) {
 }
 
 /* infer the types of an expression, and also return the type */
-DataType* inferExpressionPrime(Node* expr, Node* func) {
+DataType* inferExpressionPrime(Node* expr, Node* func, 
+    Node* lambda) {
+
   if (!expr) return NULL;
 
   /* the left hand side, right hand side, and result used below */
@@ -406,29 +409,49 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
   /* switch on the type of expression */
   switch (expr->kind()) {
     case NODE_ASSIGN: {
+                      
                         /* get the type of the right hand side */
                         rhs = inferExpression(expr->child(1), func);
 
-                        /* get the type of the left hand side */
-                        lhs = inferExpression(expr->child(0), func);
-
-                        /* make sure they are the same */
-                        if(*rhs != *lhs)
-                          throw Error("Assignment of incompatible types.", expr->getLine()); 
-
-                        /* if there is an index on the left... */
+                        /* if the left hand side is an identifier... */
                         if (expr->child(0)->kind() == NODE_INDEX){
-                          /* then check for immutable types */  
-                          DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
-                          if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
-                            throw Error("Cannot assign to immutable types (string or tuple).",
-                                expr->getLine());
+                          /* check if it exists */
+                          /* check globals first */
+                          if (globals.count(expr->getString()) > 0) {
+                            /*set the lhs to the type of the existing global */
+                            lhs = globals.find(expr->getString())->second.getType();
+                          /* if it wasn't a global, check this function */
+                          } else if (func->hasSymbol(expr->child(0)->getString())){
+                            /* set lhs equal to the type of the existing local identifier */
+                            lhs = func->lookupSymbol(expr->child(0)->getString(), 
+                                expr->getLine()).getType();
+                          /* if we end up here, then it doesn't exist yet */
+                          } else {
+                            /* so add it! */
+                            lhs = rhs;
+                            func->insertSymbol(*new Symbol(expr->child(0)->getString(),
+                                  lhs,expr->child(0)->getLine()));
+                          } 
+
+                        /* if it's not directly and identifier.. */
+                        } else{
+                          /* if there is an index on the left... */
+                          if (expr->child(0)->kind() == NODE_INDEX){
+                            /* then check for immutable types */  
+                            DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
+                            if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
+                              throw Error("Cannot assign to immutable types (string or tuple).",
+                                  expr->getLine());
+                            }
                           }
-                         
+
+                          /* get the type of the left hand side */
+                          lhs = inferExpression(expr->child(0), func);
                         }
 
-                        if (*lhs != *rhs){
-                          throw Error("Assignment with incompatible types.", expr->getLine());
+                        /* make sure both sides are the same type */
+                        if(*rhs != *lhs){
+                          throw Error("Assignment of incompatible types.", expr->getLine()); 
                         }
 
                         /* return the type of the rhs */
@@ -588,11 +611,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             if (globals.count(expr->getString()) > 0) {
                               Symbol sym = globals.find(expr->getString())->second;
                               return sym.getType();
-                            }
 
-                            /* look it up and return that type */
-                            Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
-                            return sym.getType();
+                            /* if not, see if it's local to the function */
+                            } else if (func->hasSymbol(expr->getString())){
+
+                              /* look it up and return that type */
+                              Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+                              return sym.getType();
+
+                            /* if it wasn't local or glabal, and this is called from a lambda,
+                             * check for context local to the lambda declaration */
+                            }
                             break;
                           }
 
@@ -623,6 +652,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         return dt;
                       }
 
+    case NODE_LAMBDA: 
+                        inferFunction(expr);
+
+
     default:
                       cout << expr->kind() << endl;
                       throw Error("inferExpression: unknown node type");
@@ -633,9 +666,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 }
 
 /* infer an expression and assign it to the node */
-DataType* inferExpression(Node* expr, Node* func) {
+DataType* inferExpression(Node* expr, Node* func, Node* lambda) {
   /* do the inference */
-  DataType* t = inferExpressionPrime(expr, func);
+  DataType* t = inferExpressionPrime(expr, func, lambda);
 
   /* assign it into this node */
   expr->setDataType(t);
@@ -841,7 +874,8 @@ void inferBlock(Node* block, Node* func) {
 /* infer types based on a single function */
 void inferFunction(Node* node) {
   /* only works on functions */
-  if (!node || (node->kind() != NODE_FUNCTION)) {
+  if (!node || ((node->kind() != NODE_FUNCTION) 
+        && (node->kind() != NODE_LAMBDA))) {
     return;
   }
 
@@ -849,10 +883,20 @@ void inferFunction(Node* node) {
   if (node->numChildren() > 1) {
     /* add the parameters into the table */
     addParams(node->child(0), node);
-    inferBlock(node->child(1), node);
+    /* a proper function has a block */
+    if(node->kind() == NODE_FUNCTION){
+      inferBlock(node->child(1), node);
+    /* lambda functions only have one expression */
+    } else {
+      inferExpression(node->child(1), node);
+    }
   } else {
     /* just infer the body of the function */
-    inferBlock(node->child(0), node);
+    if(node->kind() == NODE_FUNCTION) {
+      inferBlock(node->child(0), node);
+    } else {
+      inferExpression(node->child(0), node);
+    }
   }
 }
 
