@@ -133,7 +133,7 @@ value, we would need to declare the type:</p>
 value1 = 5
 
 # we tell Tetra the type
-declare value2 int
+value2 as int
 </code>
 </pre>
 
@@ -142,7 +142,7 @@ declare value2 int
 <pre>
 <code>
 # declare three variables of the real type
-declare x, y, z real
+x, y, z as real
 </code>
 </pre>
 
@@ -227,7 +227,7 @@ positive, negative, or zero:</p>
 <pre>
 <code>
 # print the sign of the parameter
-def print_sign(val int):
+def print_sign(value int):
     if val &lt; 0:
         print(val, " is negative")
     elif val &gt; 0:
@@ -237,8 +237,8 @@ def print_sign(val int):
 
 def main( ):
     print("Enter a value: ")
-    val = read_int()
-    print_sign(val)
+    value = read_int()
+    print_sign(value)
 </code>
 </pre>
 
@@ -580,6 +580,7 @@ background block with <code>wait</code> statement to implement this:</p>
 <pre>
 <code>
 def main():
+    data [string]
     background download_task:
         data = download_data()
 
@@ -589,6 +590,7 @@ def main():
     wait download_task
 
     # now we use the data we got
+
 </code>
 </pre>
 
@@ -713,7 +715,7 @@ inter-leaved output:
 <pre>
 <code>
 # here the named lock is shared amongst functions, so is global
-global print_lock mutex
+global print_lock as mutex
 
 def f1():
     # ...
@@ -805,6 +807,7 @@ function call into separate variables:</p>
 <code>
 def main():
     # the tuple is now unpacked
+    # TODO
     root1, root2, valid = roots(1, 0, -16)
 
     if valid:
@@ -893,7 +896,7 @@ the class.</p>
 # creates a class representing a square shape
 class Square:
     # the size of the square
-    size real
+    size as real
 
     # member function to compute the area
     def area():
@@ -927,7 +930,7 @@ a square when they create one:</p>
 <code>
 class Square:
     # the size of the square
-    size real
+    size as real
 
     # an initializer
     def init(size real):
@@ -963,7 +966,7 @@ add in an initializer which takes no parameters:</p>
 <code>
 class Square:
     # the size of the square
-    size real
+    size as real
 
     # an initializer with a real parameter
     def init(size real):

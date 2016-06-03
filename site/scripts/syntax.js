@@ -3,7 +3,7 @@
  */
 
 /* lists of highlighted elements */
-keywords = ["class", "def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "init", "global", "init", "self", "constant", "none", "declare"];
+keywords = ["class", "def", "if", "elif", "else", "while", "for", "in", "parallel", "return", "open", "import", "lambda", "background", "wait", "lock", "var", "init", "self", "constant", "none"];
 types = ["int", "real", "string", "bool", "task", "mutex"];
 builtins = ["print", "len", "read_int", "read_string", "read_bool", "read_real", "array", "keys"];
 
@@ -35,6 +35,7 @@ function applySyntax() {
         }
         /* comments */
         text = text.replace(/#.*\r?\n/g, "<span class='tetra-comment'>$&</span>");
+        text = text.replace(/#.*$/g, "<span class='tetra-comment'>$&</span>");
 
         /* strings */
         text = text.replace(/"[^"]*"/g, "<span class=\"tetra-value\">$&</span>");

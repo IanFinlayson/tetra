@@ -5,8 +5,7 @@ QMAKE_LINK = clang++
 # set options
 CONFIG += qt debug thread warnoff
 
-# specify icons
-ICON = tetra.icns
+# TODO specify icons
 
 # set the QT modules we need
 QT += core gui
@@ -45,8 +44,7 @@ HEADERS  += \
     tetra.h
 
 FORMS    += \
-    mainwindow.ui \
-    openapp.ui
+    mainwindow.ui
 
 RESOURCES += \
     resources.qrc
