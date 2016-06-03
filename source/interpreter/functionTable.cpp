@@ -24,7 +24,7 @@ FunctionMap::FunctionMap() {}
 // function definition for that signature
 const Node* FunctionMap::getFunctionNode(const string functionSignature) {
   // if function is not there, will return default Node* (i.e. NULL)
-  return instance.lookup[functionSignature];
+  return lookup[functionSignature];
 }
 
 // Calls the appropriate function based on the number identifier attached to the
@@ -34,7 +34,7 @@ const Node* FunctionMap::getFunctionNode(const Node* callNode) {
   // user defined functions
   // Thus we must subtract the offset TSL_FUNCS (number of TSL functions) to get
   // the proper index in this array
-  return instance.functionLookup[callNode->getInt() - TSL_FUNCS];
+  return functionLookup[callNode->getInt() - TSL_FUNCS];
 }
 
 // Fills the function map given the specified base node TODO: this function is
@@ -48,11 +48,11 @@ void FunctionMap::build(const Node* tree) {
     if (candidate->kind() == NODE_FUNCTION) {
        
       //if this function is already in the table
-      if(instance.lookup.count(getFunctionSignature(candidate)) > 0){
+      if(lookup.count(getFunctionSignature(candidate)) > 0){
         throw Error("Duplicate function. ", candidate->getLine());
       }
       //otherwise, it's not in the table, so add it!
-      instance.lookup[getFunctionSignature(candidate)] = candidate;
+      lookup[getFunctionSignature(candidate)] = candidate;
     }
     // checks if there are further functions to add
     if (tree->child(1) != NULL) {
@@ -64,8 +64,8 @@ void FunctionMap::build(const Node* tree) {
 
 bool FunctionMap::hasFuncNamed(std::string name){
   //loop through all elements in the map
-  for (std::map<std::string, Node*>::iterator it = instance.lookup.begin(); 
-      it != instance.lookup.end(); it ++){
+  for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
+      it != lookup.end(); it ++){
 
     //check for a name match
     if (name == it->first.substr(0, 
@@ -117,16 +117,16 @@ void optimizeFunction(Node* base, Node** funcs,
 
 void FunctionMap::optimizeFunctionLookup(Node* start) {
   // Now that all of the functions have been found, we can assign them numbers
-  int numFuncs = instance.lookup.size();
-  instance.functionLookup = new Node*[numFuncs];
+  int numFuncs = lookup.size();
+  functionLookup = new Node*[numFuncs];
   int count = 0;
-  for (std::map<std::string, Node*>::iterator iter = instance.lookup.begin();
-       iter != instance.lookup.end(); iter++) {
-    instance.functionLookup[count] = iter->second;
+  for (std::map<std::string, Node*>::iterator iter = lookup.begin();
+       iter != lookup.end(); iter++) {
+    functionLookup[count] = iter->second;
     count++;
   }
 
-  optimizeFunction(start, instance.functionLookup, instance.lookup);
+  optimizeFunction(start, functionLookup, lookup);
   // Then we will go through again and assign numbers to all the function call
   // nodes
 }
@@ -203,8 +203,8 @@ void FunctionMap::optimizeLookup(const Node* start) {
 
   // typedef std::pair<const std::string, Node*> mapElem;
   for (std::map<const string, Node*>::iterator searcher =
-           instance.lookup.begin();
-       searcher != instance.lookup.end(); searcher++) {
+           lookup.begin();
+       searcher != lookup.end(); searcher++) {
     std::map<std::string, int> refer;
     int nextNum = 1;
     optimize(searcher->second, refer, nextNum, globRef);
@@ -297,10 +297,10 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
   }
 }
 
-// Given a NODE_FUNTION (seen by the build method) or NODE_FUNCALL (seen at
+// Given a NODE_FUNCTION (seen by the build method) or NODE_FUNCALL (seen at
 // runtime)
 // Assembles the function signature for the function
-const string FunctionMap::getFunctionSignature(const Node* node) {
+string FunctionMap::getFunctionSignature(const Node* node) {
   string ret = node->getString();
 
   assert(node->kind() == NODE_FUNCTION || node->kind() == NODE_FUNCALL);
@@ -323,7 +323,4 @@ const string FunctionMap::getFunctionSignature(const Node* node) {
 }
 
 // Delete the functionLookup table
-void FunctionMap::cleanup() { delete[] instance.functionLookup; }
-
-// initializes single static function map instance
-FunctionMap FunctionMap::instance;
+void FunctionMap::cleanup() { delete[] functionLookup; }

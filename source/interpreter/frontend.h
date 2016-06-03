@@ -161,6 +161,19 @@ class Symbol {
   int lineno;
 };
 
+/* stores a class definition's context (methods & members) */
+class ClassContext {
+  public:
+    ClassContext(string name);
+    string getName();
+    bool hasMember(Symbol);
+    bool hasMethod();
+  private:
+    string name;
+    FunctionMap methods;
+    std::map<string, Symbol> members;
+};
+
 const int MAX_CHILDREN = 3;
 
 /* the node class represents one element of a parse tree */

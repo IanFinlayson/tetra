@@ -14,6 +14,9 @@ extern Node* root;
 /* the symbol table for storing constants and globals */
 map<string, Symbol> globals;
 
+/* map for storing classes */
+map<string, ClassContext> classes;
+
 /* prototypes */
 void inferBlock(Node*, Node* );
 void inferFunction(Node* , Node* parent =  NULL); 
@@ -69,6 +72,14 @@ string typeToString(DataType* t) {
       throw Error("typeToString: Unknown data type");
   }
 }
+
+/* class context functions */
+ClassContext::ClassContext(string name) {
+  this->name = name;
+  this->methods = new FunctionMap;
+  this->members = new std::map<string,Symbol>;
+}
+
 
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
@@ -914,7 +925,8 @@ void inferFunction(Node* node, Node* parent) {
 }
 
 /* infer types for class declaration */
-void inferClass(Node* node){
+void inferClass(Node* node) {
+    
 
 }
 

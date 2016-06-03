@@ -916,35 +916,34 @@ class ThreadEnvironment {
  */
 class FunctionMap {
  private:
-  FunctionMap();
   std::map<std::string, Node*> lookup;
   Node** functionLookup;
-  static FunctionMap instance;
   static void concatSignature(const Node*, std::string&);
 
  public:
+  FunctionMap();
   // Returns the address of a node containing the function body of the function
   // denoted by functionSignature
-  static const Node* getFunctionNode(const std::string functionSignature);
+  const Node* getFunctionNode(const std::string functionSignature);
 
-  static const Node* getFunctionNode(const Node* callNode);
+  const Node* getFunctionNode(const Node* callNode);
 
   // Generates a unique function signature based on the name AND the arguments
-  static const std::string getFunctionSignature(const Node* node);
+  static std::string getFunctionSignature(const Node* node);
 
   // Fills the function map given the specified base node
-  static void build(const Node* tree);
+  void build(const Node* tree);
 
   // does some pre-work to optimize variable lookup
-  static void optimizeLookup(const Node*);
-  static void optimizeFunctionLookup(Node*);
+  void optimizeLookup(const Node*);
+  void optimizeFunctionLookup(Node*);
 
   // Release allocated resources from the instance
-  static void cleanup();
+  void cleanup();
 
   // returns true if the map contains a function with the
   // provided name, regardless of params and return types
-  static bool hasFuncNamed(std::string name);
+  bool hasFuncNamed(std::string name);
 };
 
 /*
