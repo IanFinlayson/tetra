@@ -382,7 +382,6 @@ void MainWindow::debugMode(bool value) {
   ui->actionOpen->setEnabled(!value);
   ui->actionLine_Numbers->setEnabled(!value);
   ui->menuEdit->setEnabled(!value);
-  ui->menuBuild->setEnabled(!value);
   ui->actionBuild->setEnabled(!value);
   ui->actionRun->setEnabled(!value);
   ui->actionStop->setEnabled(!value);
