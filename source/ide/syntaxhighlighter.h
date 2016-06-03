@@ -74,7 +74,7 @@ class Highlighter : public QSyntaxHighlighter {
   QTextCharFormat multiLineCommentFormat;
   QTextCharFormat quotationFormat;
   QTextCharFormat valueFormat;
-  QTextCharFormat parallelFormat;
+  QTextCharFormat builtinFormat;;
 };
 
 #endif  // HIGHLIGHTER_H

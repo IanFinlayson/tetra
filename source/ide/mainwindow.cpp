@@ -1,3 +1,6 @@
+/* mainwindow.cpp
+ * code for the main application window, actions, etc. */
+
 #include "mainwindow.h"
 #include <QDesktopWidget>
 #include <QFileDialog>
@@ -17,8 +20,7 @@
 #include "editor.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
   menuBar()->setNativeMenuBar(true);
   ui->setupUi(this);
   setWindowTitle(tr("Tetra[*]"));
@@ -62,20 +64,13 @@ void MainWindow::setupEditor() {
   ui->actionUndo->setEnabled(false);
   ui->actionDelete->setEnabled(false);
 
-  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy,
-          SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut,
-          SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo,
-          SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo,
-          SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete,
-          SLOT(setEnabled(bool)));
-  connect(ui->input->document(), SIGNAL(contentsChanged()), this,
-          SLOT(documentWasModified()));
-  connect(ui->input, SIGNAL(cursorPositionChanged()), this,
-          SLOT(updateCoordinates()));
+  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy, SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut, SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo, SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo, SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
+  connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
+  connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
 
   ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
@@ -173,6 +168,7 @@ void MainWindow::quit() {
   quitDialog.setText("Are you sure you want to quit Tetra?");
   quitDialog.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
   quitDialog.setDefaultButton(QMessageBox::Cancel);
+  quitDialog.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.png"));
   if (quitDialog.exec() == QMessageBox::Ok) {
     QApplication::quit();
   }
@@ -411,6 +407,7 @@ void MainWindow::on_actionExit_Debug_Mode_triggered() {
   exitDebugBox.setText("Are you sure you want to stop debugging?");
   exitDebugBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
   exitDebugBox.setDefaultButton(QMessageBox::Ok);
+  exitDebugBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.png"));
   if (exitDebugBox.exec() == QMessageBox::Ok) {
     ui->actionDebug->setEnabled(true);
     ui->actionDebug->setChecked(false);

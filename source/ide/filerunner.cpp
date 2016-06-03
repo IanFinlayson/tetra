@@ -1,3 +1,6 @@
+/* filerunner.cpp
+ * code to run or debug a program */
+
 #include "filerunner.h"
 #include <QDebug>
 #include "ideCommandObserver.h"
@@ -37,3 +40,4 @@ void FileRunner::runFile(bool debug) {
   }
   emit finished();
 }
+

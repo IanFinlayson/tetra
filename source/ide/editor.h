@@ -1,3 +1,6 @@
+/* editor.h
+ * a cusomt text editor component for Tetra code */
+
 #ifndef EDITOR_H
 #define EDITOR_H
 

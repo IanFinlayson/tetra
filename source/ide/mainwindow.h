@@ -1,3 +1,6 @@
+/* mainwindow.h
+ * the main window for the application */
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 

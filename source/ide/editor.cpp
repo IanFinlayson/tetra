@@ -1,29 +1,35 @@
+/* editor.cpp
+ * A text editor component that is designed specifically for Tetra code
+ * */
+
 #include "editor.h"
 #include <QtWidgets>
 
-/*Editor is a text editor that is designed specifically for Tetra code*/
 Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
-  connect(this, SIGNAL(cursorPositionChanged()), this,
-          SLOT(updateCursorCoordinates()));
+  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursorCoordinates()));
 
   lineNumberArea = new LineNumberArea(this);
 
-  connect(this, SIGNAL(blockCountChanged(int)), this,
-          SLOT(updateLineNumberAreaWidth(int)));
-  connect(this, SIGNAL(updateRequest(QRect, int)), this,
-          SLOT(updateLineNumberArea(QRect, int)));
+  connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+  connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
 
   updateLineNumberAreaWidth(0);
+
+  /* set the background color
+   * TODO: make it come from a color scheme instead */
+  setStyleSheet("background-color:#f5f5f5;");
+
 
   lineNumbersVisible = true;
   lineHighlighted = false;
   tabWidth = 4;
 }
+
 // overrides default navigation
 void Editor::keyPressEvent(QKeyEvent *e) {
   cursor = this->textCursor();
-  if (e->key() ==
-      Qt::Key_Tab) {  // replaces tab key with predetermined amount of spaces
+  if (e->key() == Qt::Key_Tab) {
+    // replaces tab key with predetermined amount of spaces
     int pos = cursor.positionInBlock();
     if ((pos + tabWidth) % tabWidth == 0 || getLeadingSpaces() < pos) {
       for (int i = 0; i < tabWidth; i++) {
@@ -40,9 +46,8 @@ void Editor::keyPressEvent(QKeyEvent *e) {
         cursor.insertText(" ");
       }
     }
-  } else if (e->key() == Qt::Key_Enter ||
-             e->key() == Qt::Key_Return) {  // when enter key is pressed, auto
-                                            // indents new line
+  } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
+    // when enter key is pressed, auto indents new line
     int leadingSpaces = getLeadingSpaces();
     if (cursor.block().text().endsWith(":")) {
       leadingSpaces += tabWidth;
@@ -53,8 +58,8 @@ void Editor::keyPressEvent(QKeyEvent *e) {
         cursor.insertText(" ");
       }
     }
-  } else if (e->key() == Qt::Key_Backspace ||
-             e->key() == Qt::Key_Delete) {  //"smart" backspace
+  } else if (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete) {
+    //"smart" backspace
     if (isTab("left")) {
       int pos = cursor.positionInBlock();
       while (pos > tabWidth) {
@@ -66,7 +71,8 @@ void Editor::keyPressEvent(QKeyEvent *e) {
     } else {
       QPlainTextEdit::keyPressEvent(e);
     }
-  } else if (e->key() == Qt::Key_Left) {  //"smart" navigate
+  } else if (e->key() == Qt::Key_Left) {
+    //"smart" navigate
     if (isTab("left")) {
       int pos = cursor.positionInBlock();
       while (pos > tabWidth) {
@@ -146,20 +152,22 @@ void Editor::updateLineNumberAreaWidth(int /* newBlockCount */) {
 }
 
 void Editor::updateLineNumberArea(const QRect &rect, int dy) {
-  if (dy)
+  if (dy) {
     lineNumberArea->scroll(0, dy);
-  else
+  } else {
     lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+  }
 
-  if (rect.contains(viewport()->rect())) updateLineNumberAreaWidth(0);
+  if (rect.contains(viewport()->rect())) {
+    updateLineNumberAreaWidth(0);
+  }
 }
 
 void Editor::resizeEvent(QResizeEvent *e) {
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
-  lineNumberArea->setGeometry(
-      QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+  lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
@@ -207,6 +215,7 @@ void Editor::moveCursor(int lineNumberToHighlight) {
     setTextCursor(cursor);
   }
 }
+
 void Editor::highlightLine(QColor color) {
   QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -231,8 +240,16 @@ void Editor::unhighlightLine() {
   lineHighlighted = false;
 }
 
-bool Editor::checkLineHighlighted() { return lineHighlighted; }
+bool Editor::checkLineHighlighted() {
+  return lineHighlighted;
+}
 
-void Editor::setTabWidth(int tabWidth) { this->tabWidth = tabWidth; }
+void Editor::setTabWidth(int tabWidth) {
+  this->tabWidth = tabWidth;
+}
 
-int Editor::getTabWidth() { return this->tabWidth; }
+int Editor::getTabWidth() {
+  return this->tabWidth;
+}
+
+

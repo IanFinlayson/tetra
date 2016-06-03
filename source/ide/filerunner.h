@@ -1,3 +1,6 @@
+/* filerunner.h
+ * code to run or debug a program */
+
 #ifndef FILERUNNER_H
 #define FILERUNNER_H
 

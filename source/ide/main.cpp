@@ -1,3 +1,6 @@
+/* main.cpp
+ * contains the application entry point */
+
 #include <QApplication>
 #include <QLabel>
 #include <QObject>
