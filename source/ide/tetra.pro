@@ -32,15 +32,13 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
-    filerunner.cpp \
-    debugwindow.cpp
+    filerunner.cpp
 
 HEADERS  += \
     mainwindow.h \
     syntaxhighlighter.h \
     editor.h \
     filerunner.h \
-    debugwindow.h \
     tetra.h
 
 FORMS    += \

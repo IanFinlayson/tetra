@@ -15,7 +15,6 @@
 
 class Editor;
 class FileRunner;
-class DebugWindow;
 QT_BEGIN_NAMESPACE
 class QPrinter;
 class Console;
@@ -75,10 +74,6 @@ class MainWindow : public QMainWindow {
   void exitRunMode();
   void on_actionRun_triggered(bool checked);
   void on_actionExit_Debug_Mode_triggered();
-
-  DebugWindow *newThreadWindow();
-  DebugWindow *activeThreadWindow();
-  void setActiveSubWindow(QWidget *window);
 
   void on_actionStep_triggered();
 

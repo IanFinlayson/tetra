@@ -14,7 +14,6 @@
 #include <QTabWidget>
 #include <QThread>
 #include <QtCore>
-#include "debugwindow.h"
 #include "editor.h"
 #include "ui_mainwindow.h"
 
@@ -350,7 +349,6 @@ void MainWindow::on_actionDebug_toggled(bool arg1) {
     qDebug() << "hey";
     QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection,
                               Q_ARG(bool, true));
-    newThreadWindow();
   }
 }
 
@@ -382,8 +380,7 @@ void MainWindow::debugMode(bool value) {
   ui->actionOpen->setEnabled(!value);
   ui->actionLine_Numbers->setEnabled(!value);
   ui->menuEdit->setEnabled(!value);
-  ui->actionBuild->setEnabled(!value);
-  ui->actionRun->setEnabled(!value);
+  
   ui->actionStop->setEnabled(!value);
   ui->actionContinue->setEnabled(value);
   ui->actionStep->setEnabled(value);
@@ -424,30 +421,6 @@ void MainWindow::on_actionExit_Debug_Mode_triggered() {
   }
 }
 
-//--------------------MDI Methods--------------------//
-DebugWindow *MainWindow::newThreadWindow() {
-  DebugWindow *newDebugWindow = new DebugWindow;
-  newDebugWindow->setPlainText(ui->input->toPlainText());
-  QMdiSubWindow *subWindow = new QMdiSubWindow;
-  subWindow->setWidget(newDebugWindow);
-  subWindow->resize(QDesktopWidget().availableGeometry(this).size() * 0.2);
-  subWindow->setWindowFlags(Qt::CustomizeWindowHint);
-  ui->threadMdi->addSubWindow(subWindow);
-  subWindow->show();
-  return newDebugWindow;
-}
-DebugWindow *MainWindow::activeThreadWindow() {
-  if (QMdiSubWindow *activeThreadWindow = ui->threadMdi->activeSubWindow()) {
-    return qobject_cast<DebugWindow *>(activeThreadWindow->widget());
-  }
-  return 0;
-}
-void MainWindow::setActiveSubWindow(QWidget *window) {
-  if (!window) {
-    return;
-  }
-  ui->threadMdi->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
-}
 
 // overrides output to output window
 void MainWindow::printOutput(QString string) {
@@ -504,11 +477,13 @@ void MainWindow::on_actionSet_Breakpoint_triggered() {
   hideUserInput(true);
   simulateStdIn("b");
 
+  /*
   bool valueChanged;
   int lineNumber = QInputDialog::getInt(
       this, "Set Breakpoint", "Enter line number:", 1, 1,
       this->activeThreadWindow()->blockCount(), 1, &valueChanged);
-  simulateStdIn(QString::number(lineNumber));
+      */
+  //simulateStdIn(QString::number(lineNumber));
   hideUserInput(false);
 }
 
@@ -522,10 +497,12 @@ void MainWindow::on_actionRemove_Breakpoint_triggered() {
   hideUserInput(true);
   simulateStdIn("r");
 
+  /*
   bool valueChanged;
   int lineNumber = QInputDialog::getInt(
       this, "Remove  Breakpoint", "Enter line number:", 1, 1,
       this->activeThreadWindow()->blockCount(), 1, &valueChanged);
   simulateStdIn(QString::number(lineNumber));
+  */
   hideUserInput(false);
 }

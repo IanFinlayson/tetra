@@ -256,34 +256,20 @@ border: 1px solid grey;
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
     <addaction name="actionFind"/>
+    <addaction name="actionReplace"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
      <string>Debug</string>
     </property>
+    <addaction name="actionRun"/>
     <addaction name="actionDebug"/>
-    <addaction name="actionExit_Debug_Mode"/>
-    <addaction name="separator"/>
-    <addaction name="actionStep"/>
-    <addaction name="actionNext"/>
-    <addaction name="actionContinue"/>
-    <addaction name="actionSet_Breakpoint"/>
-    <addaction name="actionRemove_Breakpoint"/>
-    <addaction name="actionInterrupt"/>
-   </widget>
-   <widget class="QMenu" name="menuWindow">
-    <property name="title">
-     <string>Window</string>
-    </property>
-    <addaction name="separator"/>
-    <addaction name="actionClear_Output"/>
-    <addaction name="separator"/>
-    <addaction name="actionLine_Numbers"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuDebug"/>
-   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionSave">
@@ -412,7 +398,7 @@ border: 1px solid grey;
   </action>
   <action name="actionRun">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -422,12 +408,12 @@ border: 1px solid grey;
     <string>Run</string>
    </property>
    <property name="iconVisibleInMenu">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionDebug">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -437,7 +423,7 @@ border: 1px solid grey;
     <string>Debug</string>
    </property>
    <property name="iconVisibleInMenu">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
   </action>
   <action name="actionOpen_Recent">
@@ -457,18 +443,6 @@ border: 1px solid grey;
   <action name="actionSelect_All">
    <property name="text">
     <string>Select All</string>
-   </property>
-  </action>
-  <action name="actionBuild">
-   <property name="icon">
-    <iconset>
-     <normaloff>:/icons/resources/icons/appbar.protractor.png</normaloff>:/icons/resources/icons/appbar.protractor.png</iconset>
-   </property>
-   <property name="text">
-    <string>Build</string>
-   </property>
-   <property name="iconVisibleInMenu">
-    <bool>false</bool>
    </property>
   </action>
   <action name="actionStop">
@@ -527,7 +501,7 @@ border: 1px solid grey;
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-run.png</normaloff>:/icons/resources/icons/debug-run.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-debug.png</normaloff>:/icons/resources/icons/debug-debug.png</iconset>
    </property>
    <property name="text">
     <string>Continue</string>
@@ -564,6 +538,10 @@ border: 1px solid grey;
    <property name="enabled">
     <bool>false</bool>
    </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/icons/debug-pause.png</normaloff>:/icons/resources/icons/debug-pause.png</iconset>
+   </property>
    <property name="text">
     <string>Interrupt</string>
    </property>
@@ -571,6 +549,10 @@ border: 1px solid grey;
   <action name="actionSet_Breakpoint">
    <property name="enabled">
     <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/icons/line-breakpoint.png</normaloff>:/icons/resources/icons/line-breakpoint.png</iconset>
    </property>
    <property name="text">
     <string>Set Breakpoint</string>
@@ -603,6 +585,24 @@ border: 1px solid grey;
    </property>
    <property name="text">
     <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionReplace">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/icons/edit-replace.png</normaloff>:/icons/resources/icons/edit-replace.png</iconset>
+   </property>
+   <property name="text">
+    <string>Replace</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="icon">
+    <iconset resource="resources.qrc">
+     <normaloff>:/icons/resources/icons/file-settings.png</normaloff>:/icons/resources/icons/file-settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>
