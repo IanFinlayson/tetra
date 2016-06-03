@@ -92,14 +92,6 @@ DataType::~DataType() {
 
 DataTypeKind DataType::getKind() const { return kind; }
 
-/* find the base type of a data type */
-DataTypeKind baseType(DataType* t) {
-  if (t->getKind() == TYPE_VECTOR)
-    return baseType(&((*(t->subtypes))[0]));
-  else
-    return t->getKind();
-}
-
 /* compare two data types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're not the same kind, fail */
@@ -608,6 +600,15 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                       
                      }
     case NODE_VECRANGE: {
+                          lhs = inferExpression(expr->child(0), func, lambda); 
+                          rhs = inferExpression(expr->child(1), func, lambda); 
+
+                          /*make sure the types are both ints */
+                          if (lhs->getKind() != TYPE_INT || lhs->getKind() != TYPE_INT) {
+                            throw Error("Cannot create range with types other than INT."
+                                , expr->getLine());
+                          }
+
                           /* a vecrange can only possibly be a vector of ints */
                           DataType* t = new DataType(TYPE_VECTOR);
                           t->subtypes->push_back(*new DataType(TYPE_INT));

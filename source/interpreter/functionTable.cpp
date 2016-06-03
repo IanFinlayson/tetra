@@ -48,7 +48,7 @@ void FunctionMap::build(const Node* tree) {
     if (candidate->kind() == NODE_FUNCTION) {
        
       //if this function is already in the table
-      if(instance.lookup.count(getFunctionSignature(candidate))){
+      if(instance.lookup.count(getFunctionSignature(candidate)) > 0){
         throw Error("Duplicate function. ", candidate->getLine());
       }
       //otherwise, it's not in the table, so add it!
