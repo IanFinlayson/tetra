@@ -286,21 +286,21 @@ border: 1px solid grey;
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionNew"/>
+   <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
-   <addaction name="actionPrint"/>
    <addaction name="separator"/>
    <addaction name="actionUndo"/>
    <addaction name="actionRedo"/>
    <addaction name="separator"/>
    <addaction name="actionRun"/>
-   <addaction name="actionStop"/>
    <addaction name="separator"/>
    <addaction name="actionDebug"/>
-   <addaction name="actionExit_Debug_Mode"/>
    <addaction name="separator"/>
-   <addaction name="actionStep"/>
-   <addaction name="actionNext"/>
    <addaction name="actionContinue"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionNext"/>
+   <addaction name="actionStep"/>
   </widget>
   <action name="actionSave">
    <property name="icon">
