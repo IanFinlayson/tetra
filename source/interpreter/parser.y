@@ -244,15 +244,37 @@ init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
 } 
 
 /* a data declaration - either a constant or global */
-datadecl: TOK_CONST identifier TOK_ASSIGN expression {
+datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
   $$ = new Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($4);
-} | TOK_GLOBAL identifier TOK_ASSIGN expression {
+} | TOK_CONST typed_identifier TOK_ASSIGN assignterm {
+  $$ = new Node(NODE_CONST);
+  $$->addChild($2);
+  $$->addChild($4);
+} | TOK_CONST identifier type TOK_ASSIGN assignterm {
+  $$ = new Node(NODE_CONST);
+  $$->addChild($2);
+  $$->addChild($5);
+  $$->setDataType($3);
+} | TOK_GLOBAL typed_identifier TOK_ASSIGN assignterm {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->addChild($4);
+} | TOK_GLOBAL identifier TOK_ASSIGN assignterm {
+  $$ = new Node(NODE_GLOBAL);
+  $$->addChild($2);
+  $$->addChild($4);
+} | TOK_GLOBAL identifier type TOK_ASSIGN assignterm {
+  $$ = new Node(NODE_GLOBAL);
+  $$->addChild($2);
+  $$->addChild($5);
+  $$->setDataType($3);
 } | TOK_GLOBAL identifier type{
+  $$ = new Node(NODE_GLOBAL);
+  $$->addChild($2);
+  $$->setDataType($3);
+} | TOK_GLOBAL typed_identifier {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
 }
@@ -409,6 +431,11 @@ simple_statement: pass_statement
   $$->setLine(yylineno);
 } | typed_identifier {
   $$ = $1;
+} | typed_identifier TOK_ASSIGN assignterm {
+  $$ = new Node(NODE_ASSIGN);
+  $$->addChild($1);
+  $$->addChild($3);
+  $$->setLine($2);
 }
 
 typed_identifier: identifier TOK_AS type {
@@ -572,13 +599,7 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
 }
 
 /* expressions - assignments first */
-expression: typed_identifier TOK_ASSIGN assignterm{
-  $$ = new Node(NODE_ASSIGN);
-  $$->addChild($1);
-  $$->addChild($3);
-  $$->setLine($2);
-}
-  | lvalue TOK_ASSIGN assignterm {
+expression: lvalue TOK_ASSIGN expression {
   $$ = new Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);

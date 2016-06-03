@@ -414,12 +414,23 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                         rhs = inferExpression(expr->child(1), func);
 
                         /* if the left hand side is an identifier... */
-                        if (expr->child(0)->kind() == NODE_INDEX){
+                        if (expr->child(0)->kind() == NODE_IDENTIFIER){
                           /* check if it exists */
                           /* check globals first */
                           if (globals.count(expr->getString()) > 0) {
-                            /*set the lhs to the type of the existing global */
-                            lhs = globals.find(expr->getString())->second.getType();
+                            
+                            /* get the symbol */
+                            Symbol sym = globals.find(expr->getString())->second;
+
+                            /* if it is a constant ... */
+                            if (sym.isConst()){
+
+                              throw Error("Cannot assign to Constant.", expr->getLine());
+                            }
+
+                            /*otherwise, set the lhs to the type of the existing global */
+                            lhs = sym.getType();
+                            
                           /* if it wasn't a global, check this function */
                           } else if (func->hasSymbol(expr->child(0)->getString())){
                             /* set lhs equal to the type of the existing local identifier */
@@ -434,7 +445,11 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                           } 
 
                         /* if it's not directly and identifier.. */
-                        } else{
+                        } else {
+
+                          /* get the type of the left hand side */
+                          lhs = inferExpression(expr->child(0), func);
+
                           /* if there is an index on the left... */
                           if (expr->child(0)->kind() == NODE_INDEX){
                             /* then check for immutable types */  
@@ -445,8 +460,6 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                             }
                           }
 
-                          /* get the type of the left hand side */
-                          lhs = inferExpression(expr->child(0), func);
                         }
 
                         /* make sure both sides are the same type */
@@ -637,11 +650,11 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
 
     case NODE_VECVAL: {
                         DataType* dt = new DataType(TYPE_VECTOR);
-                        dt->subtypes->push_back(*inferExpression(expr->child(0), func));
+                        dt->subtypes->push_back(*inferExpression(expr->child(0), func, lambda));
 
                         /* if there are more than one child, recurse on them too */
                         for (int i = 1; i < expr->numChildren(); i++) {
-                          DataType* other = inferExpression(expr->child(i), func);
+                          DataType* other = inferExpression(expr->child(i), func, lambda);
 
                           /* check that they match! */
                           if (*other != *dt) {
@@ -653,7 +666,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                       }
 
     case NODE_LAMBDA: 
-                        inferFunction(expr,func);
+                      inferFunction(expr,func);
 
     default:
                       cout << expr->kind() << endl;
@@ -907,27 +920,44 @@ void inferClass(Node* node){
 /* infer a global/const definition */
 void inferGlobal(Node* node, bool isConst = false) {
 
-  /* get the type of the right hand side */
-  DataType* rhs = inferExpression(node->child(1), NULL);
-
   /* name for errors */
   string varType;
   isConst ? varType = "Constant" : varType = "Global";
 
-  /* check if this symbol exists and check that the types match */
+  /* check if this symbol exists already, (it shouldn't)*/
   if (globals.count(node->child(0)->getString()) > 0
       || FunctionMap::hasFuncNamed(node->child(0)->getString())) {
+
     throw Error(varType + " '" + node->child(0)->getString() +
         "' has been defined.");
-  } else {
-    /* add it in */
-    globals.insert(pair<string, Symbol>(
-          node->child(0)->getString(),
-          Symbol(node->child(0)->getString(), rhs, node->getLine())));
+  }
 
-    /* set the node type as well */
+  /* if there is an assignment */
+  if (node->child(1)){
+
+    /* get the type of the right hand side */
+    DataType* rhs = inferExpression(node->child(1), NULL);
+
+    /* if the left hand side has a declared type.. */
+    if (node->child(0)->type() ){
+      /* check that the types match */
+      if (*(node->child(0)->type()) != *rhs) {
+        throw Error ("Assignment of unmatched types.",node->getLine());
+      }
+    /* if there is no declared type */
+    } else {
+      /* infer the type from the right side */
+      node->setDataType(rhs);
+
+    }
+    
+    /* set the node type */
     node->child(0)->setDataType(rhs);
   }
+  /* add it in */
+  globals.insert(pair<string, Symbol>(
+        node->child(0)->getString(),
+        Symbol(node->child(0)->getString(), node->type(), node->getLine())));
 }
 
 
@@ -944,9 +974,9 @@ void inferTypes(Node* node) {
     if (node->child(0)->kind() == NODE_FUNCTION) {
       inferFunction(node->child(0));
     } else if (node->child(0)->kind() == NODE_CONST) {
-      inferGlobal(node->child(0));
-    } else if (node->child(0)->kind() == NODE_GLOBAL) {
       inferGlobal(node->child(0), true);
+    } else if (node->child(0)->kind() == NODE_GLOBAL) {
+      inferGlobal(node->child(0));
     } else if (node->child(0)->kind() == NODE_CLASS) { 
       inferClass(node->child(0));
     }
