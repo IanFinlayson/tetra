@@ -46,6 +46,12 @@ void FunctionMap::build(const Node* tree) {
     // by frontend specifications, there MUST be a child to add
     Node* candidate = tree->child(0);
     if (candidate->kind() == NODE_FUNCTION) {
+       
+      //if this function is already in the table
+      if(instance.lookup.count(getFunctionSignature(candidate))){
+        throw Error("Duplicate function. ", candidate->getLine());
+      }
+      //otherwise, it's not in the table, so add it!
       instance.lookup[getFunctionSignature(candidate)] = candidate;
     }
     // checks if there are further functions to add

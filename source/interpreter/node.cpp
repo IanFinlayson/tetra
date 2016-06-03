@@ -101,6 +101,8 @@ Symbol::Symbol(string name, DataType* type, int lineno, bool constant) {
   this->constant = constant;
 }
 
+bool Symbol::isConst(){return constant;}
+
 int Symbol::getLine() const { return lineno; }
 string Symbol::getName() const { return name; }
 DataType* Symbol::getType() const { return type; }
