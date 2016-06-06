@@ -69,7 +69,7 @@ void MainWindow::setupEditor() {
   connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
   connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
 
-  ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
+  //ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
   showDisplay(false);
 }
@@ -82,8 +82,8 @@ void MainWindow::showDisplay(bool arg1) {
   ui->input->setVisible(arg1);
   ui->output->setVisible(arg1);
   ui->cursorPosition->setVisible(arg1);
-  ui->userInput->setVisible(arg1);
-  ui->enterInputButton->setVisible(arg1);
+  //ui->userInput->setVisible(arg1);
+  //ui->enterInputButton->setVisible(arg1);
 }
 
 void MainWindow::setupShortcuts() {
@@ -404,12 +404,13 @@ void MainWindow::printOutput(QString string) {
 
 // overrides input to user input window
 std::string MainWindow::getUserInput() {
-  QEventLoop loop;  // loop waits for user to press enter button before retrieving text
-  QObject::connect(ui->enterInputButton, SIGNAL(clicked()), &loop, SLOT(quit()));
-  loop.exec();
-  QString input = ui->userInput->toPlainText();
-  ui->userInput->clear();
-  return input.toStdString();
+  /* TODO */
+  //QEventLoop loop;  // loop waits for user to press enter button before retrieving text
+  //QObject::connect(ui->enterInputButton, SIGNAL(clicked()), &loop, SLOT(quit()));
+  //loop.exec();
+  //QString input = ui->userInput->toPlainText();
+  //ui->userInput->clear();
+  return "TODO";//input.toStdString();
 }
 
 void MainWindow::createStatusBar() {
@@ -418,34 +419,18 @@ void MainWindow::createStatusBar() {
 
 //--------------------Debugger Methods--------------------//
 void MainWindow::on_actionStep_triggered() {
-  hideUserInput(true);
   simulateStdIn("s");
-  hideUserInput(false);
 }
 
 void MainWindow::on_actionContinue_triggered() {
-  hideUserInput(true);
   simulateStdIn("c");
-  hideUserInput(false);
 }
 
 void MainWindow::on_actionNext_triggered() {
-  hideUserInput(true);
   simulateStdIn("n");
-  hideUserInput(false);
-}
-
-// make texts in user input window invisible
-void MainWindow::hideUserInput(bool hide) {
-  if (hide) {
-    ui->userInput->setStyleSheet("color: rgba(255, 255, 255, 0);");
-  } else {
-    ui->userInput->setStyleSheet("color: rgba(255, 255, 255, 255);");
-  }
 }
 
 void MainWindow::on_actionSet_Breakpoint_triggered() {
-  hideUserInput(true);
   simulateStdIn("b");
 
   /*
@@ -455,17 +440,14 @@ void MainWindow::on_actionSet_Breakpoint_triggered() {
       this->activeThreadWindow()->blockCount(), 1, &valueChanged);
       */
   //simulateStdIn(QString::number(lineNumber));
-  hideUserInput(false);
 }
 
 // simulate std in by entering text to input box and pressing enter input button
 void MainWindow::simulateStdIn(QString input) {
-  ui->userInput->setPlainText(input);
-  ui->enterInputButton->animateClick();
+
 }
 
 void MainWindow::on_actionRemove_Breakpoint_triggered() {
-  hideUserInput(true);
   simulateStdIn("r");
 
   /*
@@ -475,5 +457,4 @@ void MainWindow::on_actionRemove_Breakpoint_triggered() {
       this->activeThreadWindow()->blockCount(), 1, &valueChanged);
   simulateStdIn(QString::number(lineNumber));
   */
-  hideUserInput(false);
 }

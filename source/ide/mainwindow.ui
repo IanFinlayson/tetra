@@ -133,20 +133,6 @@ border: 1px solid grey;
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="layoutWidget">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QPlainTextEdit" name="userInput"/>
-         </item>
-         <item>
-          <widget class="QPushButton" name="enterInputButton">
-           <property name="text">
-            <string>Enter</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
       </widget>
      </widget>
     </item>
@@ -207,7 +193,7 @@ border: 1px solid grey;
      <x>0</x>
      <y>0</y>
      <width>868</width>
-     <height>33</height>
+     <height>16</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
