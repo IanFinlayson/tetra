@@ -13,7 +13,8 @@ int main(int argc, char *argv[]) {
   app.setApplicationName("Tetra");
 
   MainWindow w;
-  w.showMaximized();
+//w.showMaximized();
+  w.show();
   w.startProject();
 
   return app.exec();

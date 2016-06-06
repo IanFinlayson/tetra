@@ -1,8 +1,8 @@
 /* filerunner.cpp
  * code to run or debug a program */
 
+#include <QDebug> 
 #include "filerunner.h"
-#include <QDebug>
 #include "ideCommandObserver.h"
 
 int interpret(Node* tree, int debug, int threads);
@@ -16,17 +16,17 @@ void FileRunner::runFile(bool debug) {
   ConsoleArray consoleArray;
   Console console(mainWindow);
   consoleArray.registerConsole(console);
-  Node* newNode;
+  Node* program_root;
   IDECommandObserver debugger = IDECommandObserver();
   TetraEnvironment::setObserver(debugger);
   TetraEnvironment::initialize(consoleArray);
 
   try {
-    newNode = parseFile(mainWindow->getOpenFile().toStdString());
+    program_root = parseFile(mainWindow->getOpenFile().toStdString());
     if (debug) {
-      mainWindow->setMainValue(interpret(newNode, 1, 1));
+      mainWindow->setMainValue(interpret(program_root, 1, 1));
     } else {
-      mainWindow->setMainValue(interpret(newNode, 0, 8));
+      mainWindow->setMainValue(interpret(program_root, 0, 8));
     }
   } catch (RuntimeError e) {
     mainWindow->printError(e);

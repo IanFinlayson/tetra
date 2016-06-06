@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>868</width>
-    <height>597</height>
+    <height>683</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -37,7 +37,7 @@ background-color: white;
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="2" column="0">
+        <item row="1" column="0">
          <widget class="Editor" name="input" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -70,10 +70,6 @@ background-color: white;
           <property name="text">
            <string>0, 0</string>
           </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QMdiArea" name="threadMdi">
          </widget>
         </item>
        </layout>
@@ -211,7 +207,7 @@ border: 1px solid grey;
      <x>0</x>
      <y>0</y>
      <width>868</width>
-     <height>16</height>
+     <height>33</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -517,8 +513,6 @@ border: 1px solid grey;
   <action name="actionExit_Debug_Mode">
    <property name="enabled">
     <bool>false</bool>
-   </property>
-   <property name="icon">
    </property>
    <property name="text">
     <string>Exit Debug Mode</string>

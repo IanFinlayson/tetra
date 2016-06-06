@@ -24,25 +24,22 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   menuBar()->setNativeMenuBar(true);
   ui->setupUi(this);
   setWindowTitle(tr("Tetra[*]"));
-
   setupEditor();
   setupShortcuts();
 
   highlighter = new Highlighter(ui->input->document());
-
   tetraThread = new QThread;
   fileRunner = new FileRunner(this);
   mainValue = 0;
 
   connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
-
-  setupThreadMdi();
   createStatusBar();
-
   projectTabWidth = ui->input->getTabWidth();
 }
 
-MainWindow::~MainWindow() { delete ui; }
+MainWindow::~MainWindow() {
+  delete ui;
+}
 
 // sets default values and connect signals/slots
 void MainWindow::setupEditor() {
@@ -75,13 +72,6 @@ void MainWindow::setupEditor() {
   ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
   showDisplay(false);
-}
-
-void MainWindow::setupThreadMdi() {
-  ui->threadMdi->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  ui->threadMdi->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-  windowMapper = new QSignalMapper;
-  ui->threadMdi->hide();
 }
 
 void MainWindow::showDisplay(bool arg1) {
@@ -163,15 +153,7 @@ bool MainWindow::openProject() {
 }
 
 void MainWindow::quit() {
-  QMessageBox quitDialog;
-  quitDialog.setWindowTitle("Quit Tetra");
-  quitDialog.setText("Are you sure you want to quit Tetra?");
-  quitDialog.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  quitDialog.setDefaultButton(QMessageBox::Cancel);
-  quitDialog.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.png"));
-  if (quitDialog.exec() == QMessageBox::Ok) {
-    QApplication::quit();
-  }
+  QApplication::quit();
 }
 
 // gives stripped name of file (removes file path)
@@ -213,8 +195,7 @@ void MainWindow::updateCoordinates() {
 //-----------Menu Bar/Tool Bar Actions-----------//
 void MainWindow::on_actionNew_triggered() {
   if (maybeSave()) {
-    QString filename = QFileDialog::getSaveFileName(this, tr("New Project"), "",
-                                                    "Tetra (*.ttr)");
+    QString filename = QFileDialog::getSaveFileName(this, tr("New Project"), "", "Tetra (*.ttr)");
     if (!filename.isEmpty()) {
       ui->input->setPlainText("");
       openFile = filename;
@@ -225,8 +206,7 @@ void MainWindow::on_actionNew_triggered() {
 }
 
 void MainWindow::on_actionStartProject_triggered() {
-  QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
-                                                  "Tetra (*.ttr)");
+  QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Tetra (*.ttr)");
   if (!filename.isEmpty()) {
     QFile ttrFile(filename);
     if (ttrFile.open(QFile::ReadOnly | QFile::Text)) {
@@ -251,8 +231,7 @@ void MainWindow::on_actionSave_triggered() {
     ttrFile.flush();
     ttrFile.close();
   } else {
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"),
-                                                    "", "Tetra (*.ttr)");
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "", "Tetra (*.ttr)");
     if (!filename.isEmpty()) {
       on_actionSave_triggered();
     }
@@ -260,8 +239,7 @@ void MainWindow::on_actionSave_triggered() {
 }
 void MainWindow::on_actionOpen_triggered() {
   if (maybeSave()) {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"),
-                                                    "", "Tetra (*.ttr)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Tetra (*.ttr)");
     if (!filename.isEmpty()) {
       QFile ttrFile(filename);
       if (ttrFile.open(QFile::ReadOnly | QFile::Text)) {
@@ -370,7 +348,6 @@ void MainWindow::exitRunMode() {
 
 void MainWindow::debugMode(bool value) {
   ui->input->setVisible(!value);
-  ui->threadMdi->setVisible(value);
   ui->actionNew->setEnabled(!value);
   ui->actionPrint->setEnabled(!value);
   ui->actionOpen->setEnabled(!value);
@@ -412,7 +389,6 @@ void MainWindow::on_actionExit_Debug_Mode_triggered() {
     ui->actionDebug->setEnabled(true);
     ui->actionDebug->setChecked(false);
     debugMode(false);
-    ui->threadMdi->closeAllSubWindows();
     statusBar()->showMessage("Ready.");
     this->tetraThread->disconnect();
   }
@@ -428,10 +404,8 @@ void MainWindow::printOutput(QString string) {
 
 // overrides input to user input window
 std::string MainWindow::getUserInput() {
-  QEventLoop
-      loop;  // loop waits for user to press enter button before retrieving text
-  QObject::connect(ui->enterInputButton, SIGNAL(clicked()), &loop,
-                   SLOT(quit()));
+  QEventLoop loop;  // loop waits for user to press enter button before retrieving text
+  QObject::connect(ui->enterInputButton, SIGNAL(clicked()), &loop, SLOT(quit()));
   loop.exec();
   QString input = ui->userInput->toPlainText();
   ui->userInput->clear();

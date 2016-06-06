@@ -19,7 +19,6 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
    * TODO: make it come from a color scheme instead */
   setStyleSheet("background-color:#f5f5f5;");
 
-
   lineNumbersVisible = true;
   lineHighlighted = false;
   tabWidth = 4;
@@ -28,8 +27,9 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
 // overrides default navigation
 void Editor::keyPressEvent(QKeyEvent *e) {
   cursor = this->textCursor();
+
+  // replaces tab key with predetermined amount of spaces
   if (e->key() == Qt::Key_Tab) {
-    // replaces tab key with predetermined amount of spaces
     int pos = cursor.positionInBlock();
     if ((pos + tabWidth) % tabWidth == 0 || getLeadingSpaces() < pos) {
       for (int i = 0; i < tabWidth; i++) {
@@ -46,8 +46,10 @@ void Editor::keyPressEvent(QKeyEvent *e) {
         cursor.insertText(" ");
       }
     }
+
+
+  // when enter key is pressed, auto indents new line
   } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
-    // when enter key is pressed, auto indents new line
     int leadingSpaces = getLeadingSpaces();
     if (cursor.block().text().endsWith(":")) {
       leadingSpaces += tabWidth;
@@ -58,8 +60,10 @@ void Editor::keyPressEvent(QKeyEvent *e) {
         cursor.insertText(" ");
       }
     }
-  } else if (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete) {
-    //"smart" backspace
+  }
+  
+  //"smart" backspace
+  else if (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete) {
     if (isTab("left")) {
       int pos = cursor.positionInBlock();
       while (pos > tabWidth) {
@@ -71,8 +75,10 @@ void Editor::keyPressEvent(QKeyEvent *e) {
     } else {
       QPlainTextEdit::keyPressEvent(e);
     }
-  } else if (e->key() == Qt::Key_Left) {
-    //"smart" navigate
+  }
+  
+  //"smart" navigate
+  else if (e->key() == Qt::Key_Left) {
     if (isTab("left")) {
       int pos = cursor.positionInBlock();
       while (pos > tabWidth) {
@@ -92,11 +98,15 @@ void Editor::keyPressEvent(QKeyEvent *e) {
     } else {
       QPlainTextEdit::keyPressEvent(e);
     }
-  } else {
+  }
+  
+  // else, just pass it
+  else {
     QPlainTextEdit::keyPressEvent(e);
   }
 }
 
+// return the number of leading spaces on the line with the cursor
 int Editor::getLeadingSpaces() {
   cursor = this->textCursor();
   QString line = cursor.block().text();
@@ -125,6 +135,7 @@ bool Editor::isTab(QString direction) {
   return isTab;
 }
 
+// update the cursor coordinates
 void Editor::updateCursorCoordinates() {
   cursor = this->textCursor();
   QString x = QString::number(cursor.blockNumber() + 1);
@@ -132,7 +143,10 @@ void Editor::updateCursorCoordinates() {
   coordinates = x + ", " + y;
 }
 
-QString Editor::getCoordinates() { return coordinates; }
+// return the coordinates of the cursor
+QString Editor::getCoordinates() {
+  return coordinates;
+}
 
 int Editor::lineNumberAreaWidth() {
   int digits = 1;
@@ -170,6 +184,7 @@ void Editor::resizeEvent(QResizeEvent *e) {
   lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
+// draw the line number area on the left
 void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
   QPainter painter(lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
