@@ -60,8 +60,8 @@ class MainWindow : public QMainWindow {
   void on_actionQuit_triggered();
   void on_actionRedo_triggered();
   void on_actionPaste_triggered();
-  void on_actionDelete_triggered();
-  void on_actionSelect_All_triggered();
+  //void on_actionDelete_triggered();
+  //void on_actionSelect_All_triggered();
   void on_actionStartProject_triggered();
   void on_actionNew_triggered();
   void on_actionFind_triggered();

@@ -409,16 +409,6 @@ border: 1px solid grey;
     <string>Open Recent</string>
    </property>
   </action>
-  <action name="actionDelete">
-   <property name="text">
-    <string>Delete</string>
-   </property>
-  </action>
-  <action name="actionSelect_All">
-   <property name="text">
-    <string>Select All</string>
-   </property>
-  </action>
   <action name="actionStop">
    <property name="icon">
     <iconset resource="resources.qrc">
@@ -438,16 +428,6 @@ border: 1px solid grey;
    </property>
    <property name="text">
     <string>Find</string>
-   </property>
-  </action>
-  <action name="actionMinimize">
-   <property name="text">
-    <string>Minimize</string>
-   </property>
-  </action>
-  <action name="actionFull_Screen">
-   <property name="text">
-    <string>Full Screen</string>
    </property>
   </action>
   <action name="actionLine_Numbers">

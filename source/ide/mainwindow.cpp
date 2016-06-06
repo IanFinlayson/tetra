@@ -59,13 +59,13 @@ void MainWindow::setupEditor() {
   ui->actionCopy->setEnabled(false);
   ui->actionRedo->setEnabled(false);
   ui->actionUndo->setEnabled(false);
-  ui->actionDelete->setEnabled(false);
+  //ui->actionDelete->setEnabled(false);
 
   connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy, SLOT(setEnabled(bool)));
   connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut, SLOT(setEnabled(bool)));
   connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo, SLOT(setEnabled(bool)));
   connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo, SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
+  //connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
   connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
   connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
 
@@ -91,13 +91,13 @@ void MainWindow::setupShortcuts() {
   ui->actionCopy->setShortcuts(QKeySequence::Copy);
   ui->actionCut->setShortcuts(QKeySequence::Cut);
   ui->actionPaste->setShortcuts(QKeySequence::Paste);
-  ui->actionDelete->setShortcuts(QKeySequence::Delete);
+  //ui->actionDelete->setShortcuts(QKeySequence::Delete);
   ui->actionRedo->setShortcuts(QKeySequence::Redo);
   ui->actionUndo->setShortcuts(QKeySequence::Undo);
   ui->actionSave->setShortcuts(QKeySequence::Save);
   ui->actionOpen->setShortcuts(QKeySequence::Open);
   ui->actionQuit->setShortcuts(QKeySequence::Quit);
-  ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
+  //ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -281,11 +281,11 @@ void MainWindow::on_actionQuit_triggered() { quit(); }
 void MainWindow::on_actionRedo_triggered() { ui->input->redo(); }
 void MainWindow::on_actionCopy_triggered() { ui->input->copy(); }
 void MainWindow::on_actionPaste_triggered() { ui->input->paste(); }
-void MainWindow::on_actionDelete_triggered() {
-  QTextCursor textCursor = ui->input->textCursor();
-  textCursor.removeSelectedText();
-}
-void MainWindow::on_actionSelect_All_triggered() { ui->input->selectAll(); }
+//void MainWindow::on_actionDelete_triggered() {
+  //QTextCursor textCursor = ui->input->textCursor();
+  //textCursor.removeSelectedText();
+//}
+//void MainWindow::on_actionSelect_All_triggered() { ui->input->selectAll(); }
 void MainWindow::on_actionFind_triggered() {}
 
 void MainWindow::on_actionLine_Numbers_toggled(bool arg1) {
