@@ -188,7 +188,7 @@ void Editor::resizeEvent(QResizeEvent* e) {
 // draw the line number area on the left
 void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
   QPainter painter(lineNumberArea);
-  painter.fillRect(event->rect(), Qt::lightGray);
+  painter.fillRect(event->rect(), QColor(230, 230, 230));
 
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();

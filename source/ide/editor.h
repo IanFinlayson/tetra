@@ -68,3 +68,5 @@ class LineNumberArea : public QWidget {
   Editor* codeEditor;
 };
 #endif
+
+
