@@ -17,25 +17,14 @@
    <iconset>
     <normaloff>:/icons/resources/icons/logo_squares.ico</normaloff>:/icons/resources/icons/logo_squares.ico</iconset>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
   <widget class="QWidget" name="centralWidget">
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
    <layout class="QGridLayout" name="gridLayout_3">
     <item row="0" column="0">
      <widget class="QSplitter" name="mainSplitter">
-      <property name="styleSheet">
-       <string notr="true">QSplitter::handle{
-background-color: white;
-}</string>
-      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QTabWidget" name="tabWidget">
+      <widget class="QTabWidget" name="tabBar">
        <property name="currentIndex">
         <number>0</number>
        </property>
@@ -59,9 +48,6 @@ background-color: white;
    </property>
    <property name="autoFillBackground">
     <bool>true</bool>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
    </property>
    <property name="movable">
     <bool>false</bool>
@@ -176,11 +162,6 @@ background-color: white;
        </property>
        <property name="autoFillBackground">
         <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QTextEdit{
-border: 1px solid grey;
-}</string>
        </property>
        <property name="frameShadow">
         <enum>QFrame::Plain</enum>

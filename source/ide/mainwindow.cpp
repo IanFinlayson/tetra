@@ -61,17 +61,13 @@ void MainWindow::setupEditor() {
   ui->actionCopy->setEnabled(false);
   ui->actionRedo->setEnabled(false);
   ui->actionUndo->setEnabled(false);
-  //ui->actionDelete->setEnabled(false);
 
   connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy, SLOT(setEnabled(bool)));
   connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut, SLOT(setEnabled(bool)));
   connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo, SLOT(setEnabled(bool)));
   connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo, SLOT(setEnabled(bool)));
-  //connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionDelete, SLOT(setEnabled(bool)));
   connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
   connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
-
-  //ui->userInput->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
   showDisplay(false);
 }
@@ -89,13 +85,11 @@ void MainWindow::setupShortcuts() {
   ui->actionCopy->setShortcuts(QKeySequence::Copy);
   ui->actionCut->setShortcuts(QKeySequence::Cut);
   ui->actionPaste->setShortcuts(QKeySequence::Paste);
-  //ui->actionDelete->setShortcuts(QKeySequence::Delete);
   ui->actionRedo->setShortcuts(QKeySequence::Redo);
   ui->actionUndo->setShortcuts(QKeySequence::Undo);
   ui->actionSave->setShortcuts(QKeySequence::Save);
   ui->actionOpen->setShortcuts(QKeySequence::Open);
   ui->actionQuit->setShortcuts(QKeySequence::Quit);
-  //ui->actionSelect_All->setShortcuts(QKeySequence::SelectAll);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -291,7 +285,7 @@ void MainWindow::printError(Error e) {
   ui->output->insertPlainText(QString::number(e.getLine()) + ": " +
                               QString::fromStdString(e.getMessage()) + "\n");
   ui->input->highlightLine(QColor(Qt::red));
-  // statusBar()->showMessage("Error.");
+  statusBar()->showMessage("Error.");
 }
 
 void MainWindow::on_actionStop_triggered() {
@@ -305,7 +299,6 @@ void MainWindow::setBuildSuccessful(bool buildSuccessful) {
 }
 void MainWindow::setMainValue(int mainValue) {
   this->mainValue = mainValue;
-  // statusBar()->showMessage(QString::number(mainValue));
 }
 void MainWindow::exitRunMode() {
   ui->actionRun->setChecked(false);
@@ -351,13 +344,7 @@ void MainWindow::printOutput(QString string) {
 
 // overrides input to user input window
 std::string MainWindow::getUserInput() {
-  /* TODO */
-  //QEventLoop loop;  // loop waits for user to press enter button before retrieving text
-  //QObject::connect(ui->enterInputButton, SIGNAL(clicked()), &loop, SLOT(quit()));
-  //loop.exec();
-  //QString input = ui->userInput->toPlainText();
-  //ui->userInput->clear();
-  return "TODO";//input.toStdString();
+  return "TODO";
 }
 
 void MainWindow::createStatusBar() {
