@@ -63,7 +63,6 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
                   << "\\bnone\\b"
                   << "\\bas\\b";
 
-
   foreach (const QString &pattern, keywordPatterns) {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
@@ -74,13 +73,13 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   builtinFormat.setForeground(colorFromHex(COLOR_BUILTIN));
   QStringList builtinPatterns;
   builtinPatterns << "\\bprint\\b"
-                   << "\\blen\\b"
-                   << "\\bread_int\\b"
-                   << "\\bread_string\\b"
-                   << "\\bread_bool\\b"
-                   << "\\bread_real\\b"
-                   << "\\barray\\b"
-                   << "\\bkeys\\b";
+                  << "\\blen\\b"
+                  << "\\bread_int\\b"
+                  << "\\bread_string\\b"
+                  << "\\bread_bool\\b"
+                  << "\\bread_real\\b"
+                  << "\\barray\\b"
+                  << "\\bkeys\\b";
   foreach (const QString &pattern, builtinPatterns) {
     rule.pattern = QRegExp(pattern);
     rule.format = builtinFormat;

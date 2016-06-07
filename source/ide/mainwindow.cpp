@@ -20,7 +20,8 @@
 #include "editor.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow) {
   menuBar()->setNativeMenuBar(true);
   ui->setupUi(this);
   setWindowTitle(tr("Tetra[*]"));
@@ -40,9 +41,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   statusBar()->addPermanentWidget(coords);
 }
 
-MainWindow::~MainWindow() {
-  delete ui;
-}
+MainWindow::~MainWindow() { delete ui; }
 
 // sets default values and connect signals/slots
 void MainWindow::setupEditor() {
@@ -56,18 +55,23 @@ void MainWindow::setupEditor() {
   ui->input->ensureCursorVisible();
   ui->input->setCenterOnScroll(true);
 
-
   ui->actionCut->setEnabled(false);
   ui->actionCopy->setEnabled(false);
   ui->actionRedo->setEnabled(false);
   ui->actionUndo->setEnabled(false);
 
-  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy, SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut, SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo, SLOT(setEnabled(bool)));
-  connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo, SLOT(setEnabled(bool)));
-  connect(ui->input->document(), SIGNAL(contentsChanged()), this, SLOT(documentWasModified()));
-  connect(ui->input, SIGNAL(cursorPositionChanged()), this, SLOT(updateCoordinates()));
+  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCopy,
+          SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(copyAvailable(bool)), ui->actionCut,
+          SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(redoAvailable(bool)), ui->actionRedo,
+          SLOT(setEnabled(bool)));
+  connect(ui->input, SIGNAL(undoAvailable(bool)), ui->actionUndo,
+          SLOT(setEnabled(bool)));
+  connect(ui->input->document(), SIGNAL(contentsChanged()), this,
+          SLOT(documentWasModified()));
+  connect(ui->input, SIGNAL(cursorPositionChanged()), this,
+          SLOT(updateCoordinates()));
 
   showDisplay(false);
 }
@@ -92,7 +96,7 @@ void MainWindow::setupShortcuts() {
   ui->actionQuit->setShortcuts(QKeySequence::Quit);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent* event) {
   event->ignore();
   maybeSave();
   quit();
@@ -144,12 +148,10 @@ bool MainWindow::openProject() {
   return projectOpened;
 }
 
-void MainWindow::quit() {
-  QApplication::quit();
-}
+void MainWindow::quit() { QApplication::quit(); }
 
 // gives stripped name of file (removes file path)
-QString MainWindow::strippedName(const QString &fullFileName) {
+QString MainWindow::strippedName(const QString& fullFileName) {
   return QFileInfo(fullFileName).fileName();
 }
 
@@ -177,7 +179,6 @@ bool MainWindow::maybeSave() {
 //-------------------------------------//
 
 void MainWindow::updateCoordinates() {
-
   coords->setText(ui->input->getCoordinates());
   ui->input->ensureCursorVisible();
   if (ui->input->checkLineHighlighted()) {
@@ -188,7 +189,8 @@ void MainWindow::updateCoordinates() {
 //-----------Menu Bar/Tool Bar Actions-----------//
 void MainWindow::on_actionNew_triggered() {
   if (maybeSave()) {
-    QString filename = QFileDialog::getSaveFileName(this, tr("New Project"), "", "Tetra (*.ttr)");
+    QString filename = QFileDialog::getSaveFileName(this, tr("New Project"), "",
+                                                    "Tetra (*.ttr)");
     if (!filename.isEmpty()) {
       ui->input->setPlainText("");
       openFile = filename;
@@ -199,7 +201,8 @@ void MainWindow::on_actionNew_triggered() {
 }
 
 void MainWindow::on_actionStartProject_triggered() {
-  QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Tetra (*.ttr)");
+  QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "",
+                                                  "Tetra (*.ttr)");
   if (!filename.isEmpty()) {
     QFile ttrFile(filename);
     if (ttrFile.open(QFile::ReadOnly | QFile::Text)) {
@@ -224,7 +227,8 @@ void MainWindow::on_actionSave_triggered() {
     ttrFile.flush();
     ttrFile.close();
   } else {
-    QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"), "", "Tetra (*.ttr)");
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Project As"),
+                                                    "", "Tetra (*.ttr)");
     if (!filename.isEmpty()) {
       on_actionSave_triggered();
     }
@@ -232,7 +236,8 @@ void MainWindow::on_actionSave_triggered() {
 }
 void MainWindow::on_actionOpen_triggered() {
   if (maybeSave()) {
-    QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"), "", "Tetra (*.ttr)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open Project"),
+                                                    "", "Tetra (*.ttr)");
     if (!filename.isEmpty()) {
       QFile ttrFile(filename);
       if (ttrFile.open(QFile::ReadOnly | QFile::Text)) {
@@ -250,7 +255,7 @@ void MainWindow::on_actionOpen_triggered() {
 int MainWindow::on_actionPrint_triggered() {
   QPrinter printer;
 
-  QPrintDialog *dialog = new QPrintDialog(&printer);
+  QPrintDialog* dialog = new QPrintDialog(&printer);
   dialog->setWindowTitle("Print Document");
 
   if (dialog->exec() != QDialog::Accepted) {
@@ -297,9 +302,7 @@ QString MainWindow::getOpenFile() { return this->openFile; }
 void MainWindow::setBuildSuccessful(bool buildSuccessful) {
   this->buildSuccessful = buildSuccessful;
 }
-void MainWindow::setMainValue(int mainValue) {
-  this->mainValue = mainValue;
-}
+void MainWindow::setMainValue(int mainValue) { this->mainValue = mainValue; }
 void MainWindow::exitRunMode() {
   ui->actionRun->setChecked(false);
   ui->input->setReadOnly(false);
@@ -313,7 +316,7 @@ void MainWindow::debugMode(bool value) {
   ui->actionPrint->setEnabled(!value);
   ui->actionOpen->setEnabled(!value);
   ui->menuEdit->setEnabled(!value);
-  
+
   ui->actionStop->setEnabled(!value);
   ui->actionContinue->setEnabled(value);
   ui->actionStep->setEnabled(value);
@@ -334,34 +337,21 @@ void MainWindow::on_actionRun_triggered(bool checked) {
   }
 }
 
-
 // overrides output to output window
 void MainWindow::printOutput(QString string) {
   ui->output->insertPlainText(string);
-  QScrollBar *outputSb = ui->output->verticalScrollBar();
+  QScrollBar* outputSb = ui->output->verticalScrollBar();
   outputSb->setValue(outputSb->maximum());
 }
 
 // overrides input to user input window
-std::string MainWindow::getUserInput() {
-  return "TODO";
-}
+std::string MainWindow::getUserInput() { return "TODO"; }
 
-void MainWindow::createStatusBar() {
-  statusBar()->showMessage("Ready.");
-}
+void MainWindow::createStatusBar() { statusBar()->showMessage("Ready."); }
 
 //--------------------Debugger Methods--------------------//
-void MainWindow::on_actionStep_triggered() {
+void MainWindow::on_actionStep_triggered() {}
 
-}
+void MainWindow::on_actionContinue_triggered() {}
 
-void MainWindow::on_actionContinue_triggered() {
-
-}
-
-void MainWindow::on_actionNext_triggered() {
-
-}
-
-
+void MainWindow::on_actionNext_triggered() {}

@@ -192,8 +192,8 @@
   <action name="actionSave">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-save.png</normaloff>
-     <normalon>:/icons/resources/icons/file-save.png</normalon>:/icons/resources/icons/file-save.png</iconset>
+     <normaloff>:/icons/resources/icons/file-save.svg</normaloff>
+     <normalon>:/icons/resources/icons/file-save.svg</normalon>:/icons/resources/icons/file-save.svg</iconset>
    </property>
    <property name="text">
     <string>Save</string>
@@ -205,7 +205,7 @@
   <action name="actionNew">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-new.png</normaloff>:/icons/resources/icons/file-new.png</iconset>
+     <normaloff>:/icons/resources/icons/file-new.svg</normaloff>:/icons/resources/icons/file-new.svg</iconset>
    </property>
    <property name="text">
     <string>New</string>
@@ -214,7 +214,7 @@
   <action name="actionOpen">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-open.png</normaloff>:/icons/resources/icons/file-open.png</iconset>
+     <normaloff>:/icons/resources/icons/file-open.svg</normaloff>:/icons/resources/icons/file-open.svg</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -223,7 +223,7 @@
   <action name="actionPrint">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-print.png</normaloff>:/icons/resources/icons/file-print.png</iconset>
+     <normaloff>:/icons/resources/icons/file-print.svg</normaloff>:/icons/resources/icons/file-print.svg</iconset>
    </property>
    <property name="text">
     <string>Print...</string>
@@ -238,7 +238,7 @@
   <action name="actionAbout_Tetra">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/help-about.png</normaloff>:/icons/resources/icons/help-about.png</iconset>
+     <normaloff>:/icons/resources/icons/help-about.svg</normaloff>:/icons/resources/icons/help-about.svg</iconset>
    </property>
    <property name="text">
     <string>About Tetra</string>
@@ -247,7 +247,7 @@
   <action name="actionDocumentation">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/help-contents.png</normaloff>:/icons/resources/icons/help-contents.png</iconset>
+     <normaloff>:/icons/resources/icons/help-contents.svg</normaloff>:/icons/resources/icons/help-contents.svg</iconset>
    </property>
    <property name="text">
     <string>Documentation</string>
@@ -256,7 +256,7 @@
   <action name="actionCut">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-cut.png</normaloff>:/icons/resources/icons/edit-cut.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-cut.svg</normaloff>:/icons/resources/icons/edit-cut.svg</iconset>
    </property>
    <property name="text">
     <string>Cut</string>
@@ -265,7 +265,7 @@
   <action name="actionUndo">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-undo.png</normaloff>:/icons/resources/icons/edit-undo.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-undo.svg</normaloff>:/icons/resources/icons/edit-undo.svg</iconset>
    </property>
    <property name="text">
     <string>Undo</string>
@@ -277,7 +277,7 @@
   <action name="actionRedo">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-redo.png</normaloff>:/icons/resources/icons/edit-redo.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-redo.svg</normaloff>:/icons/resources/icons/edit-redo.svg</iconset>
    </property>
    <property name="text">
     <string>Redo</string>
@@ -289,7 +289,7 @@
   <action name="actionCopy">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-copy.png</normaloff>:/icons/resources/icons/edit-copy.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-copy.svg</normaloff>:/icons/resources/icons/edit-copy.svg</iconset>
    </property>
    <property name="text">
     <string>Copy</string>
@@ -298,7 +298,7 @@
   <action name="actionPaste">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-paste.png</normaloff>:/icons/resources/icons/edit-paste.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-paste.svg</normaloff>:/icons/resources/icons/edit-paste.svg</iconset>
    </property>
    <property name="text">
     <string>Paste</string>
@@ -307,7 +307,7 @@
   <action name="actionSave_As">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-saveas.png</normaloff>:/icons/resources/icons/file-saveas.png</iconset>
+     <normaloff>:/icons/resources/icons/file-saveas.svg</normaloff>:/icons/resources/icons/file-saveas.svg</iconset>
    </property>
    <property name="text">
     <string>Save As</string>
@@ -319,7 +319,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-run.png</normaloff>:/icons/resources/icons/debug-run.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-run.svg</normaloff>:/icons/resources/icons/debug-run.svg</iconset>
    </property>
    <property name="text">
     <string>Run</string>
@@ -334,7 +334,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-debug.png</normaloff>:/icons/resources/icons/debug-debug.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-debug.svg</normaloff>:/icons/resources/icons/debug-debug.svg</iconset>
    </property>
    <property name="text">
     <string>Debug</string>
@@ -346,7 +346,7 @@
   <action name="actionOpen_Recent">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-openrecent.png</normaloff>:/icons/resources/icons/file-openrecent.png</iconset>
+     <normaloff>:/icons/resources/icons/file-openrecent.svg</normaloff>:/icons/resources/icons/file-openrecent.svg</iconset>
    </property>
    <property name="text">
     <string>Open Recent</string>
@@ -355,7 +355,7 @@
   <action name="actionStop">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-stop.png</normaloff>:/icons/resources/icons/debug-stop.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-stop.svg</normaloff>:/icons/resources/icons/debug-stop.svg</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -367,7 +367,7 @@
   <action name="actionFind">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-find.png</normaloff>:/icons/resources/icons/edit-find.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-find.svg</normaloff>:/icons/resources/icons/edit-find.svg</iconset>
    </property>
    <property name="text">
     <string>Find</string>
@@ -379,7 +379,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-debug.png</normaloff>:/icons/resources/icons/debug-debug.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-debug.svg</normaloff>:/icons/resources/icons/debug-debug.svg</iconset>
    </property>
    <property name="text">
     <string>Continue</string>
@@ -391,7 +391,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-step.png</normaloff>:/icons/resources/icons/debug-step.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-step.svg</normaloff>:/icons/resources/icons/debug-step.svg</iconset>
    </property>
    <property name="text">
     <string>Step</string>
@@ -406,7 +406,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-pause.png</normaloff>:/icons/resources/icons/debug-pause.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-pause.svg</normaloff>:/icons/resources/icons/debug-pause.svg</iconset>
    </property>
    <property name="text">
     <string>Interrupt</string>
@@ -418,7 +418,7 @@
    </property>
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/debug-next.png</normaloff>:/icons/resources/icons/debug-next.png</iconset>
+     <normaloff>:/icons/resources/icons/debug-next.svg</normaloff>:/icons/resources/icons/debug-next.svg</iconset>
    </property>
    <property name="text">
     <string>Next</string>
@@ -427,7 +427,7 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-quit.png</normaloff>:/icons/resources/icons/file-quit.png</iconset>
+     <normaloff>:/icons/resources/icons/file-quit.svg</normaloff>:/icons/resources/icons/file-quit.svg</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -436,7 +436,7 @@
   <action name="actionReplace">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/edit-replace.png</normaloff>:/icons/resources/icons/edit-replace.png</iconset>
+     <normaloff>:/icons/resources/icons/edit-replace.svg</normaloff>:/icons/resources/icons/edit-replace.svg</iconset>
    </property>
    <property name="text">
     <string>Replace</string>
@@ -445,7 +445,7 @@
   <action name="actionSettings">
    <property name="icon">
     <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-settings.png</normaloff>:/icons/resources/icons/file-settings.png</iconset>
+     <normaloff>:/icons/resources/icons/file-settings.svg</normaloff>:/icons/resources/icons/file-settings.svg</iconset>
    </property>
    <property name="text">
     <string>Settings</string>

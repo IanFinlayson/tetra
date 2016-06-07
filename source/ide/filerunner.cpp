@@ -1,8 +1,8 @@
 /* filerunner.cpp
  * code to run or debug a program */
 
-#include <QDebug> 
 #include "filerunner.h"
+#include <QDebug>
 #include "ideCommandObserver.h"
 
 int interpret(Node* tree, int debug, int threads);
@@ -40,4 +40,3 @@ void FileRunner::runFile(bool debug) {
   }
   emit finished();
 }
-

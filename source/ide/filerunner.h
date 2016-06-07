@@ -13,10 +13,10 @@ class MainWindow;
 class FileRunner : public QObject {
   Q_OBJECT
  public:
-  FileRunner(MainWindow *mainWindow);
+  FileRunner(MainWindow* mainWindow);
 
  private:
-  MainWindow *mainWindow;
+  MainWindow* mainWindow;
 
  signals:
   void finished();

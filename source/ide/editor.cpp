@@ -5,13 +5,16 @@
 #include "editor.h"
 #include <QtWidgets>
 
-Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
-  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursorCoordinates()));
+Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
+  connect(this, SIGNAL(cursorPositionChanged()), this,
+          SLOT(updateCursorCoordinates()));
 
   lineNumberArea = new LineNumberArea(this);
 
-  connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-  connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
+  connect(this, SIGNAL(blockCountChanged(int)), this,
+          SLOT(updateLineNumberAreaWidth(int)));
+  connect(this, SIGNAL(updateRequest(QRect, int)), this,
+          SLOT(updateLineNumberArea(QRect, int)));
 
   updateLineNumberAreaWidth(0);
 
@@ -25,7 +28,7 @@ Editor::Editor(QWidget *parent) : QPlainTextEdit(parent) {
 }
 
 // overrides default navigation
-void Editor::keyPressEvent(QKeyEvent *e) {
+void Editor::keyPressEvent(QKeyEvent* e) {
   cursor = this->textCursor();
 
   // replaces tab key with predetermined amount of spaces
@@ -47,8 +50,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
       }
     }
 
-
-  // when enter key is pressed, auto indents new line
+    // when enter key is pressed, auto indents new line
   } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
     int leadingSpaces = getLeadingSpaces();
     if (cursor.block().text().endsWith(":")) {
@@ -61,7 +63,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
       }
     }
   }
-  
+
   //"smart" backspace
   else if (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete) {
     if (isTab("left")) {
@@ -76,7 +78,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
       QPlainTextEdit::keyPressEvent(e);
     }
   }
-  
+
   //"smart" navigate
   else if (e->key() == Qt::Key_Left) {
     if (isTab("left")) {
@@ -99,7 +101,7 @@ void Editor::keyPressEvent(QKeyEvent *e) {
       QPlainTextEdit::keyPressEvent(e);
     }
   }
-  
+
   // else, just pass it
   else {
     QPlainTextEdit::keyPressEvent(e);
@@ -144,9 +146,7 @@ void Editor::updateCursorCoordinates() {
 }
 
 // return the coordinates of the cursor
-QString Editor::getCoordinates() {
-  return coordinates;
-}
+QString Editor::getCoordinates() { return coordinates; }
 
 int Editor::lineNumberAreaWidth() {
   int digits = 1;
@@ -165,7 +165,7 @@ void Editor::updateLineNumberAreaWidth(int /* newBlockCount */) {
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void Editor::updateLineNumberArea(const QRect &rect, int dy) {
+void Editor::updateLineNumberArea(const QRect& rect, int dy) {
   if (dy) {
     lineNumberArea->scroll(0, dy);
   } else {
@@ -177,15 +177,16 @@ void Editor::updateLineNumberArea(const QRect &rect, int dy) {
   }
 }
 
-void Editor::resizeEvent(QResizeEvent *e) {
+void Editor::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
-  lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+  lineNumberArea->setGeometry(
+      QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 // draw the line number area on the left
-void Editor::lineNumberAreaPaintEvent(QPaintEvent *event) {
+void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
   QPainter painter(lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
 
@@ -255,16 +256,8 @@ void Editor::unhighlightLine() {
   lineHighlighted = false;
 }
 
-bool Editor::checkLineHighlighted() {
-  return lineHighlighted;
-}
+bool Editor::checkLineHighlighted() { return lineHighlighted; }
 
-void Editor::setTabWidth(int tabWidth) {
-  this->tabWidth = tabWidth;
-}
+void Editor::setTabWidth(int tabWidth) { this->tabWidth = tabWidth; }
 
-int Editor::getTabWidth() {
-  return this->tabWidth;
-}
-
-
+int Editor::getTabWidth() { return this->tabWidth; }

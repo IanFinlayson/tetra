@@ -52,10 +52,10 @@ class Highlighter : public QSyntaxHighlighter {
   Q_OBJECT
 
  public:
-  Highlighter(QTextDocument *parent = 0);
+  Highlighter(QTextDocument* parent = 0);
 
  protected:
-  void highlightBlock(const QString &text);
+  void highlightBlock(const QString& text);
 
  private:
   struct HighlightingRule {
@@ -74,7 +74,8 @@ class Highlighter : public QSyntaxHighlighter {
   QTextCharFormat multiLineCommentFormat;
   QTextCharFormat quotationFormat;
   QTextCharFormat valueFormat;
-  QTextCharFormat builtinFormat;;
+  QTextCharFormat builtinFormat;
+  ;
 };
 
 #endif  // HIGHLIGHTER_H

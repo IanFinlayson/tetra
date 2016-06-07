@@ -5,13 +5,14 @@
 #define MAINWINDOW_H
 
 #include <QGridLayout>
-#include <QLayout>
 #include <QLabel>
+#include <QLayout>
 #include <QMainWindow>
 #include <QMap>
 #include <QPlainTextEdit>
 #include <QSignalMapper>
 #include <QThread>
+
 #include "../interpreter/backend.h"
 #include "../interpreter/frontend.h"
 #include "filerunner.h"
@@ -19,6 +20,7 @@
 
 class Editor;
 class FileRunner;
+
 QT_BEGIN_NAMESPACE
 class QPrinter;
 class Console;
@@ -32,7 +34,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget* parent = 0);
   ~MainWindow();
   bool openProject();
   bool newProject();
@@ -70,13 +72,13 @@ class MainWindow : public QMainWindow {
   void updateCoordinates();
 
   void exitRunMode();
-  void on_actionRun_triggered(bool checked); 
-  void on_actionStep_triggered(); 
-  void on_actionContinue_triggered(); 
+  void on_actionRun_triggered(bool checked);
+  void on_actionStep_triggered();
+  void on_actionContinue_triggered();
   void on_actionNext_triggered();
 
  private:
-  Ui::MainWindow *ui;
+  Ui::MainWindow* ui;
   QString openFile;
 
   void showDisplay(bool arg1);
@@ -84,20 +86,20 @@ class MainWindow : public QMainWindow {
   void setupEditor();
   void setupShortcuts();
 
-  QSignalMapper *windowMapper;
+  QSignalMapper* windowMapper;
   void setupThreadMdi();
 
-  Highlighter *highlighter;
+  Highlighter* highlighter;
 
-  QString strippedName(const QString &fullFileName);
+  QString strippedName(const QString& fullFileName);
 
   bool maybeSave();
   int mainValue;
   bool buildSuccessful;
 
   QString mode;
-  FileRunner *fileRunner;
-  QThread *tetraThread;
+  FileRunner* fileRunner;
+  QThread* tetraThread;
 
   QLabel* coords;
 
@@ -105,15 +107,15 @@ class MainWindow : public QMainWindow {
   int projectTabWidth;
 
  protected:
-  void closeEvent(QCloseEvent *);
+  void closeEvent(QCloseEvent*);
 };
 
 class Console : public VirtualConsole {
  private:
-  MainWindow *mainWindow;
+  MainWindow* mainWindow;
 
  public:
-  Console(MainWindow *mainWindow) : VirtualConsole() {
+  Console(MainWindow* mainWindow) : VirtualConsole() {
     this->mainWindow = mainWindow;
   }
   std::string receiveStandardInput() const {
