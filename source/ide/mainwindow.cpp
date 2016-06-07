@@ -35,6 +35,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
   createStatusBar();
   projectTabWidth = ui->input->getTabWidth();
+
+  coords = new QLabel("HDHDH");
+  statusBar()->addPermanentWidget(coords);
 }
 
 MainWindow::~MainWindow() {
@@ -53,7 +56,6 @@ void MainWindow::setupEditor() {
   ui->input->ensureCursorVisible();
   ui->input->setCenterOnScroll(true);
 
-  ui->cursorPosition->setAlignment(Qt::AlignRight);
 
   ui->actionCut->setEnabled(false);
   ui->actionCopy->setEnabled(false);
@@ -81,7 +83,6 @@ void MainWindow::showDisplay(bool arg1) {
   ui->outputLabel->setVisible(arg1);
   ui->input->setVisible(arg1);
   ui->output->setVisible(arg1);
-  ui->cursorPosition->setVisible(arg1);
   //ui->userInput->setVisible(arg1);
   //ui->enterInputButton->setVisible(arg1);
 }
@@ -185,7 +186,8 @@ bool MainWindow::maybeSave() {
 //-------------------------------------//
 
 void MainWindow::updateCoordinates() {
-  ui->cursorPosition->setText(ui->input->getCoordinates());
+
+  coords->setText(ui->input->getCoordinates());
   ui->input->ensureCursorVisible();
   if (ui->input->checkLineHighlighted()) {
     ui->input->unhighlightLine();
@@ -281,23 +283,8 @@ void MainWindow::on_actionQuit_triggered() { quit(); }
 void MainWindow::on_actionRedo_triggered() { ui->input->redo(); }
 void MainWindow::on_actionCopy_triggered() { ui->input->copy(); }
 void MainWindow::on_actionPaste_triggered() { ui->input->paste(); }
-//void MainWindow::on_actionDelete_triggered() {
-  //QTextCursor textCursor = ui->input->textCursor();
-  //textCursor.removeSelectedText();
-//}
-//void MainWindow::on_actionSelect_All_triggered() { ui->input->selectAll(); }
 void MainWindow::on_actionFind_triggered() {}
 
-void MainWindow::on_actionLine_Numbers_toggled(bool arg1) {
-  if (arg1 == true) {
-    ui->input->showLineNumbers(true);
-  } else {
-    ui->input->showLineNumbers(false);
-  }
-}
-void MainWindow::on_actionMinimize_triggered() { this->showMinimized(); }
-void MainWindow::on_actionLine_Numbers_triggered() { this->showFullScreen(); }
-void MainWindow::on_actionClear_Output_triggered() { ui->output->clear(); }
 //-----------------------------------------------//
 
 // highlights line and prints error
@@ -308,22 +295,6 @@ void MainWindow::printError(Error e) {
                               QString::fromStdString(e.getMessage()) + "\n");
   ui->input->highlightLine(QColor(Qt::red));
   // statusBar()->showMessage("Error.");
-}
-
-void MainWindow::on_actionDebug_toggled(bool arg1) {
-  on_actionClear_Output_triggered();
-  debugMode(arg1);
-  ui->actionDebug->setEnabled(!arg1);
-  ui->actionExit_Debug_Mode->setEnabled(arg1);
-  if (arg1) {
-    statusBar()->showMessage("Debugging.");
-    maybeSave();
-    fileRunner->moveToThread(tetraThread);
-    tetraThread->start();
-    qDebug() << "hey";
-    QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection,
-                              Q_ARG(bool, true));
-  }
 }
 
 void MainWindow::on_actionStop_triggered() {
@@ -351,7 +322,6 @@ void MainWindow::debugMode(bool value) {
   ui->actionNew->setEnabled(!value);
   ui->actionPrint->setEnabled(!value);
   ui->actionOpen->setEnabled(!value);
-  ui->actionLine_Numbers->setEnabled(!value);
   ui->menuEdit->setEnabled(!value);
   
   ui->actionStop->setEnabled(!value);
@@ -359,12 +329,9 @@ void MainWindow::debugMode(bool value) {
   ui->actionStep->setEnabled(value);
   ui->actionInterrupt->setEnabled(value);
   ui->actionNext->setEnabled(value);
-  ui->actionSet_Breakpoint->setEnabled(value);
-  ui->actionRemove_Breakpoint->setEnabled(value);
 }
 
 void MainWindow::on_actionRun_triggered(bool checked) {
-  on_actionClear_Output_triggered();
   ui->actionRun->setDisabled(true);
   ui->input->setReadOnly(true);
   if (checked) {
@@ -374,23 +341,6 @@ void MainWindow::on_actionRun_triggered(bool checked) {
     tetraThread->start();
     QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection,
                               Q_ARG(bool, false));
-  }
-}
-
-void MainWindow::on_actionExit_Debug_Mode_triggered() {
-  ui->actionDebug->setChecked(true);
-  QMessageBox exitDebugBox;
-  exitDebugBox.setWindowTitle("Stop Debugging");
-  exitDebugBox.setText("Are you sure you want to stop debugging?");
-  exitDebugBox.setStandardButtons(QMessageBox::Cancel | QMessageBox::Ok);
-  exitDebugBox.setDefaultButton(QMessageBox::Ok);
-  exitDebugBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.png"));
-  if (exitDebugBox.exec() == QMessageBox::Ok) {
-    ui->actionDebug->setEnabled(true);
-    ui->actionDebug->setChecked(false);
-    debugMode(false);
-    statusBar()->showMessage("Ready.");
-    this->tetraThread->disconnect();
   }
 }
 
@@ -414,47 +364,20 @@ std::string MainWindow::getUserInput() {
 }
 
 void MainWindow::createStatusBar() {
-  statusBar()->showMessage("Welcome to Tetra.");
+  statusBar()->showMessage("Ready.");
 }
 
 //--------------------Debugger Methods--------------------//
 void MainWindow::on_actionStep_triggered() {
-  simulateStdIn("s");
+
 }
 
 void MainWindow::on_actionContinue_triggered() {
-  simulateStdIn("c");
+
 }
 
 void MainWindow::on_actionNext_triggered() {
-  simulateStdIn("n");
-}
-
-void MainWindow::on_actionSet_Breakpoint_triggered() {
-  simulateStdIn("b");
-
-  /*
-  bool valueChanged;
-  int lineNumber = QInputDialog::getInt(
-      this, "Set Breakpoint", "Enter line number:", 1, 1,
-      this->activeThreadWindow()->blockCount(), 1, &valueChanged);
-      */
-  //simulateStdIn(QString::number(lineNumber));
-}
-
-// simulate std in by entering text to input box and pressing enter input button
-void MainWindow::simulateStdIn(QString input) {
 
 }
 
-void MainWindow::on_actionRemove_Breakpoint_triggered() {
-  simulateStdIn("r");
 
-  /*
-  bool valueChanged;
-  int lineNumber = QInputDialog::getInt(
-      this, "Remove  Breakpoint", "Enter line number:", 1, 1,
-      this->activeThreadWindow()->blockCount(), 1, &valueChanged);
-  simulateStdIn(QString::number(lineNumber));
-  */
-}

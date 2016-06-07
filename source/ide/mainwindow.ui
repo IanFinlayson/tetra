@@ -37,7 +37,7 @@ background-color: white;
       </property>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="1" column="0">
+        <item row="0" column="0">
          <widget class="Editor" name="input" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -56,19 +56,6 @@ background-color: white;
           </property>
           <property name="contextMenuPolicy">
            <enum>Qt::DefaultContextMenu</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="cursorPosition">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="text">
-           <string>0, 0</string>
           </property>
          </widget>
         </item>
@@ -430,25 +417,6 @@ border: 1px solid grey;
     <string>Find</string>
    </property>
   </action>
-  <action name="actionLine_Numbers">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Line Numbers</string>
-   </property>
-  </action>
-  <action name="actionClear_Output">
-   <property name="text">
-    <string>Clear Output</string>
-   </property>
-  </action>
   <action name="actionContinue">
    <property name="enabled">
     <bool>false</bool>
@@ -476,14 +444,6 @@ border: 1px solid grey;
     <string>Step</string>
    </property>
   </action>
-  <action name="actionExit_Debug_Mode">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Exit Debug Mode</string>
-   </property>
-  </action>
   <action name="actionInterrupt">
    <property name="enabled">
     <bool>false</bool>
@@ -494,26 +454,6 @@ border: 1px solid grey;
    </property>
    <property name="text">
     <string>Interrupt</string>
-   </property>
-  </action>
-  <action name="actionSet_Breakpoint">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/line-breakpoint.png</normaloff>:/icons/resources/icons/line-breakpoint.png</iconset>
-   </property>
-   <property name="text">
-    <string>Set Breakpoint</string>
-   </property>
-  </action>
-  <action name="actionRemove_Breakpoint">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="text">
-    <string>Remove Breakpoint</string>
    </property>
   </action>
   <action name="actionNext">

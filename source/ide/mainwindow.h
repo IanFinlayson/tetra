@@ -6,6 +6,7 @@
 
 #include <QGridLayout>
 #include <QLayout>
+#include <QLabel>
 #include <QMainWindow>
 #include <QMap>
 #include <QPlainTextEdit>
@@ -60,33 +61,19 @@ class MainWindow : public QMainWindow {
   void on_actionQuit_triggered();
   void on_actionRedo_triggered();
   void on_actionPaste_triggered();
-  //void on_actionDelete_triggered();
-  //void on_actionSelect_All_triggered();
   void on_actionStartProject_triggered();
   void on_actionNew_triggered();
   void on_actionFind_triggered();
-  void on_actionLine_Numbers_toggled(bool arg1);
-  void on_actionMinimize_triggered();
-  void on_actionLine_Numbers_triggered();
-  void on_actionClear_Output_triggered();
-  void on_actionDebug_toggled(bool arg1);
   void on_actionStop_triggered();
 
   void documentWasModified();
   void updateCoordinates();
+
   void exitRunMode();
-  void on_actionRun_triggered(bool checked);
-  void on_actionExit_Debug_Mode_triggered();
-
-  void on_actionStep_triggered();
-
-  void on_actionContinue_triggered();
-
+  void on_actionRun_triggered(bool checked); 
+  void on_actionStep_triggered(); 
+  void on_actionContinue_triggered(); 
   void on_actionNext_triggered();
-
-  void on_actionSet_Breakpoint_triggered();
-
-  void on_actionRemove_Breakpoint_triggered();
 
  private:
   Ui::MainWindow *ui;
@@ -112,11 +99,10 @@ class MainWindow : public QMainWindow {
   FileRunner *fileRunner;
   QThread *tetraThread;
 
+  QLabel* coords;
+
   void createStatusBar();
   int projectTabWidth;
-
-  void hideUserInput(bool);
-  void simulateStdIn(QString);
 
  protected:
   void closeEvent(QCloseEvent *);
