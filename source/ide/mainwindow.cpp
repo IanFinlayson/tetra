@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
   createStatusBar();
   projectTabWidth = ui->input->getTabWidth();
 
-  coords = new QLabel("HDHDH");
+  coords = new QLabel("");
   statusBar()->addPermanentWidget(coords);
 }
 
@@ -80,11 +80,8 @@ void MainWindow::showDisplay(bool arg1) {
   if (arg1) {
     statusBar()->showMessage("Ready.");
   }
-  ui->outputLabel->setVisible(arg1);
   ui->input->setVisible(arg1);
   ui->output->setVisible(arg1);
-  //ui->userInput->setVisible(arg1);
-  //ui->enterInputButton->setVisible(arg1);
 }
 
 void MainWindow::setupShortcuts() {
