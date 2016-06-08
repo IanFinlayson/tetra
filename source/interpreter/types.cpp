@@ -128,7 +128,8 @@ Symbol ClassContext::getMember(std::string name){
   return members[name]; 
 }
 
-Node* ClassContext::getMethod(DataType* type, std::string name) {
+const Node* ClassContext::getMethod(DataType* type, std::string name) {
+  return methods.getFunctionNode(type, name);
 }
 
 /* data type functions */
@@ -467,7 +468,7 @@ Node* getClassNode(Node* node){
   } else if (node->kind() == NODE_TOPLEVEL_LIST) { 
     return NULL;
   } else {
-    getClassNode(node->getParent());
+    return getClassNode(node->getParent());
   }
 
 }

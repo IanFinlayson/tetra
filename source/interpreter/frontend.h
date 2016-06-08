@@ -250,6 +250,7 @@ class FunctionMap {
   // Returns the address of a node containing the function body of the function
   // denoted by functionSignature
   const Node* getFunctionNode(const std::string functionSignature);
+  const Node* getFunctionNode(DataType*, std::string);
 
   const Node* getFunctionNode(const Node* callNode);
 
@@ -288,7 +289,7 @@ class ClassContext {
     void addMethod(Node*);
     void addMethods(Node*);
     Symbol getMember(std::string);
-    Node* getMethod(DataType*, std::string);
+    const Node* getMethod(DataType*, std::string);
   private:
     string name;
     FunctionMap methods;
@@ -316,5 +317,8 @@ void dumpTreeGraphviz(Node*);
 
 /* populate symbol table in function node with params */
 void inferParams(Node*);
+
+/* recursively provides string representation of a datatype */
+string typeToString(DataType*);
 
 #endif

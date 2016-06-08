@@ -25,6 +25,10 @@ const Node* FunctionMap::getFunctionNode(const string functionSignature) {
   return lookup[functionSignature];
 }
 
+const Node* FunctionMap::getFunctionNode(DataType* params, std::string name) {
+  return lookup[name + typeToString(params)];
+}
+
 // Calls the appropriate function based on the number identifier attached to the
 // node
 const Node* FunctionMap::getFunctionNode(const Node* callNode) {
@@ -77,7 +81,7 @@ bool FunctionMap::hasFuncNamed(std::string name) {
 
     //check for a name match
     if (name == it->first.substr(0, 
-          (it->first).find_first_of("#"))) { 
+          (it->first).find_first_of("("))) { 
 
       return true;
     }
@@ -92,7 +96,7 @@ bool FunctionMap::hasFunction(Node* node) {
 }
 
 bool FunctionMap::hasFunction(DataType* type, std::string name) {
-
+  return lookup.count(name+typeToString(type));
 }
 
 void optimizeFunction(Node* base, Node** funcs,
@@ -317,25 +321,8 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
 // runtime)
 // Assembles the function signature for the function
 string FunctionMap::getFunctionSignature(const Node* node) {
-  string ret = node->getString();
 
-  assert(node->kind() == NODE_FUNCTION || node->kind() == NODE_FUNCALL);
-
-  ret += "#";
-  // This symbol cannot be in a funciton name (since it denotes a comment
-  // Hence, we use it so that a user-defined function name does not accidentally
-  // align with a signature of a function
-
-  // If there are arguments, add them to the signature
-  // Reminder that a NODE_FUNCTION should only have arguments if there are 2
-  // children
-  // A NODE_FUNCALL should have arguments if it has any children
-  if ((node->kind() == NODE_FUNCTION && node->numChildren() == 2) ||
-      (node->kind() == NODE_FUNCALL && node->child(0) != NULL)) {
-    concatSignature(node->child(0), ret);
-  }
-
-  return ret;
+  return node->getString() + typeToString(&((*(node->type()->subtypes))[0]));
 }
 
 // Delete the functionLookup table
