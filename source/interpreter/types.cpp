@@ -12,14 +12,18 @@
 extern Node* root;
 
 /* the symbol table for storing constants and globals */
-map<string, Symbol> globals;
+map<std::string, Symbol> globals;
 
 /* map for storing classes */
-map<string, ClassContext> classes;
+map<std::string, ClassContext> classes;
+
+/* map for storing free functions */
+FunctionMap functions;
 
 /* prototypes */
 void inferBlock(Node*, Node* );
-void inferFunction(Node* , Node* parent =  NULL); 
+void checkClassTypes(Node*);
+DataType* inferExpression(Node*,Node*,Node*); 
 
 /* return a string of an int */
 string itoa(int num) {
@@ -51,35 +55,81 @@ string typeToString(DataType* t) {
       return "{" + typeToString(&((*(t->subtypes))[0])) + ":" 
         + typeToString(&((*(t->subtypes))[1])) + "}";
     case TYPE_TUPLE:{
-      std::string typeString = "(";
-      for(unsigned long int i = 0; i < t->subtypes->size(); i++){
-        typeString += typeToString(&((*(t->subtypes))[i])) + ","; 
-      }
-      /* if the tuple has more than one element ... */
-      if(t->subtypes->size() > 1)
-        /* then get rid of the trailing comma */
-        typeString[typeString.size()-1] = '\0';
+                      std::string typeString = "(";
+                      for(unsigned long int i = 0; i < t->subtypes->size(); i++){
+                        typeString += typeToString(&((*(t->subtypes))[i])) + ","; 
+                      }
+                      /* if the tuple has more than one element ... */
+                      if(t->subtypes->size() > 1)
+                        /* then get rid of the trailing comma */
+                        typeString[typeString.size()-1] = '\0';
 
-      return typeString + ")";
-    }
+                      return typeString + ")";
+                    }
     case TYPE_CLASS:
-      return *(t->className);
+                    return *(t->className);
     case TYPE_FUNCTION:{
-      return typeToString(&((*(t->subtypes))[0])) + "->" 
-        + typeToString(&((*(t->subtypes))[1]));
-    }
+                         return typeToString(&((*(t->subtypes))[0])) + "->" 
+                           + typeToString(&((*(t->subtypes))[1]));
+                       }
     default:
-      throw Error("typeToString: Unknown data type");
+                       throw Error("typeToString: Unknown data type");
   }
 }
 
 /* class context functions */
-ClassContext::ClassContext(string name) {
+ClassContext::ClassContext(std::string name) {
   this->name = name;
-  this->methods = new FunctionMap;
-  this->members = new std::map<string,Symbol>;
 }
 
+ClassContext::ClassContext() {
+  this->name = "#ImBroken";
+}
+
+string ClassContext::getName(){ 
+  return this->name;
+}
+
+bool ClassContext::hasMember(std::string varName) {
+  return this->members.count(varName); 
+}
+
+bool ClassContext::hasMethod(DataType* type, std::string name) {
+  return this->methods.hasFunction(type,name);
+}
+
+void ClassContext::addMember(Symbol sym) {
+  members[sym.getName()] = sym; 
+}
+
+void ClassContext::addMethods(Node* root){
+  this->methods.build(root);
+}
+
+/* Given a class node, this function adds the member vars 
+ * into the class map (Cannot type check yet as this class 
+ * may have members that are dependent on
+ * classes that have not been seen yet.)*/
+void ClassContext::addMembers(Node* node) {
+  /* add this part */
+  if (node->kind() == NODE_IDENTIFIER) {
+    this->addMember(Symbol(node->getString(), node->type(), 
+          node->getLine())); 
+  } else if (node->kind() == NODE_CLASS_PART) {
+    /* recursively add other parts */
+    this->addMembers(node->child(0));
+    if(node->child(1)){
+      this->addMembers(node->child(1));
+    }
+  }
+}
+
+Symbol ClassContext::getMember(std::string name){
+  return members[name]; 
+}
+
+Node* ClassContext::getMethod(DataType* type, std::string name) {
+}
 
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
@@ -87,7 +137,7 @@ DataType::DataType(DataTypeKind kind) {
   this->subtypes = new std::vector<DataType>;
   this->className = new std::string;
 }
- 
+
 DataType::DataType(const DataType& other) {
   this->kind = other.kind;  
   this->subtypes = new std::vector<DataType>;
@@ -114,7 +164,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
   if (lhs.getKind() == TYPE_VECTOR) {
     return (lhs.subtypes[0] == rhs.subtypes[0]);
   }
-  
+
   /* for dictionaries, recursively check the key and value types */
   if (lhs.getKind() == TYPE_DICT) {
     return (lhs.subtypes[0] == rhs.subtypes[0])
@@ -146,7 +196,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     }
     return same;
   }
-   
+
   /* otherwise return true */
   return true;
 }
@@ -163,6 +213,17 @@ DataType DataType::operator=(const DataType& other) {
   return *this;
 }
 
+/* infer the param subtype from a function call */
+void buildParamTupleType(DataType* type, Node* node, Node* func, Node* lambda) {
+  if (node->kind() == NODE_ACTUAL_PARAM_LIST) {
+    buildParamTupleType(type, node->child(0), func, lambda); 
+    buildParamTupleType(type, node->child(1), func, lambda); 
+  } else {
+    type->subtypes->push_back(*inferExpression(node,func,lambda));
+  } 
+
+}
+
 /* add the parameters of a function into its symtable */
 void addParams(Node* params, Node* func) {
   if (!params) return;
@@ -171,14 +232,15 @@ void addParams(Node* params, Node* func) {
   if (params->kind() == NODE_FORMAL_PARAM_LIST) {
     addParams(params->child(0), func);
     addParams(params->child(1), func);
-
   }
+
   /* else if it's just one param, handle it */
   else if (params->kind() == NODE_DECLARATION) {
     func->insertSymbol(
         Symbol(params->getString(), params->type(), params->getLine()));
   }
 }
+
 
 /* forward declaration needed as these are mutually-recursive */
 DataType* inferExpression(Node* expr, Node* func, Node* lambda = NULL);
@@ -303,17 +365,6 @@ int countDimensions(DataType* t) {
 
 /* find a function by name in the parse tree */
 Node* findFunction(const string& name, int lineno) {
-  Node* f = root;
-
-  while (f && (f->numChildren() > 0)) {
-    /* see if this node is the thing */
-    if (f->child(0)->getString() == name) {
-      return f->child(0);
-    }
-
-    /* move to the next */
-    f = f->child(1);
-  }
 
   throw Error("Function '" + name + "' not defined", lineno);
 }
@@ -327,78 +378,98 @@ DataType* inferFuncall(Node* funcall, Node* func, Node* lambda) {
     return t;
   }
 
-  /* find the function node this thing matches */
-  Node* f = findFunction(funcall->getString(), funcall->getLine());
+  Node* f = root;
 
-  /* if the call has no parameters, make sure the function doesn't expect any */
-  if (funcall->numChildren() == 0) {
-    if (f->numChildren() > 1) {
-      throw Error("Funcion called with no parameters, but expects some",
-          funcall->getLine());
+  while (f && (f->numChildren() > 0)) {
+    /* see if this node is the thing */
+    if (f->child(0)->getString() == funcall->getString()) {
+
+      /* if the call has no parameters, make sure the function doesn't expect any */
+      if (funcall->numChildren() == 0) {
+        if (f->child(0)->numChildren() > 1) {
+          f = f->child(1);
+        }
+
+        /* return from here as the below code expects >= 1 param */
+        return f->child(0)->type();
+      }
+
+      /* for each param, and also for each expression, make sure they match up */
+      Node* formal = f->child(0)->child(0);
+      Node* actual = funcall->child(0);
+
+      int p = 1;
+      while (formal && actual) {
+        DataType *t1, *t2;
+
+        /* it could be a list, or an actual param */
+        if (actual->kind() == NODE_ACTUAL_PARAM_LIST) {
+          t1 = inferExpression(actual->child(0), func,lambda);
+        } else {
+          t1 = inferExpression(actual, func,lambda);
+        }
+
+        /* same for formal */
+        if (formal->kind() == NODE_FORMAL_PARAM_LIST) {
+          t2 = formal->child(0)->type();
+        } else {
+          t2 = formal->type();
+        }
+
+        /* check for type mismatch */
+        if (*t1 != *t2) {
+          throw Error("Function '" + funcall->getString() + "' expected " +
+              typeToString(t2) + " but was called with " +
+              typeToString(t1) + " for parameter " + itoa(p),
+              funcall->getLine());
+        }
+        p++;
+
+        /* move on to the next one */
+        if (formal->kind() == NODE_FORMAL_PARAM_LIST) {
+          formal = formal->child(1);
+        } else {
+          formal = NULL;
+        }
+
+        /* move on to the next one */
+        if (actual->kind() == NODE_ACTUAL_PARAM_LIST) {
+          actual = actual->child(1);
+        } else {
+          actual = NULL;
+        }
+      }
+
+      /* if there are any left, the arity mismatched */
+      if (formal) {
+        throw Error("Too few parameters to function '" + funcall->getString() + "'",
+            funcall->getLine());
+      } else if (actual) {
+        throw Error(
+            "Too many parameters to function '" + funcall->getString() + "'",
+            funcall->getLine());
+      }
     }
 
-    /* return from here as the below code expects >= 1 param */
-    return f->type();
+    /* move to the next */
+    f = f->child(1);
   }
 
-  /* for each param, and also for each expression, make sure they match up */
-  Node* formal = f->child(0);
-  Node* actual = funcall->child(0);
-
-  int p = 1;
-  while (formal && actual) {
-    DataType *t1, *t2;
-
-    /* it could be a list, or an actual param */
-    if (actual->kind() == NODE_ACTUAL_PARAM_LIST) {
-      t1 = inferExpression(actual->child(0), func);
-    } else {
-      t1 = inferExpression(actual, func);
-    }
-
-    /* same for formal */
-    if (formal->kind() == NODE_FORMAL_PARAM_LIST) {
-      t2 = formal->child(0)->type();
-    } else {
-      t2 = formal->type();
-    }
-
-    /* check for type mismatch */
-    if (*t1 != *t2) {
-      throw Error("Function '" + funcall->getString() + "' expected " +
-          typeToString(t2) + " but was called with " +
-          typeToString(t1) + " for parameter " + itoa(p),
-          funcall->getLine());
-    }
-    p++;
-
-    /* move on to the next one */
-    if (formal->kind() == NODE_FORMAL_PARAM_LIST) {
-      formal = formal->child(1);
-    } else {
-      formal = NULL;
-    }
-
-    /* move on to the next one */
-    if (actual->kind() == NODE_ACTUAL_PARAM_LIST) {
-      actual = actual->child(1);
-    } else {
-      actual = NULL;
-    }
-  }
-
-  /* if there are any left, the arity mismatched */
-  if (formal) {
-    throw Error("Too few parameters to function '" + funcall->getString() + "'",
-        funcall->getLine());
-  } else if (actual) {
-    throw Error(
-        "Too many parameters to function '" + funcall->getString() + "'",
-        funcall->getLine());
-  }
 
   /* return the type of function itself */
   return f->type();
+}
+
+/* look up parent class */
+Node* getClassNode(Node* node){
+  if (node->kind() == NODE_CLASS){
+    return node;
+  } else if (node->kind() == NODE_TOPLEVEL_LIST) { 
+    return NULL;
+  } else {
+    getClassNode(node->getParent());
+  }
+
 }
 
 /* infer the types of an expression, and also return the type */
@@ -418,10 +489,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
 
                         /* if the left hand side is an identifier... */
                         if (expr->child(0)->kind() == NODE_IDENTIFIER){
-                          /* check if it exists */
-                          /* check globals first */
-                          if (globals.count(expr->getString()) > 0) {
-                            
+                         /* check if it exists */
+                         /* check this function first */
+                         if (func->hasSymbol(expr->child(0)->getString())){
+                            /* set lhs equal to the type of the existing local identifier */
+                            lhs = func->lookupSymbol(expr->child(0)->getString(), 
+                                expr->getLine()).getType();
+
+
+                          /* check globals next */
+                          } else if (globals.count(expr->getString()) > 0) {
+
                             /* get the symbol */
                             Symbol sym = globals.find(expr->getString())->second;
 
@@ -433,12 +511,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
 
                             /*otherwise, set the lhs to the type of the existing global */
                             lhs = sym.getType();
-                            
-                          /* if it wasn't a global, check this function */
-                          } else if (func->hasSymbol(expr->child(0)->getString())){
-                            /* set lhs equal to the type of the existing local identifier */
-                            lhs = func->lookupSymbol(expr->child(0)->getString(), 
-                                expr->getLine()).getType();
+                             
                           /* if we end up here, then it doesn't exist yet */
                           } else {
                             /* so add it! */
@@ -447,7 +520,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                                   lhs,expr->child(0)->getLine()));
                           } 
 
-                        /* if it's not directly and identifier.. */
+                          /* if it's not directly and identifier.. */
                         } else {
 
                           /* get the type of the left hand side */
@@ -589,26 +662,26 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                       return new DataType(lhs->getKind());
 
     case NODE_INDEX: {
-                      /* check children */
-                      lhs = inferExpression(expr->child(0), func, lambda);
-                      rhs = inferExpression(expr->child(1), func, lambda);
+                       /* check children */
+                       lhs = inferExpression(expr->child(0), func, lambda);
+                       rhs = inferExpression(expr->child(1), func, lambda);
 
-                      /* Do I exist (is my left child indexable)?*/ 
-                      DataTypeKind kind = lhs->getKind();
-                      if(!(kind == TYPE_VECTOR || kind == TYPE_TUPLE || kind == TYPE_DICT
-                            || kind == TYPE_STRING)) {
-                        throw Error("Index performed on unindexable type.", expr->getLine());
-                      }
+                       /* Do I exist (is my left child indexable)?*/ 
+                       DataTypeKind kind = lhs->getKind();
+                       if(!(kind == TYPE_VECTOR || kind == TYPE_TUPLE || kind == TYPE_DICT
+                             || kind == TYPE_STRING)) {
+                         throw Error("Index performed on unindexable type.", expr->getLine());
+                       }
 
-                      /* make sure the index type is correct (matches key type 
-                       * for dictionaries, ints elsewhere)*/
-                      if ((kind == TYPE_DICT && (*(lhs->subtypes))[0] != *rhs) 
-                          || (kind != TYPE_DICT && rhs->getKind() != TYPE_INT)){
-                          throw Error("Key has incompatible type.", expr->getLine());
-                      } 
+                       /* make sure the index type is correct (matches key type 
+                        * for dictionaries, ints elsewhere)*/
+                       if ((kind == TYPE_DICT && (*(lhs->subtypes))[0] != *rhs) 
+                           || (kind != TYPE_DICT && rhs->getKind() != TYPE_INT)){
+                         throw Error("Key has incompatible type.", expr->getLine());
+                       } 
 
-                      return rhs; 
-                      
+                       return rhs; 
+
                      }
     case NODE_VECRANGE: {
                           lhs = inferExpression(expr->child(0), func, lambda); 
@@ -633,20 +706,33 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
 
     case NODE_IDENTIFIER: {
                             /* check if it's a global first */
-                            if (globals.count(expr->getString()) > 0) {
+                            if (lambda && lambda->hasSymbol(expr->getString())) {
                               Symbol sym = globals.find(expr->getString())->second;
                               return sym.getType();
 
-                            /* if not, see if it's local to the function */
+                              /* if not, see if it's local to the function */
                             } else if (func->hasSymbol(expr->getString())){
 
                               /* look it up and return that type */
                               Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
                               return sym.getType();
 
-                            /* if it wasn't local or glabal, and this is called from a lambda,
-                             * check for context local to the lambda declaration */
-                            }
+                            /* if it is in a class, check there */
+                            } else if (Node* classNode =  getClassNode(expr)) {
+                              Symbol sym = classes[classNode->getString()].getMember(expr->getString()); 
+                              return sym.getType();
+                              
+                              /* if it wasn't local or global, and this is called from a lambda,
+                               * check for context local to the lambda declaration */
+                            } else if (globals.count(expr->getString()) > 0) {
+                              /* look it up and return that type */
+                              Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+                              return sym.getType();
+
+                            } else {
+                              throw Error("Reference to non-existent identifier.", expr->getLine());
+                            } 
+                            
                             break;
                           }
 
@@ -677,8 +763,68 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                         return dt;
                       }
 
-    case NODE_LAMBDA: 
-                      inferFunction(expr,func);
+    case NODE_LAMBDA:{ 
+                     /* make sure that any classes that are referred to
+                     * actually exist */
+                     checkClassTypes(expr->child(0));
+                     /* add the params to the symtable */
+                     inferParams(expr);
+                     return inferExpression(expr,func,expr);
+                     }
+
+    case NODE_DOT:{
+                  lhs = inferExpression(expr->child(0),func,lambda);  
+                  /* check that class exists */
+                  if (!lhs->className || !classes.count(*lhs->className)){
+                    throw Error("Class does not exist.", expr->getLine());
+                  /* check that class has member var */
+                  } else if (!classes[*lhs->className]
+                      .hasMember(expr->child(1)->getString())){
+                    throw Error("Class does not contain specified member variable."
+                        , expr->getLine());
+                  }
+
+                  /* return the type of the member variable */
+                  return classes[*lhs->className].getMember(expr->child(0)->getString()).getType();
+                  }
+    case NODE_SELF:{
+                     /* return parent class type*/
+                     Node* classNode = getClassNode(expr);
+                     /* throw error if no parent class found */
+                     if (!classNode) {
+                       throw Error("Reference to 'self' outside of class.", 
+                           expr->getLine());
+                     }
+
+                     return classNode->type();
+
+                   }
+                    
+    case NODE_METHOD_CALL:{
+                            lhs = inferExpression(expr->child(0),func,lambda);  
+                            /* infer the tuple_type of the actual params */
+                            DataType* rhsParams = new DataType(TYPE_TUPLE);
+
+                            if (expr->child(1)->numChildren() > 0 ){
+                              buildParamTupleType(rhsParams,expr->child(1),func,lambda);
+                            }
+
+                            /* check that class exists */
+                            if (!lhs->className || !classes.count(*lhs->className)){
+                              throw Error("Class does not exist.", expr->getLine());
+
+                            /* check that class has method */
+                            } else if (!classes[*lhs->className]
+                                .hasMethod(rhsParams, expr->child(1)->getString())){
+
+                              throw Error("Class does not contain specified member variable."
+                                  , expr->getLine());
+                            }
+
+                            /* return the return type of the method */
+                            return classes[*lhs->className]
+                              .getMethod(rhsParams, expr->child(0)->getString())->type();
+                          }
 
     default:
                       cout << expr->kind() << endl;
@@ -711,14 +857,14 @@ void checkMuTasks(Node* block, Node* func) {
     case NODE_WAIT:
       kind = TYPE_TASK; 
       break;
-    /* mutex */
+      /* mutex */
     case NODE_LOCK: 
       kind = TYPE_MUTEX; 
       break;
-    /* some other type (this should never happen) */
+      /* some other type (this should never happen) */
     default:
       throw Error("Something's wrotten in the state of Denmark!", 
-        block->getLine());
+          block->getLine());
   } 
 
   /* if there are two children or it's a wait block, it's named */
@@ -729,21 +875,21 @@ void checkMuTasks(Node* block, Node* func) {
     if (globals.count(block->child(0)->getString())) {
       type = (globals.find(block->child(0)->getString())->second).getType();
 
-    /* if not, check if it's local */
+      /* if not, check if it's local */
     } else if (func->hasSymbol(block->child(0)->getString())) {
       type = func->lookupSymbol(block->child(0)->getString(), 
           block->getLine()).getType();
 
-    /* if we get here, the identifier doesn't exist yet 
-     * and it's not a wait node*/ 
+      /* if we get here, the identifier doesn't exist yet 
+       * and it's not a wait node*/ 
     } else if (block->kind() != NODE_WAIT){
       /* add to this function's symtable */
       type = new DataType(kind);
       func->insertSymbol(Symbol(block->child(0)->getString(), 
             type, block->child(0)->getLine()));  
-    
-    /*if we get here, then it is a wait node and the identifier
-     * doesn't exist yet*/
+
+      /*if we get here, then it is a wait node and the identifier
+       * doesn't exist yet*/
     } else {
       throw Error("Cannot wait for task that has not been created",
           block->child(0)->getLine());
@@ -764,7 +910,7 @@ void checkMuTasks(Node* block, Node* func) {
       inferBlock(block->child(1), func);
     }
 
-  /* otherwise, it's an unnamed task/lock */
+    /* otherwise, it's an unnamed task/lock */
   } else{
 
     /* check the sub-block */
@@ -896,39 +1042,21 @@ void inferBlock(Node* block, Node* func) {
 }
 
 /* infer types based on a single function */
-void inferFunction(Node* node, Node* parent) {
+void inferParams(Node* node) {
   /* only works on functions */
   if (!node || ((node->kind() != NODE_FUNCTION) 
         && (node->kind() != NODE_LAMBDA))) {
     return;
   }
 
-  /* if there is a block for parameters */
+  /* if there are parameters */
   if (node->numChildren() > 1) {
     /* add the parameters into the table */
     addParams(node->child(0), node);
-    /* a proper function has a block */
-    if(node->kind() == NODE_FUNCTION){
-      inferBlock(node->child(1), node);
-    /* lambda functions only have one expression */
-    } else {
-      inferExpression(node->child(1), parent,node);
-    }
-  } else {
-    /* just infer the body of the function */
-    if(node->kind() == NODE_FUNCTION) {
-      inferBlock(node->child(0), node);
-    } else {
-      inferExpression(node->child(0), parent,node);
-    }
   }
-}
-
-/* infer types for class declaration */
-void inferClass(Node* node) {
-    
 
 }
+
 
 /* infer a global/const definition */
 void inferGlobal(Node* node, bool isConst = false) {
@@ -939,7 +1067,8 @@ void inferGlobal(Node* node, bool isConst = false) {
 
   /* check if this symbol exists already, (it shouldn't)*/
   if (globals.count(node->child(0)->getString()) > 0
-      || FunctionMap::hasFuncNamed(node->child(0)->getString())) {
+      || functions.hasFuncNamed(node->child(0)->getString())
+      || classes.count(node->child(0)->getString()) > 0) {
 
     throw Error(varType + " '" + node->child(0)->getString() +
         "' has been defined.");
@@ -957,13 +1086,13 @@ void inferGlobal(Node* node, bool isConst = false) {
       if (*(node->child(0)->type()) != *rhs) {
         throw Error ("Assignment of unmatched types.",node->getLine());
       }
-    /* if there is no declared type */
+      /* if there is no declared type */
     } else {
       /* infer the type from the right side */
       node->setDataType(rhs);
 
     }
-    
+
     /* set the node type */
     node->child(0)->setDataType(rhs);
   }
@@ -973,23 +1102,156 @@ void inferGlobal(Node* node, bool isConst = false) {
         Symbol(node->child(0)->getString(), node->type(), node->getLine())));
 }
 
+void inferGlobals(Node* node){
 
+  /* infer each function */
+  if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
+    /* infer child 0 based on its kind */
+    if (node->child(0)->kind() == NODE_CONST) {
+      inferGlobal(node->child(0), true);
+    } else if (node->child(0)->kind() == NODE_GLOBAL) {
+      inferGlobal(node->child(0));
+    } 
+
+    /* recursively infer any other functions */
+    inferGlobals(node->child(1));
+  }
+}
+
+
+/* Given a class node, this function adds the member vars 
+ * into the class map (Cannot type check yet as this class 
+ * may have members that are dependent on
+ * classes that have not been seen yet.)*/
+void addMembers(ClassContext* context, Node* node) {
+  /* add this part */
+  if (node->kind() == NODE_IDENTIFIER) {
+    context->addMember(Symbol(node->getString(), node->type(), 
+          node->getLine())); 
+  } else if (node->kind() == NODE_CLASS_PART) {
+    /* recursively add other parts */
+    addMembers(context, node->child(0));
+    if(node->child(1)){
+      addMembers(context, node->child(1));
+    }
+  }
+}
+
+
+/* Makes initial pass through top levels to populate
+ * class map*/
+void initClass(Node* node) {
+
+  /* First, we need to read in the the Classes. */ 
+  if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
+    if (node->child(0)->kind() == NODE_CLASS) { 
+      /* check for duplicate class name */
+      if (classes.count(node->getString())) {
+        throw Error("Duplicate class.", 
+            node->child(0)->getLine());
+      }
+
+      /* create new ClassContext */
+      ClassContext context(node->getString());
+
+      /* add any class parts */
+      context.addMembers(node->child(0));
+      context.addMethods(node->child(0));
+
+      /* add to map of classes */
+      classes[context.getName()] = context;
+    }
+
+    /* recursively infer any other functions */
+    initClass(node->child(1));
+  }
+}
+
+/* checks for the existence of any classes which are referred to */
+void checkClassTypes(Node* node) {
+  /* check return types */
+  if (node->kind() == NODE_FUNCTION) {
+    /* if the return type is a class, make sure that
+     * it exists */
+    if (node->type()->getKind() == TYPE_CLASS 
+        && !classes.count(*(node->type()->className))){
+      throw Error("Return type does not exist.", node->getLine());  
+    } 
+
+    /* if it has params... */
+    if (node->numChildren() > 1) {
+      /* check those too */
+      checkClassTypes(node->child(0));
+    }
+  
+  } else if (node->kind() == NODE_FORMAL_PARAM_LIST) {
+    checkClassTypes(node->child(0));
+    checkClassTypes(node->child(1));
+
+  } else if (node->kind() == NODE_DECLARATION) {
+    if (node->type()->getKind() == TYPE_CLASS 
+        && !classes.count(*(node->type()->className))){
+      throw Error("Class does not exist.", node->getLine());  
+    } 
+  }
+}
+
+void inferFunction(Node* node){
+  /* if there are params...*/ 
+  if (node->numChildren( ) > 1) {
+    checkClassTypes(node->child(0));
+    inferBlock(node->child(1), node);
+  } else {
+    inferBlock(node->child(0),node);
+  }
+}
+
+
+
+/* infer types for class declaration */
+void inferClass(Node* node) {
+  if (node->kind() == NODE_CLASS){
+    if (functions.hasFuncNamed(node->getString())) {
+      throw Error ("Class name cannot share free function identifier.", 
+          node->getLine());
+    }
+    inferClass(node->child(0));
+  } else if (node->kind() == NODE_CLASS_PART) {
+    inferClass(node->child(0));  
+    if(node->child(1)){
+      inferClass(node->child(1));
+    }
+  } else if (node->kind() == NODE_IDENTIFIER) {
+    checkClassTypes(node);
+  
+  } else if (node->kind() == NODE_FUNCTION) {
+    inferFunction(node);
+  } 
+}
+
+/* populates classes, free functions, and globals */
+void initTypes(Node* node) {
+
+  /* add all the classes */
+  initClass(node);
+
+  /* add all the free functions */
+  functions.build(node);
+
+  /* add and type check/infer all the globals/constants */
+  inferGlobals(node);
+
+}
 
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node) {
 
-  /* Traverse the tree and add all the function defs to the function map*/
-  FunctionMap::build(node);
 
   /* infer each function */
   if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
     /* infer child 0 based on its kind */
     if (node->child(0)->kind() == NODE_FUNCTION) {
       inferFunction(node->child(0));
-    } else if (node->child(0)->kind() == NODE_CONST) {
-      inferGlobal(node->child(0), true);
-    } else if (node->child(0)->kind() == NODE_GLOBAL) {
-      inferGlobal(node->child(0));
     } else if (node->child(0)->kind() == NODE_CLASS) { 
       inferClass(node->child(0));
     }

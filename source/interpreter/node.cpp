@@ -18,6 +18,7 @@ Node::Node(NodeKind node_type) {
   intval = 0;
   realval = 0.0;
   boolval = false;
+  parent = NULL; 
   symtable = NULL;
   lineno = yylineno; /* this is often inaccurate! */
   num_children = 0;
@@ -28,6 +29,7 @@ void Node::addChild(Node* child) {
     children[num_children] = child;
     num_children++;
   }
+  child->parent = this;
 }
 
 void Node::setDataType(DataType* data_type) { this->data_type = data_type; }
@@ -48,6 +50,7 @@ int Node::getLine() const { return lineno; }
 string Node::getString() const { return stringval; }
 int Node::getInt() const { return intval; }
 double Node::getReal() const { return realval; }
+Node* Node::getParent() const {return parent;}
 bool Node::getBool() const { return boolval; }
 NodeKind Node::kind() const { return node_type; }
 DataType* Node::type() const { return data_type; }

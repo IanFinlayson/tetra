@@ -161,19 +161,6 @@ class Symbol {
   int lineno;
 };
 
-/* stores a class definition's context (methods & members) */
-class ClassContext {
-  public:
-    ClassContext(string name);
-    string getName();
-    bool hasMember(Symbol);
-    bool hasMethod();
-  private:
-    string name;
-    FunctionMap methods;
-    std::map<string, Symbol> members;
-};
-
 const int MAX_CHILDREN = 3;
 
 /* the node class represents one element of a parse tree */
@@ -196,6 +183,7 @@ class Node {
   bool getBool() const;
   NodeKind kind() const;
   DataType* type() const;
+  Node* getParent() const;
 
   /* children functions */
   void addChild(Node* child);
@@ -238,7 +226,75 @@ class Node {
 
   /* the line number most closely associated with this node */
   int lineno;
+  
+  /* pointer to parent node */
+  Node* parent;
 };
+
+/*
+ * This file builds a function lookup table so that when the interpreter
+ *encounters a function     call, it can easily find the address of the
+ *appropriate node where the called function code res    ides
+ *Since there is only one funciton table per program (even if using multiple
+ *files, the further     functions should be addable by calling buildTree for
+ *each file's syntax tree) 
+ */
+class FunctionMap {
+ private:
+  std::map<std::string, Node*> lookup;
+  Node** functionLookup;
+  static void concatSignature(const Node*, std::string&);
+
+ public:
+  FunctionMap();
+  // Returns the address of a node containing the function body of the function
+  // denoted by functionSignature
+  const Node* getFunctionNode(const std::string functionSignature);
+
+  const Node* getFunctionNode(const Node* callNode);
+
+  // Generates a unique function signature based on the name AND the arguments
+  static std::string getFunctionSignature(const Node* node);
+
+  // Fills the function map given the specified base node
+  void build(const Node* tree);
+
+  // does some pre-work to optimize variable lookup
+  void optimizeLookup(const Node*);
+  void optimizeFunctionLookup(Node*);
+
+  // Release allocated resources from the instance
+  void cleanup();
+
+  // returns true if the map contains a function with the
+  // provided name, regardless of params and return types
+  bool hasFuncNamed(std::string name);
+
+  //returns true if the map contains the function
+  bool hasFunction(Node* node);
+  bool hasFunction(DataType*, std::string);
+};
+
+/* stores a class definition's context (methods & members) */
+class ClassContext {
+  public:
+    ClassContext(string name);
+    ClassContext();
+    string getName();
+    bool hasMember(std::string);
+    bool hasMethod(DataType*, std::string);
+    void addMember(Symbol);
+    void addMembers(Node* node);
+    void addMethod(Node*);
+    void addMethods(Node*);
+    Symbol getMember(std::string);
+    Node* getMethod(DataType*, std::string);
+  private:
+    string name;
+    FunctionMap methods;
+    std::map<string, Symbol> members;
+};
+
 
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node);
@@ -257,5 +313,8 @@ int yylex( );
 
 /* dump-tree prototype */
 void dumpTreeGraphviz(Node*);
+
+/* populate symbol table in function node with params */
+void inferParams(Node*);
 
 #endif

@@ -902,49 +902,6 @@ class ThreadEnvironment {
   static pthread_mutex_t* identifyMutex(std::string mutexName);
 };
 
-/*
- * This file builds a function lookup table so that when the interpreter
- *encounters a function     call, it can easily find the address of the
- *appropriate node where the called function code res    ides
- *Since there is only one funciton table per program (even if using multiple
- *files, the further     functions should be addable by calling buildTree for
- *each file's syntax tree) There can only b    e one instance.
- * TODO: For a long time, this class has been a convoluted mix between a
- *singleton and static member class. Must query the design plans of the debugger
- *to see whether this will ever be needed as an object, so we can stick with one
- *or the other
- */
-class FunctionMap {
- private:
-  std::map<std::string, Node*> lookup;
-  Node** functionLookup;
-  static void concatSignature(const Node*, std::string&);
-
- public:
-  FunctionMap();
-  // Returns the address of a node containing the function body of the function
-  // denoted by functionSignature
-  const Node* getFunctionNode(const std::string functionSignature);
-
-  const Node* getFunctionNode(const Node* callNode);
-
-  // Generates a unique function signature based on the name AND the arguments
-  static std::string getFunctionSignature(const Node* node);
-
-  // Fills the function map given the specified base node
-  void build(const Node* tree);
-
-  // does some pre-work to optimize variable lookup
-  void optimizeLookup(const Node*);
-  void optimizeFunctionLookup(Node*);
-
-  // Release allocated resources from the instance
-  void cleanup();
-
-  // returns true if the map contains a function with the
-  // provided name, regardless of params and return types
-  bool hasFuncNamed(std::string name);
-};
 
 /*
  * The classes contained in this file are used to keep track of certain

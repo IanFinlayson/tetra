@@ -18,8 +18,6 @@
 
 using std::string;
 
-FunctionMap::FunctionMap() {}
-
 // Given a function signature, returns the adress of a node containing the
 // function definition for that signature
 const Node* FunctionMap::getFunctionNode(const string functionSignature) {
@@ -37,20 +35,30 @@ const Node* FunctionMap::getFunctionNode(const Node* callNode) {
   return functionLookup[callNode->getInt() - TSL_FUNCS];
 }
 
+FunctionMap::FunctionMap() {
+  this->functionLookup = NULL;
+}
+
 // Fills the function map given the specified base node TODO: this function is
 // comprised of old functionality followed by new changes to accomadate constant
 // time lookup. This function can potentially bwe rewritten to both search for
 // functions and assign them values at the same time
 void FunctionMap::build(const Node* tree) {
-  if (tree->kind() == NODE_TOPLEVEL_LIST) {
+  if (tree->kind() == NODE_TOPLEVEL_LIST 
+      || tree->kind() == NODE_CLASS_PART) {
+    
     // by frontend specifications, there MUST be a child to add
     Node* candidate = tree->child(0);
     if (candidate->kind() == NODE_FUNCTION) {
-       
+      
+      //add the params to the sym table
+      inferParams(candidate); 
+
       //if this function is already in the table
       if(lookup.count(getFunctionSignature(candidate)) > 0){
         throw Error("Duplicate function. ", candidate->getLine());
       }
+
       //otherwise, it's not in the table, so add it!
       lookup[getFunctionSignature(candidate)] = candidate;
     }
@@ -62,7 +70,7 @@ void FunctionMap::build(const Node* tree) {
 }
 
 
-bool FunctionMap::hasFuncNamed(std::string name){
+bool FunctionMap::hasFuncNamed(std::string name) {
   //loop through all elements in the map
   for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
@@ -77,6 +85,14 @@ bool FunctionMap::hasFuncNamed(std::string name){
   }
   //if we got through the list and didn't find a name match
   return false;
+}
+
+bool FunctionMap::hasFunction(Node* node) {
+  return lookup.count(getFunctionSignature(node));
+}
+
+bool FunctionMap::hasFunction(DataType* type, std::string name) {
+
 }
 
 void optimizeFunction(Node* base, Node** funcs,

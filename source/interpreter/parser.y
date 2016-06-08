@@ -216,7 +216,7 @@ class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
 
 class_block: TOK_INDENT class_parts TOK_DEDENT {
   $$ = $2;
-} | TOK_INDENT pass_statement TOK_DEDENT{
+} | TOK_INDENT pass_statement newl_star TOK_DEDENT{
   $$ = $2;
 }
 
@@ -226,7 +226,8 @@ class_parts: class_part class_parts {
   $$->addChild($2);
   $$->setLine($1->getLine( ));
 } | class_part {
-  $$ = $1;
+  $$ = new Node(NODE_CLASS_PART);
+  $$->addChild($1);
 }
 
 class_part: function 
@@ -941,8 +942,7 @@ lvalue: expterm index {
   $$ = new Node(NODE_INDEX);
   $$->addChild($1);
   $$->addChild($2);
-} |   
- expterm TOK_DOT identifier { 
+} | expterm TOK_DOT identifier { 
   $$ = new Node(NODE_DOT);
   $$->addChild($1);
   $$->addChild($3);
@@ -1103,7 +1103,8 @@ Node* parseFile(const string& fname) {
     dumpTreeGraphviz(root);
 
     /* check and infer the types in the tree */
-    inferTypes(root);
+//    initTypes(root);
+ //   inferTypes(root);
     /* return the root of the parse tree */
     return root;
 }
