@@ -1,3 +1,6 @@
+/* editor.h
+ * a cusomt text editor component for Tetra code */
+
 #ifndef EDITOR_H
 #define EDITOR_H
 
@@ -17,10 +20,10 @@ class LineNumberArea;
 class Editor : public QPlainTextEdit {
   Q_OBJECT
  public:
-  Editor(QWidget *parent = 0);
+  Editor(QWidget* parent = 0);
   QString getCoordinates();
 
-  void lineNumberAreaPaintEvent(QPaintEvent *event);
+  void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
   void showLineNumbers(bool);
   void moveCursor(int);
@@ -33,18 +36,18 @@ class Editor : public QPlainTextEdit {
  private slots:
   void updateCursorCoordinates();
   void updateLineNumberAreaWidth(int newBlockCount);
-  void updateLineNumberArea(const QRect &, int);
+  void updateLineNumberArea(const QRect&, int);
 
  protected:
-  virtual void keyPressEvent(QKeyEvent *e);
-  void resizeEvent(QResizeEvent *event);
+  virtual void keyPressEvent(QKeyEvent* e);
+  void resizeEvent(QResizeEvent* event);
 
  private:
   int getLeadingSpaces();
   bool isTab(QString direction);
   QTextCursor cursor;
   QString coordinates;
-  QWidget *lineNumberArea;
+  QWidget* lineNumberArea;
   bool lineNumbersVisible;
   bool lineHighlighted;
   int tabWidth;
@@ -52,16 +55,18 @@ class Editor : public QPlainTextEdit {
 
 class LineNumberArea : public QWidget {
  public:
-  LineNumberArea(Editor *editor) : QWidget(editor) { codeEditor = editor; }
+  LineNumberArea(Editor* editor) : QWidget(editor) { codeEditor = editor; }
 
   QSize sizeHint() const { return QSize(codeEditor->lineNumberAreaWidth(), 0); }
 
  protected:
-  void paintEvent(QPaintEvent *event) {
+  void paintEvent(QPaintEvent* event) {
     codeEditor->lineNumberAreaPaintEvent(event);
   }
 
  private:
-  Editor *codeEditor;
+  Editor* codeEditor;
 };
 #endif
+
+

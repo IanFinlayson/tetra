@@ -1,12 +1,12 @@
 #include "syntaxhighlighter.h"
 
 // the colors used for highlighting
-const unsigned int COLOR_TYPE = 0xBF9407;
-const unsigned int COLOR_KEYWORD = 0x0315B6;
-const unsigned int COLOR_PARALLEL = 0x0315B6;
-const unsigned int COLOR_VALUE = 0xBB002B;
-const unsigned int COLOR_STRING = 0xBB002B;
-const unsigned int COLOR_COMMENT = 0x007231;
+const unsigned int COLOR_TYPE = 0xb28c10;
+const unsigned int COLOR_KEYWORD = 0x004088;
+const unsigned int COLOR_BUILTIN = 0x73378c;
+const unsigned int COLOR_VALUE = 0xaa0000;
+const unsigned int COLOR_STRING = 0xaa0000;
+const unsigned int COLOR_COMMENT = 0x1A5D11;
 
 // build a QColor from a 24-bit hexadecimal color value
 QColor colorFromHex(unsigned int color) {
@@ -26,7 +26,9 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   typePatterns << "\\bint\\b"
                << "\\breal\\b"
                << "\\bstring\\b"
-               << "\\bbool\\b";
+               << "\\bbool\\b"
+               << "\\btask\\b"
+               << "\\bmutex\\b";
   foreach (const QString &pattern, typePatterns) {
     rule.pattern = QRegExp(pattern);
     rule.format = typeFormat;
@@ -37,34 +39,50 @@ Highlighter::Highlighter(QTextDocument *parent) : QSyntaxHighlighter(parent) {
   keywordFormat.setForeground(colorFromHex(COLOR_KEYWORD));
   QStringList keywordPatterns;
   keywordPatterns << "\\bif\\b"
+                  << "\\bclass\\b"
+                  << "\\bdef\\b"
+                  << "\\bif\\b"
                   << "\\belif\\b"
                   << "\\belse\\b"
+                  << "\\bwhile\\b"
                   << "\\bfor\\b"
                   << "\\bin\\b"
-                  << "\\bwhile\\b"
-                  << "\\bcontinue\\b"
-                  << "\\bbreak\\b"
-                  << "\\bdef\\b"
-                  << "\\bor\\b"
-                  << "\\band\\b"
-                  << "\\bnot\\b"
-                  << "\\bpass\\b"
-                  << "\\breturn\\b";
+                  << "\\bparallel\\b"
+                  << "\\breturn\\b"
+                  << "\\bopen\\b"
+                  << "\\bimport\\b"
+                  << "\\blambda\\b"
+                  << "\\bbackground\\b"
+                  << "\\bwait\\b"
+                  << "\\block\\b"
+                  << "\\binit\\b"
+                  << "\\bglobal\\b"
+                  << "\\binit\\b"
+                  << "\\bself\\b"
+                  << "\\bconstant\\b"
+                  << "\\bnone\\b"
+                  << "\\bas\\b";
+
   foreach (const QString &pattern, keywordPatterns) {
     rule.pattern = QRegExp(pattern);
     rule.format = keywordFormat;
     highlightingRules.append(rule);
   }
 
-  // parallel stuff
-  parallelFormat.setForeground(colorFromHex(COLOR_PARALLEL));
-  QStringList parallelPatterns;
-  parallelPatterns << "\\bparallel\\b"
-                   << "\\bbackground\\b"
-                   << "\\block\\b";
-  foreach (const QString &pattern, parallelPatterns) {
+  // builtin stuff
+  builtinFormat.setForeground(colorFromHex(COLOR_BUILTIN));
+  QStringList builtinPatterns;
+  builtinPatterns << "\\bprint\\b"
+                  << "\\blen\\b"
+                  << "\\bread_int\\b"
+                  << "\\bread_string\\b"
+                  << "\\bread_bool\\b"
+                  << "\\bread_real\\b"
+                  << "\\barray\\b"
+                  << "\\bkeys\\b";
+  foreach (const QString &pattern, builtinPatterns) {
     rule.pattern = QRegExp(pattern);
-    rule.format = parallelFormat;
+    rule.format = builtinFormat;
     highlightingRules.append(rule);
   }
 

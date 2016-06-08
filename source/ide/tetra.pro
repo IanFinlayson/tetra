@@ -20,7 +20,9 @@ INCLUDEPATH += $$PWD/../interpreter
 DEPENDPATH += $$PWD/../interpreter
 
 # link to the tetra interpreter library
-PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
+# temporarily use the one in this dir...
+#PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
+PRE_TARGETDEPS += $$PWD/libtetra.a
 LIBS += -L$$PWD/../interpreter/ -ltetra
 
 # add target to reformat code
@@ -32,15 +34,13 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
-    filerunner.cpp \
-    debugwindow.cpp
+    filerunner.cpp
 
 HEADERS  += \
     mainwindow.h \
     syntaxhighlighter.h \
     editor.h \
     filerunner.h \
-    debugwindow.h \
     tetra.h
 
 FORMS    += \

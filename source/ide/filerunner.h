@@ -1,3 +1,6 @@
+/* filerunner.h
+ * code to run or debug a program */
+
 #ifndef FILERUNNER_H
 #define FILERUNNER_H
 
@@ -10,10 +13,10 @@ class MainWindow;
 class FileRunner : public QObject {
   Q_OBJECT
  public:
-  FileRunner(MainWindow *mainWindow);
+  FileRunner(MainWindow* mainWindow);
 
  private:
-  MainWindow *mainWindow;
+  MainWindow* mainWindow;
 
  signals:
   void finished();

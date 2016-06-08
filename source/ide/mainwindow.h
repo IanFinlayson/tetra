@@ -1,13 +1,18 @@
+/* mainwindow.h
+ * the main window for the application */
+
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QGridLayout>
+#include <QLabel>
 #include <QLayout>
 #include <QMainWindow>
 #include <QMap>
 #include <QPlainTextEdit>
 #include <QSignalMapper>
 #include <QThread>
+
 #include "../interpreter/backend.h"
 #include "../interpreter/frontend.h"
 #include "filerunner.h"
@@ -15,7 +20,7 @@
 
 class Editor;
 class FileRunner;
-class DebugWindow;
+
 QT_BEGIN_NAMESPACE
 class QPrinter;
 class Console;
@@ -29,7 +34,7 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QWidget* parent = 0);
   ~MainWindow();
   bool openProject();
   bool newProject();
@@ -58,40 +63,21 @@ class MainWindow : public QMainWindow {
   void on_actionQuit_triggered();
   void on_actionRedo_triggered();
   void on_actionPaste_triggered();
-  void on_actionDelete_triggered();
-  void on_actionSelect_All_triggered();
-  void on_actionStartProject_triggered();
   void on_actionNew_triggered();
   void on_actionFind_triggered();
-  void on_actionLine_Numbers_toggled(bool arg1);
-  void on_actionMinimize_triggered();
-  void on_actionLine_Numbers_triggered();
-  void on_actionClear_Output_triggered();
-  void on_actionDebug_toggled(bool arg1);
   void on_actionStop_triggered();
 
   void documentWasModified();
   void updateCoordinates();
+
   void exitRunMode();
   void on_actionRun_triggered(bool checked);
-  void on_actionExit_Debug_Mode_triggered();
-
-  DebugWindow *newThreadWindow();
-  DebugWindow *activeThreadWindow();
-  void setActiveSubWindow(QWidget *window);
-
   void on_actionStep_triggered();
-
   void on_actionContinue_triggered();
-
   void on_actionNext_triggered();
 
-  void on_actionSet_Breakpoint_triggered();
-
-  void on_actionRemove_Breakpoint_triggered();
-
  private:
-  Ui::MainWindow *ui;
+  Ui::MainWindow* ui;
   QString openFile;
 
   void showDisplay(bool arg1);
@@ -99,37 +85,36 @@ class MainWindow : public QMainWindow {
   void setupEditor();
   void setupShortcuts();
 
-  QSignalMapper *windowMapper;
+  QSignalMapper* windowMapper;
   void setupThreadMdi();
 
-  Highlighter *highlighter;
+  Highlighter* highlighter;
 
-  QString strippedName(const QString &fullFileName);
+  QString strippedName(const QString& fullFileName);
 
   bool maybeSave();
   int mainValue;
   bool buildSuccessful;
 
   QString mode;
-  FileRunner *fileRunner;
-  QThread *tetraThread;
+  FileRunner* fileRunner;
+  QThread* tetraThread;
+
+  QLabel* coords;
 
   void createStatusBar();
   int projectTabWidth;
 
-  void hideUserInput(bool);
-  void simulateStdIn(QString);
-
  protected:
-  void closeEvent(QCloseEvent *);
+  void closeEvent(QCloseEvent*);
 };
 
 class Console : public VirtualConsole {
  private:
-  MainWindow *mainWindow;
+  MainWindow* mainWindow;
 
  public:
-  Console(MainWindow *mainWindow) : VirtualConsole() {
+  Console(MainWindow* mainWindow) : VirtualConsole() {
     this->mainWindow = mainWindow;
   }
   std::string receiveStandardInput() const {
