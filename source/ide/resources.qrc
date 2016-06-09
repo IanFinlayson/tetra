@@ -32,5 +32,6 @@
         <file>resources/icons/line-current.svg</file>
         <file>resources/icons/line-error.svg</file>
         <file>resources/icons/line-warning.svg</file>
+        <file>resources/icons/window-close.svg</file>
     </qresource>
 </RCC>

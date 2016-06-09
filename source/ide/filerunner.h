@@ -11,18 +11,18 @@
 
 class MainWindow;
 class FileRunner : public QObject {
-  Q_OBJECT
- public:
-  FileRunner(MainWindow* mainWindow);
+    Q_OBJECT
+  public:
+    FileRunner(MainWindow* mainWindow);
 
- private:
-  MainWindow* mainWindow;
+  private:
+    MainWindow* mainWindow;
 
- signals:
-  void finished();
+  signals:
+    void finished();
 
- public slots:
-  void runFile(bool debug);
+  public slots:
+    void runFile(bool debug);
 };
 
 #endif

@@ -26,7 +26,7 @@ PRE_TARGETDEPS += $$PWD/libtetra.a
 LIBS += -L$$PWD/../interpreter/ -ltetra
 
 # add target to reformat code
-format.commands = clang-format -i -style=Google *.cpp *.h
+format.commands = clang-format -i *.cpp *.h
 QMAKE_EXTRA_TARGETS += format
 
 # specify all the files we need
@@ -40,8 +40,7 @@ HEADERS  += \
     mainwindow.h \
     syntaxhighlighter.h \
     editor.h \
-    filerunner.h \
-    tetra.h
+    filerunner.h
 
 FORMS    += \
     mainwindow.ui
