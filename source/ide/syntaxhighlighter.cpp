@@ -17,8 +17,7 @@ QColor colorFromHex(unsigned int color) {
 }
 
 // set up the highlighting
-Highlighter::Highlighter(QTextDocument* parent)
-    : QSyntaxHighlighter(parent) {
+Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     HighlightingRule rule;
 
     // types
@@ -124,3 +123,4 @@ void Highlighter::highlightBlock(const QString& text) {
         }
     }
 }
+

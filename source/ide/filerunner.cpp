@@ -5,13 +5,15 @@
 #include <QDebug>
 #include "ideCommandObserver.h"
 
+/* this function is defined in the Tetra interpreter code, linked as libtetra.a */
 int interpret(Node* tree, int debug, int threads);
 
+/* create the FileRunner and save the window it's associated with */
 FileRunner::FileRunner(MainWindow* mainWindow) {
     this->mainWindow = mainWindow;
 }
 
-// run or debugs file
+/* run or debugs file */
 void FileRunner::runFile(bool debug) {
     ConsoleArray consoleArray;
     Console console(mainWindow);
@@ -40,3 +42,4 @@ void FileRunner::runFile(bool debug) {
     }
     emit finished();
 }
+

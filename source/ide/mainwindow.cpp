@@ -20,8 +20,7 @@
 #include "editor.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
     setWindowTitle(tr("Tetra"));
@@ -39,7 +38,7 @@ MainWindow::MainWindow(QWidget* parent)
     statusBar()->addPermanentWidget(coords);
     
     ui->tabBar->setDocumentMode(true);
-    ui->tabBar->setTabText(0, "New File");
+    ui->tabBar->setTabText(0, "Unsaved");
 }
 
 MainWindow::~MainWindow() {
@@ -48,14 +47,22 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupShortcuts() {
     ui->actionNew->setShortcuts(QKeySequence::New);
-    ui->actionCopy->setShortcuts(QKeySequence::Copy);
+    ui->actionOpen->setShortcuts(QKeySequence::Open);
+    ui->actionSave->setShortcuts(QKeySequence::Save);
+    ui->actionSave_As->setShortcuts(QKeySequence::SaveAs);
+    ui->actionPrint->setShortcuts(QKeySequence::Print);
+    ui->actionClose->setShortcuts(QKeySequence::Close);
+    ui->actionQuit->setShortcuts(QKeySequence::Quit);
+
+    ui->actionFind->setShortcuts(QKeySequence::Find);
+    ui->actionReplace->setShortcuts(QKeySequence::Replace);
     ui->actionCut->setShortcuts(QKeySequence::Cut);
+    ui->actionCopy->setShortcuts(QKeySequence::Copy);
     ui->actionPaste->setShortcuts(QKeySequence::Paste);
     ui->actionRedo->setShortcuts(QKeySequence::Redo);
     ui->actionUndo->setShortcuts(QKeySequence::Undo);
-    ui->actionSave->setShortcuts(QKeySequence::Save);
-    ui->actionOpen->setShortcuts(QKeySequence::Open);
-    ui->actionQuit->setShortcuts(QKeySequence::Quit);
+
+    ui->actionDocumentation->setShortcuts(QKeySequence::HelpContents);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
@@ -68,18 +75,6 @@ QString MainWindow::getOpenFile() {
     return currentEditor()->getOpenFile();
 }
 
-bool MainWindow::startProject() {
-    ui->output->clear();
-    return true;
-}
-
-bool MainWindow::newProject() {
-    return true;
-}
-
-bool MainWindow::openProject() {
-    return true;
-}
 
 void MainWindow::quit() {
     QApplication::quit();
@@ -106,12 +101,16 @@ void MainWindow::updateCoordinates() {
 }
 
 void MainWindow::on_actionNew_triggered() {
-    ui->tabBar->addTab(new Editor(), "New File");
+    Editor* newEditor = new Editor;
+    ui->tabBar->addTab(newEditor, "Unsaved");
+    ui->tabBar->setCurrentWidget(newEditor);
 }
 
 void MainWindow::on_actionSave_triggered() {
     if (currentEditor()->save()) {
-        ui->tabBar->setTabText(ui->tabBar->currentIndex(), currentEditor()->getOpenFile());
+        QString full = currentEditor()->getOpenFile();
+        QFileInfo info(full);
+        ui->tabBar->setTabText(ui->tabBar->currentIndex(), info.fileName());
     }
 }
 
@@ -119,8 +118,9 @@ void MainWindow::on_actionOpen_triggered() {
     QString fname = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Tetra (*.ttr)");
     Editor* newEditor = new Editor;
     if (newEditor->open(fname)) {
-        ui->tabBar->addTab(newEditor, fname);
-
+        QFileInfo info(fname);
+        ui->tabBar->addTab(newEditor, info.fileName());
+        ui->tabBar->setCurrentWidget(newEditor);
     } else {
         // TODO warn user of their failure
     }

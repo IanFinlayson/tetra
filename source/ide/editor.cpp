@@ -7,9 +7,7 @@
 
 Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursorCoordinates()));
-
     lineNumberArea = new LineNumberArea(this);
-
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
 
@@ -17,18 +15,17 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
 
     /* set the background color */
     setStyleSheet("background-color:#f5f5f5;");
-
     highlighter = new Highlighter(document());
 
-    /* set the default tab width */
+    /* set the default settings */
     setPlainText("");
     lineNumbersVisible = true;
     lineHighlighted = false;
     tabWidth = 4;
 
+    /* set to a monospaced font */
     QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPointSize(12);
-
     QFontMetrics metrics(font);
     setFont(font);
 
@@ -37,6 +34,7 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     fileName = "";
 }
 
+/* save as - ask the user for a file name, save the file, and return success/failure */
 bool Editor::saveas() {
     fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", "Tetra (*.ttr)");
     if (fileName == "") {
@@ -46,26 +44,25 @@ bool Editor::saveas() {
     }
 }
 
+/* save - if we have a name, update it, else ask the user and then save, return success/failure */
 bool Editor::save() {
     if (fileName == "") {
         return saveas();
     } else {
         QFile ttrFile(fileName);
         if (!ttrFile.open(QFile::WriteOnly | QFile::Text)) {
-
             return false;
         }
 
         QTextStream out(&ttrFile); 
         out << toPlainText();
-
         ttrFile.flush();
         ttrFile.close();
-
         return true;
     }
 }
 
+/* open a file and return success or failure */
 bool Editor::open(QString fname) {
     if (fname.isEmpty()) {
         return false;
@@ -84,15 +81,16 @@ bool Editor::open(QString fname) {
     return false;
 }
 
+/* return the open file name (will be "" if none set) */
 QString Editor::getOpenFile() {
     return fileName;
 }
 
-// overrides default navigation
+/* overrides default navigation for smart editing */
 void Editor::keyPressEvent(QKeyEvent* e) {
     cursor = this->textCursor();
 
-    // replaces tab key with predetermined amount of spaces
+    /* replaces tab key with predetermined amount of spaces */
     if (e->key() == Qt::Key_Tab) {
         int pos = cursor.positionInBlock();
         if ((pos + tabWidth) % tabWidth == 0 || getLeadingSpaces() < pos) {
@@ -111,7 +109,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
             }
         }
 
-        // when enter key is pressed, auto indents new line
+        /* when enter key is pressed, auto indents new line */
     } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         int leadingSpaces = getLeadingSpaces();
         if (cursor.block().text().endsWith(":")) {
@@ -125,7 +123,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
         }
     }
 
-    // smart backspace
+    /* smart backspace */
     else if (e->key() == Qt::Key_Backspace || e->key() == Qt::Key_Delete) {
         if (isTab("left")) {
             int pos = cursor.positionInBlock();
@@ -140,7 +138,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
         }
     }
 
-    // smart navigate
+    /* smart navigate */
     else if (e->key() == Qt::Key_Left) {
         if (isTab("left")) {
             int pos = cursor.positionInBlock();
@@ -163,13 +161,13 @@ void Editor::keyPressEvent(QKeyEvent* e) {
         }
     }
 
-    // else, just pass it
+    /* else, just pass it */
     else {
         QPlainTextEdit::keyPressEvent(e);
     }
 }
 
-// return the number of leading spaces on the line with the cursor
+/* return the number of leading spaces on the line with the cursor */
 int Editor::getLeadingSpaces() {
     cursor = this->textCursor();
     QString line = cursor.block().text();
@@ -198,7 +196,7 @@ bool Editor::isTab(QString direction) {
     return isTab;
 }
 
-// update the cursor coordinates
+/* update the cursor coordinates */
 void Editor::updateCursorCoordinates() {
     cursor = this->textCursor();
     QString x = QString::number(cursor.blockNumber() + 1);
@@ -206,7 +204,7 @@ void Editor::updateCursorCoordinates() {
     coordinates = x + ", " + y;
 }
 
-// return the coordinates of the cursor
+/* return the coordinates of the cursor */
 QString Editor::getCoordinates() {
     return coordinates;
 }
@@ -248,7 +246,7 @@ void Editor::resizeEvent(QResizeEvent* e) {
             QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-// draw the line number area on the left
+/* draw the line number area on the left */
 void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(), QColor(230, 230, 230));

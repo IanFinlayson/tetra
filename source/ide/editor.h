@@ -15,28 +15,39 @@ class QSize;
 class QWidget;
 QT_END_NAMESPACE
 
+/* the widget which displays line numbers on the left */
 class LineNumberArea;
 
 class Editor : public QPlainTextEdit {
     Q_OBJECT
   public:
     Editor(QWidget* parent = 0);
-    QString getCoordinates();
 
+    /* functions for managind the line number widget */
     void lineNumberAreaPaintEvent(QPaintEvent* event);
     int lineNumberAreaWidth();
     void showLineNumbers(bool);
-    void moveCursor(int);
+
+    /* allows the highlighting of lines for reporting errors and warnings */
     void highlightLine(QColor);
     void unhighlightLine();
     bool checkLineHighlighted();
+
+    /* the editor must know the indent width for doing smart editing */
     void setTabWidth(int width);
     int getTabWidth();
     
-    QString getOpenFile(); 
+    /* functions to save and open files */
     bool save();
     bool saveas();
     bool open(QString fname);
+
+    /* returns the open file name of this editor, or "" if none set yet */
+    QString getOpenFile(); 
+
+    /* move the cursors and get the coordinates of it */
+    void moveCursor(int);
+    QString getCoordinates();
 
   private slots:
     void updateCursorCoordinates();
