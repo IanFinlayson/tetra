@@ -284,6 +284,7 @@ class ClassContext {
     string getName();
     bool hasMember(std::string);
     bool hasMethod(DataType*, std::string);
+    bool hasMethodNamed(std::string);
     void addMember(Symbol);
     void addMembers(Node* node);
     void addMethod(Node*);

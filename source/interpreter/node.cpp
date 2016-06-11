@@ -28,8 +28,8 @@ void Node::addChild(Node* child) {
   if (child) {
     children[num_children] = child;
     num_children++;
+    child->parent = this;
   }
-  child->parent = this;
 }
 
 void Node::setDataType(DataType* data_type) { this->data_type = data_type; }
