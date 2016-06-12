@@ -15,58 +15,80 @@ class QSize;
 class QWidget;
 QT_END_NAMESPACE
 
+/* the widget which displays line numbers on the left */
 class LineNumberArea;
 
 class Editor : public QPlainTextEdit {
-  Q_OBJECT
- public:
-  Editor(QWidget* parent = 0);
-  QString getCoordinates();
+    Q_OBJECT
+  public:
+    Editor(QWidget* parent = 0);
 
-  void lineNumberAreaPaintEvent(QPaintEvent* event);
-  int lineNumberAreaWidth();
-  void showLineNumbers(bool);
-  void moveCursor(int);
-  void highlightLine(QColor);
-  void unhighlightLine();
-  bool checkLineHighlighted();
-  void setTabWidth(int width);
-  int getTabWidth();
+    /* functions for managind the line number widget */
+    void lineNumberAreaPaintEvent(QPaintEvent* event);
+    int lineNumberAreaWidth();
+    void showLineNumbers(bool);
 
- private slots:
-  void updateCursorCoordinates();
-  void updateLineNumberAreaWidth(int newBlockCount);
-  void updateLineNumberArea(const QRect&, int);
+    /* allows the highlighting of lines for reporting errors and warnings */
+    void highlightLine(QColor);
+    void unhighlightLine();
+    bool checkLineHighlighted();
 
- protected:
-  virtual void keyPressEvent(QKeyEvent* e);
-  void resizeEvent(QResizeEvent* event);
+    /* the editor must know the indent width for doing smart editing */
+    void setTabWidth(int width);
+    int getTabWidth();
+    
+    /* functions to save and open files */
+    bool save();
+    bool saveas();
+    bool open(QString fname);
 
- private:
-  int getLeadingSpaces();
-  bool isTab(QString direction);
-  QTextCursor cursor;
-  QString coordinates;
-  QWidget* lineNumberArea;
-  bool lineNumbersVisible;
-  bool lineHighlighted;
-  int tabWidth;
+    /* returns the open file name of this editor, or "" if none set yet */
+    QString getOpenFile(); 
+
+    /* move the cursors and get the coordinates of it */
+    void moveCursor(int);
+    QString getCoordinates();
+
+  private slots:
+    void updateCursorCoordinates();
+    void updateLineNumberAreaWidth(int newBlockCount);
+    void updateLineNumberArea(const QRect&, int);
+
+  protected:
+    virtual void keyPressEvent(QKeyEvent* e);
+    void resizeEvent(QResizeEvent* event);
+
+  private:
+    int getLeadingSpaces();
+    bool isTab(QString direction);
+
+    QString fileName;
+    QTextCursor cursor;
+    QString coordinates;
+    QWidget* lineNumberArea;
+    bool lineNumbersVisible;
+    bool lineHighlighted;
+    int tabWidth;
+    Highlighter* highlighter;
 };
 
 class LineNumberArea : public QWidget {
- public:
-  LineNumberArea(Editor* editor) : QWidget(editor) { codeEditor = editor; }
+  public:
+    LineNumberArea(Editor* editor)
+        : QWidget(editor) {
+        codeEditor = editor;
+    }
 
-  QSize sizeHint() const { return QSize(codeEditor->lineNumberAreaWidth(), 0); }
+    QSize sizeHint() const {
+        return QSize(codeEditor->lineNumberAreaWidth(), 0);
+    }
 
- protected:
-  void paintEvent(QPaintEvent* event) {
-    codeEditor->lineNumberAreaPaintEvent(event);
-  }
+  protected:
+    void paintEvent(QPaintEvent* event) {
+        codeEditor->lineNumberAreaPaintEvent(event);
+    }
 
- private:
-  Editor* codeEditor;
+  private:
+    Editor* codeEditor;
 };
 #endif
-
-
