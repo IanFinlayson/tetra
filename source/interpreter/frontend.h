@@ -118,7 +118,8 @@ enum DataTypeKind {
   TYPE_FUNCTION,
   TYPE_CLASS,
   TYPE_MUTEX,
-  TYPE_TASK
+  TYPE_TASK,
+  TYPE_OVERLOAD
 };
 
 /* a data type contains the above enum, along with a pointer to the "sub" type
@@ -274,6 +275,8 @@ class FunctionMap {
   //returns true if the map contains the function
   bool hasFunction(Node* node);
   bool hasFunction(DataType*, std::string);
+
+  DataType* getFunctionsNamed(std::string) ;
 };
 
 /* stores a class definition's context (methods & members) */
@@ -290,6 +293,7 @@ class ClassContext {
     void addMethod(Node*);
     void addMethods(Node*);
     Symbol getMember(std::string);
+    DataType* getMethods(std::string);
     const Node* getMethod(DataType*, std::string);
   private:
     string name;

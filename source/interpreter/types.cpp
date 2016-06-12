@@ -132,6 +132,14 @@ const Node* ClassContext::getMethod(DataType* type, std::string name) {
   return methods.getFunctionNode(type, name);
 }
 
+DataType* ClassContext::getMethods(std::string name) {
+  return methods.getFunctionsNamed(name);
+}
+
+bool ClassContext::hasMethodNamed(std::string name) {
+  return methods.hasFuncNamed(name);
+}
+
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
@@ -341,35 +349,6 @@ DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
   return NULL;
 }
 
-/* count the number of indices used in an index operation */
-int countIndices(Node* idx, Node* func) {
-  if (!idx) return 0;
-
-  /* check the index for being an int */
-  DataType* itype = inferExpression(idx->child(0), func);
-  if (itype->getKind() != TYPE_INT) {
-    throw Error("Index must be integral", idx->getLine());
-  }
-
-  /* return 1 for this, and recurse */
-  return 1 + countIndices(idx->child(1), func);
-}
-
-/* count the number of dimensions in a data type */
-int countDimensions(DataType* t) {
-  if (t->getKind() == TYPE_VECTOR) {
-    return 1 + countDimensions(&((*(t->subtypes))[0]));
-  } else {
-    return 0;
-  }
-}
-
-/* find a function by name in the parse tree */
-Node* findFunction(const string& name, int lineno) {
-
-  throw Error("Function '" + name + "' not defined", lineno);
-}
-
 /* accepts a node as a parameter and returns true if that node 
  * cannot be inside a lambda, false otherwise */
 bool noLambdaParents(Node* node) {
@@ -388,7 +367,7 @@ bool noLambdaParents(Node* node) {
  * contains it, or null if it is not contained in a lambda */
 Node* nextLambda(Node* startNode) {
 
-  Node* curNode = startNode;
+  Node* curNode = startNode->getParent();
 
   /* keep going until you reach a node that can't be contained
    * in a lambda expression. */
@@ -407,43 +386,7 @@ Node* nextLambda(Node* startNode) {
 }
 
 
-/* infer the function of a function call and check the types */
-DataType* inferFuncall(Node* funcall, Node* func, Node* lambda) {
 
-  /* Create a datatype to store the param types */
-  DataType* paramTypes = new DataType(TYPE_TUPLE);
-
-  /* if there are params, add them */ 
-  if (funcall->child(1)->numChildren() > 0 ){
-    buildParamTupleType(paramTypes,funcall->child(1),func,lambda);
-  }
-  
-  /* infer the function type*/
-  DataType* funcType = inferExpression(funcall->child(0),func, lambda); 
-
-  /* look up for the function we are calling... */
-  /* look for lambdas first */
-  lambda = nextLambda(funcall);
-  while (lambda) {
-    /* if we found the function, return it's type */
-    if(lambda->hasSymbol(funcall->child(0)->getString())) {
-      return lambda->lookupSymbol(
-          funcall->child(0)->getString(), lambda->getLine()).getType();     
-    }
-
-    /* otherwise, go to the next lambda up */
-    lambda = nextLambda(funcall);
-  }
-
-  /* if we get here, then it's not in a lambda, so let's look in
-   * the containing function */
-  
-
-  /* return the return type of the method */
-  return classes[*lhs->className]
-    .getMethod(rhsParams, funcall->child(0)->getString())->type();
-
-}
 
 /* look up parent class */
 Node* getClassNode(Node* node){
@@ -707,20 +650,58 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                           t->subtypes->push_back(*new DataType(TYPE_INT));
                           return t;
                         }
-    case NODE_FUNCALL:
-                        return inferFuncall(expr, func, lambda);
+    case NODE_FUNCALL: {
+                        /* infer the identifier */
+                        lhs = inferExpression(expr->child(0),func,lambda);
+                        /* make an empty tuple type for the params */
+                        DataType* rhsParams = new DataType(TYPE_TUPLE);
+                        /* if there are arguments... */
+                        if(expr->numChildren() > 1) {
+                          /* add them to the tuple */
+                          buildParamTupleType(rhsParams,expr->child(1),func,lambda);
+                        } 
+
+                        /* make sure that we found a matching function */
+                        /* if we have a single function... */
+                        if(lhs->getKind() == TYPE_FUNCTION){
+                          /* make sure it has the right params */
+                          if((*(lhs->subtypes))[0] == *rhsParams){
+                            return lhs;
+                          }
+                        /* if we have multiple possibilities */
+                        } else if (lhs->getKind() == TYPE_OVERLOAD) {
+                          /* check each of them */
+                          for (int i = 0; i < lhs->subtypes->size(); i++) {
+                            /* if it matches, return it */
+                            if((*(lhs->subtypes))[i] == *rhsParams){
+                              return &((*(lhs->subtypes))[i]);
+                            }
+                          }
+                        }
+                        /* if we get here, then we either haven't found any matches,
+                         * or the ones that we have found don't accept the correct arguments */
+                            throw Error("No matching function.", expr->getLine()); 
+                      }
     case NODE_ACTUAL_PARAM_LIST:
                         throw Error("inferExpression: should not be a param list here");
                         break;
 
-    case NODE_IDENTIFIER: {
-                            /* check if it's a lambda param first */
-                            if (lambda && lambda->hasSymbol(expr->getString())) {
-                              Symbol sym = globals.find(expr->getString())->second;
-                              return sym.getType();
+    case NODE_IDENTIFIER: { /* check if it's a lambda param first */
+                            /* look for lambdas first */
+                            lambda = nextLambda(expr);
+                            while (lambda) {
+                              /* if we found the identifier, return it's type */
+                              if(lambda->hasSymbol(expr->getString())) {
+                                return lambda->lookupSymbol(
+                                    expr->getString(), lambda->getLine()).getType();     
+                              }
 
-                            /* if not, see if it's local to the function */
-                            } else if (func->hasSymbol(expr->getString())){
+                              /* otherwise, go to the next lambda up */
+                              lambda = nextLambda(expr);
+                            } 
+
+                            /* if not a lambda, see if it's local to the function */
+                            if (func->hasSymbol(expr->getString())){
 
                               /* look it up and return that type */
                               Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
@@ -733,15 +714,14 @@ DataType* inferExpressionPrime(Node* expr, Node* func,
                               Symbol sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
                               return sym.getType();
                             
-                            /* if it is in a class, check there for a member var*/
+                            /* if it is in a class, check there for a method */
                             } else if (getClassNode(expr) 
-                                && classes[getClassNode(expr)->getString()].hasMethod(expr->getString())) {
+                                && classes[getClassNode(expr)->getString()].hasMethodNamed(expr->getString())) {
 
-                              Symbol sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
-                              return sym.getType();
+                              /* get all the methods */
+                              return classes[getClassNode(expr)->getString()].getMethods(expr->getString()); 
                              
-                            /* if it wasn't local or global, and this is called from a lambda,
-                             * check for context local to the lambda declaration */
+                            /* next check for globals/constants */
                             } else if (globals.count(expr->getString()) > 0) {
                               /* look it up and return that type */
                               Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());

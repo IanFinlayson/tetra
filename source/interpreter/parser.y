@@ -1040,14 +1040,14 @@ identifier: TOK_IDENTIFIER {
 }  
 
 /* a function call */
-funcall: TOK_IDENTIFIER TOK_LEFTPARENS TOK_RIGHTPARENS {
+funcall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = new Node(NODE_FUNCALL);
-  $$->setStringval($1);
+  $$->addChild($1);
   $$->setLine($2);
 
-} | TOK_IDENTIFIER TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
+} | identifier TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
   $$ = new Node(NODE_FUNCALL);
-  $$->setStringval($1);
+  $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
   }
@@ -1059,7 +1059,8 @@ actual_param_list: expression TOK_COMMA actual_param_list {
   $$->addChild($3);
   $$->setLine($2);
 } | expression {
-  $$ = $1;
+  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
+  $$->addChild($1);
 }
 
 

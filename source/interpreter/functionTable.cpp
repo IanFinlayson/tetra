@@ -85,10 +85,36 @@ bool FunctionMap::hasFuncNamed(std::string name) {
 
       return true;
     }
-
   }
   //if we got through the list and didn't find a name match
   return false;
+}
+
+DataType* FunctionMap::getFunctionsNamed(std::string name){
+
+  //create a dataType to return
+  DataType* retType = new DataType(TYPE_OVERLOAD);  
+
+  //loop through all elements in the map
+  for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
+      it != lookup.end(); it ++){
+
+    //check for a name match
+    if (name == it->first.substr(0, 
+          (it->first).find_first_of("("))) { 
+
+      //if one was found, add it to the subtypes
+      retType->subtypes->push_back(*(it->second->type()));
+    }
+  }
+  //If there are no subtypes, return null
+  if (retType->subtypes->size() == 0) {
+    retType = NULL;
+  //If there is one, just return that one
+  } else if (retType->subtypes->size() == 1) {
+    retType = &((*(retType->subtypes))[0]);
+  }
+  return retType;
 }
 
 bool FunctionMap::hasFunction(Node* node) {
