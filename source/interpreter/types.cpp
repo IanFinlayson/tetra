@@ -383,7 +383,14 @@ Node* nextLambda(Node* startNode) {
 }
 
 
-
+/* return true if the type represents an empty
+ * container (i.e. is a dict/vector with no
+ * subtype. */
+bool isEmptyContainerType(DataType* type) {
+    return ((type->getKind() == TYPE_VECTOR 
+            || type->getKind() == TYPE_DICT)
+            && type->subtypes->size() == 0);
+}
 
 /* look up parent class */
 Node* getClassNode(Node* node){
@@ -442,8 +449,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             throw Error("Cannot assign to free function.", expr->getLine());
 
                             /* if we end up here, then it doesn't exist yet */
+                            /* make sure the right side wasnt {} or [] because
+                             * we don't do type inference on these */
+                          } else if (isEmptyContainerType(rhs)) {
+
+                            throw Error("Cannot infer subtype of empty list/dictionary."
+                                    , expr->getLine());
+
+                          /* if it doesn't exist and the type is inferable... */ 
                           } else {
-                            /* so add it! */
+
+                           /* infer it! */ 
                             lhs = rhs;
                             func->insertSymbol(*new Symbol(expr->child(0)->getString(),
                                   lhs,expr->child(0)->getLine()));
@@ -760,26 +776,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             /* set current node to the next one */
                             currNode = currNode->child(1);
                         }
-
                         return dt;
                       }
-    case NODE_TUPVAL:{
-                        DataType* dt = new DataType(TYPE_TUPLE);
-                        Node * currNode = expr;
-                        /* traverse the subtree of vecvals */
-                        while(currNode && currNode->numChildren() > 0){
-                            
-                            DataType* elemType = inferExpression(expr->child(0),func);
 
-                            /* add the subtype */
-                            (*(dt->subtypes))[0] = *elemType; 
-
-                            /* set current node to the next one */
-                            currNode = currNode->child(1);
-                        }
-
-                        return dt;
-                      }
     case NODE_DICTVAL: {
                         DataType* dt = new DataType(TYPE_DICT);
                         Node * currNode = expr;
@@ -805,6 +804,23 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         return dt;
                       }
 
+    case NODE_TUPVAL:{
+                        DataType* dt = new DataType(TYPE_TUPLE);
+                        Node * currNode = expr;
+                        /* traverse the subtree of vecvals */
+                        while(currNode && currNode->numChildren() > 0){
+                            
+                            DataType* elemType = inferExpression(expr->child(0),func);
+
+                            /* add the subtype */
+                            (*(dt->subtypes))[0] = *elemType; 
+
+                            /* set current node to the next one */
+                            currNode = currNode->child(1);
+                        }
+
+                        return dt;
+                      }
     case NODE_LAMBDA:{ 
                        /* make sure that any classes that are referred to
                         * actually exist */
