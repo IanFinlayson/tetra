@@ -132,6 +132,7 @@ class DataType {
   std::vector<DataType>* subtypes;
   std::string* className;
   DataType operator=(const DataType& other);
+  bool isEmptyContainerType() const;
 
  private:
   DataTypeKind kind;

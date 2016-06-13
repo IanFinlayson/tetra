@@ -160,6 +160,16 @@ DataType::~DataType() {
   delete(subtypes);
 }
 
+/* return true if the type represents an empty
+ * container (i.e. is a dict/vector with no
+ * subtype. */
+bool DataType::isEmptyContainerType() const {
+    return ((this->getKind() == TYPE_VECTOR 
+            || this->getKind() == TYPE_DICT)
+            && this->subtypes->size() == 0);
+}
+
+
 DataTypeKind DataType::getKind() const { return kind; }
 
 /* compare two data types for equality */
@@ -169,8 +179,15 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     return false;
   } 
 
-  /* if they're vectors, recursively ensure the subtypes match */
+  /* if they're vectors or dicts and either is empty.. */
+  if (lhs.getKind() == TYPE_VECTOR 
+      && (lhs.isEmptyContainerType() || rhs.isEmptyContainerType())) {
+      /* then they match! */
+      return true;
+  }
+
   if (lhs.getKind() == TYPE_VECTOR) {
+    /* recursively ensure the subtypes match */
     return (lhs.subtypes[0] == rhs.subtypes[0]);
   }
 
@@ -383,15 +400,6 @@ Node* nextLambda(Node* startNode) {
 }
 
 
-/* return true if the type represents an empty
- * container (i.e. is a dict/vector with no
- * subtype. */
-bool isEmptyContainerType(DataType* type) {
-    return ((type->getKind() == TYPE_VECTOR 
-            || type->getKind() == TYPE_DICT)
-            && type->subtypes->size() == 0);
-}
-
 /* look up parent class */
 Node* getClassNode(Node* node){
   if (node->kind() == NODE_CLASS){
@@ -451,7 +459,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             /* if we end up here, then it doesn't exist yet */
                             /* make sure the right side wasnt {} or [] because
                              * we don't do type inference on these */
-                          } else if (isEmptyContainerType(rhs)) {
+                          } else if (rhs->isEmptyContainerType()) {
 
                             throw Error("Cannot infer subtype of empty list/dictionary."
                                     , expr->getLine());
