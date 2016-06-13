@@ -667,7 +667,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                            /* if we have multiple possibilities */
                          } else if (lhs->getKind() == TYPE_OVERLOAD) {
                            /* check each of them */
-                           for (int i = 0; i < lhs->subtypes->size(); i++) {
+                           for (long unsigned int i = 0; i < lhs->subtypes->size(); i++) {
                              /* if it matches, return it */
                              if((*(lhs->subtypes))[i] == *rhsParams){
                                return &((*(lhs->subtypes))[i]);
@@ -743,16 +743,18 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           return new DataType(TYPE_NONE);
     case NODE_VECVAL: {
                         DataType* dt = new DataType(TYPE_VECTOR);
-                        dt->subtypes->push_back(*inferExpression(expr->child(0), func));
+                        Node * currNode = expr;
+                        /* traverse the subtree of vecvals */
+                        while(currNode){
+                            DataType* sub = inferExpression(expr->child(0),func);
+                            /* if there is a previous subtype, make sure they match */
+                            if(dt->subtypes->size() > 1 
+                                    && &((*(dt->subtypes))[0]) != sub){
 
-                        /* if there are more than one child, recurse on them too */
-                        for (int i = 1; i < expr->numChildren(); i++) {
-                          DataType* other = inferExpression(expr->child(i), func);
-
-                          /* check that they match! */
-                          if (*other != *dt) {
-                            throw Error("Mismatched vector types", expr->getLine());
-                          }
+                              throw Error("Mismatched vector types", expr->getLine());
+                            }
+                            /* set current node to the next one */
+                            currNode = currNode->child(1);
                         }
 
                         return dt;
