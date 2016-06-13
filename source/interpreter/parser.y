@@ -331,7 +331,6 @@ type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
   $$ = new DataType(TYPE_TUPLE);
 }
 
-/* a list of at least one parameter */
 type_decs: type TOK_COMMA type_decs {
   $$ = new Node(NODE_TUPLE_TYPES);
   $$->setDataType($1);
