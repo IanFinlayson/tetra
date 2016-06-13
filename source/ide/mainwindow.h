@@ -46,10 +46,9 @@ class MainWindow : public QMainWindow {
     QString getOpenFile();
     void quit();
 
-    void printOutput(QString);
-    std::string getUserInput();
     QStatusBar getStatusBar();
     void setConsole(Console);
+
   private slots:
     void on_actionCopy_triggered();
     void on_actionSave_triggered();
@@ -62,17 +61,18 @@ class MainWindow : public QMainWindow {
     void on_actionPaste_triggered();
     void on_actionNew_triggered();
     void on_actionFind_triggered();
-    void on_actionStop_triggered();
     void on_actionClose_triggered();
 
     void documentWasModified();
     void updateCoordinates();
 
-    void exitRunMode();
-    void on_actionRun_triggered(bool checked);
+    void on_actionRun_triggered();
+    void on_actionDebug_triggered();
+
     void on_actionStep_triggered();
     void on_actionContinue_triggered();
     void on_actionNext_triggered();
+    void on_actionStop_triggered();
 
   private:
     Ui::MainWindow* ui;
@@ -111,10 +111,10 @@ class Console : public VirtualConsole {
         this->mainWindow = mainWindow;
     }
     std::string receiveStandardInput() const {
-        return mainWindow->getUserInput();
+        return "42";
     }
     void processStandardOutput(const std::string text) const {
-        mainWindow->printOutput(QString::fromStdString(text));
+      /* TODO */
     }
 };
 

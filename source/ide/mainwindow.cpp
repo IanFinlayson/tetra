@@ -75,7 +75,6 @@ QString MainWindow::getOpenFile() {
     return currentEditor()->getOpenFile();
 }
 
-
 void MainWindow::quit() {
     QApplication::quit();
 }
@@ -85,9 +84,12 @@ QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }
 
-//-------------------------------------//
+void MainWindow::createStatusBar() {
+    statusBar()->showMessage("Ready.");
+}
+
 void MainWindow::documentWasModified() {
-    // setWindowModified(ui->input->document()->isModified());
+    setWindowModified(currentEditor()->document()->isModified());
 }
 
 // asks user whether or not to save file before closing file
@@ -183,46 +185,13 @@ void MainWindow::on_actionPaste_triggered() {
 void MainWindow::on_actionFind_triggered() {
 }
 
-//-----------------------------------------------//
-
-// highlights line and prints error
-void MainWindow::printError(Error e) {
-    statusBar()->showMessage("Error.");
+void MainWindow::on_actionDebug_triggered() {
 }
 
-void MainWindow::on_actionStop_triggered() {
+void MainWindow::on_actionRun_triggered() {
 }
 
-void MainWindow::setBuildSuccessful(bool buildSuccessful) {
-}
-
-void MainWindow::setMainValue(int mainValue) {
-    this->mainValue = mainValue;
-}
-
-void MainWindow::exitRunMode() {
-}
-
-void MainWindow::debugMode(bool value) {
-}
-
-void MainWindow::on_actionRun_triggered(bool checked) {
-}
-
-// overrides output to output window
-void MainWindow::printOutput(QString string) {
-}
-
-// overrides input to user input window
-std::string MainWindow::getUserInput() {
-    return "TODO";
-}
-
-void MainWindow::createStatusBar() {
-    statusBar()->showMessage("Ready.");
-}
-
-//--------------------Debugger Methods--------------------//
+/* debugger functions */
 void MainWindow::on_actionStep_triggered() {
 }
 
@@ -231,3 +200,7 @@ void MainWindow::on_actionContinue_triggered() {
 
 void MainWindow::on_actionNext_triggered() {
 }
+
+void MainWindow::on_actionStop_triggered() {
+}
+
