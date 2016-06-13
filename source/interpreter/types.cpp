@@ -745,11 +745,15 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         DataType* dt = new DataType(TYPE_VECTOR);
                         Node * currNode = expr;
                         /* traverse the subtree of vecvals */
-                        while(currNode){
-                            DataType* sub = inferExpression(expr->child(0),func);
+                        while(currNode && currNode->numChildren() > 0){
+                            
+                            DataType* elemType = inferExpression(expr->child(0),func);
+                            /* if this is the first element, add the subtype */
+                            if(dt->subtypes->size() == 0) {
+                              (*(dt->subtypes))[0] = *elemType; 
                             /* if there is a previous subtype, make sure they match */
-                            if(dt->subtypes->size() > 1 
-                                    && &((*(dt->subtypes))[0]) != sub){
+                            } else if(dt->subtypes->size() == 1 
+                                    && &((*(dt->subtypes))[0]) != elemType){
 
                               throw Error("Mismatched vector types", expr->getLine());
                             }
@@ -759,10 +763,48 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                         return dt;
                       }
-    case NODE_TUPVAL:
-                      /*TODO*/
-    case NODE_DICTVAL:
-                      /*TODO*/
+    case NODE_TUPVAL:{
+                        DataType* dt = new DataType(TYPE_TUPLE);
+                        Node * currNode = expr;
+                        /* traverse the subtree of vecvals */
+                        while(currNode && currNode->numChildren() > 0){
+                            
+                            DataType* elemType = inferExpression(expr->child(0),func);
+
+                            /* add the subtype */
+                            (*(dt->subtypes))[0] = *elemType; 
+
+                            /* set current node to the next one */
+                            currNode = currNode->child(1);
+                        }
+
+                        return dt;
+                      }
+    case NODE_DICTVAL: {
+                        DataType* dt = new DataType(TYPE_DICT);
+                        Node * currNode = expr;
+                        /* traverse the subtree of dictvals */
+                        while(currNode && currNode->numChildren() > 0) {
+                            DataType* keyType = inferExpression(expr->child(0),func);
+                            DataType* valType = inferExpression(expr->child(1),func);
+                            /* if this is the first element, add the subtypes */
+                            if(dt->subtypes->size() == 0) {
+                              (*(dt->subtypes))[0] = *keyType; 
+                              (*(dt->subtypes))[1] = *valType; 
+                            /* if there are previous subtypes, make sure they match */
+                            } else if(dt->subtypes->size() == 2 
+                                    && ((&((*(dt->subtypes))[0]) != keyType)
+                                    || (&((*(dt->subtypes))[1]) != valType))){
+
+                              throw Error("Mismatched key/value types", expr->getLine());
+                            }
+                            /* set current node to the next one */
+                            currNode = currNode->child(2);
+                        }
+
+                        return dt;
+                      }
+
     case NODE_LAMBDA:{ 
                        /* make sure that any classes that are referred to
                         * actually exist */
