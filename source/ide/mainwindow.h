@@ -63,6 +63,7 @@ class MainWindow : public QMainWindow {
     void on_actionNew_triggered();
     void on_actionFind_triggered();
     void on_actionStop_triggered();
+    void on_actionClose_triggered();
 
     void documentWasModified();
     void updateCoordinates();

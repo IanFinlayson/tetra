@@ -106,6 +106,16 @@ void MainWindow::on_actionNew_triggered() {
     ui->tabBar->setCurrentWidget(newEditor);
 }
 
+void MainWindow::on_actionClose_triggered() {
+    currentEditor()->close();
+    ui->tabBar->removeTab(ui->tabBar->currentIndex());
+
+    /* if that was the last tab, time to leave */
+    if (ui->tabBar->count() == 0) {
+        quit();
+    }
+}
+
 void MainWindow::on_actionSave_triggered() {
     if (currentEditor()->save()) {
         QString full = currentEditor()->getOpenFile();
