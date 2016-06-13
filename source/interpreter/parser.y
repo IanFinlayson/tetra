@@ -363,7 +363,8 @@ type: TOK_INT {
 } | dict_type { 
   $$ = $1;
 } | TOK_IDENTIFIER {
-  /* TODO */
+  $$ = new DataType(TYPE_CLASS);
+  *($$->className) = $1;
 }
 
 /* function_type */

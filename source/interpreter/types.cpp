@@ -160,6 +160,16 @@ DataType::~DataType() {
   delete(subtypes);
 }
 
+/* return true if the type represents an empty
+ * container (i.e. is a dict/vector with no
+ * subtype. */
+bool DataType::isEmptyContainerType() const {
+    return ((this->getKind() == TYPE_VECTOR 
+            || this->getKind() == TYPE_DICT)
+            && this->subtypes->size() == 0);
+}
+
+
 DataTypeKind DataType::getKind() const { return kind; }
 
 /* compare two data types for equality */
@@ -169,8 +179,15 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     return false;
   } 
 
-  /* if they're vectors, recursively ensure the subtypes match */
+  /* if they're vectors or dicts and either is empty.. */
+  if (lhs.getKind() == TYPE_VECTOR 
+      && (lhs.isEmptyContainerType() || rhs.isEmptyContainerType())) {
+      /* then they match! */
+      return true;
+  }
+
   if (lhs.getKind() == TYPE_VECTOR) {
+    /* recursively ensure the subtypes match */
     return (lhs.subtypes[0] == rhs.subtypes[0]);
   }
 
@@ -383,8 +400,6 @@ Node* nextLambda(Node* startNode) {
 }
 
 
-
-
 /* look up parent class */
 Node* getClassNode(Node* node){
   if (node->kind() == NODE_CLASS){
@@ -442,8 +457,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             throw Error("Cannot assign to free function.", expr->getLine());
 
                             /* if we end up here, then it doesn't exist yet */
+                            /* make sure the right side wasnt {} or [] because
+                             * we don't do type inference on these */
+                          } else if (rhs->isEmptyContainerType()) {
+
+                            throw Error("Cannot infer subtype of empty list/dictionary."
+                                    , expr->getLine());
+
+                          /* if it doesn't exist and the type is inferable... */ 
                           } else {
-                            /* so add it! */
+
+                           /* infer it! */ 
                             lhs = rhs;
                             func->insertSymbol(*new Symbol(expr->child(0)->getString(),
                                   lhs,expr->child(0)->getLine()));
@@ -760,26 +784,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             /* set current node to the next one */
                             currNode = currNode->child(1);
                         }
-
                         return dt;
                       }
-    case NODE_TUPVAL:{
-                        DataType* dt = new DataType(TYPE_TUPLE);
-                        Node * currNode = expr;
-                        /* traverse the subtree of vecvals */
-                        while(currNode && currNode->numChildren() > 0){
-                            
-                            DataType* elemType = inferExpression(expr->child(0),func);
 
-                            /* add the subtype */
-                            (*(dt->subtypes))[0] = *elemType; 
-
-                            /* set current node to the next one */
-                            currNode = currNode->child(1);
-                        }
-
-                        return dt;
-                      }
     case NODE_DICTVAL: {
                         DataType* dt = new DataType(TYPE_DICT);
                         Node * currNode = expr;
@@ -805,6 +812,23 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         return dt;
                       }
 
+    case NODE_TUPVAL:{
+                        DataType* dt = new DataType(TYPE_TUPLE);
+                        Node * currNode = expr;
+                        /* traverse the subtree of vecvals */
+                        while(currNode && currNode->numChildren() > 0){
+                            
+                            DataType* elemType = inferExpression(expr->child(0),func);
+
+                            /* add the subtype */
+                            (*(dt->subtypes))[0] = *elemType; 
+
+                            /* set current node to the next one */
+                            currNode = currNode->child(1);
+                        }
+
+                        return dt;
+                      }
     case NODE_LAMBDA:{ 
                        /* make sure that any classes that are referred to
                         * actually exist */
