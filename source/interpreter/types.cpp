@@ -412,6 +412,54 @@ Node* getClassNode(Node* node){
 
 }
 
+/* find identifier */
+DataType* findIdType(Node* expr, Node* func) {
+  /* check if it's a lambda param first */
+  /* look for lambdas first */
+  Node* lambda = nextLambda(expr);
+  while (lambda) {
+    /* if we found the identifier, return it's type */
+    if(lambda->hasSymbol(expr->getString())) {
+      return lambda->lookupSymbol(
+          expr->getString(), lambda->getLine()).getType();     
+    }
+
+    /* otherwise, go to the next lambda up */
+    lambda = nextLambda(expr);
+  } 
+
+  /* if not a lambda, see if it's local to the function */
+  if (func->hasSymbol(expr->getString())){
+
+    /* look it up and return that type */
+    Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+    return sym.getType();
+
+    /* if it is in a class, check there for a member var*/
+  } else if (getClassNode(expr) 
+      && classes[getClassNode(expr)->getString()].hasMember(expr->getString())) {
+
+    Symbol sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
+    return sym.getType();
+
+    /* if it is in a class, check there for a method */
+  } else if (getClassNode(expr) 
+      && classes[getClassNode(expr)->getString()].hasMethodNamed(expr->getString())) {
+
+    /* get all the methods */
+    return classes[getClassNode(expr)->getString()].getMethods(expr->getString()); 
+
+    /* next check for globals/constants */
+  } else if (globals.count(expr->getString()) > 0) {
+    /* look it up and return that type */
+    Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+    return sym.getType();
+
+  } else {
+    throw Error("Reference to non-existent identifier.", expr->getLine());
+  }
+}
+
 /* infer the types of an expression, and also return the type */
 DataType* inferExpressionPrime(Node* expr, Node* func) {
 
@@ -670,6 +718,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           t->subtypes->push_back(*new DataType(TYPE_INT));
                           return t;
                         }
+
     case NODE_FUNCALL: {
                          /* infer the identifier */
                          lhs = inferExpression(expr->child(0),func);
@@ -702,63 +751,31 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           * or the ones that we have found don't accept the correct arguments */
                          throw Error("No matching function.", expr->getLine()); 
                        }
+
     case NODE_ACTUAL_PARAM_LIST:
                        throw Error("inferExpression: should not be a param list here");
                        break;
 
-    case NODE_IDENTIFIER: { /* first check if it already has a type */
+    case NODE_IDENTIFIER: { /* first check if it already has a type (this happens for declarations) */
                             if (expr->type()) {
-                                /* if it is a classType, make sure it exists */
+                                /* if it is a classType, make sure the class exists */
                                 if (expr->type()->getKind() == TYPE_CLASS 
                                     && !classes.count(*(expr->type()->className))) {
                                     throw Error("Class does not exist.", expr->getLine());
                                 }
-                                /* make sure that it doesn't already exits */
-                                /* TODO */
-                                /* return the declared type */
+
+                                /* if the identifier already exists... */
+                                if(findIdType(expr, func)) {
+                                  /* complain! */
+                                  throw Error("The identifier already exists.",expr->getLine());
+                                }
                             } 
-                            /* check if it's a lambda param first */
-                            /* look for lambdas first */
-                            Node* lambda = nextLambda(expr);
-                            while (lambda) {
-                              /* if we found the identifier, return it's type */
-                              if(lambda->hasSymbol(expr->getString())) {
-                                return lambda->lookupSymbol(
-                                    expr->getString(), lambda->getLine()).getType();     
-                              }
+                            /* if the id already exists, get its type */
+                            DataType* type = findIdType(expr, func);
 
-                              /* otherwise, go to the next lambda up */
-                              lambda = nextLambda(expr);
-                            } 
-
-                            /* if not a lambda, see if it's local to the function */
-                            if (func->hasSymbol(expr->getString())){
-
-                              /* look it up and return that type */
-                              Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
-                              return sym.getType();
-
-                              /* if it is in a class, check there for a member var*/
-                            } else if (getClassNode(expr) 
-                                && classes[getClassNode(expr)->getString()].hasMember(expr->getString())) {
-
-                              Symbol sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
-                              return sym.getType();
-
-                              /* if it is in a class, check there for a method */
-                            } else if (getClassNode(expr) 
-                                && classes[getClassNode(expr)->getString()].hasMethodNamed(expr->getString())) {
-
-                              /* get all the methods */
-                              return classes[getClassNode(expr)->getString()].getMethods(expr->getString()); 
-
-                              /* next check for globals/constants */
-                            } else if (globals.count(expr->getString()) > 0) {
-                              /* look it up and return that type */
-                              Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
-                              return sym.getType();
-
-                            } else {
+                            /* if we didn't find it... */
+                            if (!type) {
+                              /* complain! */
                               throw Error("Reference to non-existent identifier.", expr->getLine());
                             } 
 
