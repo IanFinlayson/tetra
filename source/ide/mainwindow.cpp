@@ -23,7 +23,7 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
-    setWindowTitle(tr("Tetra"));
+    setWindowTitle(tr("Tetra [*]"));
     statusBar()->showMessage("Ready.");
     setupShortcuts();
 
@@ -31,13 +31,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     fileRunner = new FileRunner(this);
     mainValue = 0;
 
-    createStatusBar();
+    statusBar()->showMessage("Ready.");
 
     coords = new QLabel("");
     statusBar()->addPermanentWidget(coords);
+    updateCoordinates();
     
     ui->tabBar->setDocumentMode(true);
     ui->tabBar->setTabText(0, "Unsaved");
+
+    ui->actionCut->setEnabled(false);
+    ui->actionCopy->setEnabled(false);
+    ui->actionRedo->setEnabled(false);
+    ui->actionUndo->setEnabled(false);
+    currentEditor()->setUpConnections(this);
 }
 
 MainWindow::~MainWindow() {
@@ -66,8 +73,9 @@ void MainWindow::setupShortcuts() {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
     event->ignore();
-    maybeSave();
-    quit();
+    if (maybeSave()) {
+        quit();
+    }
 }
 
 QString MainWindow::getOpenFile() {
@@ -83,12 +91,12 @@ QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }
 
-void MainWindow::createStatusBar() {
-    statusBar()->showMessage("Ready.");
-}
-
 void MainWindow::documentWasModified() {
-    setWindowModified(currentEditor()->document()->isModified());
+    if (ui->tabBar->count() == 1) {
+        setWindowModified(currentEditor()->document()->isModified());
+    } else {
+        updateTitle();
+    }
 }
 
 // asks user whether or not to save file before closing file
@@ -103,8 +111,10 @@ void MainWindow::updateCoordinates() {
 
 void MainWindow::on_actionNew_triggered() {
     Editor* newEditor = new Editor;
+    newEditor->setUpConnections(this);
     ui->tabBar->addTab(newEditor, "Unsaved");
     ui->tabBar->setCurrentWidget(newEditor);
+    updateTitle();
 }
 
 void MainWindow::on_actionClose_triggered() {
@@ -114,18 +124,33 @@ void MainWindow::on_actionClose_triggered() {
     /* if that was the last tab, time to leave */
     if (ui->tabBar->count() == 0) {
         quit();
+    } else {
+        updateTitle();
     }
 }
 
 void MainWindow::updateTitle() {
     QString full = currentEditor()->getOpenFile();
     QFileInfo info(full);
-    ui->tabBar->setTabText(ui->tabBar->currentIndex(), info.fileName());
+
+    if (full != "") {
+        QString name = info.fileName();
+        if (currentEditor()->document()->isModified()) {
+            name += "*";
+        }
+        ui->tabBar->setTabText(ui->tabBar->currentIndex(), name);
+    }
 
     if (ui->tabBar->count() == 1) {
-        setWindowTitle(info.fileName());
+        if (full != "") {
+            setWindowTitle(info.fileName() + " [*]");
+        } else {
+            setWindowTitle("Tetra [*]");
+        }
+        setWindowModified(currentEditor()->document()->isModified());
+    } else {
+        setWindowTitle("Tetra [*]");
     } 
-
 }
 
 void MainWindow::on_actionSave_triggered() {
@@ -143,10 +168,12 @@ void MainWindow::on_actionSave_As_triggered() {
 void MainWindow::on_actionOpen_triggered() {
     QString fname = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Tetra (*.ttr)");
     Editor* newEditor = new Editor;
+    newEditor->setUpConnections(this);
     if (newEditor->open(fname)) {
         QFileInfo info(fname);
         ui->tabBar->addTab(newEditor, info.fileName());
         ui->tabBar->setCurrentWidget(newEditor);
+        updateTitle();
     } else {
         // TODO warn user of their failure
     }

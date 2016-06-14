@@ -47,6 +47,8 @@ class MainWindow : public QMainWindow {
     void setConsole(Console);
     void updateTitle();
 
+    Ui::MainWindow* ui;
+
   private slots:
     void on_actionCopy_triggered();
     void on_actionSave_triggered();
@@ -74,7 +76,6 @@ class MainWindow : public QMainWindow {
     void on_actionStop_triggered();
 
   private:
-    Ui::MainWindow* ui;
 
     void setupShortcuts();
     Editor* currentEditor();
