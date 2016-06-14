@@ -1315,8 +1315,8 @@ void checkClassTypes(Node* node) {
   if (node->kind() == NODE_FUNCTION) {
     /* if the return type is a class, make sure that
      * it exists */
-    if (node->type()->getKind() == TYPE_CLASS 
-        && !classes.count(*(node->type()->className))){
+    if ((*(node->type()->subtypes)).back().getKind() == TYPE_CLASS 
+        && !classes.count(*((*(node->type()->subtypes)).back().className))) {
       throw Error("Return type does not exist.", node->getLine());  
     } 
 
