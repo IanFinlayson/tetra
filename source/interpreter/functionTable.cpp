@@ -73,6 +73,29 @@ void FunctionMap::build(const Node* tree) {
   }
 }
 
+void FunctionMap::rename(std::string oldName, std::string newName) {
+  //make a list to store old keys
+  std::vector<string> oldKeys;
+
+  //add the new functions
+  for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
+      it != lookup.end(); it ++){
+
+    //check for a name match
+    if (oldName == it->first.substr(0, 
+          (it->first).find_first_of("("))) { 
+      //add the new function
+      lookup[newName + it->first.substr((it->first).find_first_of("("))] = it->second;
+      //add the old key to a list for removal
+      oldKeys.push_back(it->first);
+    }
+  }
+
+  //remove all the old keys
+  for (unsigned long i = 0; i<oldKeys.size(); i++){
+    lookup.erase(oldKeys[i]);
+  }
+}
 
 bool FunctionMap::hasFuncNamed(std::string name) {
   //loop through all elements in the map

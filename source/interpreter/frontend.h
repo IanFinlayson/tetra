@@ -204,14 +204,14 @@ class Node {
   Symbol lookupSymbol(string name, int lineno) const;
   bool hasSymbol(const string& name) const;
 
+  /* the symbol table used for this Node - currently only function nodes have
+   * one */
+  map<string, Symbol>* symtable;
+
  private:
   /* the children nodes of this node */
   Node* children[MAX_CHILDREN];
   int num_children;
-
-  /* the symbol table used for this Node - currently only function nodes have
-   * one */
-  map<string, Symbol>* symtable;
 
   /* the type of node it is (eg plus vs stmt vs intval etc.) */
   NodeKind node_type;
@@ -277,6 +277,9 @@ class FunctionMap {
   bool hasFunction(DataType*, std::string);
 
   DataType* getFunctionsNamed(std::string) ;
+
+  //renames functions
+  void rename(std::string, std::string);
 };
 
 /* stores a class definition's context (methods & members) */
@@ -295,6 +298,7 @@ class ClassContext {
     Symbol getMember(std::string);
     DataType* getMethods(std::string);
     const Node* getMethod(DataType*, std::string);
+    void initSquared();
   private:
     string name;
     FunctionMap methods;

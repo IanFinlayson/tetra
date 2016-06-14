@@ -140,6 +140,10 @@ bool ClassContext::hasMethodNamed(std::string name) {
   return methods.hasFuncNamed(name);
 }
 
+void ClassContext::initSquared(){
+  methods.rename("init", name);
+}
+
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
@@ -720,6 +724,14 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         }
 
     case NODE_FUNCALL: {
+                         /* check for stl functions */
+                         bool is_stdlib;
+                         lhs = inferStdlib(expr, func, is_stdlib); 
+                         if (is_stdlib){
+                           return lhs;
+                         }
+                          
+                         /* if it's not an stl function */
                          /* infer the identifier */
                          lhs = inferExpression(expr->child(0),func);
                          /* make an empty tuple type for the params */
@@ -863,10 +875,23 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        checkClassTypes(expr->child(0));
                        /* add the params to the symtable */
                        inferParams(expr);
+                       /* make a new DataType for this lambda */
+                       DataType* type = new DataType(TYPE_FUNCTION);
+                       /* add any param types as subtypes */
+                       for (std::map<std::string, Symbol>::iterator it = expr->symtable->begin(); 
+                          it != expr->symtable->end(); it ++){
+                          
+                          type->subtypes->push_back(*(it->second.getType()));
+                       }
 
-                       /* check the expression */
-                       /* if there are arguments... */
-                       return inferExpression(expr,func);
+                       /* infer the the return type */
+                       if (expr->numChildren() > 1) {
+                        type->subtypes->push_back(*inferExpression(expr->child(1),func));
+                       } else {
+                        type->subtypes->push_back(*inferExpression(expr->child(0),func));
+                       }
+
+                       return type;
                      }
 
     case NODE_DOT:{
@@ -952,7 +977,7 @@ DataType* inferExpression(Node* expr, Node* func) {
 void checkMuTasks(Node* block, Node* func) {
   /* is it a task or a mutex? */
   DataTypeKind kind;
-  switch (block->kind()){
+  switch (block->kind()) {
     /* task */
     case NODE_BACKGROUND:
     case NODE_WAIT:
@@ -972,26 +997,19 @@ void checkMuTasks(Node* block, Node* func) {
   if (block->child(1) || block->kind() == NODE_WAIT){
     /* check if the identifier exists */
     DataType* type = NULL;
-    /* check if it's a global first */
-    if (globals.count(block->child(0)->getString())) {
-      type = (globals.find(block->child(0)->getString())->second).getType();
-
-      /* if not, check if it's local */
-    } else if (func->hasSymbol(block->child(0)->getString())) {
-      type = func->lookupSymbol(block->child(0)->getString(), 
-          block->getLine()).getType();
-
-      /* if we get here, the identifier doesn't exist yet 
-       * and it's not a wait node*/ 
-    } else if (block->kind() != NODE_WAIT){
+    type = findIdType(block->child(0), func);
+    
+   /* if the identifier doesn't exist yet 
+    * and it's not a wait node*/ 
+    if (!type && block->kind() != NODE_WAIT){
       /* add to this function's symtable */
       type = new DataType(kind);
       func->insertSymbol(Symbol(block->child(0)->getString(), 
             type, block->child(0)->getLine()));  
 
-      /*if we get here, then it is a wait node and the identifier
-       * doesn't exist yet*/
-    } else {
+    /* if the identifier doesn't exist and it
+     * is a wait node*/
+    } else if (!type) {
       throw Error("Cannot wait for task that has not been created",
           block->child(0)->getLine());
     }
@@ -1006,7 +1024,7 @@ void checkMuTasks(Node* block, Node* func) {
     block->child(0)->setDataType(type);
 
     /* if there is a block ... */
-    if (block->child(1)){
+    if (block->child(1)) {
       /* check the block */
       inferBlock(block->child(1), func);
     }
@@ -1219,6 +1237,20 @@ void inferGlobals(Node* node){
   }
 }
 
+/* add stl functions to the list of globals */
+void addStls() {
+  
+  string stls [] = {"len", "read_string", "read_int", 
+    "read_real", "read_bool", "print"};
+
+  for (unsigned long i = 0; i < sizeof(stls)/sizeof(stls[0]); i++) {
+    /* add them to the globals */
+    DataType type(TYPE_FUNCTION);
+
+    globals.insert(pair<string, Symbol>( "len",
+          Symbol(stls[i], &type, 0, true)));
+  }
+}
 
 /* Given a class node, this function adds the member vars 
  * into the class map (Cannot type check yet as this class 
@@ -1238,7 +1270,6 @@ void addMembers(ClassContext* context, Node* node) {
   }
 }
 
-
 /* Makes initial pass through top levels to populate
  * class map*/
 void initClass(Node* node) {
@@ -1251,6 +1282,11 @@ void initClass(Node* node) {
         throw Error("Duplicate class.", 
             node->child(0)->getLine());
       }
+      /* check for stl names*/
+      if (globals.count(node->getString())) {
+        throw Error("Cannot use stl function name for class name.", 
+            node->child(0)->getLine());
+      }
 
       /* create new ClassContext */
       ClassContext context(node->getString());
@@ -1258,6 +1294,9 @@ void initClass(Node* node) {
       /* add any class parts */
       context.addMembers(node->child(0));
       context.addMethods(node->child(0));
+
+      /* replace init functions with class name */
+      context.initSquared();
 
       /* add to map of classes */
       classes[context.getName()] = context;
@@ -1298,6 +1337,15 @@ void checkClassTypes(Node* node) {
 }
 
 void inferFunction(Node* node){
+  /* make sure that this function does not share a name
+   * with a global or a class */
+  if (globals.count(node->getString())
+        || classes.count(node->getString())) {
+
+      throw Error("Function name is used elsewhere.", 
+          node->getLine());
+   }
+
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
     checkClassTypes(node->child(0));
@@ -1332,6 +1380,9 @@ void inferClass(Node* node) {
 
 /* populates classes, free functions, and globals */
 void initTypes(Node* node) {
+  /* add all the stl functions to the global list
+   * to reserve their names */
+  addStls();
 
   /* add all the classes */
   initClass(node);
@@ -1341,12 +1392,10 @@ void initTypes(Node* node) {
 
   /* add and type check/infer all the globals/constants */
   inferGlobals(node);
-
 }
 
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node) {
-
 
   /* infer each function */
   if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
