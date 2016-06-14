@@ -26,18 +26,15 @@ void FileRunner::runFile(bool debug) {
     try {
         program_root = parseFile(mainWindow->getOpenFile().toStdString());
         if (debug) {
-            mainWindow->setMainValue(interpret(program_root, 1, 1));
+            interpret(program_root, true, 1);
         } else {
-            mainWindow->setMainValue(interpret(program_root, 0, 8));
+            interpret(program_root, false, 8);
         }
     } catch (RuntimeError e) {
-        mainWindow->printError(e);
         qDebug() << "error";
     } catch (SystemError e) {
-        mainWindow->printError(e);
         qDebug() << "error";
     } catch (Error e) {
-        mainWindow->printError(e);
         qDebug() << "error";
     }
     emit finished();
