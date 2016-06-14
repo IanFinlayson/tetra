@@ -21,7 +21,10 @@ class LineNumberArea;
 class Editor : public QPlainTextEdit {
     Q_OBJECT
   public:
-    Editor(QWidget* parent = 0);
+    Editor(QWidget* parent = NULL);
+
+    /* sets the link to the parent window and connections between them */
+    void setUpConnections(MainWindow* parent);
 
     /* functions for managind the line number widget */
     void lineNumberAreaPaintEvent(QPaintEvent* event);
@@ -70,6 +73,7 @@ class Editor : public QPlainTextEdit {
     bool lineHighlighted;
     int tabWidth;
     Highlighter* highlighter;
+    MainWindow* parent;
 };
 
 class LineNumberArea : public QWidget {

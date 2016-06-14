@@ -2,8 +2,10 @@
  * A text editor component that is designed specifically for Tetra code
  * */
 
-#include "editor.h"
 #include <QtWidgets>
+
+#include "editor.h"
+#include "ui_mainwindow.h"
 
 Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursorCoordinates()));
@@ -34,6 +36,18 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     fileName = "";
 }
 
+void Editor::setUpConnections(MainWindow* parent) {
+    this->parent = parent;
+    connect(this, SIGNAL(copyAvailable(bool)), parent->ui->actionCopy, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(copyAvailable(bool)), parent->ui->actionCut, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(redoAvailable(bool)), parent->ui->actionRedo, SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(undoAvailable(bool)), parent->ui->actionUndo, SLOT(setEnabled(bool)));
+    connect(this->document(), SIGNAL(contentsChanged()), parent, SLOT(documentWasModified()));
+    connect(this, SIGNAL(cursorPositionChanged()), parent, SLOT(updateCoordinates()));
+    connect(this, SIGNAL(cursorPositionChanged()), parent, SLOT(updateCoordinates()));
+}
+
+
 /* save as - ask the user for a file name, save the file, and return success/failure */
 bool Editor::saveas() {
     fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", "Tetra (*.ttr)");
@@ -58,6 +72,7 @@ bool Editor::save() {
         out << toPlainText();
         ttrFile.flush();
         ttrFile.close();
+        document()->setModified(false);
         return true;
     }
 }

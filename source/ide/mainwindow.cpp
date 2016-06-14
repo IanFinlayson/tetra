@@ -23,7 +23,7 @@
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     menuBar()->setNativeMenuBar(true);
     ui->setupUi(this);
-    setWindowTitle(tr("Tetra"));
+    setWindowTitle(tr("Tetra [*]"));
     statusBar()->showMessage("Ready.");
     setupShortcuts();
 
@@ -31,13 +31,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     fileRunner = new FileRunner(this);
     mainValue = 0;
 
-    createStatusBar();
+    statusBar()->showMessage("Ready.");
 
     coords = new QLabel("");
     statusBar()->addPermanentWidget(coords);
-    
+    updateCoordinates();
+
     ui->tabBar->setDocumentMode(true);
     ui->tabBar->setTabText(0, "Unsaved");
+
+    ui->actionCut->setEnabled(false);
+    ui->actionCopy->setEnabled(false);
+    ui->actionRedo->setEnabled(false);
+    ui->actionUndo->setEnabled(false);
+    currentEditor()->setUpConnections(this);
 }
 
 MainWindow::~MainWindow() {
@@ -66,16 +73,11 @@ void MainWindow::setupShortcuts() {
 
 void MainWindow::closeEvent(QCloseEvent* event) {
     event->ignore();
-    maybeSave();
-    quit();
+    on_actionQuit_triggered();
 }
 
 QString MainWindow::getOpenFile() {
     return currentEditor()->getOpenFile();
-}
-
-void MainWindow::quit() {
-    QApplication::quit();
 }
 
 // gives stripped name of file (removes file path)
@@ -83,17 +85,12 @@ QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }
 
-void MainWindow::createStatusBar() {
-    statusBar()->showMessage("Ready.");
-}
-
 void MainWindow::documentWasModified() {
-    setWindowModified(currentEditor()->document()->isModified());
-}
-
-// asks user whether or not to save file before closing file
-bool MainWindow::maybeSave() {
-    return true;
+    if (ui->tabBar->count() == 1) {
+        setWindowModified(currentEditor()->document()->isModified());
+    } else {
+        updateTitle();
+    }
 }
 
 void MainWindow::updateCoordinates() {
@@ -103,29 +100,70 @@ void MainWindow::updateCoordinates() {
 
 void MainWindow::on_actionNew_triggered() {
     Editor* newEditor = new Editor;
+    newEditor->setUpConnections(this);
     ui->tabBar->addTab(newEditor, "Unsaved");
     ui->tabBar->setCurrentWidget(newEditor);
+    updateTitle();
 }
 
 void MainWindow::on_actionClose_triggered() {
+    if (currentEditor()->document()->isModified()) {
+        QMessageBox msgBox;
+        msgBox.setText("The file has been modified.");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.svg"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        switch (msgBox.exec()) {
+            case QMessageBox::Save:
+                /* try to save, if something goes wrong, bail */
+                if (!currentEditor()->save()) {
+                    return;
+                }
+                break;
+            case QMessageBox::Discard:
+                /* don't save! */
+                break;
+            case QMessageBox::Cancel:
+                /* bail! */
+                return;
+        }
+    }
+
+    /* actually close the editor and tab */
     currentEditor()->close();
     ui->tabBar->removeTab(ui->tabBar->currentIndex());
 
     /* if that was the last tab, time to leave */
     if (ui->tabBar->count() == 0) {
-        quit();
+        QApplication::quit();
+    } else {
+        updateTitle();
     }
 }
 
 void MainWindow::updateTitle() {
     QString full = currentEditor()->getOpenFile();
     QFileInfo info(full);
-    ui->tabBar->setTabText(ui->tabBar->currentIndex(), info.fileName());
+
+    if (full != "") {
+        QString name = info.fileName();
+        if (currentEditor()->document()->isModified()) {
+            name += "*";
+        }
+        ui->tabBar->setTabText(ui->tabBar->currentIndex(), name);
+    }
 
     if (ui->tabBar->count() == 1) {
-        setWindowTitle(info.fileName());
+        if (full != "") {
+            setWindowTitle(info.fileName() + " [*]");
+        } else {
+            setWindowTitle("Tetra [*]");
+        }
+        setWindowModified(currentEditor()->document()->isModified());
+    } else {
+        setWindowTitle("Tetra [*]");
     } 
-
 }
 
 void MainWindow::on_actionSave_triggered() {
@@ -142,13 +180,22 @@ void MainWindow::on_actionSave_As_triggered() {
 
 void MainWindow::on_actionOpen_triggered() {
     QString fname = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Tetra (*.ttr)");
+    if (fname == "") {
+        return;
+    }
+
     Editor* newEditor = new Editor;
+    newEditor->setUpConnections(this);
     if (newEditor->open(fname)) {
         QFileInfo info(fname);
         ui->tabBar->addTab(newEditor, info.fileName());
         ui->tabBar->setCurrentWidget(newEditor);
+        updateTitle();
     } else {
-        // TODO warn user of their failure
+        QMessageBox warning;
+        warning.setText("Could not open file '" + fname + "'");
+        warning.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-warning.svg"));
+        warning.exec();
     }
 }
 
@@ -184,8 +231,71 @@ void MainWindow::on_actionUndo_triggered() {
     currentEditor()->undo();
 }
 void MainWindow::on_actionQuit_triggered() {
-    quit();
+    /* if there is one tab only, do a close */
+    if (ui->tabBar->count() == 1) {
+        on_actionClose_triggered();
+    }
+
+    /* check if there are unsaved tabs */
+    int mod_count = 0;
+    Editor* unsaved = NULL;
+    for (int i = 0; i < ui->tabBar->count(); i++) {
+        Editor* ed = (Editor*) ui->tabBar->widget(i);
+        if (ed->document()->isModified()) {
+            unsaved = ed;
+            mod_count++;
+        }
+    }
+
+    if (mod_count == 1) {
+        QMessageBox msgBox;
+        msgBox.setText("The file has been modified.");
+        msgBox.setInformativeText("Do you want to save your changes?");
+        msgBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.svg"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        switch (msgBox.exec()) {
+            case QMessageBox::Save:
+                /* try to save, if something goes wrong, bail */
+                if (!unsaved->save()) {
+                    return;
+                }
+                break;
+            case QMessageBox::Discard:
+                /* don't save! */
+                break;
+            case QMessageBox::Cancel:
+                /* bail! */
+                return;
+        }
+    } else if (mod_count > 1) {
+        QMessageBox msgBox;
+        msgBox.setText("Files have been modified.");
+        msgBox.setInformativeText("Do you want to save all changes?");
+        msgBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.svg"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Save);
+        switch (msgBox.exec()) {
+            case QMessageBox::Save:
+                for (int i = 0; i < ui->tabBar->count(); i++) {
+                    Editor* ed = (Editor*) ui->tabBar->widget(i);
+                    if (!ed->save()) {
+                        return;
+                    }
+                    break;
+                }
+            case QMessageBox::Discard:
+                /* don't save! */
+                break;
+            case QMessageBox::Cancel:
+                /* bail! */
+                return;
+        }
+    }
+
+    QApplication::quit();
 }
+
 void MainWindow::on_actionRedo_triggered() {
     currentEditor()->redo();
 }
@@ -196,24 +306,45 @@ void MainWindow::on_actionPaste_triggered() {
     currentEditor()->paste();
 }
 void MainWindow::on_actionFind_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 void MainWindow::on_actionDebug_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 void MainWindow::on_actionRun_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 /* debugger functions */
 void MainWindow::on_actionStep_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 void MainWindow::on_actionContinue_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 void MainWindow::on_actionNext_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 void MainWindow::on_actionStop_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
