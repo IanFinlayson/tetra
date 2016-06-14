@@ -706,7 +706,18 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        throw Error("inferExpression: should not be a param list here");
                        break;
 
-    case NODE_IDENTIFIER: { /* check if it's a lambda param first */
+    case NODE_IDENTIFIER: { /* first check if it already has a type */
+                            if (expr->type()) {
+                                /* if it is a classType, make sure it exists */
+                                if (expr->type()->getKind() == TYPE_CLASS 
+                                    && !classes.count(*(expr->type()->className))) {
+                                    throw Error("Class does not exist.", expr->getLine());
+                                }
+                                /* make sure that it doesn't already exits */
+                                /* TODO */
+                                /* return the declared type */
+                            } 
+                            /* check if it's a lambda param first */
                             /* look for lambdas first */
                             Node* lambda = nextLambda(expr);
                             while (lambda) {
@@ -856,7 +867,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                     /* return the type of the member variable */
                     return classes[*lhs->className].getMember(expr->child(0)->getString()).getType();
                   }
-    case NODE_SELF:{
+    case NODE_SELF: {
                      /* return parent class type*/
                      Node* classNode = getClassNode(expr);
                      /* throw error if no parent class found */
@@ -869,7 +880,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                    }
 
-    case NODE_METHOD_CALL:{
+    case NODE_METHOD_CALL: {
                             lhs = inferExpression(expr->child(0),func);  
                             /* infer the tuple_type of the actual params */
                             DataType* rhsParams = new DataType(TYPE_TUPLE);
@@ -882,7 +893,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             if (!lhs->className || !classes.count(*lhs->className)){
                               throw Error("Class does not exist.", expr->getLine());
 
-                              /* check that class has method */
+                            /* check that class has method */
                             } else if (!classes[*lhs->className]
                                 .hasMethod(rhsParams, expr->child(1)->getString())){
 
@@ -894,6 +905,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             return classes[*lhs->className]
                               .getMethod(rhsParams, expr->child(0)->getString())->type();
                           }
+
+    case NODE_DECLARATION: {
+
+                           } 
 
     default:
                           cout << expr->kind() << endl;
