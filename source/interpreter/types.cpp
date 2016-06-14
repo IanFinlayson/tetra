@@ -251,7 +251,6 @@ void buildParamTupleType(DataType* type, Node* node, Node* func) {
   } else {
     type->subtypes->push_back(*inferExpression(node,func));
   } 
-
 }
 
 /* add the parameters of a function into its symtable */
@@ -878,11 +877,14 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        /* make a new DataType for this lambda */
                        DataType* type = new DataType(TYPE_FUNCTION);
                        /* add any param types as subtypes */
+                       DataType* paramTypes = new DataType(TYPE_TUPLE);
                        for (std::map<std::string, Symbol>::iterator it = expr->symtable->begin(); 
                           it != expr->symtable->end(); it ++){
                           
-                          type->subtypes->push_back(*(it->second.getType()));
+                          paramTypes->subtypes->push_back(*(it->second.getType()));
                        }
+                       /* add the params as a subtype */
+                       (*(type->subtypes))[0] = *paramTypes;
 
                        /* infer the the return type */
                        if (expr->numChildren() > 1) {

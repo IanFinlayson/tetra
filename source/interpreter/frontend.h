@@ -259,7 +259,7 @@ class FunctionMap {
   static std::string getFunctionSignature(const Node* node);
 
   // Fills the function map given the specified base node
-  void build(const Node* tree);
+  void build(Node* tree);
 
   // does some pre-work to optimize variable lookup
   void optimizeLookup(const Node*);
@@ -305,6 +305,12 @@ class ClassContext {
     std::map<string, Symbol> members;
 };
 
+/* takes a tree of actual params and builds a tuple_type */
+void buildParamTupleType(DataType*, Node*, Node*);
+  
+/* this function does initial pass to populate 
+ * globals/classes/free functions for type checker */
+void initTypes(Node* node);
 
 /* this function does type checking/type inference on a parse tree */
 void inferTypes(Node* node);

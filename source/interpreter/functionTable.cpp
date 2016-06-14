@@ -47,7 +47,7 @@ FunctionMap::FunctionMap() {
 // comprised of old functionality followed by new changes to accomadate constant
 // time lookup. This function can potentially bwe rewritten to both search for
 // functions and assign them values at the same time
-void FunctionMap::build(const Node* tree) {
+void FunctionMap::build(Node* tree) {
   if (tree->kind() == NODE_TOPLEVEL_LIST 
       || tree->kind() == NODE_CLASS_PART) {
     
@@ -57,6 +57,22 @@ void FunctionMap::build(const Node* tree) {
       
       //add the params to the sym table
       inferParams(candidate); 
+
+      //update the DataType to a function
+      DataType* type = new DataType(TYPE_FUNCTION);
+      //add the return val subtype
+      (*(type->subtypes))[1] = *tree->type();
+      //create the paramtype
+      DataType* paramType = new DataType(TYPE_TUPLE);
+
+      //add the types of the actual params
+      if(tree->numChildren() > 1) {
+        /* add them to the tuple */
+        buildParamTupleType(paramType,tree->child(1),tree);
+      } 
+      //add the param tuple type as a subtype */
+      (*(type->subtypes))[0] = *paramType;
+
 
       //if this function is already in the table
       if(lookup.count(getFunctionSignature(candidate)) > 0){

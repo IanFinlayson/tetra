@@ -1104,8 +1104,8 @@ Node* parseFile(const string& fname) {
     dumpTreeGraphviz(root);
 
     /* check and infer the types in the tree */
-//    initTypes(root);
- //   inferTypes(root);
+    initTypes(root);
+//    inferTypes(root);
     /* return the root of the parse tree */
     return root;
 }
