@@ -40,18 +40,17 @@ class MainWindow : public QMainWindow {
     void setBuildSuccessful(bool);
     void printError(Error);
     void printMainValue();
-    void runMode(bool);
-    void debugMode(bool);
-    void runFile();
     QString getOpenFile();
     void quit();
 
     QStatusBar getStatusBar();
     void setConsole(Console);
+    void updateTitle();
 
   private slots:
     void on_actionCopy_triggered();
     void on_actionSave_triggered();
+    void on_actionSave_As_triggered();
     void on_actionOpen_triggered();
     int on_actionPrint_triggered();
     void on_actionCut_triggered();

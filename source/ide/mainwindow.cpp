@@ -31,7 +31,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     fileRunner = new FileRunner(this);
     mainValue = 0;
 
-    connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
     createStatusBar();
 
     coords = new QLabel("");
@@ -118,11 +117,26 @@ void MainWindow::on_actionClose_triggered() {
     }
 }
 
+void MainWindow::updateTitle() {
+    QString full = currentEditor()->getOpenFile();
+    QFileInfo info(full);
+    ui->tabBar->setTabText(ui->tabBar->currentIndex(), info.fileName());
+
+    if (ui->tabBar->count() == 1) {
+        setWindowTitle(info.fileName());
+    } 
+
+}
+
 void MainWindow::on_actionSave_triggered() {
     if (currentEditor()->save()) {
-        QString full = currentEditor()->getOpenFile();
-        QFileInfo info(full);
-        ui->tabBar->setTabText(ui->tabBar->currentIndex(), info.fileName());
+        updateTitle();
+    }
+}
+
+void MainWindow::on_actionSave_As_triggered() {
+    if (currentEditor()->saveas()) {
+        updateTitle();
     }
 }
 
@@ -153,8 +167,7 @@ int MainWindow::on_actionPrint_triggered() {
     QFont f("Monaco");
     f.setStyleHint(QFont::Monospace);
     painter.setFont(f);
-    painter.drawText(100, 100, 500, 500, Qt::AlignLeft | Qt::AlignTop,
-                     currentEditor()->toPlainText());
+    painter.drawText(100, 100, 500, 500, Qt::AlignLeft | Qt::AlignTop, currentEditor()->toPlainText());
 
     painter.end();
     return 0;
