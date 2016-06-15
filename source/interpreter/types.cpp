@@ -168,9 +168,9 @@ DataType::~DataType() {
  * container (i.e. is a dict/vector with no
  * subtype. */
 bool DataType::isEmptyContainerType() const {
-    return ((this->getKind() == TYPE_VECTOR 
-            || this->getKind() == TYPE_DICT)
-            && this->subtypes->size() == 0);
+  return ((this->getKind() == TYPE_VECTOR 
+        || this->getKind() == TYPE_DICT)
+      && this->subtypes->size() == 0);
 }
 
 
@@ -186,8 +186,8 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
   /* if they're vectors or dicts and either is empty.. */
   if (lhs.getKind() == TYPE_VECTOR 
       && (lhs.isEmptyContainerType() || rhs.isEmptyContainerType())) {
-      /* then they match! */
-      return true;
+    /* then they match! */
+    return true;
   }
 
   if (lhs.getKind() == TYPE_VECTOR) {
@@ -311,12 +311,12 @@ DataType* inferPrint(Node* pcall, Node* func) {
 
 DataType* inferLen(Node* funcall, Node* func) {
   /* check that there is one argument */
-  if (funcall->numChildren() != 2) {
+  if (funcall->numChildren() != 2 || funcall->child(1)->numChildren() != 1) {
     throw Error("len function expects one argument", funcall->getLine());
   }
 
   /* infer the argument and capture its type */
-  DataType* t = inferExpression(funcall->child(0), func);
+  DataType* t = inferExpression(funcall->child(1)->child(0), func);
 
   /* check that it is a vector or a string */
   if ((t->getKind() != TYPE_VECTOR) && (t->getKind() != TYPE_STRING)
@@ -516,12 +516,12 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           } else if (rhs->isEmptyContainerType()) {
 
                             throw Error("Cannot infer subtype of empty list/dictionary."
-                                    , expr->getLine());
+                                , expr->getLine());
 
-                          /* if it doesn't exist and the type is inferable... */ 
+                            /* if it doesn't exist and the type is inferable... */ 
                           } else {
 
-                           /* infer it! */ 
+                            /* infer it! */ 
                             lhs = rhs;
                             func->insertSymbol(*new Symbol(expr->child(0)->getString(),
                                   lhs,expr->child(0)->getLine()));
@@ -732,7 +732,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          if (is_stdlib) {
                            return lhs;
                          }
-                          
+
                          /* if it's not an stl function */
                          /* infer the identifier */
                          lhs = inferExpression(expr->child(0),func);
@@ -772,20 +772,20 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_IDENTIFIER: { /* first check if it already has a type (this happens for declarations) */
                             if (expr->type()) {
-                                /* if it is a classType, make sure the class exists */
-                                if (expr->type()->getKind() == TYPE_CLASS 
-                                    && !classes.count(*(expr->type()->className))) {
-                                    throw Error("Class does not exist.", expr->getLine());
-                                }
+                              /* if it is a classType, make sure the class exists */
+                              if (expr->type()->getKind() == TYPE_CLASS 
+                                  && !classes.count(*(expr->type()->className))) {
+                                throw Error("Class does not exist.", expr->getLine());
+                              }
 
-                                /* if the identifier already exists... */
-                                if(findIdType(expr, func)) {
-                                  /* complain! */
-                                  throw Error("The identifier already exists.",expr->getLine());
-                                }
+                              /* if the identifier already exists... */
+                              if(findIdType(expr, func)) {
+                                /* complain! */
+                                throw Error("The identifier already exists.",expr->getLine());
+                              }
 
-                                /* if we make it here, then just return the type it already has */
-                                return expr->type();
+                              /* if we make it here, then just return the type it already has */
+                              return expr->type();
                             } 
                             /* otherwise, if it doesn't already have a type... */
                             /* if the id already exists, get its type */
@@ -818,65 +818,65 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         Node * currNode = expr;
                         /* traverse the subtree of vecvals */
                         while(currNode && currNode->numChildren() > 0){
-                            
-                            DataType* elemType = inferExpression(expr->child(0),func);
-                            /* if this is the first element, add the subtype */
-                            if(dt->subtypes->size() == 0) {
-                              (dt->subtypes)->push_back(*elemType); 
-                            /* if there is a previous subtype, make sure they match */
-                            } else if(dt->subtypes->size() == 1 
-                                    && &((*(dt->subtypes))[0]) != elemType){
 
-                              throw Error("Mismatched vector types", expr->getLine());
-                            }
-                            /* set current node to the next one */
-                            currNode = currNode->child(1);
+                          DataType* elemType = inferExpression(expr->child(0),func);
+                          /* if this is the first element, add the subtype */
+                          if(dt->subtypes->size() == 0) {
+                            (dt->subtypes)->push_back(*elemType); 
+                            /* if there is a previous subtype, make sure they match */
+                          } else if(dt->subtypes->size() == 1 
+                              && &((*(dt->subtypes))[0]) != elemType){
+
+                            throw Error("Mismatched vector types", expr->getLine());
+                          }
+                          /* set current node to the next one */
+                          currNode = currNode->child(1);
                         }
                         return dt;
                       }
 
     case NODE_DICTVAL: {
-                        DataType* dt = new DataType(TYPE_DICT);
-                        Node * currNode = expr;
-                        /* traverse the subtree of dictvals */
-                        while(currNode && currNode->numChildren() > 0) {
-                            DataType* keyType = inferExpression(expr->child(0),func);
-                            DataType* valType = inferExpression(expr->child(1),func);
-                            /* if this is the first element, add the subtypes */
-                            if(dt->subtypes->size() == 0) {
-                              dt->subtypes->push_back(*keyType); 
-                              dt->subtypes->push_back(*valType); 
-                            /* if there are previous subtypes, make sure they match */
-                            } else if(dt->subtypes->size() == 2 
-                                    && ((&((*(dt->subtypes))[0]) != keyType)
-                                    || (&((*(dt->subtypes))[1]) != valType))){
+                         DataType* dt = new DataType(TYPE_DICT);
+                         Node * currNode = expr;
+                         /* traverse the subtree of dictvals */
+                         while(currNode && currNode->numChildren() > 0) {
+                           DataType* keyType = inferExpression(expr->child(0),func);
+                           DataType* valType = inferExpression(expr->child(1),func);
+                           /* if this is the first element, add the subtypes */
+                           if(dt->subtypes->size() == 0) {
+                             dt->subtypes->push_back(*keyType); 
+                             dt->subtypes->push_back(*valType); 
+                             /* if there are previous subtypes, make sure they match */
+                           } else if(dt->subtypes->size() == 2 
+                               && ((&((*(dt->subtypes))[0]) != keyType)
+                                 || (&((*(dt->subtypes))[1]) != valType))){
 
-                              throw Error("Mismatched key/value types", expr->getLine());
-                            }
-                            /* set current node to the next one */
-                            currNode = currNode->child(2);
-                        }
+                             throw Error("Mismatched key/value types", expr->getLine());
+                           }
+                           /* set current node to the next one */
+                           currNode = currNode->child(2);
+                         }
 
-                        return dt;
-                      }
+                         return dt;
+                       }
 
     case NODE_TUPVAL:{
-                        DataType* dt = new DataType(TYPE_TUPLE);
-                        Node * currNode = expr;
-                        /* traverse the subtree of vecvals */
-                        while(currNode && currNode->numChildren() > 0){
-                            
-                            DataType* elemType = inferExpression(expr->child(0),func);
+                       DataType* dt = new DataType(TYPE_TUPLE);
+                       Node * currNode = expr;
+                       /* traverse the subtree of vecvals */
+                       while(currNode && currNode->numChildren() > 0){
 
-                            /* add the subtype */
-                            dt->subtypes->push_back(*elemType); 
+                         DataType* elemType = inferExpression(expr->child(0),func);
 
-                            /* set current node to the next one */
-                            currNode = currNode->child(1);
-                        }
+                         /* add the subtype */
+                         dt->subtypes->push_back(*elemType); 
 
-                        return dt;
-                      }
+                         /* set current node to the next one */
+                         currNode = currNode->child(1);
+                       }
+
+                       return dt;
+                     }
     case NODE_LAMBDA:{ 
                        /* make sure that any classes that are referred to
                         * actually exist */
@@ -888,18 +888,18 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        /* add any param types as subtypes */
                        DataType* paramTypes = new DataType(TYPE_TUPLE);
                        for (std::map<std::string, Symbol>::iterator it = expr->symtable->begin(); 
-                          it != expr->symtable->end(); it ++){
-                          
-                          paramTypes->subtypes->push_back(*(it->second.getType()));
+                           it != expr->symtable->end(); it ++){
+
+                         paramTypes->subtypes->push_back(*(it->second.getType()));
                        }
                        /* add the params as a subtype */
                        type->subtypes->push_back(*paramTypes);
 
                        /* infer the the return type */
                        if (expr->numChildren() > 1) {
-                        type->subtypes->push_back(*inferExpression(expr->child(1),func));
+                         type->subtypes->push_back(*inferExpression(expr->child(1),func));
                        } else {
-                        type->subtypes->push_back(*inferExpression(expr->child(0),func));
+                         type->subtypes->push_back(*inferExpression(expr->child(0),func));
                        }
 
                        return type;
@@ -921,54 +921,54 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                     return classes[*lhs->className].getMember(expr->child(0)->getString()).getType();
                   }
     case NODE_SELF: {
-                     /* return parent class type*/
-                     Node* classNode = getClassNode(expr);
-                     /* throw error if no parent class found */
-                     if (!classNode) {
-                       throw Error("Reference to 'self' outside of class.", 
-                           expr->getLine());
-                     }
+                      /* return parent class type*/
+                      Node* classNode = getClassNode(expr);
+                      /* throw error if no parent class found */
+                      if (!classNode) {
+                        throw Error("Reference to 'self' outside of class.", 
+                            expr->getLine());
+                      }
 
-                     return classNode->type();
+                      return classNode->type();
 
-                   }
+                    }
 
     case NODE_METHOD_CALL: {
-                            lhs = inferExpression(expr->child(0),func);  
-                            /* infer the tuple_type of the actual params */
-                            DataType* rhsParams = new DataType(TYPE_TUPLE);
+                             lhs = inferExpression(expr->child(0),func);  
+                             /* infer the tuple_type of the actual params */
+                             DataType* rhsParams = new DataType(TYPE_TUPLE);
 
-                            /* if there are actual params... */
-                            if (expr->child(1)->numChildren() > 1) {
-                              /* add them to the tuple_type */
-                              buildParamTupleType(rhsParams,expr->child(1)->child(1),func);
-                            }
+                             /* if there are actual params... */
+                             if (expr->child(1)->numChildren() > 1) {
+                               /* add them to the tuple_type */
+                               buildParamTupleType(rhsParams,expr->child(1)->child(1),func);
+                             }
 
-                            /* check that class exists */
-                            if (!lhs->className || !classes.count(*lhs->className)){
-                              throw Error("Class does not exist.", expr->getLine());
+                             /* check that class exists */
+                             if (!lhs->className || !classes.count(*lhs->className)){
+                               throw Error("Class does not exist.", expr->getLine());
 
-                            /* check that class has method */
-                            } else if (!classes[*lhs->className]
-                                .hasMethod(rhsParams, expr->child(1)->getString())){
+                               /* check that class has method */
+                             } else if (!classes[*lhs->className]
+                                 .hasMethod(rhsParams, expr->child(1)->getString())){
 
-                              throw Error("Class does not contain specified member variable."
-                                  , expr->getLine());
-                            }
+                               throw Error("Class does not contain specified member variable."
+                                   , expr->getLine());
+                             }
 
-                            /* return the return type of the method */
-                            return classes[*lhs->className]
-                              .getMethod(rhsParams, expr->child(0)->getString())->type();
-                          }
+                             /* return the return type of the method */
+                             return classes[*lhs->className]
+                               .getMethod(rhsParams, expr->child(0)->getString())->type();
+                           }
 
     case NODE_DECLARATION: {
 
                            } 
 
     default:
-                          cout << expr->kind() << endl;
-                          throw Error("inferExpression: unknown node type");
-                          break;
+                           cout << expr->kind() << endl;
+                           throw Error("inferExpression: unknown node type");
+                           break;
   }
 
   throw Error("inferExpression: unhandled type");
@@ -1011,17 +1011,17 @@ void checkMuTasks(Node* block, Node* func) {
     /* check if the identifier exists */
     DataType* type = NULL;
     type = findIdType(block->child(0), func);
-    
-   /* if the identifier doesn't exist yet 
-    * and it's not a wait node*/ 
+
+    /* if the identifier doesn't exist yet 
+     * and it's not a wait node*/ 
     if (!type && block->kind() != NODE_WAIT){
       /* add to this function's symtable */
       type = new DataType(kind);
       func->insertSymbol(Symbol(block->child(0)->getString(), 
             type, block->child(0)->getLine()));  
 
-    /* if the identifier doesn't exist and it
-     * is a wait node*/
+      /* if the identifier doesn't exist and it
+       * is a wait node*/
     } else if (!type) {
       throw Error("Cannot wait for task that has not been created",
           block->child(0)->getLine());
@@ -1252,7 +1252,7 @@ void inferGlobals(Node* node){
 
 /* add stl functions to the list of globals */
 void addStls() {
-  
+
   string stls [] = {"len", "read_string", "read_int", 
     "read_real", "read_bool", "print"};
 
@@ -1353,11 +1353,11 @@ void inferFunction(Node* node){
   /* make sure that this function does not share a name
    * with a global or a class */
   if (globals.count(node->getString())
-        || classes.count(node->getString())) {
+      || classes.count(node->getString())) {
 
-      throw Error("Function name is used elsewhere.", 
-          node->getLine());
-   }
+    throw Error("Function name is used elsewhere.", 
+        node->getLine());
+  }
 
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
