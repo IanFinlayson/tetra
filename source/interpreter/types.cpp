@@ -854,8 +854,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          Node * currNode = expr;
                          /* traverse the subtree of dictvals */
                          while(currNode && currNode->numChildren() > 0) {
-                           DataType* keyType = inferExpression(expr->child(0),func);
-                           DataType* valType = inferExpression(expr->child(1),func);
+                           DataType* keyType = inferExpression(currNode->child(0),func);
+                           DataType* valType = inferExpression(currNode->child(1),func);
                            /* if this is the first element, add the subtypes */
                            if(dt->subtypes->size() == 0) {
                              dt->subtypes->push_back(*keyType); 
