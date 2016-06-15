@@ -245,11 +245,13 @@ DataType DataType::operator=(const DataType& other) {
 
 /* infer the param subtype from a function call */
 void buildParamTupleType(DataType* type, Node* node, Node* func) {
-  if (node->kind() == NODE_ACTUAL_PARAM_LIST) {
+  if (node && node->kind() == NODE_ACTUAL_PARAM_LIST) {
     buildParamTupleType(type, node->child(0), func); 
     buildParamTupleType(type, node->child(1), func); 
-  } else {
+  } else if (node) {
     type->subtypes->push_back(*inferExpression(node,func));
+  } else {
+    return;
   } 
 }
 
@@ -936,8 +938,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             /* infer the tuple_type of the actual params */
                             DataType* rhsParams = new DataType(TYPE_TUPLE);
 
-                            if (expr->child(1)->numChildren() > 0 ){
-                              buildParamTupleType(rhsParams,expr->child(1),func);
+                            /* if there are actual params... */
+                            if (expr->child(1)->numChildren() > 1) {
+                              /* add them to the tuple_type */
+                              buildParamTupleType(rhsParams,expr->child(1)->child(1),func);
                             }
 
                             /* check that class exists */
