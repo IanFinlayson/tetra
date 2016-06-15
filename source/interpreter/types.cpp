@@ -833,13 +833,13 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* traverse the subtree of vecvals */
                         while(currNode && currNode->numChildren() > 0){
 
-                          DataType* elemType = inferExpression(expr->child(0),func);
+                          DataType* elemType = inferExpression(currNode->child(0),func);
                           /* if this is the first element, add the subtype */
                           if(dt->subtypes->size() == 0) {
                             (dt->subtypes)->push_back(*elemType); 
                             /* if there is a previous subtype, make sure they match */
                           } else if(dt->subtypes->size() == 1 
-                              && &((*(dt->subtypes))[0]) != elemType){
+                              && ((*(dt->subtypes))[0]) != *elemType){
 
                             throw Error("Mismatched vector types", expr->getLine());
                           }
