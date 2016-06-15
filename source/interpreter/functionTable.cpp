@@ -60,21 +60,29 @@ void FunctionMap::build(Node* tree) {
 
       //update the DataType to a function
       DataType* type = new DataType(TYPE_FUNCTION);
+
       //create the paramtype
       DataType* paramTypes = new DataType(TYPE_TUPLE);
 
-      //add the types of the formal params
-      for (std::map<std::string, Symbol>::iterator it = candidate->symtable->begin(); 
-          it != candidate->symtable->end(); it ++){
-        
-        /* add them to the tuple */
-        paramTypes->subtypes->push_back(*(it->second.getType()));
-      } 
+      //if it has params...
+      if(candidate->symtable) {
+        //add the types of the formal params
+        for (std::map<std::string, Symbol>::iterator it = candidate->symtable->begin(); 
+            it != candidate->symtable->end(); it ++){
+          
+          /* add them to the tuple */
+          paramTypes->subtypes->push_back(*(it->second.getType()));
+        } 
+      }
+
       //add the param tuple type as a subtype */
       type->subtypes->push_back(*paramTypes);
 
       //add the return val subtype
       type->subtypes->push_back(*candidate->type());
+
+      //update the candidates datatype
+      candidate->setDataType(type);
 
       //if this function is already in the table
       if(lookup.count(getFunctionSignature(candidate)) > 0){
