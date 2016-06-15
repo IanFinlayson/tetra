@@ -848,8 +848,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                              dt->subtypes->push_back(*valType); 
                              /* if there are previous subtypes, make sure they match */
                            } else if(dt->subtypes->size() == 2 
-                               && ((&((*(dt->subtypes))[0]) != keyType)
-                                 || (&((*(dt->subtypes))[1]) != valType))){
+                               && (((*(dt->subtypes))[0] != *keyType)
+                                 || ((*(dt->subtypes))[1] != *valType))){
 
                              throw Error("Mismatched key/value types", expr->getLine());
                            }
