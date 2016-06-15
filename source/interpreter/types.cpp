@@ -813,7 +813,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             DataType* elemType = inferExpression(expr->child(0),func);
                             /* if this is the first element, add the subtype */
                             if(dt->subtypes->size() == 0) {
-                              (*(dt->subtypes))[0] = *elemType; 
+                              (dt->subtypes)->push_back(*elemType); 
                             /* if there is a previous subtype, make sure they match */
                             } else if(dt->subtypes->size() == 1 
                                     && &((*(dt->subtypes))[0]) != elemType){
@@ -835,8 +835,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             DataType* valType = inferExpression(expr->child(1),func);
                             /* if this is the first element, add the subtypes */
                             if(dt->subtypes->size() == 0) {
-                              (*(dt->subtypes))[0] = *keyType; 
-                              (*(dt->subtypes))[1] = *valType; 
+                              dt->subtypes->push_back(*keyType); 
+                              dt->subtypes->push_back(*valType); 
                             /* if there are previous subtypes, make sure they match */
                             } else if(dt->subtypes->size() == 2 
                                     && ((&((*(dt->subtypes))[0]) != keyType)
@@ -860,7 +860,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             DataType* elemType = inferExpression(expr->child(0),func);
 
                             /* add the subtype */
-                            (*(dt->subtypes))[0] = *elemType; 
+                            dt->subtypes->push_back(*elemType); 
 
                             /* set current node to the next one */
                             currNode = currNode->child(1);
@@ -884,7 +884,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           paramTypes->subtypes->push_back(*(it->second.getType()));
                        }
                        /* add the params as a subtype */
-                       (*(type->subtypes))[0] = *paramTypes;
+                       type->subtypes->push_back(*paramTypes);
 
                        /* infer the the return type */
                        if (expr->numChildren() > 1) {
@@ -1060,7 +1060,7 @@ void inferBlock(Node* block, Node* func) {
                         }
 
                         /* check that it matches the return type */
-                        if (*ret != *(func->type())) {
+                        if (*ret != func->type()->subtypes->back()) {
                           throw Error("Return value type does not match function's declared type",
                               block->getLine());
                         }
