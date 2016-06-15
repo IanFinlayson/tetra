@@ -481,7 +481,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         rhs = inferExpression(expr->child(1), func);
 
                         /* if the left hand side is an identifier... */
-                        if (expr->child(0)->kind() == NODE_IDENTIFIER){
+                        if (expr->child(0)->kind() == NODE_IDENTIFIER) {
                           /* check if it exists */
                           /* check this function first */
                           if (func->hasSymbol(expr->child(0)->getString())){
@@ -491,7 +491,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
 
                             /* check globals next */
-                          } else if (globals.count(expr->getString()) > 0) {
+                          } else if (globals.count(expr->child(0)->getString()) > 0) {
 
                             /* get the symbol */
                             Symbol sym = globals.find(expr->getString())->second;
@@ -505,20 +505,25 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             /*otherwise, set the lhs to the type of the existing global */
                             lhs = sym.getType();
 
-                            /* make sure it's not the name of a free function */   
-                          } else if (functions.hasFuncNamed(expr->getString())) {
+                          /* make sure it is not the name of a class */
+                          } else if (classes.count(expr->child(0)->getString())) {
+
+                            throw Error("Cannot assign to class.", expr->getLine());
+
+                          /* make sure it's not the name of a free function */   
+                          } else if (functions.hasFuncNamed(expr->child(0)->getString())) {
 
                             throw Error("Cannot assign to free function.", expr->getLine());
 
-                            /* if we end up here, then it doesn't exist yet */
-                            /* make sure the right side wasnt {} or [] because
-                             * we don't do type inference on these */
+                          /* if we end up here, then it doesn't exist yet */
+                          /* make sure the right side wasnt {} or [] because
+                           * we don't do type inference on these */
                           } else if (rhs->isEmptyContainerType()) {
 
                             throw Error("Cannot infer subtype of empty list/dictionary."
                                 , expr->getLine());
 
-                            /* if it doesn't exist and the type is inferable... */ 
+                          /* if it doesn't exist and the type is inferable... */ 
                           } else {
 
                             /* infer it! */ 
@@ -527,7 +532,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                                   lhs,expr->child(0)->getLine()));
                           } 
 
-                          /* if it's not directly and identifier.. */
+                        /* if it's not directly and identifier.. */
                         } else {
 
                           /* get the type of the left hand side */
@@ -781,7 +786,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               /* if the identifier already exists... */
                               if(findIdType(expr, func)) {
                                 /* complain! */
-                                throw Error("The identifier already exists.",expr->getLine());
+                                throw Error("The identifier '" + expr->getString() 
+                                    + "' already exists.",expr->getLine());
                               }
 
                               /* if we make it here, then just return the type it already has */

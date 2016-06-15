@@ -1037,6 +1037,7 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 identifier: TOK_IDENTIFIER {
   $$ = new Node(NODE_IDENTIFIER);
   $$->setStringval($1);
+  $$->setLine(yylineno);
 }  
 
 /* a function call */
