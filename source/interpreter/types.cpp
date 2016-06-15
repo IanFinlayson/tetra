@@ -278,7 +278,7 @@ DataType* inferPrint(Node* pcall, Node* func) {
   /* just infer each expression, but we don't care what it is */
 
   /* get the first arg */
-  Node* arg = pcall->child(0);
+  Node* arg = pcall->child(1);
 
   /* while there are arguments */
   while (arg) {
@@ -311,7 +311,7 @@ DataType* inferPrint(Node* pcall, Node* func) {
 
 DataType* inferLen(Node* funcall, Node* func) {
   /* check that there is one argument */
-  if (funcall->numChildren() != 1) {
+  if (funcall->numChildren() != 2) {
     throw Error("len function expects one argument", funcall->getLine());
   }
 
@@ -331,16 +331,16 @@ DataType* inferLen(Node* funcall, Node* func) {
 
 DataType* inferRead(Node* funcall) {
   /* make sure there are no parameters */
-  if (funcall->numChildren() > 0) {
+  if (funcall->numChildren() > 1) {
     throw Error(funcall->getString() + " should not have any parameters",
         funcall->getLine());
   }
 
   /* get the return type right */
-  if (funcall->getString() == "read_string") return new DataType(TYPE_STRING);
-  if (funcall->getString() == "read_int") return new DataType(TYPE_INT);
-  if (funcall->getString() == "read_real") return new DataType(TYPE_REAL);
-  if (funcall->getString() == "read_bool") return new DataType(TYPE_BOOL);
+  if (funcall->child(0)->getString() == "read_string") return new DataType(TYPE_STRING);
+  if (funcall->child(0)->getString() == "read_int") return new DataType(TYPE_INT);
+  if (funcall->child(0)->getString() == "read_real") return new DataType(TYPE_REAL);
+  if (funcall->child(0)->getString() == "read_bool") return new DataType(TYPE_BOOL);
 
   throw Error("This should not happen!", funcall->getLine());
 }
@@ -349,18 +349,18 @@ DataType* inferRead(Node* funcall) {
  * infers it */
 DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
   is_stdlib = true;
-  if (funcall->getString() == "print") {
+  if (funcall->child(0)->getString() == "print") {
     return inferPrint(funcall, func);
   }
 
-  if (funcall->getString() == "len") {
+  if (funcall->child(0)->getString() == "len") {
     return inferLen(funcall, func);
   }
 
-  if ((funcall->getString() == "read_string") ||
-      (funcall->getString() == "read_int") ||
-      (funcall->getString() == "read_real") ||
-      (funcall->getString() == "read_bool")) {
+  if ((funcall->child(0)->getString() == "read_string") ||
+      (funcall->child(0)->getString() == "read_int") ||
+      (funcall->child(0)->getString() == "read_real") ||
+      (funcall->child(0)->getString() == "read_bool")) {
     return inferRead(funcall);
   }
 
@@ -729,7 +729,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          /* check for stl functions */
                          bool is_stdlib;
                          lhs = inferStdlib(expr, func, is_stdlib); 
-                         if (is_stdlib){
+                         if (is_stdlib) {
                            return lhs;
                          }
                           
