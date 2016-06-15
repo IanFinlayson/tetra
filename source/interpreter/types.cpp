@@ -441,25 +441,32 @@ DataType* findIdType(Node* expr, Node* func) {
     Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
     return sym.getType();
 
-    /* if it is in a class, check there for a member var*/
+  /* if it is in a class, check there for a member var*/
   } else if (getClassNode(expr) 
       && classes[getClassNode(expr)->getString()].hasMember(expr->getString())) {
 
     Symbol sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
     return sym.getType();
 
-    /* if it is in a class, check there for a method */
+  /* if it is in a class, check there for a method */
   } else if (getClassNode(expr) 
       && classes[getClassNode(expr)->getString()].hasMethodNamed(expr->getString())) {
 
     /* get all the methods */
     return classes[getClassNode(expr)->getString()].getMethods(expr->getString()); 
 
-    /* next check for globals/constants */
+  /* next check for globals/constants */
   } else if (globals.count(expr->getString()) > 0) {
+     
     /* look it up and return that type */
     Symbol sym = globals[expr->getString()];
     return sym.getType();
+
+  /* next check if it's the name of a free function */
+  } else if (functions.hasFuncNamed(expr->getString())) {
+
+    /* look it up and return that type */
+    return functions.getFunctionsNamed(expr->getString());
 
   } else {
     return NULL;
@@ -800,7 +807,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             /* if we didn't find it... */
                             if (!type) {
                               /* complain! */
-                              throw Error("Reference to non-existent identifier.", expr->getLine());
+                              throw Error("Reference to non-existent identifier '" 
+                                  + expr->getString() + "'.", expr->getLine());
                             } 
 
                             /* otherwise, return the type */
@@ -868,11 +876,11 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
     case NODE_TUPVAL:{
                        DataType* dt = new DataType(TYPE_TUPLE);
-                       Node * currNode = expr;
+                       Node* currNode = expr;
                        /* traverse the subtree of vecvals */
-                       while(currNode && currNode->numChildren() > 0){
+                       while(currNode && currNode->numChildren() > 0) {
 
-                         DataType* elemType = inferExpression(expr->child(0),func);
+                         DataType* elemType = inferExpression(currNode->child(0),func);
 
                          /* add the subtype */
                          dt->subtypes->push_back(*elemType); 
@@ -883,6 +891,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                        return dt;
                      }
+
     case NODE_LAMBDA:{ 
                        /* make sure that any classes that are referred to
                         * actually exist */
