@@ -371,7 +371,8 @@ DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
 bool noLambdaParents(Node* node) {
   NodeKind k = node->kind();
 
-  if (k == NODE_ASSIGN || k == NODE_LOCK || k == NODE_BACKGROUND 
+  if (!k || k == NODE_ASSIGN || k == NODE_LOCK 
+      || k == NODE_BACKGROUND 
       || k == NODE_PARALLEL || k == NODE_WHILE || k == NODE_PARFOR 
       || k == NODE_FOR || k == NODE_ELIF_CLAUSE || k == NODE_IF) {
 

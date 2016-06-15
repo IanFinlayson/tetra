@@ -1105,7 +1105,7 @@ Node* parseFile(const string& fname) {
 
     /* check and infer the types in the tree */
     initTypes(root);
-//    inferTypes(root);
+    inferTypes(root);
     /* return the root of the parse tree */
     return root;
 }
