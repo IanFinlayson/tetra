@@ -460,7 +460,7 @@ DataType* findIdType(Node* expr, Node* func) {
     return sym.getType();
 
   } else {
-    throw Error("Reference to non-existent identifier.", expr->getLine());
+    return NULL;
   }
 }
 
@@ -781,7 +781,11 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                                   /* complain! */
                                   throw Error("The identifier already exists.",expr->getLine());
                                 }
+
+                                /* if we make it here, then just return the type it already has */
+                                return expr->type();
                             } 
+                            /* otherwise, if it doesn't already have a type... */
                             /* if the id already exists, get its type */
                             DataType* type = findIdType(expr, func);
 
@@ -791,7 +795,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               throw Error("Reference to non-existent identifier.", expr->getLine());
                             } 
 
-                            break;
+                            /* otherwise, return the type */
+                            return type;
+
                           }
 
                           /* return these types */
