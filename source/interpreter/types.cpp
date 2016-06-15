@@ -456,7 +456,7 @@ DataType* findIdType(Node* expr, Node* func) {
     /* next check for globals/constants */
   } else if (globals.count(expr->getString()) > 0) {
     /* look it up and return that type */
-    Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
+    Symbol sym = globals[expr->getString()];
     return sym.getType();
 
   } else {
