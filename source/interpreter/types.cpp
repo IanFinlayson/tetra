@@ -192,13 +192,13 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
 
   if (lhs.getKind() == TYPE_VECTOR) {
     /* recursively ensure the subtypes match */
-    return (lhs.subtypes[0] == rhs.subtypes[0]);
+    return (*(lhs.subtypes))[0] == (*(rhs.subtypes))[0];
   }
 
   /* for dictionaries, recursively check the key and value types */
   if (lhs.getKind() == TYPE_DICT) {
-    return (lhs.subtypes[0] == rhs.subtypes[0])
-      && (lhs.subtypes[1] == rhs.subtypes[1]);
+    return (((*(lhs.subtypes))[0] == (*(rhs.subtypes))[0])
+      && ((*(lhs.subtypes))[1] == (*(rhs.subtypes))[1]));
   }
 
   /* for classes, just check the names */
@@ -221,7 +221,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     bool same = true;
     unsigned long int i = 0;
     while (same && i < lhs.subtypes->size()) {
-      same = (lhs.subtypes[i] == rhs.subtypes[i]);
+      same = ((*(lhs.subtypes))[i] == (*(rhs.subtypes))[i]);
       i++;
     }
     return same;
