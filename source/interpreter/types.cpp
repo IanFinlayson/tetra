@@ -980,7 +980,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             expr->getLine());
                       }
 
-                      return classNode->type();
+                      /* return the class' type */
+                      DataType* type = new DataType(TYPE_CLASS);
+                      *(type->className) = classNode->getString();
+                      return type;
 
                     }
 
