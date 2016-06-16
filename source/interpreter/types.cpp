@@ -549,7 +549,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           lhs = inferExpression(expr->child(0), func);
 
                           /* if there is an index on the left... */
-                          if (expr->child(0)->kind() == NODE_INDEX){
+                          if (expr->child(0)->kind() == NODE_INDEX) {
                             /* then check for immutable types */  
                             DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
                             if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
@@ -557,7 +557,6 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                                   expr->getLine());
                             }
                           }
-
                         }
 
                         /* make sure both sides are the same type */
@@ -721,7 +720,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          throw Error("Key has incompatible type.", expr->getLine());
                        } 
 
-                       return rhs; 
+                       return &(*(lhs->subtypes))[1]; 
 
                      }
     case NODE_VECRANGE: {
@@ -1318,7 +1317,7 @@ void initSquared(ClassContext context) {
 
   /* loop through the inits*/
   for (std::map<std::string, Node*>::iterator it = inits.begin(); 
-    it != inits.end(); it ++){
+    it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
     it->second->setDataType(type);
