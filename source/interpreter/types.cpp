@@ -549,7 +549,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           lhs = inferExpression(expr->child(0), func);
 
                           /* if there is an index on the left... */
-                          if (expr->child(0)->kind() == NODE_INDEX){
+                          if (expr->child(0)->kind() == NODE_INDEX) {
                             /* then check for immutable types */  
                             DataTypeKind assignKind = expr->child(0)->child(0)->type()->getKind();
                             if(assignKind == TYPE_TUPLE || assignKind == TYPE_STRING){
@@ -557,11 +557,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                                   expr->getLine());
                             }
                           }
-
                         }
 
                         /* make sure both sides are the same type */
-                        if(*rhs != *lhs){
+                        if(*rhs != *lhs) {
                           throw Error("Assignment of incompatible types.", expr->getLine()); 
                         }
 
@@ -707,23 +706,57 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        lhs = inferExpression(expr->child(0), func);
                        rhs = inferExpression(expr->child(1), func);
 
-                       /* Do I exist (is my left child indexable)?*/ 
+                       /* get the kind of lhs*/ 
                        DataTypeKind kind = lhs->getKind();
-                       if(!(kind == TYPE_VECTOR || kind == TYPE_TUPLE || kind == TYPE_DICT
-                             || kind == TYPE_STRING)) {
+
+                       /* return the type of the container's values */
+                       /* dictionaries */
+                       if (kind == TYPE_DICT) {
+                        /* check the key type */
+                        if ((*(lhs->subtypes))[0] != *rhs) {
+                          throw Error("Key has incompatible type.", expr->getLine());
+                        }
+                        return &(*(lhs->subtypes))[1]; 
+
+                       /* tuples */
+                       } else if (kind == TYPE_TUPLE) {
+                         /* check the index type */
+                         if (rhs->getKind() != TYPE_INT){
+                          throw Error("Tuple index must be an integer.", expr->getLine());
+                         }
+                         /* make sure the index is in range */  
+                         if ((unsigned long) expr->child(1)->getInt() < lhs->subtypes->size()){
+                           /* get return the type of the index */
+                           return &(*(lhs->subtypes))[expr->child(1)->getInt()]; 
+                         /* if it isn't in range */
+                         } else {
+                           /* complain! */
+                           throw Error("Tuple index out of range.", expr->getLine());
+                         }
+
+                       /* vectors */
+                       } else if (kind == TYPE_VECTOR) {
+                         /* check the index type */
+                         if (rhs->getKind() != TYPE_INT){
+                          throw Error("Vector index must be an integer.", expr->getLine());
+                         }
+                         return &(*(lhs->subtypes))[0]; 
+
+                       /* strings */
+                       } else if (kind == TYPE_STRING) {
+                         /* check the index type */
+                         if (rhs->getKind() != TYPE_INT){
+                          throw Error("String index must be an integer.", expr->getLine());
+                         }
+                         return lhs; 
+
+                       /* otherwise it isn't an indexable type */
+                       } else {
                          throw Error("Index performed on unindexable type.", expr->getLine());
                        }
 
-                       /* make sure the index type is correct (matches key type 
-                        * for dictionaries, ints elsewhere)*/
-                       if ((kind == TYPE_DICT && (*(lhs->subtypes))[0] != *rhs) 
-                           || (kind != TYPE_DICT && rhs->getKind() != TYPE_INT)){
-                         throw Error("Key has incompatible type.", expr->getLine());
-                       } 
-
-                       return rhs; 
-
                      }
+
     case NODE_VECRANGE: {
                           lhs = inferExpression(expr->child(0), func); 
                           rhs = inferExpression(expr->child(1), func); 
@@ -754,16 +787,16 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          /* make an empty tuple type for the params */
                          DataType* rhsParams = new DataType(TYPE_TUPLE);
                          /* if there are arguments... */
-                         if(expr->numChildren() > 1) {
+                         if (expr->numChildren() > 1) {
                            /* add them to the tuple */
                            buildParamTupleType(rhsParams,expr->child(1),func);
                          } 
 
                          /* make sure that we found a matching function */
                          /* if we have a single function... */
-                         if(lhs->getKind() == TYPE_FUNCTION){
+                         if (lhs->getKind() == TYPE_FUNCTION){
                            /* make sure it has the right params */
-                           if((*(lhs->subtypes))[0] == *rhsParams){
+                           if ((*(lhs->subtypes))[0] == *rhsParams){
                              return lhs;
                            }
                            /* if we have multiple possibilities */
@@ -771,7 +804,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                            /* check each of them */
                            for (long unsigned int i = 0; i < lhs->subtypes->size(); i++) {
                              /* if it matches, return it */
-                             if((*(lhs->subtypes))[i] == *rhsParams){
+                             if ((*(lhs->subtypes))[i] == *rhsParams){
                                return &((*(lhs->subtypes))[i]);
                              }
                            }
@@ -1318,10 +1351,10 @@ void initSquared(ClassContext context) {
 
   /* loop through the inits*/
   for (std::map<std::string, Node*>::iterator it = inits.begin(); 
-    it != inits.end(); it ++){
+    it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
-    it->second->setDataType(type);
+    (*(it->second->type()->subtypes))[(*(it->second->type()->subtypes)).size()-1] = *type;
     
     /* rename the functions and insert them */
     functions.insert(std::pair<string,Node*>(context.getName() 
@@ -1351,24 +1384,24 @@ void initClass(Node* node) {
   if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
     if (node->child(0)->kind() == NODE_CLASS) { 
       /* check for duplicate class name */
-      if (classes.count(node->getString())) {
+      if (classes.count(node->child(0)->getString())) {
         throw Error("Duplicate class.", 
             node->child(0)->getLine());
       }
       /* check for stl names*/
-      if (globals.count(node->getString())) {
+      if (globals.count(node->child(0)->getString())) {
         throw Error("Cannot use stl function name for class name.", 
             node->child(0)->getLine());
       }
 
       /* create new ClassContext */
-      ClassContext context(node->getString());
+      ClassContext context(node->child(0)->getString());
 
       /* add any class parts */
       context.addMembers(node->child(0));
       context.addMethods(node->child(0));
 
-      /* remove the init functions from the classes methods
+      /* remove the init functions from the class' methods
        * and add them as globally available class constructors */
       initSquared(context);
 
