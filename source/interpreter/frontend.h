@@ -278,8 +278,12 @@ class FunctionMap {
 
   DataType* getFunctionsNamed(std::string) ;
 
-  //renames functions
-  void rename(std::string, std::string);
+  //renames functions with the name provided and returns them as a
+  //vector of pairs
+  std::map<std::string, Node*> remove(std::string);
+
+  //wrapper around std::map.insert
+  void insert(std::pair<string, Node*>);
 };
 
 /* stores a class definition's context (methods & members) */
@@ -298,7 +302,7 @@ class ClassContext {
     Symbol getMember(std::string);
     DataType* getMethods(std::string);
     const Node* getMethod(DataType*, std::string);
-    void initSquared();
+    std::map<std::string,Node*> removeInits();
   private:
     string name;
     FunctionMap methods;

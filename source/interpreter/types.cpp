@@ -140,8 +140,11 @@ bool ClassContext::hasMethodNamed(std::string name) {
   return methods.hasFuncNamed(name);
 }
 
-void ClassContext::initSquared(){
-  methods.rename("init", name);
+std::map<std::string,Node*> ClassContext::removeInits(){
+
+  /* remove any inits from the list of methods 
+   * and return them */
+  return methods.remove("init");
 }
 
 /* data type functions */
@@ -833,13 +836,13 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* traverse the subtree of vecvals */
                         while(currNode && currNode->numChildren() > 0){
 
-                          DataType* elemType = inferExpression(expr->child(0),func);
+                          DataType* elemType = inferExpression(currNode->child(0),func);
                           /* if this is the first element, add the subtype */
                           if(dt->subtypes->size() == 0) {
                             (dt->subtypes)->push_back(*elemType); 
                             /* if there is a previous subtype, make sure they match */
                           } else if(dt->subtypes->size() == 1 
-                              && &((*(dt->subtypes))[0]) != elemType){
+                              && ((*(dt->subtypes))[0]) != *elemType){
 
                             throw Error("Mismatched vector types", expr->getLine());
                           }
@@ -854,8 +857,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          Node * currNode = expr;
                          /* traverse the subtree of dictvals */
                          while(currNode && currNode->numChildren() > 0) {
-                           DataType* keyType = inferExpression(expr->child(0),func);
-                           DataType* valType = inferExpression(expr->child(1),func);
+                           DataType* keyType = inferExpression(currNode->child(0),func);
+                           DataType* valType = inferExpression(currNode->child(1),func);
                            /* if this is the first element, add the subtypes */
                            if(dt->subtypes->size() == 0) {
                              dt->subtypes->push_back(*keyType); 
@@ -1298,6 +1301,48 @@ void addMembers(ClassContext* context, Node* node) {
   }
 }
 
+/* Given a class context, removes any init functions
+ * from its list of methods and adds them as 
+ * constructors to the lists of free functions
+ * (also adds a default constructor if one does not
+ * exist) */
+void initSquared(ClassContext context) {
+
+  /* remove the init functions */
+  std::map<std::string,Node*> inits 
+    = context.removeInits();
+  
+  bool hasDefault = false;
+  DataType* type = new DataType(TYPE_CLASS);
+  *(type->className) = context.getName();
+
+  /* loop through the inits*/
+  for (std::map<std::string, Node*>::iterator it = inits.begin(); 
+    it != inits.end(); it ++){
+
+    /* update the return types to this class's type*/
+    it->second->setDataType(type);
+    
+    /* rename the functions and insert them */
+    functions.insert(std::pair<string,Node*>(context.getName() 
+          + it->first.substr((it->first).find_first_of("(")), it->second));
+
+    /* if the function is a default constructor... */
+    if (it->first == "init()") {
+      /* take note! */
+      hasDefault = true;
+    }
+  }
+  /* if there was no default constructor... */
+  if (!hasDefault) {
+    /* make one and add it! */
+    Node* node = new Node(NODE_FUNCTION);
+    node->setDataType(type);
+    std::string key = context.getName() + "()";
+    functions.insert(std::pair<string,Node*> (key, node)); 
+  }
+}
+
 /* Makes initial pass through top levels to populate
  * class map*/
 void initClass(Node* node) {
@@ -1323,8 +1368,9 @@ void initClass(Node* node) {
       context.addMembers(node->child(0));
       context.addMethods(node->child(0));
 
-      /* replace init functions with class name */
-      context.initSquared();
+      /* remove the init functions from the classes methods
+       * and add them as globally available class constructors */
+      initSquared(context);
 
       /* add to map of classes */
       classes[context.getName()] = context;
