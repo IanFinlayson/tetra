@@ -1354,7 +1354,7 @@ void initSquared(ClassContext context) {
     it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
-    (*(it->second->type()->subtypes))[(*(it->second->type()->subtypes)).size()-1] = *type;
+    it->second->type()->subtypes->push_back(*type);
     
     /* rename the functions and insert them */
     functions.insert(std::pair<string,Node*>(context.getName() 
@@ -1398,8 +1398,8 @@ void initClass(Node* node) {
       ClassContext context(node->child(0)->getString());
 
       /* add any class parts */
-      context.addMembers(node->child(0));
-      context.addMethods(node->child(0));
+      context.addMembers(node->child(0)->child(0));
+      context.addMethods(node->child(0)->child(0));
 
       /* remove the init functions from the class' methods
        * and add them as globally available class constructors */
