@@ -238,6 +238,7 @@ class_part: function
 
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
   $$ = new Node(NODE_FUNCTION);
+  $$->setDataType(new DataType(TYPE_CLASS));
   $$->setStringval("init");
   $$->addChild($3);
   $$->addChild($5);
