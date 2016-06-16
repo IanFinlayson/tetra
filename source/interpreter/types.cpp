@@ -418,7 +418,6 @@ Node* getClassNode(Node* node){
   } else {
     return getClassNode(node->getParent());
   }
-
 }
 
 /* find identifier */
@@ -969,8 +968,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                     }
 
                     /* return the type of the member variable */
-                    return classes[*lhs->className].getMember(expr->child(0)->getString()).getType();
+                    return classes[*lhs->className].getMember(expr->child(1)->getString()).getType();
                   }
+
     case NODE_SELF: {
                       /* return parent class type*/
                       Node* classNode = getClassNode(expr);
