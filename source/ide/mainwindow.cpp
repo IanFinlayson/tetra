@@ -330,9 +330,10 @@ void MainWindow::on_actionDebug_triggered() {
 }
 
 void MainWindow::on_actionRun_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
+    static int time = 1;
+    char msg[256];
+    sprintf(msg, "Hello #%d\n", time++);
+    ui->console->processStandardOutput(msg);
 }
 
 /* debugger functions */
