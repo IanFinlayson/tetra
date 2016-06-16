@@ -85,6 +85,30 @@ QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }
 
+/* load an initial file e.g. as an open file */
+void MainWindow::doOpen(QString fname) {
+    Editor* newEditor = new Editor;
+    newEditor->setUpConnections(this);
+    if (newEditor->open(fname)) {
+        /* if there is one tab which is empty and not modified, close it first */
+        if (ui->tabBar->count() == 1 && currentEditor()->isEmpty()) {
+            currentEditor()->close();
+            ui->tabBar->removeTab(ui->tabBar->currentIndex()); 
+        }
+
+
+        QFileInfo info(fname);
+        ui->tabBar->addTab(newEditor, info.fileName());
+        ui->tabBar->setCurrentWidget(newEditor);
+        updateTitle();
+    } else {
+        QMessageBox warning;
+        warning.setText("Could not open file '" + fname + "'");
+        warning.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-warning.svg"));
+        warning.exec();
+    }
+}
+
 void MainWindow::documentWasModified() {
     if (ui->tabBar->count() == 1) {
         setWindowModified(currentEditor()->document()->isModified());
@@ -184,19 +208,7 @@ void MainWindow::on_actionOpen_triggered() {
         return;
     }
 
-    Editor* newEditor = new Editor;
-    newEditor->setUpConnections(this);
-    if (newEditor->open(fname)) {
-        QFileInfo info(fname);
-        ui->tabBar->addTab(newEditor, info.fileName());
-        ui->tabBar->setCurrentWidget(newEditor);
-        updateTitle();
-    } else {
-        QMessageBox warning;
-        warning.setText("Could not open file '" + fname + "'");
-        warning.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-warning.svg"));
-        warning.exec();
-    }
+    doOpen(fname);
 }
 
 int MainWindow::on_actionPrint_triggered() {

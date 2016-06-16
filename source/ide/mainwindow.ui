@@ -104,7 +104,7 @@
      <x>0</x>
      <y>0</y>
      <width>722</width>
-     <height>33</height>
+     <height>16</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -113,7 +113,6 @@
     </property>
     <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
-    <addaction name="actionOpen_Recent"/>
     <addaction name="separator"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
@@ -356,15 +355,6 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
-   </property>
-  </action>
-  <action name="actionOpen_Recent">
-   <property name="icon">
-    <iconset resource="resources.qrc">
-     <normaloff>:/icons/resources/icons/file-openrecent.svg</normaloff>:/icons/resources/icons/file-openrecent.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Open Recent</string>
    </property>
   </action>
   <action name="actionStop">

@@ -47,6 +47,8 @@ class MainWindow : public QMainWindow {
     void setConsole(Console);
     void updateTitle();
 
+    void doOpen(QString fname);
+
     Ui::MainWindow* ui;
 
   private slots:
@@ -114,7 +116,7 @@ class Console : public VirtualConsole {
         return "42";
     }
     void processStandardOutput(const std::string text) const {
-      /* TODO */
+
     }
 };
 

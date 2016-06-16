@@ -15,5 +15,9 @@ int main(int argc, char* argv[]) {
     MainWindow w;
     w.show();
 
+    for (int i = 1; i < argc; i++) {
+        w.doOpen(argv[i]);
+    }
+
     return app.exec();
 }
