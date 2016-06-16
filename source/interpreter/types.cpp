@@ -793,7 +793,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                          /* make sure that we found a matching function */
                          /* if we have a single function... */
-                         if (lhs->getKind() == TYPE_FUNCTION){
+                         if (lhs->getKind() == TYPE_FUNCTION) {
                            /* make sure it has the right params */
                            if ((*(lhs->subtypes))[0] == *rhsParams){
                              return lhs;
@@ -803,7 +803,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                            /* check each of them */
                            for (long unsigned int i = 0; i < lhs->subtypes->size(); i++) {
                              /* if it matches, return it */
-                             if ((*(lhs->subtypes))[i] == *rhsParams){
+                             if ((*((*(lhs->subtypes))[i].subtypes))[0] == *rhsParams) {
                                return &((*(lhs->subtypes))[i]);
                              }
                            }
