@@ -1449,7 +1449,8 @@ void inferFunction(Node* node){
   if (globals.count(node->getString())
       || classes.count(node->getString())) {
 
-    throw Error("Function name is used elsewhere.", 
+    throw Error("Free function cannot share name with \
+        global, constant, or class.", 
         node->getLine());
   }
 
@@ -1467,10 +1468,6 @@ void inferFunction(Node* node){
 /* infer types for class declaration */
 void inferClass(Node* node) {
   if (node->kind() == NODE_CLASS){
-    if (functions.hasFuncNamed(node->getString())) {
-      throw Error ("Class name cannot share free function identifier.", 
-          node->getLine());
-    }
     inferClass(node->child(0));
   } else if (node->kind() == NODE_CLASS_PART) {
     inferClass(node->child(0));  
