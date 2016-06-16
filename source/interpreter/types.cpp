@@ -560,7 +560,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         }
 
                         /* make sure both sides are the same type */
-                        if(*rhs != *lhs){
+                        if(*rhs != *lhs) {
                           throw Error("Assignment of incompatible types.", expr->getLine()); 
                         }
 
@@ -706,23 +706,57 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        lhs = inferExpression(expr->child(0), func);
                        rhs = inferExpression(expr->child(1), func);
 
-                       /* Do I exist (is my left child indexable)?*/ 
+                       /* get the kind of lhs*/ 
                        DataTypeKind kind = lhs->getKind();
-                       if(!(kind == TYPE_VECTOR || kind == TYPE_TUPLE || kind == TYPE_DICT
-                             || kind == TYPE_STRING)) {
+
+                       /* return the type of the container's values */
+                       /* dictionaries */
+                       if (kind == TYPE_DICT) {
+                        /* check the key type */
+                        if ((*(lhs->subtypes))[0] != *rhs) {
+                          throw Error("Key has incompatible type.", expr->getLine());
+                        }
+                        return &(*(lhs->subtypes))[1]; 
+
+                       /* tuples */
+                       } else if (kind == TYPE_TUPLE) {
+                         /* check the index type */
+                         if (rhs->getKind() != TYPE_INT){
+                          throw Error("Tuple index must be an integer.", expr->getLine());
+                         }
+                         /* make sure the index is in range */  
+                         if ((unsigned long) expr->child(1)->getInt() < lhs->subtypes->size()){
+                           /* get return the type of the index */
+                           return &(*(lhs->subtypes))[expr->child(1)->getInt()]; 
+                         /* if it isn't in range */
+                         } else {
+                           /* complain! */
+                           throw Error("Tuple index out of range.", expr->getLine());
+                         }
+
+                       /* vectors */
+                       } else if (kind == TYPE_VECTOR) {
+                         /* check the index type */
+                         if (rhs->getKind() != TYPE_INT){
+                          throw Error("Vector index must be an integer.", expr->getLine());
+                         }
+                         return &(*(lhs->subtypes))[0]; 
+
+                       /* strings */
+                       } else if (kind == TYPE_STRING) {
+                         /* check the index type */
+                         if (rhs->getKind() != TYPE_INT){
+                          throw Error("String index must be an integer.", expr->getLine());
+                         }
+                         return lhs; 
+
+                       /* otherwise it isn't an indexable type */
+                       } else {
                          throw Error("Index performed on unindexable type.", expr->getLine());
                        }
 
-                       /* make sure the index type is correct (matches key type 
-                        * for dictionaries, ints elsewhere)*/
-                       if ((kind == TYPE_DICT && (*(lhs->subtypes))[0] != *rhs) 
-                           || (kind != TYPE_DICT && rhs->getKind() != TYPE_INT)){
-                         throw Error("Key has incompatible type.", expr->getLine());
-                       } 
-
-                       return &(*(lhs->subtypes))[1]; 
-
                      }
+
     case NODE_VECRANGE: {
                           lhs = inferExpression(expr->child(0), func); 
                           rhs = inferExpression(expr->child(1), func); 
