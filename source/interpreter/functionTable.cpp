@@ -99,28 +99,41 @@ void FunctionMap::build(Node* tree) {
   }
 }
 
-void FunctionMap::rename(std::string oldName, std::string newName) {
-  //make a list to store old keys
-  std::vector<string> oldKeys;
+/* wrapper around std::map's insert function */
+void FunctionMap::insert(std::pair<string,Node*> pair) {
 
-  //add the new functions
+  lookup.insert(pair);
+}
+
+std::map<std::string, Node*> FunctionMap::remove(std::string name) {
+
+  //make a map to store the pairs to return
+  std::map<string,Node*> pairs;
+
+  //make a vector to store keys to remove
+  std::vector<std::string> keys;
+
+  // find the functions
   for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
-    if (oldName == it->first.substr(0, 
+    if (name == it->first.substr(0, 
           (it->first).find_first_of("("))) { 
-      //add the new function
-      lookup[newName + it->first.substr((it->first).find_first_of("("))] = it->second;
+      //add it to the return list
+      pairs.insert(*it);
+
       //add the old key to a list for removal
-      oldKeys.push_back(it->first);
+      keys.push_back(it->first);
     }
   }
 
   //remove all the old keys
-  for (unsigned long i = 0; i<oldKeys.size(); i++){
-    lookup.erase(oldKeys[i]);
+  for (unsigned long i = 0; i<keys.size(); i++){
+    lookup.erase(keys[i]);
   }
+
+  return pairs;
 }
 
 bool FunctionMap::hasFuncNamed(std::string name) {

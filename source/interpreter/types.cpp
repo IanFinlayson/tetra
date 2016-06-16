@@ -140,8 +140,11 @@ bool ClassContext::hasMethodNamed(std::string name) {
   return methods.hasFuncNamed(name);
 }
 
-void ClassContext::initSquared(){
-  methods.rename("init", name);
+std::map<std::string,Node*> ClassContext::removeInits(){
+
+  /* remove any inits from the list of methods 
+   * and return them */
+  return methods.remove("init");
 }
 
 /* data type functions */
@@ -1298,6 +1301,48 @@ void addMembers(ClassContext* context, Node* node) {
   }
 }
 
+/* Given a class context, removes any init functions
+ * from its list of methods and adds them as 
+ * constructors to the lists of free functions
+ * (also adds a default constructor if one does not
+ * exist) */
+void initSquared(ClassContext context) {
+
+  /* remove the init functions */
+  std::map<std::string,Node*> inits 
+    = context.removeInits();
+  
+  bool hasDefault = false;
+  DataType* type = new DataType(TYPE_CLASS);
+  *(type->className) = context.getName();
+
+  /* loop through the inits*/
+  for (std::map<std::string, Node*>::iterator it = inits.begin(); 
+    it != inits.end(); it ++){
+
+    /* update the return types to this class's type*/
+    it->second->setDataType(type);
+    
+    /* rename the functions and insert them */
+    functions.insert(std::pair<string,Node*>(context.getName() 
+          + it->first.substr((it->first).find_first_of("(")), it->second));
+
+    /* if the function is a default constructor... */
+    if (it->first == "init()") {
+      /* take note! */
+      hasDefault = true;
+    }
+  }
+  /* if there was no default constructor... */
+  if (!hasDefault) {
+    /* make one and add it! */
+    Node* node = new Node(NODE_FUNCTION);
+    node->setDataType(type);
+    std::string key = context.getName() + "()";
+    functions.insert(std::pair<string,Node*> (key, node)); 
+  }
+}
+
 /* Makes initial pass through top levels to populate
  * class map*/
 void initClass(Node* node) {
@@ -1323,8 +1368,9 @@ void initClass(Node* node) {
       context.addMembers(node->child(0));
       context.addMethods(node->child(0));
 
-      /* replace init functions with class name */
-      context.initSquared();
+      /* remove the init functions from the classes methods
+       * and add them as globally available class constructors */
+      initSquared(context);
 
       /* add to map of classes */
       classes[context.getName()] = context;
