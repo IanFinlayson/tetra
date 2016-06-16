@@ -1384,24 +1384,24 @@ void initClass(Node* node) {
   if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
     if (node->child(0)->kind() == NODE_CLASS) { 
       /* check for duplicate class name */
-      if (classes.count(node->getString())) {
+      if (classes.count(node->child(0)->getString())) {
         throw Error("Duplicate class.", 
             node->child(0)->getLine());
       }
       /* check for stl names*/
-      if (globals.count(node->getString())) {
+      if (globals.count(node->child(0)->getString())) {
         throw Error("Cannot use stl function name for class name.", 
             node->child(0)->getLine());
       }
 
       /* create new ClassContext */
-      ClassContext context(node->getString());
+      ClassContext context(node->child(0)->getString());
 
       /* add any class parts */
       context.addMembers(node->child(0));
       context.addMethods(node->child(0));
 
-      /* remove the init functions from the classes methods
+      /* remove the init functions from the class' methods
        * and add them as globally available class constructors */
       initSquared(context);
 
