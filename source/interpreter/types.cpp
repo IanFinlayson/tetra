@@ -787,16 +787,16 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          /* make an empty tuple type for the params */
                          DataType* rhsParams = new DataType(TYPE_TUPLE);
                          /* if there are arguments... */
-                         if(expr->numChildren() > 1) {
+                         if (expr->numChildren() > 1) {
                            /* add them to the tuple */
                            buildParamTupleType(rhsParams,expr->child(1),func);
                          } 
 
                          /* make sure that we found a matching function */
                          /* if we have a single function... */
-                         if(lhs->getKind() == TYPE_FUNCTION){
+                         if (lhs->getKind() == TYPE_FUNCTION){
                            /* make sure it has the right params */
-                           if((*(lhs->subtypes))[0] == *rhsParams){
+                           if ((*(lhs->subtypes))[0] == *rhsParams){
                              return lhs;
                            }
                            /* if we have multiple possibilities */
@@ -804,7 +804,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                            /* check each of them */
                            for (long unsigned int i = 0; i < lhs->subtypes->size(); i++) {
                              /* if it matches, return it */
-                             if((*(lhs->subtypes))[i] == *rhsParams){
+                             if ((*(lhs->subtypes))[i] == *rhsParams){
                                return &((*(lhs->subtypes))[i]);
                              }
                            }
@@ -1354,7 +1354,7 @@ void initSquared(ClassContext context) {
     it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
-    it->second->setDataType(type);
+    (*(it->second->type()->subtypes))[0] = *type;
     
     /* rename the functions and insert them */
     functions.insert(std::pair<string,Node*>(context.getName() 
