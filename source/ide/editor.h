@@ -45,6 +45,9 @@ class Editor : public QPlainTextEdit {
     bool saveas();
     bool open(QString fname);
 
+    /* returns whether the editor is empty and not unsaved */
+    bool isEmpty();
+
     /* returns the open file name of this editor, or "" if none set yet */
     QString getOpenFile(); 
 

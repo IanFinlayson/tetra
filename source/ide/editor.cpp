@@ -96,6 +96,16 @@ bool Editor::open(QString fname) {
     return false;
 }
 
+/* return whether the editor is empty and not unsaved */
+bool Editor::isEmpty() {
+    if (document()->isModified() || !document()->isEmpty()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
 /* return the open file name (will be "" if none set) */
 QString Editor::getOpenFile() {
     return fileName;
