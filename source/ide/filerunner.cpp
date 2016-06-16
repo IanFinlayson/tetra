@@ -1,8 +1,10 @@
 /* filerunner.cpp
  * code to run or debug a program */
 
-#include "filerunner.h"
 #include <QDebug>
+
+#include "console.h"
+#include "filerunner.h"
 #include "ideCommandObserver.h"
 
 /* this function is defined in the Tetra interpreter code, linked as libtetra.a */

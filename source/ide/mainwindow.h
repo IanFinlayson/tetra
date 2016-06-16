@@ -103,21 +103,4 @@ class MainWindow : public QMainWindow {
     void closeEvent(QCloseEvent*);
 };
 
-class Console : public VirtualConsole {
-  private:
-    MainWindow* mainWindow;
-
-  public:
-    Console(MainWindow* mainWindow)
-        : VirtualConsole() {
-        this->mainWindow = mainWindow;
-    }
-    std::string receiveStandardInput() const {
-        return "42";
-    }
-    void processStandardOutput(const std::string text) const {
-
-    }
-};
-
 #endif  // MAINWINDOW_H

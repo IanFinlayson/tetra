@@ -34,12 +34,14 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     syntaxhighlighter.cpp \
     editor.cpp \
+    console.cpp \
     filerunner.cpp
 
 HEADERS  += \
     mainwindow.h \
     syntaxhighlighter.h \
     editor.h \
+    console.h \
     filerunner.h
 
 FORMS    += \
