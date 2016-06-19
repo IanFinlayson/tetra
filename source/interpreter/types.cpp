@@ -962,7 +962,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                     lhs = inferExpression(expr->child(0),func);  
                     /* check that class exists */
                     if (!lhs->className || !classes.count(*lhs->className)) {
-                      throw Error("Class does not exist.3" + typeToString(expr->child(0)->type()), expr->getLine());
+                      throw Error("Class does not exist.", expr->getLine());
                       /* check that class has member var */
                     } else if (!classes[*lhs->className]
                         .hasMember(expr->child(1)->getString())) {
@@ -1003,19 +1003,20 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                              /* check that class exists */
                              if (!lhs->className || !classes.count(*lhs->className)){
-                               throw Error("Class does not exist.1", expr->getLine());
+                               throw Error("Class '" + *(lhs->className) + "' does not exist.", expr->getLine());
 
                                /* check that class has method */
                              } else if (!classes[*lhs->className]
-                                 .hasMethod(rhsParams, expr->child(1)->getString())){
+                                 .hasMethod(rhsParams, expr->child(1)->child(0)->getString())){
 
-                               throw Error("Class does not contain specified member variable."
-                                   , expr->getLine());
+                               throw Error("Class '" + *(lhs->className) + "' does not contain method '" 
+                                   + expr->child(1)->child(0)->getString() + "'. " 
+                                   + expr->child(1)->getString()+ typeToString(rhsParams), expr->getLine());
                              }
 
                              /* return the return type of the method */
                              return classes[*lhs->className]
-                               .getMethod(rhsParams, expr->child(0)->getString())->type();
+                               .getMethod(rhsParams, expr->child(1)->child(0)->getString())->type();
                            }
 
     case NODE_DECLARATION: {
