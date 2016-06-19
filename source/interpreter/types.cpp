@@ -794,17 +794,19 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          /* make sure that we found a matching function */
                          /* if we have a single function... */
                          if (lhs->getKind() == TYPE_FUNCTION) {
-                           /* make sure it has the right params */
+                           /* if it has the right params... */
                            if ((*(lhs->subtypes))[0] == *rhsParams){
-                             return lhs;
+                             /* return the return type */
+                             return &(*(lhs->subtypes))[1];
                            }
                            /* if we have multiple possibilities */
                          } else if (lhs->getKind() == TYPE_OVERLOAD) {
                            /* check each of them */
                            for (long unsigned int i = 0; i < lhs->subtypes->size(); i++) {
-                             /* if it matches, return it */
+                             /* if one has the right params... */
                              if ((*((*(lhs->subtypes))[i].subtypes))[0] == *rhsParams) {
-                               return &((*(lhs->subtypes))[i]);
+                               /* return its return type */
+                               return &(*((*(lhs->subtypes))[i].subtypes))[1];
                              }
                            }
                          }
@@ -1375,6 +1377,7 @@ void initSquared(ClassContext context) {
   if (!hasDefault) {
     /* make one and add it! */
     Node* node = new Node(NODE_FUNCTION);
+    node->setStringval(context.getName());
     node->setDataType(new DataType(TYPE_FUNCTION));
     /* add the empty param type */
     node->type()->subtypes->push_back(*(new DataType(TYPE_TUPLE)));
