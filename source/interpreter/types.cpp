@@ -829,13 +829,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               }
 
                               /* if the identifier already exists... */
-                              if(findIdType(expr, func)) {
+                              if (findIdType(expr, func)) {
                                 /* complain! */
                                 throw Error("The identifier '" + expr->getString() 
                                     + "' already exists.",expr->getLine());
                               }
 
-                              /* if we make it here, then just return the type it already has */
+                              /* if we make it here, we need to add this declaration to this
+                               * function's sym table */
+                              func->insertSymbol(*new Symbol(expr->getString(),
+                                    expr->type(), expr->getLine())); 
+                              /* then just return the type it already has */
                               return expr->type();
                             } 
                             /* otherwise, if it doesn't already have a type... */
