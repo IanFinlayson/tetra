@@ -822,7 +822,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               /* if it is a classType, make sure the class exists */
                               if (expr->type()->getKind() == TYPE_CLASS 
                                   && !classes.count(*(expr->type()->className))) {
-                                throw Error("Class does not exist.", expr->getLine());
+                                throw Error("Class '" + *(expr->type()->className)
+                                    + "' does not exist.", expr->getLine());
                               }
 
                               /* if the identifier already exists... */
@@ -909,7 +910,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          return dt;
                        }
 
-    case NODE_TUPVAL:{
+    case NODE_TUPVAL: {
                        DataType* dt = new DataType(TYPE_TUPLE);
                        Node* currNode = expr;
                        /* traverse the subtree of vecvals */
@@ -925,9 +926,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        }
 
                        return dt;
-                     }
+                      }
 
-    case NODE_LAMBDA:{ 
+    case NODE_LAMBDA: { 
                        /* make sure that any classes that are referred to
                         * actually exist */
                        checkClassTypes(expr->child(0));
@@ -955,21 +956,21 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        return type;
                      }
 
-    case NODE_DOT:{
+    case NODE_DOT: {
                     lhs = inferExpression(expr->child(0),func);  
                     /* check that class exists */
-                    if (!lhs->className || !classes.count(*lhs->className)){
-                      throw Error("Class does not exist.", expr->getLine());
+                    if (!lhs->className || !classes.count(*lhs->className)) {
+                      throw Error("Class does not exist.3" + typeToString(expr->child(0)->type()), expr->getLine());
                       /* check that class has member var */
                     } else if (!classes[*lhs->className]
-                        .hasMember(expr->child(1)->getString())){
+                        .hasMember(expr->child(1)->getString())) {
                       throw Error("Class does not contain specified member variable."
                           , expr->getLine());
                     }
 
                     /* return the type of the member variable */
                     return classes[*lhs->className].getMember(expr->child(1)->getString()).getType();
-                  }
+                   }
 
     case NODE_SELF: {
                       /* return parent class type*/
@@ -1000,7 +1001,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                              /* check that class exists */
                              if (!lhs->className || !classes.count(*lhs->className)){
-                               throw Error("Class does not exist.", expr->getLine());
+                               throw Error("Class does not exist.1", expr->getLine());
 
                                /* check that class has method */
                              } else if (!classes[*lhs->className]
@@ -1357,7 +1358,8 @@ void initSquared(ClassContext context) {
     it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
-    it->second->type()->subtypes->push_back(*type);
+    (*(it->second->type()->subtypes))
+      [it->second->type()->subtypes->size() - 1] = *type;
     
     /* rename the functions and insert them */
     functions.insert(std::pair<string,Node*>(context.getName() 
@@ -1373,7 +1375,11 @@ void initSquared(ClassContext context) {
   if (!hasDefault) {
     /* make one and add it! */
     Node* node = new Node(NODE_FUNCTION);
-    node->setDataType(type);
+    node->setDataType(new DataType(TYPE_FUNCTION));
+    /* add the empty param type */
+    node->type()->subtypes->push_back(*(new DataType(TYPE_TUPLE)));
+    /* add the return type */
+    node->type()->subtypes->push_back(*type); 
     std::string key = context.getName() + "()";
     functions.insert(std::pair<string,Node*> (key, node)); 
   }
@@ -1441,7 +1447,7 @@ void checkClassTypes(Node* node) {
   } else if (node->kind() == NODE_DECLARATION) {
     if (node->type()->getKind() == TYPE_CLASS 
         && !classes.count(*(node->type()->className))){
-      throw Error("Class does not exist.", node->getLine());  
+      throw Error("Class does not exist2.", node->getLine());  
     } 
   }
 }

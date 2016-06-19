@@ -65,7 +65,7 @@ void FunctionMap::build(Node* tree) {
       DataType* paramTypes = new DataType(TYPE_TUPLE);
 
       //if it has params...
-      if(candidate->symtable) {
+      if (candidate->symtable) {
         //add the types of the formal params
         for (std::map<std::string, Symbol>::iterator it = candidate->symtable->begin(); 
             it != candidate->symtable->end(); it ++){
@@ -85,7 +85,7 @@ void FunctionMap::build(Node* tree) {
       candidate->setDataType(type);
 
       //if this function is already in the table
-      if(lookup.count(getFunctionSignature(candidate)) > 0){
+      if(lookup.count(getFunctionSignature(candidate)) > 0) {
         throw Error("Duplicate function. ", candidate->getLine());
       }
 
@@ -152,14 +152,14 @@ bool FunctionMap::hasFuncNamed(std::string name) {
   return false;
 }
 
-DataType* FunctionMap::getFunctionsNamed(std::string name){
+DataType* FunctionMap::getFunctionsNamed(std::string name) {
 
   //create a dataType to return
   DataType* retType = new DataType(TYPE_OVERLOAD);  
 
   //loop through all elements in the map
   for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
-      it != lookup.end(); it ++){
+      it != lookup.end(); it ++) {
 
     //check for a name match
     if (name == it->first.substr(0, 
