@@ -812,7 +812,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          }
                          /* if we get here, then we either haven't found any matches,
                           * or the ones that we have found don't accept the correct arguments */
-                         throw Error("No matching function.", expr->getLine()); 
+                         throw Error("No matching function." + expr->child(0)->getString() + typeToString(rhsParams), expr->getLine()); 
                        }
 
     case NODE_ACTUAL_PARAM_LIST:
