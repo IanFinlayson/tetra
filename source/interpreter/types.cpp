@@ -206,13 +206,12 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
 
   /* for classes, just check the names */
   if (lhs.getKind() == TYPE_CLASS) {
-    return lhs.className == rhs.className;
+    return *(lhs.className) == *(rhs.className);
   }
 
   /* for tuples and functions, check that they have the same
    * number of subtypes */
-  if ((lhs.subtypes->size() && rhs.subtypes->size()) 
-      && lhs.subtypes->size() != rhs.subtypes->size()){
+  if (lhs.subtypes->size() != rhs.subtypes->size()){
     return false;
   }
 
@@ -421,7 +420,7 @@ Node* getClassNode(Node* node){
 }
 
 /* find identifier */
-DataType* findIdType(Node* expr, Node* func) {
+DataType* findIdType(Node* expr, Node* func = NULL) {
   /* check if it's a lambda param first */
   /* look for lambdas first */
   Node* lambda = nextLambda(expr);
@@ -437,7 +436,7 @@ DataType* findIdType(Node* expr, Node* func) {
   } 
 
   /* if not a lambda, see if it's local to the function */
-  if (func->hasSymbol(expr->getString())){
+  if (func && func->hasSymbol(expr->getString())){
 
     /* look it up and return that type */
     Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
@@ -812,7 +811,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          }
                          /* if we get here, then we either haven't found any matches,
                           * or the ones that we have found don't accept the correct arguments */
-                         throw Error("No matching function.", expr->getLine()); 
+                         throw Error("No matching function." + expr->child(0)->getString() + typeToString(rhsParams), expr->getLine()); 
                        }
 
     case NODE_ACTUAL_PARAM_LIST:
@@ -1134,7 +1133,9 @@ void inferBlock(Node* block, Node* func) {
 
                         /* check that it matches the return type */
                         if (*ret != func->type()->subtypes->back()) {
-                          throw Error("Return value type does not match function's declared type",
+                          throw Error("Return value type '" + typeToString(ret) 
+                              + "' does not match function's declared type '" 
+                              + typeToString(&func->type()->subtypes->back()) + "'.",
                               block->getLine());
                         }
                         break;
@@ -1356,11 +1357,10 @@ void initSquared(ClassContext context) {
   std::map<std::string,Node*> inits 
     = context.removeInits();
   
-  bool hasDefault = false;
   DataType* type = new DataType(TYPE_CLASS);
   *(type->className) = context.getName();
 
-  /* loop through the inits*/
+  /* loop through any inits*/
   for (std::map<std::string, Node*>::iterator it = inits.begin(); 
     it != inits.end(); it ++) {
 
@@ -1371,16 +1371,11 @@ void initSquared(ClassContext context) {
     /* rename the functions and insert them */
     functions.insert(std::pair<string,Node*>(context.getName() 
           + it->first.substr((it->first).find_first_of("(")), it->second));
-
-    /* if the function is a default constructor... */
-    if (it->first == "init()") {
-      /* take note! */
-      hasDefault = true;
-    }
   }
-  /* if there was no default constructor... */
-  if (!hasDefault) {
-    /* make one and add it! */
+
+  /* if there were no inits... */
+  if (!inits.size()) {
+    /* make a default one and add it! */
     Node* node = new Node(NODE_FUNCTION);
     node->setStringval(context.getName());
     node->setDataType(new DataType(TYPE_FUNCTION));
@@ -1455,8 +1450,32 @@ void checkClassTypes(Node* node) {
   } else if (node->kind() == NODE_DECLARATION) {
     if (node->type()->getKind() == TYPE_CLASS 
         && !classes.count(*(node->type()->className))){
-      throw Error("Class does not exist2.", node->getLine());  
+      throw Error("Class '" + *(node->type()->className) 
+          + "' does not exist.", node->getLine());  
     } 
+  }
+}
+
+void checkParamNames(Node* node) {
+  /* if we get to a NULL CHILD, bail */
+  if (!node)
+    return;
+  /* if we have a param... */
+  if (node->kind() == NODE_DECLARATION) {
+    /* try to get its type */
+    DataType* type = findIdType(node);  
+    /* if we found a type... */
+    if (type) {
+      /* then it already exists in scope above this, so
+       * complain! */
+      throw Error("Param identifier '" +  node->getString() 
+          + "' already exists in current scope.", node->getLine());
+    }
+  /* if we have more params... */
+  } else if (node->kind() == NODE_FORMAL_PARAM_LIST) {
+    /* check them */
+    checkParamNames(node->child(0)); 
+    checkParamNames(node->child(1)); 
   }
 }
 
@@ -1466,14 +1485,16 @@ void inferFunction(Node* node){
   if (globals.count(node->getString())
       || classes.count(node->getString())) {
 
-    throw Error("Free function cannot share name with \
-        global, constant, or class.", 
+    throw Error("Free function cannot share name with global, constant, or class.", 
         node->getLine());
   }
+  /* check that any classes in params/return type exist */
+  checkClassTypes(node->child(0));
 
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
-    checkClassTypes(node->child(0));
+    /* check that any param names are not already in scope */
+    checkParamNames(node->child(0));
     inferBlock(node->child(1), node);
   } else {
     inferBlock(node->child(0),node);

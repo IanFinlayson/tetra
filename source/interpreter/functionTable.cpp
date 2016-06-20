@@ -67,11 +67,12 @@ void FunctionMap::build(Node* tree) {
       //if it has params...
       if (candidate->symtable) {
         //add the types of the formal params
-        for (std::map<std::string, Symbol>::iterator it = candidate->symtable->begin(); 
-            it != candidate->symtable->end(); it ++){
+        for (std::map<std::string, Symbol>::reverse_iterator rit 
+            = candidate->symtable->rbegin(); 
+            rit != candidate->symtable->rend(); ++rit ) {
           
           /* add them to the tuple */
-          paramTypes->subtypes->push_back(*(it->second.getType()));
+          paramTypes->subtypes->push_back(*(rit->second.getType()));
         } 
       }
 
@@ -85,7 +86,7 @@ void FunctionMap::build(Node* tree) {
       candidate->setDataType(type);
 
       //if this function is already in the table
-      if(lookup.count(getFunctionSignature(candidate)) > 0) {
+      if (lookup.count(getFunctionSignature(candidate)) > 0) {
         throw Error("Duplicate function. ", candidate->getLine());
       }
 
