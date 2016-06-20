@@ -18,7 +18,7 @@ void TetraEnvironment::initialize() {
   outputStream = &std::cout;
 }
 
-void TetraEnvironment::initialize(const ConsoleArray& console) {
+void TetraEnvironment::initialize(ConsoleArray& console) {
   maxThreads = 8;
   consoleArray_ptr = &console;
   // pthread_mutex_init(&next_thread_mutex, NULL);
@@ -35,15 +35,15 @@ ostream& TetraEnvironment::getOutputStream() { return *outputStream; }
 
 int TetraEnvironment::getMaxThreads() { return maxThreads; }
 
-void TetraEnvironment::setConsoleArray(const ConsoleArray& pConsole) {
+void TetraEnvironment::setConsoleArray(ConsoleArray& pConsole) {
   consoleArray_ptr = &pConsole;
 }
 
-const ConsoleArray& TetraEnvironment::getConsoleArray() {
+ConsoleArray& TetraEnvironment::getConsoleArray() {
   return *consoleArray_ptr;
 }
 
-const VirtualConsole& TetraEnvironment::getConsole(int thread, bool debug) {
+VirtualConsole& TetraEnvironment::getConsole(int thread, bool debug) {
   return consoleArray_ptr->getSpecifiedConsole(thread, debug);
 }
 
@@ -69,7 +69,7 @@ int TetraEnvironment::obtainNewThreadID() {
 
 pthread_mutex_t TetraEnvironment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
 long TetraEnvironment::nextThreadID = 0;
-ConsoleArray const* TetraEnvironment::consoleArray_ptr = NULL;
+ConsoleArray* TetraEnvironment::consoleArray_ptr = NULL;
 int TetraEnvironment::maxThreads = 8;
 bool TetraEnvironment::debugMode = false;
 ostream* TetraEnvironment::outputStream = &std::cout;

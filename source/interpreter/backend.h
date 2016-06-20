@@ -1433,10 +1433,10 @@ class VirtualObserver {
 class TetraEnvironment {
  public:
   static void initialize();
-  static void initialize(const ConsoleArray&);
-  static void setConsoleArray(const ConsoleArray&);
-  static const ConsoleArray& getConsoleArray();
-  static const VirtualConsole& getConsole(int, bool);
+  static void initialize(ConsoleArray&);
+  static void setConsoleArray(ConsoleArray&);
+  static ConsoleArray& getConsoleArray();
+  static VirtualConsole& getConsole(int, bool);
   static int getMaxThreads();
   static void setMaxThreads(int);
   static ostream& getOutputStream();
@@ -1451,7 +1451,7 @@ class TetraEnvironment {
  private:
   static int maxThreads;
   static ostream* outputStream;
-  static ConsoleArray const* consoleArray_ptr;
+  static ConsoleArray* consoleArray_ptr;
   static VirtualObserver* observer;
   static bool debugMode;
   static long nextThreadID;
