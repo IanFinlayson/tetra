@@ -157,7 +157,7 @@
    <addaction name="menuDebug"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="dock">
    <property name="styleSheet">
     <string notr="true"/>
    </property>

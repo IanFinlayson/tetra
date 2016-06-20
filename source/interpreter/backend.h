@@ -1380,10 +1380,10 @@ class VirtualConsole {
  public:
   // Used to input standard input. Implementation should return the user input
   // as a string
-  virtual std::string receiveStandardInput() const = 0;
+  virtual std::string receiveStandardInput() = 0;
   // Used for standard output. Argument is a string containing what the Tetra
   // Program is requesting to output.
-  virtual void processStandardOutput(const std::string) const = 0;
+  virtual void processStandardOutput(const std::string&) = 0;
 };
 
 class ConsoleArray {
@@ -1460,9 +1460,9 @@ class TetraEnvironment {
 
 class CommandConsole : public VirtualConsole {
  public:
-  std::string receiveStandardInput() const;
+  std::string receiveStandardInput();
 
-  void processStandardOutput(const std::string output) const;
+  void processStandardOutput(const std::string& output);
 };
 
 #endif

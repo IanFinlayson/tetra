@@ -1,7 +1,7 @@
 #include <sstream>
 #include "backend.h"
 
-std::string CommandConsole::receiveStandardInput() const {
+std::string CommandConsole::receiveStandardInput() {
   std::string input;
 
   std::cin >> input;
@@ -9,7 +9,7 @@ std::string CommandConsole::receiveStandardInput() const {
   return input;
 }
 
-void CommandConsole::processStandardOutput(const std::string output) const {
+void CommandConsole::processStandardOutput(const std::string& output) {
   std::cout << output;
 }
 

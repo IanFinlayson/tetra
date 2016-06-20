@@ -27,6 +27,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     statusBar()->showMessage("Ready.");
     setupShortcuts();
 
+    setWindowIcon(QIcon(":/icons/resources/icons/logo.svg"));
+
     tetraThread = new QThread;
     fileRunner = new FileRunner(this);
     mainValue = 0;
@@ -323,15 +325,34 @@ void MainWindow::on_actionFind_triggered() {
     msgBox.exec();
 }
 
+/* help and about functions */
+void MainWindow::on_actionAbout_Tetra_triggered() {
+    QMessageBox::about(this, "About Tetra", "sdjfhskf\nsdfjhsdj sdjfh sdf sdjfsd jsdf ");
+}
+
+void MainWindow::on_actionDocumentation_triggered() {
+}
+
+/* run and debug functions */
 void MainWindow::on_actionDebug_triggered() {
+    /* make sure the bottom dock is shown */
+    ui->dock->show();
+
+    /* test getting input */ 
+    std::string resp = ui->console->receiveStandardInput();
+
     QMessageBox msgBox;
-    msgBox.setText("TODO");
+    msgBox.setText(resp.c_str());
     msgBox.exec();
 }
 
 void MainWindow::on_actionRun_triggered() {
     static int time = 1;
     char msg[256];
+
+    /* make sure the bottom dock is shown */
+    ui->dock->show();
+
     sprintf(msg, "Hello #%d\n", time++);
     ui->console->processStandardOutput(msg);
 }

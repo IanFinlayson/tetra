@@ -25,8 +25,8 @@ class Console : public QPlainTextEdit, public VirtualConsole {
     void setUpConnections(MainWindow* parent);
 
     /* functions for communicating with tetra I/O */
-    std::string receiveStandardInput() const;
-    void processStandardOutput(const std::string text) const;
+    std::string receiveStandardInput();
+    void processStandardOutput(const std::string& text);
 
 
   protected:
