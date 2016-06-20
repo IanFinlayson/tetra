@@ -138,7 +138,7 @@ Node* parseFile(const string& fname);
              background lock_statement index vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
-             init_function lvalue type_decs lambdaterm in
+             init_function lvalue type_decs lambdaterm
 
 %type <data_type> return_type type type_dec_tuple function_type dict_type
 
@@ -541,36 +541,22 @@ elif_clause: TOK_ELIF expression TOK_COLON block {
 }
 
 /* a for loop */
-for_statement: TOK_FOR in TOK_COLON block {
+for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
   $$ = new Node(NODE_FOR);
-  if ($2->child(0)->kind() != NODE_IDENTIFIER) {
-    throw Error("For loop iterator must be identifier.", yylineno);
-  }
-  $$->addChild($2->child(0));
-  $$->addChild($2->child(1));
+  $$->addChild($2);
   $$->addChild($4);
+  $$->addChild($6);
   $$->setLine($1);
 }
 
 /* a parallel for loop */
-parfor: TOK_PARALLEL TOK_FOR in TOK_COLON block {
+parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
   $$ = new Node(NODE_PARFOR);
-  if ($3->child(0)->kind() != NODE_IDENTIFIER) {
-    throw Error("For loop iterator must be identifier.", yylineno);
-  }
-  $$->addChild($3->child(0));
-  $$->addChild($3->child(1));
+  $$->addChild($3);
   $$->addChild($5);
+  $$->addChild($7);
   $$->setLine($1);
 }
-
-/* in operator */
-in: expression TOK_IN expression {
-  $$ = new Node(NODE_IN);
-  $$->addChild($1);
-  $$->addChild($3);
-}
-
 
 /* a while loop */
 while_statement: TOK_WHILE expression TOK_COLON block {
@@ -799,6 +785,10 @@ notterm: notterm TOK_LT relterm {
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
+} | notterm TOK_IN relterm {
+  $$ = new Node(NODE_IN);
+  $$->addChild($1);
+  $$->addChild($3);
 } | relterm {
   $$ = $1;
 }
@@ -950,8 +940,6 @@ rvalue: funcall {
 } | TOK_SELF { 
   $$ = new Node(NODE_SELF);
 } | lvalue {
-  $$ = $1;
-} | in {
   $$ = $1;
 }
 
