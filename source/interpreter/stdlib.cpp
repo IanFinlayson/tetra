@@ -21,7 +21,7 @@ void print(const Node* args, TetraContext& context) {
   // If args is an expression, actually print it!
   else {
     std::stringstream formattedData;
-    const VirtualConsole& console =
+    VirtualConsole& console =
         TetraEnvironment::getConsole(context.getThreadID(), false);
     switch (args->type()->getKind()) {
       case TYPE_INT: {

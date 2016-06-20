@@ -26,3 +26,4 @@ class FileRunner : public QObject {
 };
 
 #endif
+

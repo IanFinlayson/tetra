@@ -21,8 +21,7 @@ DEPENDPATH += $$PWD/../interpreter
 
 # link to the tetra interpreter library
 # temporarily use the one in this dir...
-#PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
-PRE_TARGETDEPS += $$PWD/libtetra.a
+PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
 LIBS += -L$$PWD/../interpreter/ -ltetra
 
 # add target to reformat code

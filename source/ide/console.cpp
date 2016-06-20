@@ -15,6 +15,7 @@ Console::Console(MainWindow* parent) : QPlainTextEdit(parent), VirtualConsole() 
     /* set to a monospaced font */
     QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPointSize(14);
+    font.setBold(true);
     QFontMetrics metrics(font);
     setFont(font);
 
@@ -27,11 +28,16 @@ void Console::setUpConnections(MainWindow* parent) {
     this->parent = parent;
 }
 
-std::string Console::receiveStandardInput() const {
-    return "hi";
+std::string Console::receiveStandardInput() {
+    /* make it writeable */
+    setReadOnly(false);
+
+    setFocus(Qt::OtherFocusReason);
+
+    return "42";
 }
 
-void Console::processStandardOutput(const std::string text) const {
+void Console::processStandardOutput(const std::string& text) {
     QTextCursor* cursor = new QTextCursor(document());
     cursor->movePosition(QTextCursor::End);
     cursor->insertText(QString(text.c_str()));

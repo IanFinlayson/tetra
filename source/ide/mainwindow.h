@@ -65,42 +65,44 @@ class MainWindow : public QMainWindow {
     void on_actionNew_triggered();
     void on_actionFind_triggered();
     void on_actionClose_triggered();
+    void on_actionAbout_Tetra_triggered();
+    void on_actionDocumentation_triggered();
 
-    void documentWasModified();
-    void updateCoordinates();
+        void documentWasModified();
+        void updateCoordinates();
 
-    void on_actionRun_triggered();
-    void on_actionDebug_triggered();
+        void on_actionRun_triggered();
+        void on_actionDebug_triggered();
 
-    void on_actionStep_triggered();
-    void on_actionContinue_triggered();
-    void on_actionNext_triggered();
-    void on_actionStop_triggered();
+        void on_actionStep_triggered();
+        void on_actionContinue_triggered();
+        void on_actionNext_triggered();
+        void on_actionStop_triggered();
 
-  private:
+        private:
 
-    void setupShortcuts();
-    Editor* currentEditor();
+        void setupShortcuts();
+        Editor* currentEditor();
 
-    QSignalMapper* windowMapper;
-    void setupThreadMdi();
+        QSignalMapper* windowMapper;
+        void setupThreadMdi();
 
-    QString strippedName(const QString& fullFileName);
+        QString strippedName(const QString& fullFileName);
 
-    bool maybeSave();
-    int mainValue;
-    bool buildSuccessful;
+        bool maybeSave();
+        int mainValue;
+        bool buildSuccessful;
 
-    QString mode;
-    FileRunner* fileRunner;
-    QThread* tetraThread;
+        QString mode;
+        FileRunner* fileRunner;
+        QThread* tetraThread;
 
-    QLabel* coords;
+        QLabel* coords;
 
-    void createStatusBar();
+        void createStatusBar();
 
-  protected:
-    void closeEvent(QCloseEvent*);
-};
+        protected:
+        void closeEvent(QCloseEvent*);
+    };
 
 #endif  // MAINWINDOW_H

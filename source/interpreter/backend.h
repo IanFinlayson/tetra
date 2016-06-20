@@ -1380,10 +1380,10 @@ class VirtualConsole {
  public:
   // Used to input standard input. Implementation should return the user input
   // as a string
-  virtual std::string receiveStandardInput() const = 0;
+  virtual std::string receiveStandardInput() = 0;
   // Used for standard output. Argument is a string containing what the Tetra
   // Program is requesting to output.
-  virtual void processStandardOutput(const std::string) const = 0;
+  virtual void processStandardOutput(const std::string&) = 0;
 };
 
 class ConsoleArray {
@@ -1433,10 +1433,10 @@ class VirtualObserver {
 class TetraEnvironment {
  public:
   static void initialize();
-  static void initialize(const ConsoleArray&);
-  static void setConsoleArray(const ConsoleArray&);
-  static const ConsoleArray& getConsoleArray();
-  static const VirtualConsole& getConsole(int, bool);
+  static void initialize(ConsoleArray&);
+  static void setConsoleArray(ConsoleArray&);
+  static ConsoleArray& getConsoleArray();
+  static VirtualConsole& getConsole(int, bool);
   static int getMaxThreads();
   static void setMaxThreads(int);
   static ostream& getOutputStream();
@@ -1451,7 +1451,7 @@ class TetraEnvironment {
  private:
   static int maxThreads;
   static ostream* outputStream;
-  static ConsoleArray const* consoleArray_ptr;
+  static ConsoleArray* consoleArray_ptr;
   static VirtualObserver* observer;
   static bool debugMode;
   static long nextThreadID;
@@ -1460,9 +1460,9 @@ class TetraEnvironment {
 
 class CommandConsole : public VirtualConsole {
  public:
-  std::string receiveStandardInput() const;
+  std::string receiveStandardInput();
 
-  void processStandardOutput(const std::string output) const;
+  void processStandardOutput(const std::string& output);
 };
 
 #endif
