@@ -1456,14 +1456,36 @@ void checkClassTypes(Node* node) {
   }
 }
 
+void checkParamNames(Node* node, Node* func) {
+  /* if we get to a NULL CHILD, bail */
+  if (!node)
+    return;
+  /* if we have a param... */
+  if (node->kind() == NODE_DECLARATION) {
+    /* try to get its type */
+    DataType* type = findIdType(node,func);  
+    /* if we found a type... */
+    if (type) {
+      /* then it already exists in scope above this, so
+       * complain! */
+      throw Error("Param identifier '" +  node->getString() 
+          + "' already exists in current scope.", node->getLine());
+    }
+  /* if we have more params... */
+  } else if (node->kind() == NODE_FORMAL_PARAM_LIST) {
+    /* check them */
+    checkParamNames(node->child(0), func); 
+    checkParamNames(node->child(1), func); 
+  }
+}
+
 void inferFunction(Node* node){
   /* make sure that this function does not share a name
    * with a global or a class */
   if (globals.count(node->getString())
       || classes.count(node->getString())) {
 
-    throw Error("Free function cannot share name with \
-        global, constant, or class.", 
+    throw Error("Free function cannot share name with global, constant, or class.", 
         node->getLine());
   }
   /* check that any classes in params/return type exist */
@@ -1471,6 +1493,8 @@ void inferFunction(Node* node){
 
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
+    /* check that any param names are not already in scope */
+    checkParamNames(node->child(0), node);
     inferBlock(node->child(1), node);
   } else {
     inferBlock(node->child(0),node);
