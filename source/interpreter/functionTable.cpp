@@ -86,7 +86,7 @@ void FunctionMap::build(Node* tree) {
       candidate->setDataType(type);
 
       //if this function is already in the table
-      if(lookup.count(getFunctionSignature(candidate)) > 0) {
+      if (lookup.count(getFunctionSignature(candidate)) > 0) {
         throw Error("Duplicate function. ", candidate->getLine());
       }
 

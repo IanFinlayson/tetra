@@ -206,7 +206,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
 
   /* for classes, just check the names */
   if (lhs.getKind() == TYPE_CLASS) {
-    return lhs.className == rhs.className;
+    return *(lhs.className) == *(rhs.className);
   }
 
   /* for tuples and functions, check that they have the same
@@ -1133,7 +1133,9 @@ void inferBlock(Node* block, Node* func) {
 
                         /* check that it matches the return type */
                         if (*ret != func->type()->subtypes->back()) {
-                          throw Error("Return value type does not match function's declared type",
+                          throw Error("Return value type '" + typeToString(ret) 
+                              + "' does not match function's declared type '" 
+                              + typeToString(&func->type()->subtypes->back()) + "'.",
                               block->getLine());
                         }
                         break;
@@ -1448,7 +1450,8 @@ void checkClassTypes(Node* node) {
   } else if (node->kind() == NODE_DECLARATION) {
     if (node->type()->getKind() == TYPE_CLASS 
         && !classes.count(*(node->type()->className))){
-      throw Error("Class does not exist2.", node->getLine());  
+      throw Error("Class '" + *(node->type()->className) 
+          + "' does not exist.", node->getLine());  
     } 
   }
 }
@@ -1463,10 +1466,11 @@ void inferFunction(Node* node){
         global, constant, or class.", 
         node->getLine());
   }
+  /* check that any classes in params/return type exist */
+  checkClassTypes(node->child(0));
 
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
-    checkClassTypes(node->child(0));
     inferBlock(node->child(1), node);
   } else {
     inferBlock(node->child(0),node);
