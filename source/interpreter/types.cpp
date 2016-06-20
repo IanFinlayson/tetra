@@ -99,6 +99,14 @@ bool ClassContext::hasMethod(DataType* type, std::string name) {
 }
 
 void ClassContext::addMember(Symbol sym) {
+  /* if this context already has the member... */
+  if (members.count(sym.getName())) {
+    /* COMPLAIN ! */
+    throw Error("Class '" + this->name 
+        + "' already has member named '" 
+        + sym.getName() + "'.", sym.getLine());
+  }
+  /* otherwise, add it */
   members[sym.getName()] = sym; 
 }
 
@@ -1333,8 +1341,9 @@ void addStls() {
  * may have members that are dependent on
  * classes that have not been seen yet.)*/
 void addMembers(ClassContext* context, Node* node) {
-  /* add this part */
+  /* if this node is for a member var... */
   if (node->kind() == NODE_IDENTIFIER) {
+    /* add it */
     context->addMember(Symbol(node->getString(), node->type(), 
           node->getLine())); 
   } else if (node->kind() == NODE_CLASS_PART) {
@@ -1514,7 +1523,13 @@ void inferClass(Node* node) {
     }
   } else if (node->kind() == NODE_IDENTIFIER) {
     checkClassTypes(node);
-
+    /* make sure that the identifier doesn't already exist */
+    if (globals.count(node->getString()) 
+        || classes.count(node->getString())
+        || functions.hasFuncNamed(node->getString())) {
+      throw Error("Member identifier '" +  node->getString() 
+          + "' already exists in current scope.", node->getLine());
+    }
   } else if (node->kind() == NODE_FUNCTION) {
     inferFunction(node);
   } 
