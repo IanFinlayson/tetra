@@ -420,7 +420,7 @@ Node* getClassNode(Node* node){
 }
 
 /* find identifier */
-DataType* findIdType(Node* expr, Node* func) {
+DataType* findIdType(Node* expr, Node* func = NULL) {
   /* check if it's a lambda param first */
   /* look for lambdas first */
   Node* lambda = nextLambda(expr);
@@ -436,7 +436,7 @@ DataType* findIdType(Node* expr, Node* func) {
   } 
 
   /* if not a lambda, see if it's local to the function */
-  if (func->hasSymbol(expr->getString())){
+  if (func && func->hasSymbol(expr->getString())){
 
     /* look it up and return that type */
     Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
@@ -1456,14 +1456,14 @@ void checkClassTypes(Node* node) {
   }
 }
 
-void checkParamNames(Node* node, Node* func) {
+void checkParamNames(Node* node) {
   /* if we get to a NULL CHILD, bail */
   if (!node)
     return;
   /* if we have a param... */
   if (node->kind() == NODE_DECLARATION) {
     /* try to get its type */
-    DataType* type = findIdType(node,func);  
+    DataType* type = findIdType(node);  
     /* if we found a type... */
     if (type) {
       /* then it already exists in scope above this, so
@@ -1474,8 +1474,8 @@ void checkParamNames(Node* node, Node* func) {
   /* if we have more params... */
   } else if (node->kind() == NODE_FORMAL_PARAM_LIST) {
     /* check them */
-    checkParamNames(node->child(0), func); 
-    checkParamNames(node->child(1), func); 
+    checkParamNames(node->child(0)); 
+    checkParamNames(node->child(1)); 
   }
 }
 
@@ -1494,7 +1494,7 @@ void inferFunction(Node* node){
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
     /* check that any param names are not already in scope */
-    checkParamNames(node->child(0), node);
+    checkParamNames(node->child(0));
     inferBlock(node->child(1), node);
   } else {
     inferBlock(node->child(0),node);
