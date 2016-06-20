@@ -1510,8 +1510,6 @@ void inferFunction(Node* node){
   }
 }
 
-
-
 /* infer types for class declaration */
 void inferClass(Node* node) {
   if (node->kind() == NODE_CLASS){

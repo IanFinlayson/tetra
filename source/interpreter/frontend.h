@@ -70,6 +70,7 @@ enum NodeKind {
   NODE_EXP,
   NODE_VECRANGE,
   NODE_INDEX,
+  NODE_IN,
 
   /* function call */
   NODE_FUNCALL,
