@@ -211,8 +211,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
 
   /* for tuples and functions, check that they have the same
    * number of subtypes */
-  if ((lhs.subtypes->size() && rhs.subtypes->size()) 
-      && lhs.subtypes->size() != rhs.subtypes->size()){
+  if (lhs.subtypes->size() != rhs.subtypes->size()){
     return false;
   }
 
@@ -1356,11 +1355,10 @@ void initSquared(ClassContext context) {
   std::map<std::string,Node*> inits 
     = context.removeInits();
   
-  bool hasDefault = false;
   DataType* type = new DataType(TYPE_CLASS);
   *(type->className) = context.getName();
 
-  /* loop through the inits*/
+  /* loop through any inits*/
   for (std::map<std::string, Node*>::iterator it = inits.begin(); 
     it != inits.end(); it ++) {
 
@@ -1371,16 +1369,11 @@ void initSquared(ClassContext context) {
     /* rename the functions and insert them */
     functions.insert(std::pair<string,Node*>(context.getName() 
           + it->first.substr((it->first).find_first_of("(")), it->second));
-
-    /* if the function is a default constructor... */
-    if (it->first == "init()") {
-      /* take note! */
-      hasDefault = true;
-    }
   }
-  /* if there was no default constructor... */
-  if (!hasDefault) {
-    /* make one and add it! */
+
+  /* if there were no inits... */
+  if (!inits.size()) {
+    /* make a default one and add it! */
     Node* node = new Node(NODE_FUNCTION);
     node->setStringval(context.getName());
     node->setDataType(new DataType(TYPE_FUNCTION));
