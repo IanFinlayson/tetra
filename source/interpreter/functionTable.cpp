@@ -50,11 +50,11 @@ FunctionMap::FunctionMap() {
 void FunctionMap::build(Node* tree) {
   if (tree->kind() == NODE_TOPLEVEL_LIST 
       || tree->kind() == NODE_CLASS_PART) {
-    
+
     // by frontend specifications, there MUST be a child to add
     Node* candidate = tree->child(0);
     if (candidate->kind() == NODE_FUNCTION) {
-      
+
       //add the params to the sym table
       inferParams(candidate); 
 
@@ -70,7 +70,7 @@ void FunctionMap::build(Node* tree) {
         for (std::map<std::string, Symbol>::reverse_iterator rit 
             = candidate->symtable->rbegin(); 
             rit != candidate->symtable->rend(); ++rit ) {
-          
+
           /* add them to the tuple */
           paramTypes->subtypes->push_back(*(rit->second.getType()));
         } 
@@ -173,7 +173,7 @@ DataType* FunctionMap::getFunctionsNamed(std::string name) {
   //If there are no subtypes, return null
   if (retType->subtypes->size() == 0) {
     retType = NULL;
-  //If there is one, just return that one
+    //If there is one, just return that one
   } else if (retType->subtypes->size() == 1) {
     retType = &((*(retType->subtypes))[0]);
   }
@@ -189,7 +189,7 @@ bool FunctionMap::hasFunction(DataType* type, std::string name) {
 }
 
 void optimizeFunction(Node* base, Node** funcs,
-                      std::map<std::string, Node*>& lookup) {
+    std::map<std::string, Node*>& lookup) {
   if (base->kind() == NODE_FUNCALL) {
     for (unsigned int index = 0; index < lookup.size(); index++) {
       std::string name = base->getString();
@@ -209,7 +209,7 @@ void optimizeFunction(Node* base, Node** funcs,
       } else if (name == "len") {
         base->setIntval(5);
       } else if (lookup[FunctionMap::getFunctionSignature(base)] ==
-                 funcs[index]) {
+          funcs[index]) {
         // The earliest numbers are reserved for Tetra Standard Library
         // Functions
         // Integers for user-defined functions will start with the number after
@@ -230,7 +230,7 @@ void FunctionMap::optimizeFunctionLookup(Node* start) {
   functionLookup = new Node*[numFuncs];
   int count = 0;
   for (std::map<std::string, Node*>::iterator iter = lookup.begin();
-       iter != lookup.end(); iter++) {
+      iter != lookup.end(); iter++) {
     functionLookup[count] = iter->second;
     count++;
   }
@@ -243,7 +243,7 @@ void FunctionMap::optimizeFunctionLookup(Node* start) {
 // Fills the numerical field of each variable node to a value referencing where
 // it will be held in the variable scope table
 void optimize(Node* node, std::map<std::string, int>& refer, int& nextNum,
-              std::map<std::string, int>& globRefer) {
+    std::map<std::string, int>& globRefer) {
   // If the node is a variable identifier, give it a numerical value
   if (node->kind() == NODE_IDENTIFIER || node->kind() == NODE_DECLARATION) {
     std::string name = node->getString();
@@ -312,8 +312,8 @@ void FunctionMap::optimizeLookup(const Node* start) {
 
   // typedef std::pair<const std::string, Node*> mapElem;
   for (std::map<const string, Node*>::iterator searcher =
-           lookup.begin();
-       searcher != lookup.end(); searcher++) {
+      lookup.begin();
+      searcher != lookup.end(); searcher++) {
     std::map<std::string, int> refer;
     int nextNum = 1;
     optimize(searcher->second, refer, nextNum, globRef);
@@ -384,8 +384,8 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
             default:
               std::stringstream message;
               message << "Error, unknown nodekind encountered in function "
-                         "signature."
-                      << std::endl;
+                "signature."
+                << std::endl;
               SystemError e(message.str(), node->getLine(), node);
               throw e;
           }
@@ -394,7 +394,7 @@ void FunctionMap::concatSignature(const Node* node, string& signature) {
       default:
         std::stringstream message;
         message << "Error, unknown nodekind encountered in function signature."
-                << std::endl;
+          << std::endl;
         SystemError e(message.str(), node->getLine(), node);
         throw e;
     }

@@ -138,7 +138,7 @@ Node* parseFile(const string& fname);
              background lock_statement index vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
-             init_function lvalue type_decs lambdaterm
+             init_function lvalue type_decs lambdaterm interm
 
 %type <data_type> return_type type type_dec_tuple function_type dict_type
 
@@ -785,10 +785,6 @@ notterm: notterm TOK_LT relterm {
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
-} | notterm TOK_IN relterm {
-  $$ = new Node(NODE_IN);
-  $$->addChild($1);
-  $$->addChild($3);
 } | relterm {
   $$ = $1;
 }
@@ -892,12 +888,22 @@ timesterm: TOK_PLUS timesterm {
 }
 
 /* exponent operator - this is right associative!!! */
-unaryterm: expterm TOK_EXP unaryterm {
+unaryterm: interm TOK_EXP unaryterm {
   $$ = new Node(NODE_EXP);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
-} | expterm {
+} | interm {
+  $$ = $1;
+}
+
+/* in operator */
+interm: interm TOK_IN expterm {
+  $$ = new Node(NODE_IN);
+  $$->addChild($1);
+  $$->addChild($3);
+  $$->setLine($2);
+} |expterm {
   $$ = $1;
 }
 
