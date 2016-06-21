@@ -428,15 +428,16 @@ Node* getClassNode(Node* node){
 }
 
 /* find identifier */
-DataType* findIdType(Node* expr, Node* func = NULL) {
+Symbol* findIdSym(Node* expr, Node* func = NULL) {
   /* check if it's a lambda param first */
   /* look for lambdas first */
   Node* lambda = nextLambda(expr);
+  Symbol* sym = NULL;
   while (lambda) {
-    /* if we found the identifier, return it's type */
+    /* if we found the identifier, get its symbol*/
     if(lambda->hasSymbol(expr->getString())) {
-      return lambda->lookupSymbol(
-          expr->getString(), lambda->getLine()).getType();     
+      *sym = lambda->lookupSymbol(
+          expr->getString(), lambda->getLine());     
     }
 
     /* otherwise, go to the next lambda up */
@@ -446,40 +447,40 @@ DataType* findIdType(Node* expr, Node* func = NULL) {
   /* if not a lambda, see if it's local to the function */
   if (func && func->hasSymbol(expr->getString())){
 
-    /* look it up and return that type */
-    Symbol sym = func->lookupSymbol(expr->getString(), expr->getLine());
-    return sym.getType();
+    /* look it up */
+    *sym = func->lookupSymbol(expr->getString(), expr->getLine());
 
   /* if it is in a class, check there for a member var*/
   } else if (getClassNode(expr) 
       && classes[getClassNode(expr)->getString()].hasMember(expr->getString())) {
 
-    Symbol sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
-    return sym.getType();
+    *sym = classes[getClassNode(expr)->getString()].getMember(expr->getString()); 
 
   /* if it is in a class, check there for a method */
   } else if (getClassNode(expr) 
       && classes[getClassNode(expr)->getString()].hasMethodNamed(expr->getString())) {
 
     /* get all the methods */
-    return classes[getClassNode(expr)->getString()].getMethods(expr->getString()); 
+    sym = new Symbol(expr->getString(), 
+        classes[getClassNode(expr)->getString()].getMethods(expr->getString()),
+        expr->getLine(), true); 
 
   /* next check for globals/constants */
   } else if (globals.count(expr->getString()) > 0) {
-     
-    /* look it up and return that type */
-    Symbol sym = globals[expr->getString()];
-    return sym.getType();
+      
+    /* look it up */
+    *sym = globals[expr->getString()];
 
   /* next check if it's the name of a free function */
   } else if (functions.hasFuncNamed(expr->getString())) {
 
-    /* look it up and return that type */
-    return functions.getFunctionsNamed(expr->getString());
-
-  } else {
-    return NULL;
+    /* look it up */
+    sym = new Symbol(expr->getString(), 
+        functions.getFunctionsNamed(expr->getString()),
+        expr->getLine(), true); 
   }
+  /* return the thing we found (or NULL) */
+  return sym;
 }
 
 /* infer the types of an expression, and also return the type */
@@ -499,12 +500,12 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* if the left hand side is an identifier... */
                         if (expr->child(0)->kind() == NODE_IDENTIFIER) {
                           /* check if it exists */
+                          Symbol* sym = findIdSym(expr->child(0), func);
                           /* check this function first */
-                          if (func->hasSymbol(expr->child(0)->getString())){
+                          if (func->hasSymbol(expr->child(0)->getString())) {
                             /* set lhs equal to the type of the existing local identifier */
                             lhs = func->lookupSymbol(expr->child(0)->getString(), 
                                 expr->getLine()).getType();
-
 
                             /* check globals next */
                           } else if (globals.count(expr->child(0)->getString()) > 0) {
@@ -884,7 +885,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               }
 
                               /* if the identifier already exists... */
-                              if (findIdType(expr, func)) {
+                              if (findIdSym(expr, func)) {
                                 /* complain! */
                                 throw Error("The identifier '" + expr->getString() 
                                     + "' already exists.",expr->getLine());
@@ -899,17 +900,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             } 
                             /* otherwise, if it doesn't already have a type... */
                             /* if the id already exists, get its type */
-                            DataType* type = findIdType(expr, func);
+                            Symbol* sym = findIdSym(expr, func);
 
                             /* if we didn't find it... */
-                            if (!type) {
+                            if (!sym) {
                               /* complain! */
                               throw Error("Reference to non-existent identifier '" 
                                   + expr->getString() + "'.", expr->getLine());
                             } 
 
                             /* otherwise, return the type */
-                            return type;
+                            return sym->getType();
 
                           }
 
@@ -1126,32 +1127,33 @@ void checkMuTasks(Node* block, Node* func) {
   /* if there are two children or it's a wait block, it's named */
   if (block->child(1) || block->kind() == NODE_WAIT){
     /* check if the identifier exists */
-    DataType* type = NULL;
-    type = findIdType(block->child(0), func);
+    Symbol* sym = NULL;
+    sym = findIdSym(block->child(0), func);
 
     /* if the identifier doesn't exist yet 
      * and it's not a wait node*/ 
-    if (!type && block->kind() != NODE_WAIT){
+    if (!sym && block->kind() != NODE_WAIT){
+      /* make a symbol for it */
+      sym = new Symbol(block->child(0)->getString(), 
+            new DataType(kind), block->child(0)->getLine());
       /* add to this function's symtable */
-      type = new DataType(kind);
-      func->insertSymbol(Symbol(block->child(0)->getString(), 
-            type, block->child(0)->getLine()));  
+      func->insertSymbol(*sym);  
 
       /* if the identifier doesn't exist and it
        * is a wait node*/
-    } else if (!type) {
+    } else if (!sym) {
       throw Error("Cannot wait for task that has not been created",
           block->child(0)->getLine());
     }
 
     /* if the type is wrong... */
-    if (type->getKind() != kind){
+    if (sym->getType()->getKind() != kind) {
       throw Error("Task or mutex identifier has improper type.", 
           block->child(0)->getLine());
     }
 
     /* set the type */
-    block->child(0)->setDataType(type);
+    block->child(0)->setDataType(sym->getType());
 
     /* if there is a block ... */
     if (block->child(1)) {
@@ -1519,10 +1521,10 @@ void checkParamNames(Node* node) {
     return;
   /* if we have a param... */
   if (node->kind() == NODE_DECLARATION) {
-    /* try to get its type */
-    DataType* type = findIdType(node);  
-    /* if we found a type... */
-    if (type) {
+    /* try to get its symbol */
+    Symbol* sym = findIdSym(node);  
+    /* if we found a symbol... */
+    if (sym) {
       /* then it already exists in scope above this, so
        * complain! */
       throw Error("Param identifier '" +  node->getString() 
