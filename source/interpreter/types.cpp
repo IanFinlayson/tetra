@@ -62,7 +62,7 @@ string typeToString(DataType* t) {
                       /* if the tuple has more than one element ... */
                       if(t->subtypes->size() > 1)
                         /* then get rid of the trailing comma */
-                        typeString[typeString.size()-1] = '\0';
+                        typeString = typeString.substr(0,typeString.size()-2);
 
                       return typeString + ")";
                     }
@@ -885,7 +885,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          }
                          /* if we get here, then we either haven't found any matches,
                           * or the ones that we have found don't accept the correct arguments */
-                         throw Error("No matching function." + expr->child(0)->getString() + typeToString(rhsParams), expr->getLine()); 
+                         throw Error("No matching function for: '" 
+                             + expr->child(0)->getString() + typeToString(rhsParams)
+                             + "'.", expr->getLine()); 
                        }
 
     case NODE_ACTUAL_PARAM_LIST:
