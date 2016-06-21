@@ -476,7 +476,7 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
     }
 
     /* otherwise, go to the next lambda up */
-    lambda = nextLambda(expr);
+    lambda = nextLambda(lambda);
   } 
 
   /* if not a lambda, see if it's local to the function */
