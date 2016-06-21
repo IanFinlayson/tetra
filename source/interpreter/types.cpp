@@ -538,7 +538,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           /* try to find the id */
                           Symbol* sym = findIdSym(expr->child(0), func);
                           /* if it doesn't exist  and it IS inferable...*/
-                          if (!sym && rhs->isEmptyContainerType()) {
+                          if (!sym && !rhs->isEmptyContainerType()) {
                               /* infer it! */ 
                               lhs = rhs;
                               func->insertSymbol(*new Symbol(expr->child(0)->getString(),
