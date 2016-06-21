@@ -465,11 +465,14 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
   /* look for lambdas first */
   Node* lambda = nextLambda(expr);
   Symbol* sym = new Symbol();
-  while (lambda) {
+  bool found = false;
+  while (lambda && !found) {
     /* if we found the identifier, get its symbol*/
     if(lambda->hasSymbol(expr->getString())) {
       *sym = lambda->lookupSymbol(
           expr->getString(), lambda->getLine());     
+
+      found = true;
     }
 
     /* otherwise, go to the next lambda up */
@@ -650,19 +653,21 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                     /* if the container on the right is a dictionary or a vector... */
                     if (rhs->getKind() == TYPE_VECTOR || rhs->getKind() == TYPE_DICT) {
+
                       /* make sure that the vector subtype/ dictionary key type matches the
                        * type of the left operand */
                       if (*lhs != ((*(rhs->subtypes))[0])) {
                         /* otherwise, complain */
                         throw Error("Mismatched operands to 'in' operator."
                             , expr->getLine());
-                      }
                       /* if we got here then it matched */
-                      return new DataType(TYPE_BOOL);
-                    }
+                      } else {
+                        return new DataType(TYPE_BOOL);
+                      }
 
                     /* if the container on the right is a tuple... */
-                    if (rhs->getKind() == TYPE_TUPLE ) {
+                    } else if (rhs->getKind() == TYPE_TUPLE ) {
+
                       /* look through the types of each of its elements */
                       for (long unsigned i = 0; i < rhs->subtypes->size(); i++) {
                         /* if one type matches the left side... */
@@ -670,26 +675,28 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           /* then it passes type checking */
                           return new DataType(TYPE_BOOL); 
                         }
-                      }
                       /* if we get here, then the tuple doesn't have any
                        * element that is the same type as the left operand */
-                        throw Error("Mismatched operands to 'in' operator."
-                           , expr->getLine());
-                    }
+                      }
+                        throw Error("Mismatched operands to 'in' operator.",
+                           expr->getLine());
+
                     /* if the left side is a string */
-                    if (rhs->getKind() == TYPE_STRING) {
+                    } else if (rhs->getKind() == TYPE_STRING) {
                       /* make sure the right side is too */
                       if (lhs->getKind() == TYPE_STRING) {
                         return new DataType(TYPE_BOOL);
-                      } 
                       /* otherwise, COMPLAIN */
-                      throw Error("Mismatched operands to 'in' operator."
-                         , expr->getLine());
-                    }
-
+                      } else { 
+                        throw Error("Mismatched operands to 'in' operator.",
+                          expr->getLine());
+                      } 
                     /* if we get here, then the right side does not evaluate to a container */
-                    Error("Invalid operand to 'in' operator. Right operand must be of type vector, dictionary, tuple, or string.",
-                         expr->getLine());
+                    } else {
+
+                      Error("Invalid operand to 'in' operator. Right operand must be of type vector, dictionary, tuple, or string.",
+                           expr->getLine());
+                    }
                     }
     case NODE_BITXOR:
     case NODE_BITAND:
