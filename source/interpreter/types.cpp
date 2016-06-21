@@ -189,7 +189,32 @@ DataTypeKind DataType::getKind() const { return kind; }
 
 /* compare two data types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs) {
-  /* if they're not the same kind, fail */
+
+  /* check for an overload/function pairing */
+  if (lhs.getKind() == TYPE_OVERLOAD && rhs.getKind() == TYPE_FUNCTION) {
+    /* check each of them */
+    for (long unsigned int i = 0; i < lhs.subtypes->size(); i++) {
+      /* if one has the right params... */
+      if ((*((*(lhs.subtypes))[i].subtypes))[0] == (*(rhs.subtypes))[0]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /* check for a function/overload pairing */
+  if (rhs.getKind() == TYPE_OVERLOAD && lhs.getKind() == TYPE_FUNCTION) {
+    /* check each of them */
+    for (long unsigned int i = 0; i < rhs.subtypes->size(); i++) {
+      /* if one has the right params... */
+      if ((*((*(rhs.subtypes))[i].subtypes))[0] == (*(lhs.subtypes))[0]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /* otherwise, if they're not the same kind, fail */
   if (lhs.getKind() != rhs.getKind()) {
     return false;
   } 
