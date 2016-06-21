@@ -464,7 +464,7 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
   /* check if it's a lambda param first */
   /* look for lambdas first */
   Node* lambda = nextLambda(expr);
-  Symbol* sym = NULL;
+  Symbol* sym = new Symbol();
   while (lambda) {
     /* if we found the identifier, get its symbol*/
     if(lambda->hasSymbol(expr->getString())) {
@@ -493,7 +493,7 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
       && classes[getClassNode(expr)->getString()].hasMethodNamed(expr->getString())) {
 
     /* get all the methods */
-    sym = new Symbol(expr->getString(), 
+    *sym = Symbol(expr->getString(), 
         classes[getClassNode(expr)->getString()].getMethods(expr->getString()),
         expr->getLine(), true); 
 
@@ -507,12 +507,16 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
   } else if (functions.hasFuncNamed(expr->getString())) {
 
     /* look it up */
-    sym = new Symbol(expr->getString(), 
+    *sym = Symbol(expr->getString(), 
         functions.getFunctionsNamed(expr->getString()),
         expr->getLine(), true); 
   }
   /* return the thing we found (or NULL) */
-  return sym;
+  if(sym->getName() != "") {
+    return sym;
+  } else {
+    return NULL;
+  }
 }
 
 /* infer the types of an expression, and also return the type */
