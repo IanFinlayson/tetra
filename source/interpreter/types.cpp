@@ -499,55 +499,29 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                         /* if the left hand side is an identifier... */
                         if (expr->child(0)->kind() == NODE_IDENTIFIER) {
-                          /* check if it exists */
+                          /* try to find the id */
                           Symbol* sym = findIdSym(expr->child(0), func);
-                          /* check this function first */
-                          if (func->hasSymbol(expr->child(0)->getString())) {
-                            /* set lhs equal to the type of the existing local identifier */
-                            lhs = func->lookupSymbol(expr->child(0)->getString(), 
-                                expr->getLine()).getType();
-
-                            /* check globals next */
-                          } else if (globals.count(expr->child(0)->getString()) > 0) {
-
-                            /* get the symbol */
-                            Symbol sym = globals.find(expr->getString())->second;
-
-                            /* if it is a constant ... */
-                            if (sym.isConst()){
-
-                              throw Error("Cannot assign to Constant.", expr->getLine());
-                            }
-
-                            /*otherwise, set the lhs to the type of the existing global */
-                            lhs = sym.getType();
-
-                          /* make sure it is not the name of a class */
-                          } else if (classes.count(expr->child(0)->getString())) {
-
-                            throw Error("Cannot assign to class.", expr->getLine());
-
-                          /* make sure it's not the name of a free function */   
-                          } else if (functions.hasFuncNamed(expr->child(0)->getString())) {
-
-                            throw Error("Cannot assign to free function.", expr->getLine());
-
-                          /* if we end up here, then it doesn't exist yet */
-                          /* make sure the right side wasnt {} or [] because
-                           * we don't do type inference on these */
-                          } else if (rhs->isEmptyContainerType()) {
-
+                          /* if it doesn't exist  and it IS inferable...*/
+                          if (!sym && rhs->isEmptyContainerType()) {
+                              /* infer it! */ 
+                              lhs = rhs;
+                              func->insertSymbol(*new Symbol(expr->child(0)->getString(),
+                                    lhs,expr->child(0)->getLine()));
+                            
+                          /* if it doesn't exist and it IS NOT inferable... */
+                          } else if (!sym) {
+                            /* complain so much */
                             throw Error("Cannot infer subtype of empty list/dictionary."
                                 , expr->getLine());
+                            
+                          /* if it exists and is a unassignable ... */
+                          } else if (sym->isConst()) {
 
-                          /* if it doesn't exist and the type is inferable... */ 
-                          } else {
+                            throw Error("Cannot assign to constant, class, method, or free function.", expr->getLine());
 
-                            /* infer it! */ 
-                            lhs = rhs;
-                            func->insertSymbol(*new Symbol(expr->child(0)->getString(),
-                                  lhs,expr->child(0)->getLine()));
                           } 
+                          /* if we end up here, all is well - update lhs */
+                          lhs = sym->getType();
 
                         /* if it's not directly and identifier.. */
                         } else {
