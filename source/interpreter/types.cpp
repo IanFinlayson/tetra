@@ -106,6 +106,13 @@ void ClassContext::addMember(Symbol sym) {
         + "' already has member named '" 
         + sym.getName() + "'.", sym.getLine());
   }
+  /* if this context already has a similarly named method... */
+  if (methods.hasFuncNamed(sym.getName())) {
+    /* COMPLAIN ! */
+    throw Error("Class '" + this->name 
+        + "' already has method named '" 
+        + sym.getName() + "'.", sym.getLine());
+  }
   /* otherwise, add it */
   members[sym.getName()] = sym; 
 }
@@ -883,8 +890,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                                     + "' does not exist.", expr->getLine());
                               }
 
-                              /* if the identifier already exists... */
-                              if (findIdSym(expr, func)) {
+                              /* if the identifier already exists in this function... */
+                              if (func->hasSymbol(expr->getString())) {
                                 /* complain! */
                                 throw Error("The identifier '" + expr->getString() 
                                     + "' already exists.",expr->getLine());
@@ -1468,18 +1475,18 @@ void initClass(Node* node) {
       ClassContext context(node->child(0)->getString());
 
       /* add any class parts */
-      context.addMembers(node->child(0)->child(0));
       context.addMethods(node->child(0)->child(0));
+      context.addMembers(node->child(0)->child(0));
 
       /* remove the init functions from the class' methods
        * and add them as globally available class constructors */
       initSquared(context);
 
-      /* add to map of classes */
+      /* add context to map of class contexts */
       classes[context.getName()] = context;
     }
 
-    /* recursively infer any other functions */
+    /* recursively infer any other classes */
     initClass(node->child(1));
   }
 }
@@ -1514,29 +1521,6 @@ void checkClassTypes(Node* node) {
   }
 }
 
-void checkParamNames(Node* node) {
-  /* if we get to a NULL CHILD, bail */
-  if (!node)
-    return;
-  /* if we have a param... */
-  if (node->kind() == NODE_DECLARATION) {
-    /* try to get its symbol */
-    Symbol* sym = findIdSym(node);  
-    /* if we found a symbol... */
-    if (sym) {
-      /* then it already exists in scope above this, so
-       * complain! */
-      throw Error("Param identifier '" +  node->getString() 
-          + "' already exists in current scope.", node->getLine());
-    }
-  /* if we have more params... */
-  } else if (node->kind() == NODE_FORMAL_PARAM_LIST) {
-    /* check them */
-    checkParamNames(node->child(0)); 
-    checkParamNames(node->child(1)); 
-  }
-}
-
 void inferFunction(Node* node){
   /* make sure that this function does not share a name
    * with a global or a class */
@@ -1551,8 +1535,6 @@ void inferFunction(Node* node){
 
   /* if there are params...*/ 
   if (node->numChildren( ) > 1) {
-    /* check that any param names are not already in scope */
-    checkParamNames(node->child(0));
     inferBlock(node->child(1), node);
   } else {
     inferBlock(node->child(0),node);
@@ -1578,7 +1560,14 @@ void inferClass(Node* node) {
           + "' already exists in current scope.", node->getLine());
     }
   } else if (node->kind() == NODE_FUNCTION) {
-    inferFunction(node);
+    /* check that any classes in params/return type exist */
+    checkClassTypes(node->child(0));
+    /* if there are params...*/ 
+    if (node->numChildren( ) > 1) {
+      inferBlock(node->child(1), node);
+    } else {
+      inferBlock(node->child(0),node);
+    }
   } 
 }
 
