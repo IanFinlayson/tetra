@@ -555,10 +555,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                             throw Error("Cannot assign to constant, class, method, or free function.", expr->getLine());
 
-                          } 
+                          } else { 
                           /* if we end up here, all is well - update lhs */
                           lhs = sym->getType();
-
+                          }
                         /* if it's not directly and identifier.. */
                         } else {
 
