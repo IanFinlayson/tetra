@@ -127,6 +127,8 @@ string stringType(Node* node) {
       return "%";
     case NODE_EXP:
       return "EXP";
+    case NODE_IN:
+      return "in";
 
     /* functions */
     case NODE_FUNCALL:
