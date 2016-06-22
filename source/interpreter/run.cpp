@@ -107,6 +107,7 @@ int main(int argc, char** argv) {
   TetraEnvironment::initialize(console);
 //  TetraEnvironment::setObserver(observer);
 
+
   Node* tree;
 
   // Parse file, and check for initial errors. Print out and exit if an error

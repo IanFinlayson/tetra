@@ -999,6 +999,8 @@ int interpret(Node* tree, int debug, int threads) {
   // Construct a TetraContext (this also initializes the global scope)
   TetraContext tContext(TetraEnvironment::obtainNewThreadID());
   // Build function lookup table, find address of main method
+  functions.optimizeLookup(tree);
+  functions.optimizeFunctionLookup(tree);
   const Node* start = functions.getFunctionNode("main()");
 
   // If Main was not found, print an error
