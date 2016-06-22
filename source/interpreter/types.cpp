@@ -995,28 +995,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        /* make sure that any classes that are referred to
                         * actually exist */
                        checkClassTypes(expr->child(0));
-                       /* add the params to the symtable */
+                       /* add the params to the symtable and datatype */
                        inferParams(expr);
-                       /* make a new DataType for this lambda */
-                       DataType* type = new DataType(TYPE_FUNCTION);
-                       /* add any param types as subtypes */
-                       DataType* paramTypes = new DataType(TYPE_TUPLE);
-                       for (std::map<std::string, Symbol>::iterator it = expr->symtable->begin(); 
-                           it != expr->symtable->end(); it ++){
-
-                         paramTypes->subtypes->push_back(*(it->second.getType()));
-                       }
-                       /* add the params as a subtype */
-                       type->subtypes->push_back(*paramTypes);
 
                        /* infer the the return type */
                        if (expr->numChildren() > 1) {
-                         type->subtypes->push_back(*inferExpression(expr->child(1),func));
+                         expr->type()->subtypes->push_back(*inferExpression(expr->child(1),func));
                        } else {
-                         type->subtypes->push_back(*inferExpression(expr->child(0),func));
+                         expr->type()->subtypes->push_back(*inferExpression(expr->child(0),func));
                        }
 
-                       return type;
+                       return expr->type();
                      }
 
     case NODE_DOT: {
@@ -1303,13 +1292,26 @@ void inferParams(Node* node, Node* func) {
     return;
   }
 
-  /* if there are parameters */ 
-  if ((node->kind() == NODE_FUNCTION 
-      || node->kind() == NODE_LAMBDA)
-      && node->numChildren() > 1){
+  /* if we are in the function node */ 
+  if (node->kind() == NODE_FUNCTION 
+      || node->kind() == NODE_LAMBDA){
 
-    /* add them */
-    inferParams(node->child(0), node);
+    /* make a new function datatype */
+    DataType* type = new DataType(TYPE_FUNCTION);
+    /* add an empty param tuple */
+    type->subtypes->push_back(DataType(TYPE_TUPLE));
+    /* add the return type (if it has one)*/
+    if (node->kind() == NODE_FUNCTION) {
+      type->subtypes->push_back(*(node->type()));
+    }
+    /* replace the existing datatype */
+    node->setDataType(type);
+      
+    /* if there are params */
+    if (node->numChildren() > 1) {
+      /* add the params*/
+      inferParams(node->child(0), node);
+    }
   }
 
   /* if it's more than one, recurse on both */
@@ -1320,8 +1322,11 @@ void inferParams(Node* node, Node* func) {
 
   /* else if it's just one param, handle it */
   else if (node->kind() == NODE_DECLARATION) {
+    /* add the param to the symbol table */
     func->insertSymbol(
         Symbol(node->getString(), node->type(), node->getLine()));
+    /* add the param to the datatype */
+    (*(func->type()->subtypes))[0].subtypes->push_back(*node->type());
   }
 }
 

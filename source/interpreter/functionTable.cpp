@@ -54,37 +54,9 @@ void FunctionMap::build(Node* tree) {
     // by frontend specifications, there MUST be a child to add
     Node* candidate = tree->child(0);
     if (candidate->kind() == NODE_FUNCTION) {
+      //populate the symtable and update the datatype
+      inferParams(candidate);
       
-      //add the params to the sym table
-      inferParams(candidate); 
-
-      //update the DataType to a function
-      DataType* type = new DataType(TYPE_FUNCTION);
-
-      //create the paramtype
-      DataType* paramTypes = new DataType(TYPE_TUPLE);
-/* TODO: fix this thing to use the tree */
-      //if it has params...
-      if (candidate->symtable) {
-        //add the types of the formal params
-        for (std::map<std::string, Symbol>::reverse_iterator rit 
-            = candidate->symtable->rbegin(); 
-            rit != candidate->symtable->rend(); ++rit ) {
-          
-          /* add them to the tuple */
-          paramTypes->subtypes->push_back(*(rit->second.getType()));
-        } 
-      }
-
-      //add the param tuple type as a subtype */
-      type->subtypes->push_back(*paramTypes);
-
-      //add the return val subtype
-      type->subtypes->push_back(*candidate->type());
-
-      //update the candidates datatype
-      candidate->setDataType(type);
-
       //if this function is already in the table
       if (lookup.count(getFunctionSignature(candidate)) > 0) {
         throw Error("Duplicate function. ", candidate->getLine());
