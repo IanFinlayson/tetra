@@ -107,8 +107,6 @@ int main(int argc, char** argv) {
   TetraEnvironment::initialize(console);
 //  TetraEnvironment::setObserver(observer);
 
-  TetraEnvironment::setMaxThreads(8);
-
   Node* tree;
 
   // Parse file, and check for initial errors. Print out and exit if an error
@@ -124,7 +122,7 @@ int main(int argc, char** argv) {
   }
   int ret = 0;
   try {
-    //ret = interpret(tree, args.debug, args.threads);
+    ret = interpret(tree, args.debug, args.threads);
   } catch (SystemError e) {
     cout << "The interpreter has entered an undefined state: " << endl;
     cout << e << endl;

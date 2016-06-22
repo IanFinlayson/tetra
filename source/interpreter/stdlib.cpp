@@ -6,7 +6,7 @@
 #include "frontend.h"
 
 template <typename T>
-//void evaluateNode(const Node*, TData<T>&, TetraContext&);
+void evaluateNode(const Node*, TData<T>&, TetraContext&);
 
 // Prints (recursively) the expression(s) denoted by args
 void print(const Node* args, TetraContext& context) {
@@ -26,7 +26,7 @@ void print(const Node* args, TetraContext& context) {
     switch (args->type()->getKind()) {
       case TYPE_INT: {
         TData<int> value;
- //       evaluateNode<int>(args, value, context);
+        evaluateNode<int>(args, value, context);
         // Prints the value, flushes the buffer WITHOUT a new line
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
@@ -34,28 +34,28 @@ void print(const Node* args, TetraContext& context) {
       } break;
       case TYPE_REAL: {
         TData<double> value;
-  //      evaluateNode<double>(args, value, context);
+        evaluateNode<double>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
         console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_BOOL: {
         TData<bool> value;
-   //     evaluateNode<bool>(args, value, context);
+        evaluateNode<bool>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
         console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_STRING: {
         TData<string> value;
-    //    evaluateNode<string>(args, value, context);
+        evaluateNode<string>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
         console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_VECTOR: {
         TData<TArray> value;
-        //evaluateNode<TArray>(args, value, context);
+        evaluateNode<TArray>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
         console.processStandardOutput(formattedData.str());

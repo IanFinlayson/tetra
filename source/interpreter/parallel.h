@@ -274,7 +274,7 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
       // Check to see if the array can be evaluated by reference, or see if it
       // is a literal that must be evaluated before we can use it
       if (node->child(1)->kind() == NODE_IDENTIFIER ||
-          node->child(1)->kind() == NODE_INDREF) {
+          node->child(1)->kind() == NODE_INDEX) {
         // Put the address of the addressable vector into collection
         evaluateAddress<TArray*>(node->child(1), collection, context);
         // aliasArray(node->child(0), collection.getData(), context);

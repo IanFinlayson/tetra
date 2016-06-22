@@ -1,4 +1,4 @@
-#include "commandObserver.h"
+#include "ideCommandObserver.h"
 #include <sstream>
 #include "backend.h"
 #include "frontend.h"
@@ -7,22 +7,17 @@
 extern std::map<std::string, Symbol> globals;
 
 // as a courtesy, we will provide this method
-std::string statusToString(ThreadStatus status) {
-  switch (status) {
-    case RUNNING:
-      return "Running";
-    case STOPPED:
-      return "Stopped";
-    case DESTROYED:
-      return "Destroyed";
-    case WAITING:
-      return "Waiting";
-    default:
-      return "";
-  }
+/*std::string statusToString(ThreadStatus status) {
+        switch(status) {
+        case RUNNING: return "Running";
+        case STOPPED: return "Stopped";
+        case DESTROYED: return "Destroyed";
+        case WAITING: return "Waiting";
+        default: return "";
+        }
 }
-
-CommandObserver::CommandObserver() {
+*/
+IDECommandObserver::IDECommandObserver() {
   // lastLine.lineNo = 0;
   // stepping = false;
   // stopAtNext = false;
@@ -47,22 +42,13 @@ CommandObserver::CommandObserver() {
   yieldEnabled = true;
 }
 
-// Breakpoints are equal if they have the same line number, and they have the
-// same line number, and they have the same thread ID or either has the
-// universal threadID (-1)
-bool operator==(Breakpoint a, Breakpoint b) {
-  return (a.lineNo == b.lineNo) && (a.threadLabel == b.threadLabel ||
-                                    a.threadLabel == -1 || b.threadLabel == -1);
-}
-
-bool operator!=(Breakpoint a, Breakpoint b) { return !(a == b); }
-
 // TODO Since these options were added over time, there are several common
 // operations, suh as checking if a breakpoint exists, that should probably put
 // into methods
 
 // Notifies the observer that a certain node in the program has been reached
-void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
+void IDECommandObserver::notify_E(const Node* foundNode,
+                                  TetraContext& context) {
   // Check to see if we entered a new scope
   if (foundNode->kind() == NODE_FUNCTION) {
     // cout << "Entering scope: " << foundNode->getString() << endl;
@@ -114,7 +100,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
     // Register that this thread has stopped
     context.setRunStatus(STOPPED);
 
-    const VirtualConsole& console =
+    VirtualConsole& console =
         TetraEnvironment::getConsole(context.getThreadID(), true);
 
     pthread_mutex_lock(&threadList_mutex);
@@ -150,18 +136,17 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
       allowedThread = -1;
 
       while (ret == " ") {
-        std::stringstream infoStr;
-        pthread_mutex_lock(&threadList_mutex);  // As a courtesy, insure that
-                                                // the directions are not cut
-                                                // off by an incoming thread
+        /*std::stringstream infoStr;
+        pthread_mutex_lock(&threadList_mutex);//As a courtesy, insure that the
+        directions are not cut off by an incoming thread
         {
-          infoStr << "Thread: " << context.getThreadID();
-          console.processStandardOutput(infoStr.str());
-          console.processStandardOutput(
-              "\nOptions: (s)tep, (n)ext (c)ontinue (b)reak (r)emove "
-              "(p)rint\nFor more options, type (h)elp\n");
+                infoStr << "Thread: " << context.getThreadID();
+                console.processStandardOutput(infoStr.str());
+                console.processStandardOutput("\nOptions: (s)tep, (n)ext
+        (c)ontinue (b)reak (r)emove (p)rint\nFor more options, type (h)elp\n");
         }
         pthread_mutex_unlock(&threadList_mutex);
+        */
         ret = console.receiveStandardInput();
 
         switch (ret[0]) {
@@ -244,10 +229,10 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
                 filter = 0;
               // check that the global variable table has been initialized
               /*if(context.getGlobRefTable() == NULL) {
-                console.processStandardOutput("There are no global
-                variables\n");
-                break;
-                }*/
+                      console.processStandardOutput("There are no global
+              variables\n");
+                      break;
+              }*/
               case 'v':  // Local Variables
               case 'V':  // filter will be 1
               {
@@ -322,36 +307,6 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
               }
             }
             ret = " ";
-          } break;
-          case 'y':  // yield
-          case 'Y': {
-            int threadNo = 0;
-            bool givePrompt = false;
-            std::string threadArg = console.receiveStandardInput();
-            // Validate that it is a valid thread, and a currently waiting
-            // thread
-            pthread_mutex_lock(&threadList_mutex);
-            {
-              threadNo = atoi(threadArg.c_str());
-              if (threadNo == 0 && threadArg != "0") {
-                console.processStandardOutput(
-                    "Failed to parse thread number\n");
-                givePrompt = true;
-              } else if (std::find(waitingThreads.begin(), waitingThreads.end(),
-                                   threadNo) == waitingThreads.end()) {
-                console.processStandardOutput(
-                    "The requested thread either does not exist, or is not "
-                    "currently blocked\n");
-                givePrompt = true;
-              }
-            }
-            pthread_mutex_unlock(&threadList_mutex);
-            // This thread should return to the wait queue
-            context.setResume(false);
-            if (!givePrompt) {
-              allowedThread = threadNo;
-            }
-
           } break;
           case 'b':  // break
           case 'B': {
@@ -444,9 +399,30 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
                   // message << " (bool): ";
                   message << *static_cast<bool*>(var);
                   break;
+                case TYPE_MUTEX:
+                  //TODO
+                  break;
+                case TYPE_TASK:
+                  //TODO
+                  break;
                 case TYPE_VECTOR:
                   // message << " (vector): ";
                   message << *static_cast<TArray*>(var);
+                  break;
+                case TYPE_TUPLE:
+                  //TODO
+                  break;
+                case TYPE_DICT:
+                  //TODO
+                  break;
+                case TYPE_FUNCTION:
+                  //TODO
+                  break;
+                case TYPE_OVERLOAD:
+                  //TODO:this should never happen
+                  break;
+                case TYPE_CLASS:
+                  //TODO
                   break;
                 case TYPE_NONE:
                   // message << " (void): ";
@@ -511,118 +487,133 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
 // might not be to register thread N!
 // i.e. might call this function with threadNum=3 after calling it with
 // threadNum = 4, but before threadNum = 2
-void CommandObserver::threadCreated_E(int threadNum, TetraContext& context) {
-  pthread_mutex_lock(&context_mutex);
+void IDECommandObserver::threadCreated_E(int threadNum, TetraContext& context) {
+  /*pthread_mutex_lock(&context_mutex);
   std::stringstream threadMessage;
   threadMessage << "Thread launched: " << threadNum << "\n";
 
-  TetraEnvironment::getConsole(context.getThreadID(), true)
-      .processStandardOutput(threadMessage.str());
+  TetraEnvironment::getConsole(context.getThreadID(),true).processStandardOutput(threadMessage.str());
 
   TetraContext* threadData = &context;
 
   threadContexts.push_back(threadData);
 
-  pthread_mutex_unlock(&context_mutex);
+  pthread_mutex_unlock(&context_mutex);*/
+  CommandObserver::threadCreated_E(threadNum, context);
 }
 
-void CommandObserver::threadDestroyed_E(int threadNum) {
-  pthread_mutex_lock(&context_mutex);
+void IDECommandObserver::threadDestroyed_E(int threadNum) {
+  /*pthread_mutex_lock(&context_mutex);
 
-  for (std::list<TetraContext*>::iterator candidate = threadContexts.begin();
-       candidate != threadContexts.end(); ++candidate) {
-    if ((*candidate)->getThreadID() == threadNum) {
-      //(*candidate)->setRunStatus(DESTROYED);
-      // Erase the element from the array
-      std::remove(threadContexts.begin(), threadContexts.end(), (*candidate));
-      threadContexts.pop_back();
-      // break necessary, since we may have invalidated the iterator
-      break;
-    }
+  for(std::list<TetraContext*>::iterator candidate = threadContexts.begin();
+  candidate != threadContexts.end(); ++candidate) {
+          if((*candidate)->getThreadID() == threadNum) {
+                  //(*candidate)->setRunStatus(DESTROYED);
+                  //Erase the element from the array
+                  std::remove(threadContexts.begin(),threadContexts.end(),(*candidate));
+                  threadContexts.pop_back();
+                  //break necessary, since we may have invalidated the iterator
+                  break;
+          }
+
   }
 
-  pthread_mutex_unlock(&context_mutex);
+  pthread_mutex_unlock(&context_mutex);*/
+  CommandObserver::threadDestroyed_E(threadNum);
 }
 
-void CommandObserver::step_E(TetraContext& context) {
-  context.setStepping(true);
-  allowedThread = context.getThreadID();
+void IDECommandObserver::step_E(TetraContext& context) {
+  /*context.setStepping(true);
+  allowedThread = context.getThreadID();*/
+  CommandObserver::step_E(context);
 }
 
-void CommandObserver::next_E(TetraContext& context) {
-  context.setStopAtNext(true);
-  allowedThread = context.getThreadID();
+void IDECommandObserver::next_E(TetraContext& context) {
+  /*context.setStopAtNext(true);
+  allowedThread = context.getThreadID();*/
+  CommandObserver::next_E(context);
 }
 
 // Adds a breakpoint associated with the given line number. Returns false if
 // there was already a breakpoint there.
-bool CommandObserver::break_E(int lineNum) {
-  Breakpoint toPush;
+bool IDECommandObserver::break_E(int lineNum) {
+  /*Breakpoint toPush;
   toPush.lineNo = lineNum;
   toPush.threadLabel = -1;
   bool ret = true;
 
   pthread_mutex_lock(&breakList_mutex);
   {
-    if (std::find(breakpoints.begin(), breakpoints.end(), toPush) ==
-        breakpoints.end()) {
-      breakpoints.push_back(toPush);
-    } else {
-      ret = false;
-    }
+          if(std::find(breakpoints.begin(), breakpoints.end(), toPush) ==
+  breakpoints.end()) {
+                  breakpoints.push_back(toPush);
+          }
+          else {
+                  ret = false;
+          }
   }
   pthread_mutex_unlock(&breakList_mutex);
 
-  return ret;
+  return ret;*/
+  return CommandObserver::break_E(lineNum);
 }
 
 // Removes a breakpoint from the given line number. Returns false if no
 // breakpoint exists
-bool CommandObserver::remove_E(int lineNum) {
-  bool ret = false;
+bool IDECommandObserver::remove_E(int lineNum) {
+  /*bool ret = false;
   Breakpoint toPop;
   toPop.lineNo = lineNum;
   toPop.threadLabel = -1;
-  std::vector<Breakpoint>::iterator location =
-      std::find(breakpoints.begin(), breakpoints.end(), toPop);
+  std::vector<Breakpoint>::iterator location = std::find(breakpoints.begin(),
+  breakpoints.end(), toPop);
 
   pthread_mutex_lock(&breakList_mutex);
   {
-    while (location != breakpoints.end()) {
-      breakpoints.erase(location);
-      ret = true;
-      location = std::find(breakpoints.begin(), breakpoints.end(), toPop);
-    }
+          while(location != breakpoints.end()) {
+                  breakpoints.erase(location);
+                  ret = true;
+                  location = std::find(breakpoints.begin(), breakpoints.end(),
+  toPop);
+          }
   }
   pthread_mutex_unlock(&breakList_mutex);
-  return ret;
+  return ret;*/
+  return CommandObserver::remove_E(lineNum);
 }
 
-void CommandObserver::continue_E() {
+void IDECommandObserver::continue_E() {
   // do nothing at the moment
+  CommandObserver::continue_E();
 }
 
-void CommandObserver::leftScope_E(TetraContext& context) {
-  context.getScopes().pop();
+void IDECommandObserver::leftScope_E(TetraContext& context) {
+  /*context.getScopes().pop();*/
+  CommandObserver::leftScope_E(context);
 }
 
-void CommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
-  UNUSED(varName);
+void IDECommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
+  CommandObserver::notifyThreadSpecificVariable_E(varName);
 }
 
-void CommandObserver::setYieldEnabled(bool enable) { yieldEnabled = enable; }
+void IDECommandObserver::setYieldEnabled(bool enable) {
+  /*yieldEnabled = enable;*/
+  CommandObserver::setYieldEnabled(enable);
+}
 
-std::vector<int> CommandObserver::getThreadLocations() {
-  std::vector<int> ret;
+std::vector<int> IDECommandObserver::getThreadLocations() {
+  /*std::vector<int> ret;
   pthread_mutex_lock(&context_mutex);
   {
-    for (std::list<TetraContext*>::iterator context = threadContexts.begin();
-         context != threadContexts.end(); context++) {
-      if ((*context)->getRunStatus() == STOPPED) {
-        ret.push_back((*context)->getLastLineNo());
-      }
-    }
+          for(std::list<TetraContext*>::iterator context =
+  threadContexts.begin(); context != threadContexts.end();context++) {
+                  if((*context)->getRunStatus() == STOPPED) {
+                          ret.push_back((*context)->getLastLineNo());
+                  }
+          }
   }
   pthread_mutex_unlock(&context_mutex);
   return ret;
+  */
+  return CommandObserver::getThreadLocations();
 }

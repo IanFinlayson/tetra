@@ -621,7 +621,7 @@ T* VarTable::lookupVar(const std::string varName) {
   // cout << varName <<"<<<<<"<<endl;
   // pthread_mutex_lock(&table_mutex);
 
-  // Check whether this variable is a parallel for variable. Ideally there won;t
+  // Check whether this variable is a parallel for variable. Ideally there won't
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
   std::list<std::pair<
