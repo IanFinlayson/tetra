@@ -336,7 +336,7 @@ int yylex( );
 void dumpTreeGraphviz(Node*);
 
 /* populate symbol table in function node with params */
-void inferParams(Node*);
+void inferParams(Node*,Node* func=NULL);
 
 /* recursively provides string representation of a datatype */
 string typeToString(DataType*);

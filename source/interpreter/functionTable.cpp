@@ -63,7 +63,7 @@ void FunctionMap::build(Node* tree) {
 
       //create the paramtype
       DataType* paramTypes = new DataType(TYPE_TUPLE);
-
+/* TODO: fix this thing to use the tree */
       //if it has params...
       if (candidate->symtable) {
         //add the types of the formal params

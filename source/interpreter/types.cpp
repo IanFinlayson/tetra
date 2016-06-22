@@ -297,24 +297,6 @@ void buildParamTupleType(DataType* type, Node* node, Node* func) {
   } 
 }
 
-/* add the parameters of a function into its symtable */
-void addParams(Node* params, Node* func) {
-  if (!params) return;
-
-  /* if it's more than one, recurse on both */
-  if (params->kind() == NODE_FORMAL_PARAM_LIST) {
-    addParams(params->child(0), func);
-    addParams(params->child(1), func);
-  }
-
-  /* else if it's just one param, handle it */
-  else if (params->kind() == NODE_DECLARATION) {
-    func->insertSymbol(
-        Symbol(params->getString(), params->type(), params->getLine()));
-  }
-}
-
-
 /* infer the types of a print call */
 DataType* inferPrint(Node* pcall, Node* func) {
   /* just infer each expression, but we don't care what it is */
@@ -1313,20 +1295,34 @@ void inferBlock(Node* block, Node* func) {
   }
 }
 
-/* infer types based on a single function */
-void inferParams(Node* node) {
-  /* only works on functions */
-  if (!node || ((node->kind() != NODE_FUNCTION) 
-        && (node->kind() != NODE_LAMBDA))) {
+/* infer the function's params and add them to the
+ * symtable/update the datatype */
+void inferParams(Node* node, Node* func) {
+  /* base case */
+  if (!node) {
     return;
   }
 
-  /* if there are parameters */
-  if (node->numChildren() > 1) {
-    /* add the parameters into the table */
-    addParams(node->child(0), node);
+  /* if there are parameters */ 
+  if ((node->kind() == NODE_FUNCTION 
+      || node->kind() == NODE_LAMBDA)
+      && node->numChildren() > 1){
+
+    /* add them */
+    inferParams(node->child(0), node);
   }
 
+  /* if it's more than one, recurse on both */
+  if (node->kind() == NODE_FORMAL_PARAM_LIST) {
+    inferParams(node->child(0), func);
+    inferParams(node->child(1), func);
+  }
+
+  /* else if it's just one param, handle it */
+  else if (node->kind() == NODE_DECLARATION) {
+    func->insertSymbol(
+        Symbol(node->getString(), node->type(), node->getLine()));
+  }
 }
 
 
