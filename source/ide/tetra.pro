@@ -34,6 +34,7 @@ SOURCES += main.cpp\
     syntaxhighlighter.cpp \
     editor.cpp \
     console.cpp \
+    settingsdialog.cpp \
     filerunner.cpp
 
 HEADERS  += \
@@ -41,10 +42,13 @@ HEADERS  += \
     syntaxhighlighter.h \
     editor.h \
     console.h \
+    settingsdialog.h \
     filerunner.h
 
 FORMS    += \
-    mainwindow.ui
+    mainwindow.ui \
+    about.ui \
+    settings.ui
 
 RESOURCES += \
     resources.qrc
