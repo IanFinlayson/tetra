@@ -244,8 +244,6 @@ class Node {
 class FunctionMap {
  private:
   std::map<std::string, Node*> lookup;
-  Node** functionLookup;
-  static void concatSignature(const Node*, std::string&);
 
  public:
   FunctionMap();
@@ -261,13 +259,6 @@ class FunctionMap {
 
   // Fills the function map given the specified base node
   void build(Node* tree);
-
-  // does some pre-work to optimize variable lookup
-  void optimizeLookup(const Node*);
-  void optimizeFunctionLookup(Node*);
-
-  // Release allocated resources from the instance
-  void cleanup();
 
   // returns true if the map contains a function with the
   // provided name, regardless of params and return types

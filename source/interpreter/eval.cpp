@@ -34,7 +34,7 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret,
                     TetraContext& context) {
   TData<int> indexNum;
   // assuming a node index MUST simplify to an integer
-  evaluateNode<int>(node->child(0), indexNum, context);
+  evaluateNode<int>(node, indexNum, context);
 
   // Check if there are further idecies which must be evaluated (i.e. x[0] v.
   // x[0][0])
@@ -203,9 +203,13 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
     case NODE_INDEX: {
       // Here, T should be the type that needs to be returned, if not, then we
       // really didn;t need it anyways
+      Node* curr = new Node(*node);
+      while(curr->child(0)) {
+        curr = curr->child(0);
+      }
       TArray* lookupArray =
-          context.lookupVar<TArray>(node->child(0) /*->getString()*/);
-      evaluateVecVal<T>(node->child(1), lookupArray, ret, context);
+          context.lookupVar<TArray>(curr /*->getString()*/);
+      evaluateVecVal<T>(node, lookupArray, ret, context);
     } break;
     case NODE_FOR: {
       // Obtain the list of elements we need to loop over
@@ -367,92 +371,74 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
   // TSL names to check 1 condiitonal
   // std::string funcName = node->getString();
 
-  int functionID = node->getInt();
-  if (functionID < TSL_FUNCS) {
-    switch (functionID) {
-      case 0: {
-        if (node->child(0) != NULL) {
-          print(node->child(0), context);
-        }
-        // Each print does NOT end with a line break
-        // std::cout << endl;
-      } break;
-      case 1: {
-        ret.setData(readInt(context.getThreadID()));
-      } break;
-      case 2: {
-        ret.setData(readReal(context.getThreadID()));
-      } break;
-      case 3: {
-        ret.setData(readString(context.getThreadID()));
-      } break;
-      case 4: {
-        ret.setData(readBool(context.getThreadID()));
-      } break;
-      case 5: {
-        if (node->child(0)->type()->getKind() == TYPE_STRING) {
-          TData<string> value;
-          evaluateNode(node->child(0), value, context);
-          ret.setData(len(value.getData()));
-        } else if (node->child(0)->type()->getKind() == TYPE_VECTOR) {
-          TData<TArray> value;
-          evaluateNode(node->child(0), value, context);
-          ret.setData(len(value.getData()));
-        } else {  // attempting to take length of another type is an error
-          std::stringstream message;
-          message << "Attempted to obtain length of unknown type. ID: "
-                  << node->child(0)->type()->getKind();
-          SystemError e(message.str(), node->getLine(), node);
-          throw e;
-        }
-      } break;
-      default: {
-        std::stringstream message;
-        message << "Unexpected functionID when attempting to resolve function "
-                   "call to "
-                << node->getString() << "\nFound ID: " << functionID;
-        SystemError e(message.str(), node->getLine(), node);
-        throw e;
-      } break;
+  std::string funcName = node->child(0)->getString();
+  if (funcName == "print") {
+    if (node->child(1) != NULL) {
+      print(node->child(1), context);
     }
-  }
-  // USER DEFINED FUNCTION
-  else {
-    // gets the node where the body of the called function begins
-    ///////////////	//const Node* funcNode =
-    ///FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
-
-    const Node* funcNode = functions.getFunctionNode(node);
-
-    // check if there are parameters to be passed, and do so if needed
-    // This call will have arguments if and only if the calling node has
-    // children
-    if (node->child(0) != NULL) {
-      // When copying arg list, we must have handles to both scopes
-      // Calling scope handle
-      TetraScope destScope(node);
-
-      // cout << "Old scope X: " << *(context.lookupVar<TArray>("x")) << endl;
-
-      // Initialize the new scope with the passed parameters
-      pasteArgList(funcNode->child(0), node->child(0), destScope, context);
-
-      // Set the new scope to the scope we created containing all the parameters
-      // cout << "x: " << destScope.lookupVar<int>("x") << endl;
-      context.initializeNewScope(destScope);
-    } else {  // if there are no args, we still need to initialize a new scope!
-      context.initializeNewScope(node);
+    // Each print does NOT end with a line break
+    // std::cout << endl;
+  } if (funcName == "read_int") {
+    ret.setData(readInt(context.getThreadID()));
+  } if (funcName == "read_real") {
+    ret.setData(readReal(context.getThreadID()));
+  } if (funcName == "read_string") {
+    ret.setData(readString(context.getThreadID()));
+  } if (funcName == "read_bool") {
+    ret.setData(readBool(context.getThreadID()));
+  } if (funcName == "len") {
+    if (node->child(1)->child(0)->type()->getKind() == TYPE_STRING) {
+      TData<string> value;
+      evaluateNode(node->child(1), value, context);
+      ret.setData(len(value.getData()));
+    } else if (node->child(1)->child(0)->type()->getKind() == TYPE_VECTOR) {
+      TData<TArray> value;
+      evaluateNode(node->child(1), value, context);
+      ret.setData(len(value.getData()));
+    } else {  // attempting to take length of another type is an error
+      std::stringstream message;
+      message << "Attempted to obtain length of unknown type. ID: "
+              << node->child(1)->type()->getKind();
+      SystemError e(message.str(), node->getLine(), node);
+      throw e;
     }
+  } else {
+      // USER DEFINED FUNCTION
+      // gets the node where the body of the called function begins
+      ///////////////	//const Node* funcNode =
+      ///FunctionMap::getFunctionNode(FunctionMap::getFunctionSignature(node));
 
-    // Place this node on the call stack, so it can be printed in the stack
-    // trace
-    context.getCurrentScope().setCallNode(node);
+      const Node* funcNode = functions.getFunctionNode(node);
 
-    // transfer control to the function
-    evaluateNode<T>(funcNode, ret, context);
+      // check if there are parameters to be passed, and do so if needed
+      // This call will have arguments if and only if the calling node has
+      // children
+      if (node->child(1) != NULL) {
+        // When copying arg list, we must have handles to both scopes
+        // Calling scope handle
+        TetraScope destScope(node);
 
-    // returns to the old scope once the function has finished evaluating
-    context.exitScope();
+        // cout << "Old scope X: " << *(context.lookupVar<TArray>("x")) << endl;
+
+        // Initialize the new scope with the passed parameters
+        pasteArgList(funcNode->child(0), node->child(1), destScope, context);
+
+        // Set the new scope to the scope we created containing all the parameters
+        // cout << "x: " << destScope.lookupVar<int>("x") << endl;
+        context.initializeNewScope(destScope);
+      } else {  // if there are no args, we still need to initialize a new scope!
+        context.initializeNewScope(node);
+      }
+
+      // Place this node on the call stack, so it can be printed in the stack
+      // trace
+      context.getCurrentScope().setCallNode(node);
+
+      // transfer control to the function
+      evaluateNode<T>(funcNode, ret, context);
+
+      // returns to the old scope once the function has finished evaluating
+      context.exitScope();
   }
 }
 
@@ -1034,9 +1020,6 @@ int interpret(Node* tree, int debug, int threads) {
   ThreadEnvironment::joinDetachedThreads();
 
   tContext.exitScope();
-
-  // cleanup
-  functions.cleanup();
 
   // Return the value from main
   return retVal.getData();

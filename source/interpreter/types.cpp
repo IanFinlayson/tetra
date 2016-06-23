@@ -567,6 +567,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         }
 
                         /* return the type of the rhs */
+                        expr->child(0)->setDataType(lhs);
                         return rhs;
                         break;
                       }
@@ -1249,13 +1250,28 @@ void inferBlock(Node* block, Node* func) {
                      DataType* expr_type = inferExpression(block->child(1), func);
 
                      /* make sure it is some type of vector */
-                     if (expr_type->getKind() != TYPE_VECTOR) {
-                       throw Error("for expression must have vector type", block->getLine());
+                     if (expr_type->getKind() != TYPE_VECTOR && 
+                         expr_type->getKind() != TYPE_DICT && 
+                         expr_type->getKind() != TYPE_STRING) {
+                       throw Error("for expression must be of type vector, dictionary, or string",
+                           block->getLine());
                      }
 
-                     /* put the identifier in the func */
-                     func->insertSymbol(Symbol(block->child(0)->getString(),
-                           &(*(expr_type->subtypes))[0], block->getLine()));
+                     /* see if the identifier for indexing already exists */
+                     Symbol* idxSym = findIdSym(block->child(0));
+
+                     /* if it does, make sure it is the right type */
+                     if (idxSym && (*(idxSym->getType())) 
+                         != (*(expr_type->subtypes))[0]) {
+                       throw Error("Type of index variable '" + block->child(0)->getString()
+                           + "' is incompatible with container elements.", block->getLine()); 
+
+                     /*otherwise, if it doesn't exist, add it */
+                     } else if (!idxSym) {
+
+                       func->insertSymbol(Symbol(block->child(0)->getString(),
+                             &(*(expr_type->subtypes))[0], block->getLine()));
+                     }
 
                      /* set the type of the node too */
                      block->child(0)->setDataType(&(*(expr_type->subtypes))[0]);

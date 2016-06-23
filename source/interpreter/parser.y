@@ -272,7 +272,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
   $$->addChild($2);
   $$->addChild($5);
   $$->setDataType($3);
-} | TOK_GLOBAL identifier type{
+} | TOK_GLOBAL identifier type {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->setDataType($3);

@@ -1419,9 +1419,6 @@ class VirtualObserver {
   void* fetchVariable(std::string s, TetraContext& context) const;
   void updateVarReferenceTable(const Node*);
   void popReferenceTable();
-
-  // Where the global variable cross reference list will be initialized
-  friend void FunctionMap::optimizeLookup(const Node* start);
 };
 
 /*

@@ -29,18 +29,12 @@ const Node* FunctionMap::getFunctionNode(DataType* params, std::string name) {
   return lookup[name + typeToString(params)];
 }
 
-// Calls the appropriate function based on the number identifier attached to the
-// node
+//lookup function node from funcall node
 const Node* FunctionMap::getFunctionNode(const Node* callNode) {
-  // TSL functions are given the low numbers, but functionLookup only contains
-  // user defined functions
-  // Thus we must subtract the offset TSL_FUNCS (number of TSL functions) to get
-  // the proper index in this array
-  return functionLookup[callNode->getInt() - TSL_FUNCS];
+  return lookup[getFunctionSignature(callNode->child(0))];
 }
 
 FunctionMap::FunctionMap() {
-  this->functionLookup = NULL;
 }
 
 // Fills the function map given the specified base node TODO: this function is
@@ -167,6 +161,3 @@ string FunctionMap::getFunctionSignature(const Node* node) {
 
   return node->getString() + typeToString(&((*(node->type()->subtypes))[0]));
 }
-
-// Delete the functionLookup table
-void FunctionMap::cleanup() { delete[] functionLookup; }
