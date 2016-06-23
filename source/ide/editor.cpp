@@ -4,6 +4,7 @@
 
 #include <QtWidgets>
 
+#include "settingsmanager.h"
 #include "editor.h"
 #include "ui_mainwindow.h"
 
@@ -14,26 +15,33 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
 
     updateLineNumberAreaWidth(0);
-
-    /* set the background color */
-    setStyleSheet("background-color:#f5f5f5;");
+    setPlainText("");
     highlighter = new Highlighter(document());
 
-    /* set the default settings */
-    setPlainText("");
-    lineNumbersVisible = true;
-    lineHighlighted = false;
-    tabWidth = 4;
-
-    /* set to a monospaced font */
-    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    font.setPointSize(12);
-    QFontMetrics metrics(font);
-    setFont(font);
-
     ensureCursorVisible();
-    setCenterOnScroll(true);
+    setCenterOnScroll(false);
     fileName = "";
+
+    updateSettings();
+}
+
+
+void Editor::updateSettings() {
+    /* set line number and tab width */
+    if (SettingsManager::lineNo()) {
+        lineNumberArea->show();
+    } else {
+        lineNumberArea->hide();
+    }
+    tabWidth = SettingsManager::tabWidth();
+
+    /* set the font */
+    setFont(SettingsManager::font());
+
+
+
+    /* TODO should be part of color scheme */
+    setStyleSheet("background-color:#f5f5f5;");
 }
 
 void Editor::setUpConnections(MainWindow* parent) {
@@ -113,6 +121,13 @@ QString Editor::getOpenFile() {
 
 /* overrides default navigation for smart editing */
 void Editor::keyPressEvent(QKeyEvent* e) {
+
+    /* if we're not doing smart editing, just pass it up */
+    if (!SettingsManager::smartEdit()) {
+        QPlainTextEdit::keyPressEvent(e);
+        return;
+    }
+
     cursor = this->textCursor();
 
     /* replaces tab key with predetermined amount of spaces */
@@ -267,8 +282,7 @@ void Editor::resizeEvent(QResizeEvent* e) {
     QPlainTextEdit::resizeEvent(e);
 
     QRect cr = contentsRect();
-    lineNumberArea->setGeometry(
-            QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 /* draw the line number area on the left */
@@ -293,14 +307,6 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
         top = bottom;
         bottom = top + (int)blockBoundingRect(block).height();
         ++blockNumber;
-    }
-}
-
-void Editor::showLineNumbers(bool arg1) {
-    if (arg1 == true) {
-        this->lineNumberArea->show();
-    } else {
-        this->lineNumberArea->hide();
     }
 }
 
@@ -333,17 +339,11 @@ void Editor::highlightLine(QColor color) {
         extraSelections.append(selection);
     }
     setExtraSelections(extraSelections);
-    lineHighlighted = true;
 }
 
 void Editor::unhighlightLine() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
-    lineHighlighted = false;
-}
-
-bool Editor::checkLineHighlighted() {
-    return lineHighlighted;
 }
 
 void Editor::setTabWidth(int tabWidth) {
