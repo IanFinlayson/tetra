@@ -17,8 +17,11 @@
 #include <QTabWidget>
 #include <QThread>
 #include <QtCore>
+
+#include "settingsdialog.h"
 #include "editor.h"
 #include "ui_mainwindow.h"
+#include "ui_about.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
     menuBar()->setNativeMenuBar(true);
@@ -327,10 +330,22 @@ void MainWindow::on_actionFind_triggered() {
 
 /* help and about functions */
 void MainWindow::on_actionAbout_Tetra_triggered() {
-    QMessageBox::about(this, "About Tetra", "sdjfhskf\nsdfjhsdj sdjfh sdf sdjfsd jsdf ");
+    QDialog* about = new QDialog(0, 0);
+    Ui_About about_ui;
+    about_ui.setupUi(about);
+    about->show();
 }
 
+void MainWindow::on_actionSettings_triggered() {
+    SettingsDialog* prefs = new SettingsDialog(this);
+    prefs->show();
+}
+
+
 void MainWindow::on_actionDocumentation_triggered() {
+    QMessageBox msgBox;
+    msgBox.setText("TODO");
+    msgBox.exec();
 }
 
 /* run and debug functions */
