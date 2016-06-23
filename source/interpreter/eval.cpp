@@ -34,11 +34,11 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret,
                     TetraContext& context) {
   TData<int> indexNum;
   // assuming a node index MUST simplify to an integer
-  evaluateNode<int>(node, indexNum, context);
+  evaluateNode<int>(node->child(1), indexNum, context);
 
   // Check if there are further idecies which must be evaluated (i.e. x[0] v.
   // x[0][0])
-  if (node->numChildren() == 2) {
+ /* if (node->numChildren() == 2) {
     // Get the vector pointed to by this index
     TArray* nextVec;
     try {
@@ -52,7 +52,7 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret,
       throw e2;
     }
     evaluateVecVal<T>(node->child(1), nextVec, ret, context);
-  } else {  // If we have accounted for all the indeces, set the return value
+  } else { */ // If we have accounted for all the indeces, set the return value
     T value;
     try {
       value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
@@ -61,7 +61,7 @@ void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret,
       throw e2;
     }
     ret.setData(value);
-  }
+  //}
 }
 
 // Executes structural statements
@@ -203,12 +203,9 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
     case NODE_INDEX: {
       // Here, T should be the type that needs to be returned, if not, then we
       // really didn;t need it anyways
-      Node* curr = new Node(*node);
-      while(curr->child(0)) {
-        curr = curr->child(0);
-      }
+      evaluateStatement<T>(node->child(0), ret, context);
       TArray* lookupArray =
-          context.lookupVar<TArray>(curr /*->getString()*/);
+          context.lookupVar<TArray>(node->child(0) /*->getString()*/);
       evaluateVecVal<T>(node, lookupArray, ret, context);
     } break;
     case NODE_FOR: {
@@ -378,15 +375,15 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
     }
     // Each print does NOT end with a line break
     // std::cout << endl;
-  } if (funcName == "read_int") {
+  } else if (funcName == "read_int") {
     ret.setData(readInt(context.getThreadID()));
-  } if (funcName == "read_real") {
+  } else if (funcName == "read_real") {
     ret.setData(readReal(context.getThreadID()));
-  } if (funcName == "read_string") {
+  } else if (funcName == "read_string") {
     ret.setData(readString(context.getThreadID()));
-  } if (funcName == "read_bool") {
+  } else if (funcName == "read_bool") {
     ret.setData(readBool(context.getThreadID()));
-  } if (funcName == "len") {
+  } else if (funcName == "len") {
     if (node->child(1)->child(0)->type()->getKind() == TYPE_STRING) {
       TData<string> value;
       evaluateNode(node->child(1), value, context);

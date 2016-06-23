@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <iostream>
 #include "backend.h"
-//#include "commandObserver.h"
+#include "commandObserver.h"
 #include "frontend.h"
 
 
@@ -102,10 +102,10 @@ int main(int argc, char** argv) {
   ConsoleArray console;
   CommandConsole mainConsole = CommandConsole();
   console.registerConsole(mainConsole);
-//  CommandObserver observer;
+  CommandObserver observer;
 
   TetraEnvironment::initialize(console);
-//  TetraEnvironment::setObserver(observer);
+  TetraEnvironment::setObserver(observer);
 
 
   Node* tree;
