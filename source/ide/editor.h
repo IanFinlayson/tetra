@@ -34,6 +34,7 @@ class Editor : public QPlainTextEdit {
     void highlightLine(QColor);
     void unhighlightLine();
 
+    /* updat the editor based on the settings from the settings manager */
     void updateSettings();
 
     /* the editor must know the indent width for doing smart editing */

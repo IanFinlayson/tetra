@@ -349,6 +349,12 @@ void MainWindow::on_actionAbout_Tetra_triggered() {
 void MainWindow::on_actionSettings_triggered() {
     SettingsDialog* prefs = new SettingsDialog(this);
     prefs->exec();
+
+    /* update the settings of all open editors */
+    for (int i = 0; i < ui->tabBar->count(); i++) {
+        Editor* ed = (Editor*) ui->tabBar->widget(i);
+        ed->updateSettings();
+    }
 }
 
 
