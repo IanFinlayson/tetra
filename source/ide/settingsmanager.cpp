@@ -11,33 +11,23 @@ void SettingsManager::init() {
 }
 
 int SettingsManager::tabWidth() {
-    if (qset->contains("editor/tabWidth")) {
-        return qset->value("editor/tabWidth").toInt() ;
-    } else {
-        return 4;
-    }
+    return qset->value("editor/tabWidth", 4).toInt() ;
 }
 
 bool SettingsManager::lineNo() {
-    if (qset->contains("editor/lineNo")) {
-        return qset->value("editor/lineNo").toBool() ;
-    } else {
-        return true;
-    }
+    return qset->value("editor/lineNo", true).toBool() ;
 }
 
 bool SettingsManager::smartEdit() {
-    if (qset->contains("editor/smartEdit")) {
-        return qset->value("editor/smartEdit").toBool() ;
-    } else {
-        return true;
-    }
+    return qset->value("editor/smartEdit", true).toBool() ;
 }
 
 QFont SettingsManager::font() {
+    /* star with the generic monospace font */
     QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     font.setPointSize(12);
-    return font;
+
+    return qset->value("editor/font", font).value<QFont>();
 }
 
 
@@ -54,6 +44,6 @@ void SettingsManager::setSmartEdit(bool smartEdit) {
 }
 
 void SettingsManager::setFont(QFont font) {
-
+    qset->setValue("editor/font", font);
 }
 

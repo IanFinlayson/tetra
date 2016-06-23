@@ -19,7 +19,7 @@ Console::Console(MainWindow* parent) : QPlainTextEdit(parent), VirtualConsole() 
     setFont(font);
 
     ensureCursorVisible();
-    setCenterOnScroll(true);
+    setCenterOnScroll(false);;
     setReadOnly(true);
 }
 
