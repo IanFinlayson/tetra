@@ -321,8 +321,10 @@ void pasteArgList(const Node* node1, const Node* node2,
                                                   // of NODE_ACTUAL_PARAM_LIST
     pasteArgList(node1->child(0), node2->child(0), destinationScope,
                  sourceContext);
-    pasteArgList(node1->child(1), node2->child(1), destinationScope,
+    if (node1->child(1)) {
+      pasteArgList(node1->child(1), node2->child(1), destinationScope,
                  sourceContext);
+    }
   } else {
     assert(node1->type() != NULL);
     // Paste the value from the source to the destination
