@@ -1335,7 +1335,6 @@ void inferParams(Node* node, Node* func) {
     inferParams(node->child(0), func);
     /* if there are more... */
     if (node->child(1)) {
-      /* get them too */ 
       inferParams(node->child(1), func);
     }
   }
@@ -1368,7 +1367,7 @@ void inferGlobal(Node* node, bool isConst = false) {
   }
 
   /* if there is an assignment */
-  if (node->child(1)){
+  if (node->child(1)) {
 
     /* get the type of the right hand side */
     DataType* rhs = inferExpression(node->child(1), NULL);

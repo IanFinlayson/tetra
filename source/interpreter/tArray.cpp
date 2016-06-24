@@ -4,7 +4,6 @@
  */
 
 #include "backend.h"
-#include "frontend.h"
 
 using std::string;
 using std::vector;

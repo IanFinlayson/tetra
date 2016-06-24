@@ -258,7 +258,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
   $$ = new Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($5);
-  $$->setDataType($3);
+  $2->setDataType($3);
 } | TOK_GLOBAL typed_identifier TOK_ASSIGN assignterm {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
@@ -271,11 +271,11 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->addChild($5);
-  $$->setDataType($3);
+  $2->setDataType($3);
 } | TOK_GLOBAL identifier type {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
-  $$->setDataType($3);
+  $2->setDataType($3);
 } | TOK_GLOBAL typed_identifier {
   $$ = new Node(NODE_GLOBAL);
   $$->addChild($2);
