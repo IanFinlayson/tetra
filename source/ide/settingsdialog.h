@@ -7,6 +7,7 @@ class SettingsDialog : public QDialog, public Ui::Settings {
 
     private:
         QSettings* settings_manager;
+        QFont font_choice;
 
     private slots:
         void on_buttonBox_clicked(QAbstractButton* button);

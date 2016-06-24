@@ -19,6 +19,8 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
 
     /* set up the font button */
     connect(fontButton, SIGNAL(released()),this, SLOT(askFont()));
+
+    font_choice = SettingsManager::font();
 }
 
 void SettingsDialog::askFont() {
@@ -28,9 +30,8 @@ void SettingsDialog::askFont() {
 
     /* if they clicked OK, set it */
     if (ok) {
-        SettingsManager::setFont(font);
-        fontButton->setText(SettingsManager::font().family() + " | " +
-            QString::number(SettingsManager::font().pointSize()));
+        fontButton->setText(font.family() + " | " + QString::number(font.pointSize()));
+        font_choice = font;
     } 
 }
 
@@ -41,6 +42,7 @@ void SettingsDialog::on_buttonBox_clicked(QAbstractButton* button)
         SettingsManager::setTabWidth(tabWidth->value());
         SettingsManager::setLineNo(lineNo->checkState() == Qt::Checked);
         SettingsManager::setSmartEdit(smartEdit->checkState() == Qt::Checked);
+        SettingsManager::setFont(font_choice);
         accept();
 
     } else if (button == buttonBox->button(QDialogButtonBox::Cancel)) {
