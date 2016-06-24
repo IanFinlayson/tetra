@@ -728,7 +728,7 @@ T* VarTable::lookupVar(const Node* varNode) {
   // pthread_mutex_lock(&table_mutex);
   std::string varName = varNode->getString();
   // Index may be negative if a global variable is being referenced
-  int index = abs(varNode->getInt());
+//  int index = abs(varNode->getInt());
   // Check whether this variable is a parallel for variable. Ideally there won;t
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
@@ -782,7 +782,7 @@ T* VarTable::lookupVar(const Node* varNode) {
   // check whether a normal entry exists for this variable
   // The find and [] operators are redundant. we can combine them into one
   // search
-  else if (varMap[index].getData() == NULL) {
+  else if (varMap[varName].getData() == NULL) {
     // Otherwise, we must insert a new variable into the current scope
 
     // Release read privelages while we assemble what we need to insert
@@ -798,17 +798,17 @@ T* VarTable::lookupVar(const Node* varNode) {
     // waitring for write privelages!
     // Hence, we must again check that the variable is stillnot in the table
     // TODO check this logic with the new hash table changes
-    if (varMap[index].getData() == NULL) {
+    if (varMap[varName].getData() == NULL) {
       // Note that it is important that these two statements remain seperate.
       // Attempting to assemble the TData object before insertion will lead to
       // either an extra allocation and object copy or a memory leak
-      varMap[index] = TData<void*>(newData_ptr);
-      varMap[index].setDeletableType<T>();
+      varMap[varName] = TData<void*>(newData_ptr);
+      varMap[varName].setDeletableType<T>();
     }
     // else do nothing, as the statement after this block will retrieve the
     // correct value
   }
-  T* ret = static_cast<T*>(varMap[index].getData());
+  T* ret = static_cast<T*>(varMap[varName].getData());
   // Release whatever lock we happened to have
   pthread_rwlock_unlock(&table_mutex);
 
