@@ -388,11 +388,11 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
   } else if (funcName == "len") {
     if (node->child(1)->child(0)->type()->getKind() == TYPE_STRING) {
       TData<string> value;
-      evaluateNode(node->child(1), value, context);
+      evaluateNode(node->child(1)->child(0), value, context);
       ret.setData(len(value.getData()));
     } else if (node->child(1)->child(0)->type()->getKind() == TYPE_VECTOR) {
       TData<TArray> value;
-      evaluateNode(node->child(1), value, context);
+      evaluateNode(node->child(1)->child(0), value, context);
       ret.setData(len(value.getData()));
     } else {  // attempting to take length of another type is an error
       std::stringstream message;
