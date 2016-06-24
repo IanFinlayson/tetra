@@ -6,6 +6,7 @@
 
 #include <QGridLayout>
 #include <QLabel>
+#include <QSettings>
 #include <QLayout>
 #include <QMainWindow>
 #include <QMap>
@@ -83,11 +84,10 @@ class MainWindow : public QMainWindow {
   private:
 
     void setupShortcuts();
+
     Editor* currentEditor();
 
     QSignalMapper* windowMapper;
-    void setupThreadMdi();
-
     QString strippedName(const QString& fullFileName);
 
     bool maybeSave();

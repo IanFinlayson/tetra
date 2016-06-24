@@ -29,12 +29,13 @@ class Editor : public QPlainTextEdit {
     /* functions for managind the line number widget */
     void lineNumberAreaPaintEvent(QPaintEvent* event);
     int lineNumberAreaWidth();
-    void showLineNumbers(bool);
 
     /* allows the highlighting of lines for reporting errors and warnings */
     void highlightLine(QColor);
     void unhighlightLine();
-    bool checkLineHighlighted();
+
+    /* updat the editor based on the settings from the settings manager */
+    void updateSettings();
 
     /* the editor must know the indent width for doing smart editing */
     void setTabWidth(int width);
@@ -72,8 +73,6 @@ class Editor : public QPlainTextEdit {
     QTextCursor cursor;
     QString coordinates;
     QWidget* lineNumberArea;
-    bool lineNumbersVisible;
-    bool lineHighlighted;
     int tabWidth;
     Highlighter* highlighter;
     MainWindow* parent;

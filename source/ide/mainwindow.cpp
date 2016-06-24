@@ -1,7 +1,6 @@
 /* mainwindow.cpp
  * code for the main application window, actions, etc. */
 
-#include "mainwindow.h"
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -18,37 +17,49 @@
 #include <QThread>
 #include <QtCore>
 
+#include "mainwindow.h"
 #include "settingsdialog.h"
+#include "settingsmanager.h"
 #include "editor.h"
 #include "ui_mainwindow.h"
 #include "ui_about.h"
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+    /* set the menu bar to work natively for systems with global bars */
     menuBar()->setNativeMenuBar(true);
-    ui->setupUi(this);
-    setWindowTitle(tr("Tetra [*]"));
-    statusBar()->showMessage("Ready.");
-    setupShortcuts();
 
+    /* set up the ui elements for the window */
+    ui->setupUi(this);
+
+    /* set the title and icon */
+    setWindowTitle(tr("Tetra [*]"));
     setWindowIcon(QIcon(":/icons/resources/icons/logo.svg"));
 
+    /* set up the key shortcuts for the program */
+    setupShortcuts(); 
+
+    /* set up the thread and file runner for running programs */
     tetraThread = new QThread;
     fileRunner = new FileRunner(this);
     mainValue = 0;
 
+    /* set up the status bar */
     statusBar()->showMessage("Ready.");
-
     coords = new QLabel("");
     statusBar()->addPermanentWidget(coords);
     updateCoordinates();
 
+    /* set the tab bar in "document mode" and give the tab no name */
     ui->tabBar->setDocumentMode(true);
     ui->tabBar->setTabText(0, "Unsaved");
 
+    /* set these as disabled (they are enabled dynamically */
     ui->actionCut->setEnabled(false);
     ui->actionCopy->setEnabled(false);
     ui->actionRedo->setEnabled(false);
     ui->actionUndo->setEnabled(false);
+
+    /* set up connections of signals with the current editor */
     currentEditor()->setUpConnections(this);
 }
 
@@ -228,8 +239,7 @@ int MainWindow::on_actionPrint_triggered() {
 
     QPainter painter;
     painter.begin(&printer);
-    QFont f("Monaco");
-    f.setStyleHint(QFont::Monospace);
+    QFont f = SettingsManager::font();
     painter.setFont(f);
     painter.drawText(100, 100, 500, 500, Qt::AlignLeft | Qt::AlignTop, currentEditor()->toPlainText());
 
@@ -338,7 +348,13 @@ void MainWindow::on_actionAbout_Tetra_triggered() {
 
 void MainWindow::on_actionSettings_triggered() {
     SettingsDialog* prefs = new SettingsDialog(this);
-    prefs->show();
+    prefs->exec();
+
+    /* update the settings of all open editors */
+    for (int i = 0; i < ui->tabBar->count(); i++) {
+        Editor* ed = (Editor*) ui->tabBar->widget(i);
+        ed->updateSettings();
+    }
 }
 
 

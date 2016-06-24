@@ -3,8 +3,10 @@
  * */
 
 #include <QtWidgets>
+
 #include "console.h"
 #include "ui_mainwindow.h"
+#include "settingsmanager.h"
 
 Console::Console(MainWindow* parent) : QPlainTextEdit(parent), VirtualConsole() {
     setContentsMargins(50, 50, 50, 50);
@@ -13,14 +15,11 @@ Console::Console(MainWindow* parent) : QPlainTextEdit(parent), VirtualConsole() 
     setStyleSheet("background-color:#404244; color: #eeeeee;");
 
     /* set to a monospaced font */
-    QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
-    font.setPointSize(14);
-    font.setBold(true);
-    QFontMetrics metrics(font);
+    QFont font = SettingsManager::font();
     setFont(font);
 
     ensureCursorVisible();
-    setCenterOnScroll(true);
+    setCenterOnScroll(false);;
     setReadOnly(true);
 }
 

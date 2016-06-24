@@ -4,6 +4,8 @@
 #include <QApplication>
 #include <QLabel>
 #include <QObject>
+
+#include "settingsmanager.h"
 #include "editor.h"
 #include "mainwindow.h"
 
@@ -12,6 +14,7 @@ int main(int argc, char* argv[]) {
     app.setOrganizationName("UMW Computer Science");
     app.setApplicationName("Tetra");
 
+    SettingsManager::init();
     MainWindow w;
     w.show();
 
