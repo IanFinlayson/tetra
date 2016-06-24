@@ -306,7 +306,8 @@ formal_params: declaration TOK_COMMA formal_params {
   $$->addChild($1);
   $$->addChild($3);
 } | declaration{
-  $$ = $1;
+  $$ = new Node(NODE_FORMAL_PARAM_LIST);
+  $$->addChild($1);
 }
 
 /* a single parameter */

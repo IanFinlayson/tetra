@@ -1330,10 +1330,14 @@ void inferParams(Node* node, Node* func) {
     }
   }
 
-  /* if it's more than one, recurse on both */
+  /* infer any list elements */
   if (node->kind() == NODE_FORMAL_PARAM_LIST) {
     inferParams(node->child(0), func);
-    inferParams(node->child(1), func);
+    /* if there are more... */
+    if (node->child(1)) {
+      /* get them too */ 
+      inferParams(node->child(1), func);
+    }
   }
 
   /* else if it's just one param, handle it */
@@ -1540,7 +1544,11 @@ void checkClassTypes(Node* node) {
 
   } else if (node->kind() == NODE_FORMAL_PARAM_LIST) {
     checkClassTypes(node->child(0));
-    checkClassTypes(node->child(1));
+    /* if there are more params... */ 
+    if(node->child(1)) {
+      /* check 'em */
+      checkClassTypes(node->child(1));
+    }
 
   } else if (node->kind() == NODE_DECLARATION) {
     if (node->type()->getKind() == TYPE_CLASS 
