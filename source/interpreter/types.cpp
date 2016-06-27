@@ -470,6 +470,53 @@ bool inLoop(Node* node) {
   return false;
 }
 
+/* check that all contained blocks return */
+bool checkReturns(Node* node) {
+  switch (node->kind()) {
+    case NODE_STATEMENT:
+      /* a chain of statements returns on all paths
+       * if it's statement returns on all paths or the
+       * remaining chain does */
+      return checkReturns(node->child(0))
+         || checkReturns(node->child(1));
+
+    case NODE_IF:
+        /* returns true if there is an else
+         * and both the if and the else return true */ 
+        return node->numChildren() == 3
+            && checkReturns(node->child(1))
+            && checkReturns(node->child(2));
+
+    case NODE_ELIF:
+        /* returns true if there is and else
+         * and all the conditional paths return*/ 
+        return node->numChildren() == 3
+            && checkReturns(node->child(0))
+            && checkReturns(node->child(1))
+            && checkReturns(node->child(2));
+
+    case NODE_ELIF_CHAIN:
+      /* returns true if both children return true */
+      return checkReturns(node->child(0))
+         && checkReturns(node->child(1));
+
+    case NODE_ELIF_CLAUSE:
+      /* returns true if the block returns true */
+      return checkReturns(node->child(0));
+
+    case NODE_FUNCTION:
+    case NODE_LOCK:
+      /* returns what it's block returns */
+      return checkReturns(node->child(node->numChildren()-1));
+
+    case NODE_RETURN:
+      return true;
+
+    default:
+      return false;
+  }   
+}
+
 /* look up parent class */
 Node* getClassNode(Node* node) {
   if (node->kind() == NODE_CLASS){
@@ -1619,6 +1666,16 @@ void inferFunction(Node* node){
     throw Error("Free function cannot share name with global, constant, or class.", 
         node->getLine());
   }
+
+  /* if there is a return (not none) and all paths don't return */
+  if ((*(node->type()->subtypes))[1].getKind() != TYPE_NONE 
+      && !checkReturns(node)) {
+    /* complain */
+    throw Error("Function '" + node->getString() + 
+        "' has declared return type, but all paths do not return.",
+        node->getLine());
+  }
+
   /* check that any classes in params/return type exist */
   checkClassTypes(node->child(0));
 
@@ -1651,6 +1708,16 @@ void inferClass(Node* node) {
   } else if (node->kind() == NODE_FUNCTION) {
     /* check that any classes in params/return type exist */
     checkClassTypes(node->child(0));
+
+    /* if there is a return (not none) and all paths don't return */
+    if ((*(node->type()->subtypes))[1].getKind() != TYPE_NONE 
+        && !checkReturns(node)) {
+      /* complain */
+      throw Error("Function '" + node->getString() + 
+          "' has declared return type, but all paths do not return.",
+          node->getLine());
+    }
+
     /* if there are params...*/ 
     if (node->numChildren( ) > 1) {
       inferBlock(node->child(1), node);
