@@ -450,6 +450,26 @@ bool inPar(Node* node) {
   return false;
 }
 
+/* check if this node is inside a loop */
+bool inLoop(Node* node) {
+  Node* curr = node;
+  /* loop until we get to the containing function */
+  while (curr->kind() != NODE_FUNCTION){
+    /* check to see if we have found a containing parallel
+     * block of any kind */
+    if (curr->kind() == NODE_PARFOR
+        || curr->kind() == NODE_FOR
+        || curr->kind() == NODE_WHILE) {
+      return true;
+    }
+    /* go up one node */
+    curr = curr->getParent();
+  }
+  /* if we reached a function node and never found
+   * a parallel node */
+  return false;
+}
+
 /* look up parent class */
 Node* getClassNode(Node* node) {
   if (node->kind() == NODE_CLASS){
@@ -1316,8 +1336,14 @@ void inferBlock(Node* block, Node* func) {
                    break;
                    /* these require no work... */
     case NODE_PASS:
+                   break;
     case NODE_BREAK:
     case NODE_CONTINUE:
+                   /* if not contained in a loop... */
+                   if (!inLoop(block)) {
+                     throw Error("Break and continue are only permitted within a loop.",
+                         block->getLine());
+                   }
                    break;
 
     default:
