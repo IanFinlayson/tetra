@@ -429,9 +429,29 @@ Node* nextLambda(Node* startNode) {
   return NULL;
 }
 
+/* check if this node is inside a parallel, parfor,
+ * or background block */
+bool inPar(Node* node) {
+  Node* curr = node;
+  /* loop until we get to the containing function */
+  while (curr->kind() != NODE_FUNCTION){
+    /* check to see if we have found a containing parallel
+     * block of any kind */
+    if (curr->kind() == NODE_PARFOR
+        || curr->kind() == NODE_PARALLEL
+        || curr->kind() == NODE_BACKGROUND) {
+      return true;
+    }
+    /* go up one node */
+    curr = curr->getParent();
+  }
+  /* if we reached a function node and never found
+   * a parallel node */
+  return false;
+}
 
 /* look up parent class */
-Node* getClassNode(Node* node){
+Node* getClassNode(Node* node) {
   if (node->kind() == NODE_CLASS){
     return node;
   } else if (node->kind() == NODE_TOPLEVEL_LIST) { 
@@ -1172,6 +1192,12 @@ void inferBlock(Node* block, Node* func) {
       inferBlock(block->child(1), func);
       break;
     case NODE_RETURN: {
+                        /* make sure that it isn't in a parallel block of any kind */
+                        if (inPar(block)) {
+                          throw Error("Cannot place return statement in parallel block.",
+                              block->getLine());
+                        }
+
                         /* infer the expression */
                         DataType* ret;
                         if (block->child(0)) {
