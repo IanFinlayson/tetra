@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <QFontDialog>
+#include <QColorDialog>
 
 #include "settingsdialog.h"
 #include "settingsmanager.h"
@@ -19,8 +20,39 @@ SettingsDialog::SettingsDialog(QWidget* parent) : QDialog(parent) {
 
     /* set up the font button */
     connect(fontButton, SIGNAL(released()),this, SLOT(askFont()));
-
     font_choice = SettingsManager::font();
+
+    /* set up the color buttons */
+    foreground->setPalette(SettingsManager::foreground());
+    background->setPalette(SettingsManager::background());
+    keywords->setPalette(SettingsManager::keywords());
+    types->setPalette(SettingsManager::types());
+    values->setPalette(SettingsManager::values());
+    comments->setPalette(SettingsManager::comments());
+    functions->setPalette(SettingsManager::functions());
+    termForeground->setPalette(SettingsManager::termForeground());
+    termBackground->setPalette(SettingsManager::termBackground());
+    linesForeground->setPalette(SettingsManager::linesForeground());
+    linesBackground->setPalette(SettingsManager::linesBackground());
+
+    connect(foreground, SIGNAL(released()), this, SLOT(askColor()));
+    connect(background, SIGNAL(released()), this, SLOT(askColor()));
+    connect(keywords, SIGNAL(released()), this, SLOT(askColor()));
+    connect(types, SIGNAL(released()), this, SLOT(askColor()));
+    connect(values, SIGNAL(released()), this, SLOT(askColor()));
+    connect(comments, SIGNAL(released()), this, SLOT(askColor()));
+    connect(functions, SIGNAL(released()), this, SLOT(askColor()));
+    connect(termForeground, SIGNAL(released()), this, SLOT(askColor()));
+    connect(termBackground, SIGNAL(released()), this, SLOT(askColor()));
+    connect(linesForeground, SIGNAL(released()), this, SLOT(askColor()));
+    connect(linesBackground, SIGNAL(released()), this, SLOT(askColor()));
+}
+
+void SettingsDialog::askColor() {
+    QPushButton* it = (QPushButton*) sender();
+
+    QColor selection = QColorDialog::getColor(it->palette().color(QWidget::backgroundRole()), this, "Select Color");
+    it->setPalette(selection);
 }
 
 void SettingsDialog::askFont() {
@@ -43,6 +75,19 @@ void SettingsDialog::on_buttonBox_clicked(QAbstractButton* button)
         SettingsManager::setLineNo(lineNo->checkState() == Qt::Checked);
         SettingsManager::setSmartEdit(smartEdit->checkState() == Qt::Checked);
         SettingsManager::setFont(font_choice);
+
+        SettingsManager::setForeground(foreground->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setBackground(background->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setKeywords(keywords->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setTypes(types->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setValues(values->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setComments(comments->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setFunctions(functions->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setTermForeground(termForeground->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setTermBackground(termBackground->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setLinesForeground(linesForeground->palette().color(QWidget::backgroundRole()));
+        SettingsManager::setLinesBackground(linesBackground->palette().color(QWidget::backgroundRole()));
+
         accept();
 
     } else if (button == buttonBox->button(QDialogButtonBox::Cancel)) {

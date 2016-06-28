@@ -57,6 +57,7 @@ class Highlighter : public QSyntaxHighlighter {
   protected:
     void highlightBlock(const QString& text);
 
+
   private:
     struct HighlightingRule {
         QRegExp pattern;
@@ -78,4 +79,6 @@ class Highlighter : public QSyntaxHighlighter {
     ;
 };
 
-#endif  // HIGHLIGHTER_H
+#endif
+
+

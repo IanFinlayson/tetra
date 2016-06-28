@@ -24,6 +24,9 @@ class Console : public QPlainTextEdit, public VirtualConsole {
     /* sets the link to the parent window and connections between them */
     void setUpConnections(MainWindow* parent);
 
+    /* update the settings */
+    void updateSettings();
+
     /* functions for communicating with tetra I/O */
     std::string receiveStandardInput();
     void processStandardOutput(const std::string& text);
@@ -35,8 +38,6 @@ class Console : public QPlainTextEdit, public VirtualConsole {
 
   private:
     MainWindow* parent;
-
-
 };
 #endif
 

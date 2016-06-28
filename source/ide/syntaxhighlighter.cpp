@@ -1,27 +1,12 @@
 #include "syntaxhighlighter.h"
-
-// the colors used for highlighting
-const unsigned int COLOR_TYPE = 0xb28c10;
-const unsigned int COLOR_KEYWORD = 0x004088;
-const unsigned int COLOR_BUILTIN = 0x73378c;
-const unsigned int COLOR_VALUE = 0xaa0000;
-const unsigned int COLOR_STRING = 0xaa0000;
-const unsigned int COLOR_COMMENT = 0x1A5D11;
-
-// build a QColor from a 24-bit hexadecimal color value
-QColor colorFromHex(unsigned int color) {
-    int r = (color & 0xFF0000) >> 16;
-    int g = (color & 0x00FF00) >> 8;
-    int b = color & 0x0000FF;
-    return QColor(r, g, b, 255);
-}
+#include "settingsmanager.h"
 
 // set up the highlighting
 Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     HighlightingRule rule;
 
     // types
-    typeFormat.setForeground(colorFromHex(COLOR_TYPE));
+    typeFormat.setForeground(SettingsManager::types());
     QStringList typePatterns;
     typePatterns << "\\bint\\b"
                  << "\\breal\\b"
@@ -36,7 +21,7 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     }
 
     // keywords
-    keywordFormat.setForeground(colorFromHex(COLOR_KEYWORD));
+    keywordFormat.setForeground(SettingsManager::keywords());
     QStringList keywordPatterns;
     keywordPatterns << "\\bif\\b"
                     << "\\bclass\\b"
@@ -70,7 +55,7 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     }
 
     // builtin stuff
-    builtinFormat.setForeground(colorFromHex(COLOR_BUILTIN));
+    builtinFormat.setForeground(SettingsManager::functions());
     QStringList builtinPatterns;
     builtinPatterns << "\\bprint\\b"
                     << "\\blen\\b"
@@ -87,7 +72,7 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     }
 
     // values
-    valueFormat.setForeground(colorFromHex(COLOR_VALUE));
+    valueFormat.setForeground(SettingsManager::values());
     QStringList valuePatterns;
     valuePatterns << "\\btrue\\b"
                   << "\\bfalse\\b"
@@ -100,13 +85,13 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     }
 
     // strings
-    quotationFormat.setForeground(colorFromHex(COLOR_STRING));
+    quotationFormat.setForeground(SettingsManager::values());
     rule.pattern = QRegExp("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
     // comments
-    singleLineCommentFormat.setForeground(colorFromHex(COLOR_COMMENT));
+    singleLineCommentFormat.setForeground(SettingsManager::comments());
     rule.pattern = QRegExp("#[^\n]*");
     rule.format = singleLineCommentFormat;
     highlightingRules.append(rule);
@@ -123,4 +108,5 @@ void Highlighter::highlightBlock(const QString& text) {
         }
     }
 }
+
 

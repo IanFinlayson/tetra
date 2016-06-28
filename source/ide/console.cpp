@@ -11,29 +11,38 @@
 Console::Console(MainWindow* parent) : QPlainTextEdit(parent), VirtualConsole() {
     setContentsMargins(50, 50, 50, 50);
 
-    /* set the background color */
-    setStyleSheet("background-color:#404244; color: #eeeeee;");
-
-    /* set to a monospaced font */
-    QFont font = SettingsManager::font();
-    setFont(font);
-
     ensureCursorVisible();
     setCenterOnScroll(false);;
     setReadOnly(true);
+    this->parent = parent;
+
+    updateSettings();
 }
 
 void Console::setUpConnections(MainWindow* parent) {
     this->parent = parent;
 }
 
+void Console::updateSettings() {
+    /* set colors */
+    setStyleSheet("background-color: " + SettingsManager::termBackground().name() + ";");
+    setStyleSheet(styleSheet().append("color: " + SettingsManager::termForeground().name() + ";"));
+
+    /* set font */
+    QFont font = SettingsManager::font();
+    setFont(font);
+}
+
+/* TODO change this to use the actual console itself the difficulty in that is
+ * that we can't return right away like we must for the interface... */
 std::string Console::receiveStandardInput() {
-    /* make it writeable */
-    setReadOnly(false);
-
-    setFocus(Qt::OtherFocusReason);
-
-    return "42";
+    while (true) {
+        bool ok;
+        QString text = QInputDialog::getText(parent, "Enter Input", "Enter Input", QLineEdit::Normal, "", &ok);
+        if (ok) {
+            return text.toStdString();
+        }
+    }
 }
 
 void Console::processStandardOutput(const std::string& text) {

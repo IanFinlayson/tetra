@@ -355,6 +355,9 @@ void MainWindow::on_actionSettings_triggered() {
         Editor* ed = (Editor*) ui->tabBar->widget(i);
         ed->updateSettings();
     }
+
+    /* update the settings for the console */
+    ui->console->updateSettings();
 }
 
 

@@ -33,15 +33,19 @@ void Editor::updateSettings() {
     } else {
         lineNumberArea->hide();
     }
+    lineNumberArea->setFont(SettingsManager::font());
     tabWidth = SettingsManager::tabWidth();
 
-    /* set the font */
+    /* set the font and colors */
     setFont(SettingsManager::font());
+    setStyleSheet("background-color: " + SettingsManager::background().name() + ";");
+    setStyleSheet(styleSheet().append("color: " + SettingsManager::foreground().name() + ";"));
+    lineNumberArea->setStyleSheet("background-color: " + SettingsManager::background().name() + ";");
+    lineNumberArea->setStyleSheet(styleSheet().append("color: " + SettingsManager::foreground().name() + ";"));
 
-
-
-    /* TODO should be part of color scheme */
-    setStyleSheet("background-color:#f5f5f5;");
+    /* update syntax highlighting */
+    delete highlighter;
+    highlighter = new Highlighter(document());
 }
 
 void Editor::setUpConnections(MainWindow* parent) {
@@ -288,7 +292,7 @@ void Editor::resizeEvent(QResizeEvent* e) {
 /* draw the line number area on the left */
 void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(), QColor(230, 230, 230));
+    painter.fillRect(event->rect(), SettingsManager::linesBackground());
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -299,7 +303,7 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
+            painter.setPen(SettingsManager::linesForeground());
             painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
         }
 
