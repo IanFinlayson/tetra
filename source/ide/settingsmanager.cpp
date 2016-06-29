@@ -3,8 +3,12 @@
 
 #include <QtWidgets>
 #include "settingsmanager.h"
+#include "settingsdialog.h"
 
 QSettings* SettingsManager::qset = NULL;
+
+/* external referecne to the color schemes, 0 is default */
+extern ColorScheme schemes[12];
 
 void SettingsManager::init() {
     qset = new QSettings("tetra", "tetraide0.2");
@@ -48,47 +52,47 @@ void SettingsManager::setFont(QFont font) {
 
 
 QColor SettingsManager::foreground() {
-    return qset->value("color/foreground", QColor(0x00, 0x00, 0x00)).value<QColor>();
+    return qset->value("color/foreground", QColor(schemes[0].foreground)).value<QColor>();
 }
 
 QColor SettingsManager::background() {
-    return qset->value("color/background", QColor(0xf5, 0xf5, 0xf5)).value<QColor>();
+    return qset->value("color/background", QColor(schemes[0].background)).value<QColor>();
 }
 
 QColor SettingsManager::keywords() {
-    return qset->value("color/keywords", QColor(0x00, 0x40, 0x88)).value<QColor>();
+    return qset->value("color/keywords", QColor(schemes[0].keywords)).value<QColor>();
 }
 
 QColor SettingsManager::types() {
-    return qset->value("color/types", QColor(0xb2, 0x8c, 0x10)).value<QColor>();
+    return qset->value("color/types", QColor(schemes[0].types)).value<QColor>();
 }
 
 QColor SettingsManager::values() {
-    return qset->value("color/values", QColor(0xaa, 0x00, 0x00)).value<QColor>();
+    return qset->value("color/values", QColor(schemes[0].values)).value<QColor>();
 }
 
 QColor SettingsManager::comments() {
-    return qset->value("color/comments", QColor(0x1a, 0x5d, 0x11)).value<QColor>();
+    return qset->value("color/comments", QColor(schemes[0].comments)).value<QColor>();
 }
 
 QColor SettingsManager::functions() {
-    return qset->value("color/functions", QColor(0x73, 0x37, 0x8c)).value<QColor>();
+    return qset->value("color/functions", QColor(schemes[0].functions)).value<QColor>();
 }
 
 QColor SettingsManager::termForeground() {
-    return qset->value("color/termForeground", QColor(0xee, 0xee, 0xee)).value<QColor>();
+    return qset->value("color/termForeground", QColor(schemes[0].termForeground)).value<QColor>();
 }
 
 QColor SettingsManager::termBackground() {
-    return qset->value("color/termBackground", QColor(0x40, 0x42, 0x44)).value<QColor>();
+    return qset->value("color/termBackground", QColor(schemes[0].termBackground)).value<QColor>();
 }
 
 QColor SettingsManager::linesForeground() {
-    return qset->value("color/linesForeground", QColor(0x00, 0x00, 0x00)).value<QColor>();
+    return qset->value("color/linesForeground", QColor(schemes[0].linesForeground)).value<QColor>();
 }
 
 QColor SettingsManager::linesBackground() {
-    return qset->value("color/linesBackground", QColor(0xe8, 0xe8, 0xe8)).value<QColor>();
+    return qset->value("color/linesBackground", QColor(schemes[0].linesBackground)).value<QColor>();
 }
 
 void SettingsManager::setForeground(QColor color) {

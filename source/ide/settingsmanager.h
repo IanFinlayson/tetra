@@ -7,7 +7,6 @@
 #include <QSettings>
 #include <QFont>
 
-
 class SettingsManager {
     public:
         static void init();
@@ -50,7 +49,6 @@ class SettingsManager {
 
     private:
         static QSettings* qset;
-
 };
 
 #endif
