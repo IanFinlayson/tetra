@@ -10,11 +10,10 @@
 
 Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursorCoordinates()));
-    lineNumberArea = new LineNumberArea(this);
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
 
-    updateLineNumberAreaWidth(0);
+    lineNumberArea = NULL;
     setPlainText("");
     highlighter = new Highlighter(document());
 
@@ -27,21 +26,43 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
 
 
 void Editor::updateSettings() {
-    /* set line number and tab width */
+    /* if line numbers are on */
     if (SettingsManager::lineNo()) {
+        /* create if needed */
+        if (!lineNumberArea) {
+            lineNumberArea = new LineNumberArea(this);
+        }
+
+        /* set them up */
         lineNumberArea->show();
+        lineNumberArea->setFont(SettingsManager::font());
+        updateLineNumberAreaWidth(0);
+        lineNumberArea->setStyleSheet(
+                "background-color: " + SettingsManager::background().name() + ";"
+                "color: " + SettingsManager::foreground().name() + ";");
     } else {
-        lineNumberArea->hide();
+        /* delete them if needed */
+        if (lineNumberArea) {
+            delete lineNumberArea;
+            lineNumberArea = NULL;
+            setViewportMargins(0, 0, 0, 0);
+        }
     }
+
+    /* set the tab width */
     tabWidth = SettingsManager::tabWidth();
 
-    /* set the font */
+    /* set the font and colors */
     setFont(SettingsManager::font());
+    setStyleSheet("QPlainTextEdit {"
+            "background-color: " + SettingsManager::background().name() + ";"
+            "color: " + SettingsManager::foreground().name() + ";"
+            "}");
 
 
-
-    /* TODO should be part of color scheme */
-    setStyleSheet("background-color:#f5f5f5;");
+    /* update syntax highlighting */
+    delete highlighter;
+    highlighter = new Highlighter(document());
 }
 
 void Editor::setUpConnections(MainWindow* parent) {
@@ -263,10 +284,16 @@ int Editor::lineNumberAreaWidth() {
 }
 
 void Editor::updateLineNumberAreaWidth(int /* newBlockCount */) {
-    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+    if (lineNumberArea) {
+        setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+    }
 }
 
 void Editor::updateLineNumberArea(const QRect& rect, int dy) {
+    if (!lineNumberArea) {
+        return;
+    }
+
     if (dy) {
         lineNumberArea->scroll(0, dy);
     } else {
@@ -281,14 +308,20 @@ void Editor::updateLineNumberArea(const QRect& rect, int dy) {
 void Editor::resizeEvent(QResizeEvent* e) {
     QPlainTextEdit::resizeEvent(e);
 
-    QRect cr = contentsRect();
-    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    if (lineNumberArea) {
+        QRect cr = contentsRect();
+        lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    }
 }
 
 /* draw the line number area on the left */
 void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
+    if (!lineNumberArea) {
+        return;
+    }
+
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(), QColor(230, 230, 230));
+    painter.fillRect(event->rect(), SettingsManager::linesBackground());
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -299,7 +332,7 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
+            painter.setPen(SettingsManager::linesForeground());
             painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
         }
 

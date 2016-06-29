@@ -1,6 +1,7 @@
 /* mainwindow.cpp
  * code for the main application window, actions, etc. */
 
+#include <QDesktopServices>
 #include <QDesktopWidget>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -332,6 +333,7 @@ void MainWindow::on_actionCopy_triggered() {
 void MainWindow::on_actionPaste_triggered() {
     currentEditor()->paste();
 }
+
 void MainWindow::on_actionFind_triggered() {
     QMessageBox msgBox;
     msgBox.setText("TODO");
@@ -355,13 +357,14 @@ void MainWindow::on_actionSettings_triggered() {
         Editor* ed = (Editor*) ui->tabBar->widget(i);
         ed->updateSettings();
     }
+
+    /* update the settings for the console */
+    ui->console->updateSettings();
 }
 
 
 void MainWindow::on_actionDocumentation_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
+    QDesktopServices::openUrl(QUrl("http://tetra-lang.org/ide-reference"));
 }
 
 /* run and debug functions */
