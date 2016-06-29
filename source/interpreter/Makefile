@@ -2,7 +2,8 @@
 
 # options
 CC := clang++
-FLAGS := -W -Wall -pedantic -g -pthread -ftemplate-backtrace-limit=1
+FLAGS := -W -Wall -pedantic -g -pthread -std=c++11
+# -ftemplate-backtrace-limit=1 
 
 # globs
 SRCS := $(wildcard *.cpp)
@@ -16,7 +17,7 @@ all: tetra libtetra.a tags
 
 # build the tetra executable
 tetra: $(OBJS)
-	$(CC) $(FLAGS) $(OBJS) -o tetra
+	$(CC) $(FLAGS) $(OBJS) -lgc -o tetra
 	mkdir -p ../../bin
 	cp tetra ../../bin/
 

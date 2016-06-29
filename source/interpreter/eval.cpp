@@ -238,7 +238,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
 
       // For_each loop with some extra conditions tacked on to check whether we
       // are returning or breaking
-      for (std::vector<TData<void*> /*, mmap_allocator<TData<void*> >*/>::
+      for (std::vector<TData<void*>, gc_allocator<TData<void*> > /*, mmap_allocator<TData<void*> >*/>::
                const_iterator iter = collection.getData()->begin();
            iter != collection.getData()->end() && status != BREAK &&
            status != RETURN;

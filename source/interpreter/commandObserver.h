@@ -21,7 +21,7 @@ bool operator==(Breakpoint a, Breakpoint b);
 std::string statusToString(ThreadStatus status);
 class CommandObserver : public VirtualObserver {
  private:
-  std::vector<Breakpoint> breakpoints;
+  std::vector<Breakpoint, gc_allocator<Breakpoint> > breakpoints;
   // Breakpoint lastLine;
   // bool stepping;
   // bool stopAtNext;
@@ -30,7 +30,7 @@ class CommandObserver : public VirtualObserver {
   // them specially
   // std::stack<std::vector<std::string> > threadSpecificVars;
 
-  std::vector<long> waitingThreads;
+  std::vector<long, gc_allocator<long> > waitingThreads;
   long allowedThread;
   bool yieldEnabled;  // Some imlementations may find it more useful to disable
                       // this feature
@@ -75,7 +75,7 @@ class CommandObserver : public VirtualObserver {
   void setYieldEnabled(bool);
 
   // Returns a list of linenumbers of stopped threads
-  std::vector<int> getThreadLocations();
+  std::vector<int, gc_allocator<int> > getThreadLocations();
 };
 
 #endif

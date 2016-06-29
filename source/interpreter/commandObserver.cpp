@@ -4,7 +4,7 @@
 #include "frontend.h"
 
 // Global symbol table
-extern std::map<std::string, Symbol> globals;
+extern std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
 
 // as a courtesy, we will provide this method
 std::string statusToString(ThreadStatus status) {
@@ -202,7 +202,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
               pthread_mutex_lock(&context_mutex);
               {
                 bool threadFound = false;
-                for (std::list<TetraContext*>::iterator iter =
+                for (std::list<TetraContext*, gc_allocator<TetraContext*> >::iterator iter =
                          threadContexts.begin();
                      iter != threadContexts.end(); ++iter) {
                   if ((*iter)->getThreadID() == threadNum) {
@@ -256,7 +256,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
                 const Node* nodey = context.getScopes().top();
                 std::stringstream output;
                 output << "-----\n";
-                for (std::map<std::string, int>::const_iterator varIterator =
+                for (std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string,int> > >::const_iterator varIterator =
                          ((filter == 0) ? context.getGlobRefTable()
                                         : context.getRefTable())
                              .begin();
@@ -292,7 +292,7 @@ void CommandObserver::notify_E(const Node* foundNode, TetraContext& context) {
                 output << "-----\n";
                 pthread_mutex_lock(&context_mutex);
                 {
-                  for (std::list<TetraContext*>::iterator contextIter =
+                  for (std::list<TetraContext*, gc_allocator<TetraContext*> >::iterator contextIter =
                            threadContexts.begin();
                        contextIter != threadContexts.end(); ++contextIter) {
                     TetraContext* loopContext = *contextIter;
@@ -550,7 +550,7 @@ void CommandObserver::threadCreated_E(int threadNum, TetraContext& context) {
 void CommandObserver::threadDestroyed_E(int threadNum) {
   pthread_mutex_lock(&context_mutex);
 
-  for (std::list<TetraContext*>::iterator candidate = threadContexts.begin();
+  for (std::list<TetraContext*, gc_allocator<TetraContext*> >::iterator candidate = threadContexts.begin();
        candidate != threadContexts.end(); ++candidate) {
     if ((*candidate)->getThreadID() == threadNum) {
       //(*candidate)->setRunStatus(DESTROYED);
@@ -604,7 +604,7 @@ bool CommandObserver::remove_E(int lineNum) {
   Breakpoint toPop;
   toPop.lineNo = lineNum;
   toPop.threadLabel = -1;
-  std::vector<Breakpoint>::iterator location =
+  std::vector<Breakpoint, gc_allocator<Breakpoint> >::iterator location =
       std::find(breakpoints.begin(), breakpoints.end(), toPop);
 
   pthread_mutex_lock(&breakList_mutex);
@@ -633,11 +633,11 @@ void CommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
 
 void CommandObserver::setYieldEnabled(bool enable) { yieldEnabled = enable; }
 
-std::vector<int> CommandObserver::getThreadLocations() {
-  std::vector<int> ret;
+std::vector<int, gc_allocator<int> > CommandObserver::getThreadLocations() {
+  std::vector<int, gc_allocator<int> > ret;
   pthread_mutex_lock(&context_mutex);
   {
-    for (std::list<TetraContext*>::iterator context = threadContexts.begin();
+    for (std::list<TetraContext*, gc_allocator<TetraContext*> >::iterator context = threadContexts.begin();
          context != threadContexts.end(); context++) {
       if ((*context)->getRunStatus() == STOPPED) {
         ret.push_back((*context)->getLastLineNo());

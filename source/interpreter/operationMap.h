@@ -245,8 +245,8 @@ class OperationList {
   }
 
  private:
-  std::map<NodeKind, T (OperationList<T>::*)(T, T)> functionMap;
-  std::map<NodeKind, T (OperationList<T>::*)(Node*, Node*, TetraContext&)>
+  std::map<NodeKind, T (OperationList<T>::*)(T, T), less<NodeKind>, gc_allocator<pair<NodeKind, T (OperationList<T>::*)(T, T)> > > functionMap;
+  std::map<NodeKind, T (OperationList<T>::*)(Node*, Node*, TetraContext&),less<NodeKind>, gc_allocator<pair<NodeKind, T (OperationList<T>::*)(Node*, Node*, TetraContext&)> > >
       opMap;
   // Define all the operations:
   // Note that in cases where due consideration should be considered when

@@ -46,7 +46,7 @@ void ThreadPool::addThread(pthread_t aThread) {
 void ThreadPool::removeThread(pthread_t rThread) {
   // cout << "Removing mutex thread" << endl;
   pthread_mutex_lock(&threadCount_mutex);
-  for (vector<pthread_t>::iterator element = currentThreads.begin();
+  for (auto element = currentThreads.begin();
        element < currentThreads.end(); element++) {
     if (*element == rThread) {
       currentThreads.erase(element);
@@ -95,9 +95,10 @@ ThreadEnvironment::ThreadEnvironment() : backgroundThreads(), mutexes() {
 
 // Destructor destroys the allocated mutexes
 ThreadEnvironment::~ThreadEnvironment() {
-  for (std::map<string, pthread_mutex_t*>::iterator iter = mutexes.begin();
+  for (std::map<std::string, pthread_mutex_t*, less<std::string>, gc_allocator<pair<string, pthread_mutex_t*> > >
+      ::iterator iter = mutexes.begin();
        iter != mutexes.end(); iter++) {
-    delete iter->second;
+    //delete iter->second;
   }
 }
 
@@ -160,7 +161,7 @@ pthread_mutex_t* ThreadEnvironment::identifyMutex(string mutexName) {
     // cout << "Inserting new mutex" << endl;
     // Mutexes are not copy constructable, so the map will have to store
     // references
-    pthread_mutex_t* lock = new pthread_mutex_t();
+    pthread_mutex_t* lock = new(GC) pthread_mutex_t();
     pthread_mutex_init(lock, NULL);
     instance.mutexes[mutexName] = lock;
   }

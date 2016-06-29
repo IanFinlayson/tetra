@@ -4,7 +4,7 @@
 #include "frontend.h"
 
 // Global symbol table
-extern std::map<std::string, Symbol> globals;
+extern std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
 
 // as a courtesy, we will provide this method
 /*std::string statusToString(ThreadStatus status) {
@@ -187,7 +187,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
               pthread_mutex_lock(&context_mutex);
               {
                 bool threadFound = false;
-                for (std::list<TetraContext*>::iterator iter =
+                for (std::list<TetraContext*, gc_allocator<TetraContext*> >::iterator iter =
                          threadContexts.begin();
                      iter != threadContexts.end(); ++iter) {
                   if ((*iter)->getThreadID() == threadNum) {
@@ -241,7 +241,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
                 const Node* nodey = context.getScopes().top();
                 std::stringstream output;
                 output << "-----\n";
-                for (std::map<std::string, int>::const_iterator varIterator =
+                for (std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >::const_iterator varIterator =
                          ((filter == 0) ? context.getGlobRefTable()
                                         : context.getRefTable())
                              .begin();
@@ -277,7 +277,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
                 output << "-----\n";
                 pthread_mutex_lock(&context_mutex);
                 {
-                  for (std::list<TetraContext*>::iterator contextIter =
+                  for (std::list<TetraContext*, gc_allocator<TetraContext*> >::iterator contextIter =
                            threadContexts.begin();
                        contextIter != threadContexts.end(); ++contextIter) {
                     TetraContext* loopContext = *contextIter;
@@ -601,7 +601,7 @@ void IDECommandObserver::setYieldEnabled(bool enable) {
   CommandObserver::setYieldEnabled(enable);
 }
 
-std::vector<int> IDECommandObserver::getThreadLocations() {
+std::vector<int, gc_allocator<int> > IDECommandObserver::getThreadLocations() {
   /*std::vector<int> ret;
   pthread_mutex_lock(&context_mutex);
   {

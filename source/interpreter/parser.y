@@ -160,22 +160,22 @@ newl_plus: TOK_NEWLINE newl_star {}
 
 /* a list of functions */
 toplevels: newl_star function toplevels {
-  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$ = new(GC) Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
 } | newl_star datadecl toplevels {
-  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$ = new(GC) Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
 } | newl_star module toplevels { 
-  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$ = new(GC) Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
 } | newl_star class toplevels {
-  $$ = new Node(NODE_TOPLEVEL_LIST);
+  $$ = new(GC) Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
@@ -185,23 +185,23 @@ toplevels: newl_star function toplevels {
 
 /* modules */
 identifiers: identifier TOK_COMMA identifiers {
-  $$ = new Node(NODE_IDENTIFIERS);
+  $$ = new(GC) Node(NODE_IDENTIFIERS);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
 } | identifier {
-  $$ = new Node(NODE_IDENTIFIERS);
+  $$ = new(GC) Node(NODE_IDENTIFIERS);
   $$->setLine(yylineno);
   $$->addChild($1);
 }
 
 module: TOK_OPEN identifiers {
-  $$ = new Node(NODE_OPEN); 
+  $$ = new(GC) Node(NODE_OPEN); 
   $$->setLine(yylineno);
   $$->addChild($2);
 
   } | TOK_IMPORT identifiers {
-  $$ = new Node(NODE_IMPORT); 
+  $$ = new(GC) Node(NODE_IMPORT); 
   $$->setLine(yylineno);
   $$->addChild($2);
 }
@@ -209,7 +209,7 @@ module: TOK_OPEN identifiers {
 
 /* class */
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
-  $$ = new Node(NODE_CLASS);
+  $$ = new(GC) Node(NODE_CLASS);
   $$->setStringval(string($2));
   $$->addChild($5);
 }
@@ -221,12 +221,12 @@ class_block: TOK_INDENT class_parts TOK_DEDENT {
 }
 
 class_parts: class_part class_parts {
-  $$ = new Node(NODE_CLASS_PART);
+  $$ = new(GC) Node(NODE_CLASS_PART);
   $$->addChild($1);
   $$->addChild($2);
   $$->setLine($1->getLine( ));
 } | class_part {
-  $$ = new Node(NODE_CLASS_PART);
+  $$ = new(GC) Node(NODE_CLASS_PART);
   $$->addChild($1);
 }
 
@@ -237,8 +237,8 @@ class_part: function
 }
 
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
-  $$ = new Node(NODE_FUNCTION);
-  $$->setDataType(new DataType(TYPE_CLASS));
+  $$ = new(GC) Node(NODE_FUNCTION);
+  $$->setDataType(new(GC) DataType(TYPE_CLASS));
   $$->setStringval("init");
   $$->addChild($3);
   $$->addChild($5);
@@ -247,43 +247,43 @@ init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
 
 /* a data declaration - either a constant or global */
 datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_CONST);
+  $$ = new(GC) Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($4);
 } | TOK_CONST typed_identifier TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_CONST);
+  $$ = new(GC) Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($4);
 } | TOK_CONST identifier type TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_CONST);
+  $$ = new(GC) Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($5);
   $2->setDataType($3);
 } | TOK_GLOBAL typed_identifier TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_GLOBAL);
+  $$ = new(GC) Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->addChild($4);
 } | TOK_GLOBAL identifier TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_GLOBAL);
+  $$ = new(GC) Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->addChild($4);
 } | TOK_GLOBAL identifier type TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_GLOBAL);
+  $$ = new(GC) Node(NODE_GLOBAL);
   $$->addChild($2);
   $$->addChild($5);
   $2->setDataType($3);
 } | TOK_GLOBAL identifier type {
-  $$ = new Node(NODE_GLOBAL);
+  $$ = new(GC) Node(NODE_GLOBAL);
   $$->addChild($2);
   $2->setDataType($3);
 } | TOK_GLOBAL typed_identifier {
-  $$ = new Node(NODE_GLOBAL);
+  $$ = new(GC) Node(NODE_GLOBAL);
   $$->addChild($2);
 }
 
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
-  $$ = new Node(NODE_FUNCTION);
+  $$ = new(GC) Node(NODE_FUNCTION);
   $$->setStringval(string($2));
   $$->setDataType($4);
   $$->addChild($3);
@@ -301,18 +301,18 @@ formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
 
 /* a list of at least one parameter */
 formal_params: declaration TOK_COMMA formal_params {
-  $$ = new Node(NODE_FORMAL_PARAM_LIST);
+  $$ = new(GC) Node(NODE_FORMAL_PARAM_LIST);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
 } | declaration{
-  $$ = new Node(NODE_FORMAL_PARAM_LIST);
+  $$ = new(GC) Node(NODE_FORMAL_PARAM_LIST);
   $$->addChild($1);
 }
 
 /* a single parameter */
 declaration: TOK_IDENTIFIER type {
-  $$ = new Node(NODE_DECLARATION);
+  $$ = new(GC) Node(NODE_DECLARATION);
   $$->setLine(yylineno);
   $$->setStringval(string($1));
   $$->setDataType($2);
@@ -320,43 +320,43 @@ declaration: TOK_IDENTIFIER type {
 
 /* tuple types */
 type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
-  $$ = new DataType(TYPE_TUPLE);
+  $$ = new(GC) DataType(TYPE_TUPLE);
   Node* decs = $2;
   while(decs){
     $$->subtypes->push_back(*decs->type());
     decs = decs->child(0);
   }
 } | TOK_LEFTPARENS type TOK_COMMA TOK_RIGHTPARENS {
-  $$ = new DataType(TYPE_TUPLE);
+  $$ = new(GC) DataType(TYPE_TUPLE);
   $$->subtypes->push_back(*$2);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
-  $$ = new DataType(TYPE_TUPLE);
+  $$ = new(GC) DataType(TYPE_TUPLE);
 }
 
 type_decs: type TOK_COMMA type_decs {
-  $$ = new Node(NODE_TUPLE_TYPES);
+  $$ = new(GC) Node(NODE_TUPLE_TYPES);
   $$->setDataType($1);
   $$->addChild($3);
 } | type {
-  $$ = new Node(NODE_TUPLE_TYPES);
+  $$ = new(GC) Node(NODE_TUPLE_TYPES);
   $$->setDataType($1);
 }
 
 /* types just primitives and vectors for now */
 type: TOK_INT {
-  $$ = new DataType(TYPE_INT);
+  $$ = new(GC) DataType(TYPE_INT);
 } | TOK_REAL {
-  $$ = new DataType(TYPE_REAL);
+  $$ = new(GC) DataType(TYPE_REAL);
 } | TOK_STRING {
-  $$ = new DataType(TYPE_STRING);
+  $$ = new(GC) DataType(TYPE_STRING);
 } | TOK_BOOL {
-  $$ = new DataType(TYPE_BOOL);
+  $$ = new(GC) DataType(TYPE_BOOL);
 } | TOK_MUTEX {
-  $$ = new DataType(TYPE_MUTEX);
+  $$ = new(GC) DataType(TYPE_MUTEX);
 } | TOK_TASK {
-  $$ = new DataType(TYPE_TASK);
+  $$ = new(GC) DataType(TYPE_TASK);
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
-  $$ = new DataType(TYPE_VECTOR);
+  $$ = new(GC) DataType(TYPE_VECTOR);
   $$->subtypes->push_back(*$2);
 } | type_dec_tuple {
   $$ = $1;
@@ -365,20 +365,20 @@ type: TOK_INT {
 } | dict_type { 
   $$ = $1;
 } | TOK_IDENTIFIER {
-  $$ = new DataType(TYPE_CLASS);
+  $$ = new(GC) DataType(TYPE_CLASS);
   *($$->className) = $1;
 }
 
 /* function_type */
 function_type: type_dec_tuple TOK_RIGHTARROW return_type{
-  $$ = new DataType(TYPE_FUNCTION);
+  $$ = new(GC) DataType(TYPE_FUNCTION);
   $$->subtypes->push_back(*$1);
   $$->subtypes->push_back(*$3);
 }
 
 /* dict_type */
 dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
-  $$ = new DataType(TYPE_DICT);
+  $$ = new(GC) DataType(TYPE_DICT);
   $$->subtypes->push_back(*$2);
   $$->subtypes->push_back(*$4);
 }
@@ -387,9 +387,9 @@ dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
 return_type: type {
   $$ = $1;
 } | TOK_NONE {
-  $$ = new DataType(TYPE_NONE);
+  $$ = new(GC) DataType(TYPE_NONE);
 }  | {
-  $$ = new DataType(TYPE_NONE);
+  $$ = new(GC) DataType(TYPE_NONE);
 }
 
 /* a block is a set of statements, indented over */
@@ -399,7 +399,7 @@ block: newl_plus TOK_INDENT statements TOK_DEDENT {
 
 /* a list of at least one statement */
 statements: statement statements {
-  $$ = new Node(NODE_STATEMENT);
+  $$ = new(GC) Node(NODE_STATEMENT);
   $$->addChild($1);
   $$->addChild($2);
   $$->setLine($1->getLine( ));
@@ -415,7 +415,7 @@ statement: simple_statements
 
 /* simple statements are a list of simple statements separated by semi-conlons on one line */
 simple_statements: simple_statement TOK_SEMICOLON simple_statements {
-  $$ = new Node(NODE_STATEMENT);
+  $$ = new(GC) Node(NODE_STATEMENT);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
@@ -435,7 +435,7 @@ simple_statement: pass_statement
 } | typed_identifier {
   $$ = $1;
 } | typed_identifier TOK_ASSIGN assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -461,35 +461,35 @@ compound_statement: if_statement
 
 /* simple statements */
 pass_statement: TOK_PASS {
-  $$ = new Node(NODE_PASS);
+  $$ = new(GC) Node(NODE_PASS);
   $$->setLine(yylineno);
 }
 return_statement: TOK_RETURN {
-  $$ = new Node(NODE_RETURN);
+  $$ = new(GC) Node(NODE_RETURN);
   $$->setLine(yylineno);
 
 } | TOK_RETURN expression {
-  $$ = new Node(NODE_RETURN);
+  $$ = new(GC) Node(NODE_RETURN);
   $$->addChild($2);
   $$->setLine($1);
 }
 break_statement: TOK_BREAK {
-  $$ = new Node(NODE_BREAK);
+  $$ = new(GC) Node(NODE_BREAK);
   $$->setLine(yylineno);
 }
 continue_statement: TOK_CONTINUE {
-  $$ = new Node(NODE_CONTINUE);
+  $$ = new(GC) Node(NODE_CONTINUE);
   $$->setLine(yylineno);
 }
 wait_statement: TOK_WAIT identifier{
-  $$ = new Node(NODE_WAIT);
+  $$ = new(GC) Node(NODE_WAIT);
   $$->addChild($2);
   $$->setLine(yylineno);
 }
 
 /* if statement with or without else */
 if_statement: TOK_IF expression TOK_COLON block else_option {
-  $$ = new Node(NODE_IF);
+  $$ = new(GC) Node(NODE_IF);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -508,10 +508,10 @@ else_option: TOK_ELSE TOK_COLON block {
 
 /* an elif statement */
 elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
-  $$ = new Node(NODE_ELIF);
+  $$ = new(GC) Node(NODE_ELIF);
   
   /* make a node for the first clause */
-  Node* c1 = new Node(NODE_ELIF_CLAUSE);
+  Node* c1 = new(GC) Node(NODE_ELIF_CLAUSE);
   c1->addChild($2);
   c1->addChild($4);
   $$->addChild(c1);
@@ -525,7 +525,7 @@ elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
 
 /* one or more elif clauses */
 elif_clauses: elif_clause elif_clauses {
-  $$ = new Node(NODE_ELIF_CHAIN);
+  $$ = new(GC) Node(NODE_ELIF_CHAIN);
   $$->addChild($1);
   $$->addChild($2);
   $$->setLine($1->getLine( ));
@@ -535,7 +535,7 @@ elif_clauses: elif_clause elif_clauses {
 
 /* a single elif clause */
 elif_clause: TOK_ELIF expression TOK_COLON block {
-  $$ = new Node(NODE_ELIF_CLAUSE);
+  $$ = new(GC) Node(NODE_ELIF_CLAUSE);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -543,7 +543,7 @@ elif_clause: TOK_ELIF expression TOK_COLON block {
 
 /* a for loop */
 for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
-  $$ = new Node(NODE_FOR);
+  $$ = new(GC) Node(NODE_FOR);
   $$->addChild($2);
   $$->addChild($4);
   $$->addChild($6);
@@ -552,7 +552,7 @@ for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
 
 /* a parallel for loop */
 parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
-  $$ = new Node(NODE_PARFOR);
+  $$ = new(GC) Node(NODE_PARFOR);
   $$->addChild($3);
   $$->addChild($5);
   $$->addChild($7);
@@ -561,7 +561,7 @@ parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
 
 /* a while loop */
 while_statement: TOK_WHILE expression TOK_COLON block {
-  $$ = new Node(NODE_WHILE);
+  $$ = new(GC) Node(NODE_WHILE);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -569,19 +569,19 @@ while_statement: TOK_WHILE expression TOK_COLON block {
 
 /* a parallel block */
 parblock: TOK_PARALLEL TOK_COLON block {
-  $$ = new Node(NODE_PARALLEL);
+  $$ = new(GC) Node(NODE_PARALLEL);
   $$->addChild($3);
   $$->setLine($1);
 }
 
 /* a background block */
 background: TOK_BACKGROUND TOK_COLON block {
-  $$ = new Node(NODE_BACKGROUND);
+  $$ = new(GC) Node(NODE_BACKGROUND);
   $$->addChild($3);
   $$->setLine($1);
 
 } | TOK_BACKGROUND identifier TOK_COLON block {
-  $$ = new Node(NODE_BACKGROUND);
+  $$ = new(GC) Node(NODE_BACKGROUND);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -589,13 +589,13 @@ background: TOK_BACKGROUND TOK_COLON block {
 
 /* a lock statement */
 lock_statement: TOK_LOCK TOK_COLON block {
-  $$ = new Node(NODE_LOCK);
+  $$ = new(GC) Node(NODE_LOCK);
   $$->addChild($3);
   $$->setLine($1);
 }
 
 lock_statement: TOK_LOCK identifier TOK_COLON block {
-  $$ = new Node(NODE_LOCK);
+  $$ = new(GC) Node(NODE_LOCK);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -603,105 +603,105 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
 
 /* expressions - assignments first */
 expression: lvalue TOK_ASSIGN expression {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | lvalue TOK_PLUSEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_PLUS);
+  Node* rhs = new(GC) Node(NODE_PLUS);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_MINUSEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_MINUS);
+  Node* rhs = new(GC) Node(NODE_MINUS);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_TIMESEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_TIMES);
+  Node* rhs = new(GC) Node(NODE_TIMES);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_DIVIDEEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_DIVIDE);
+  Node* rhs = new(GC) Node(NODE_DIVIDE);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_MODULUSEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_MODULUS);
+  Node* rhs = new(GC) Node(NODE_MODULUS);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_EXPEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_EXP);
+  Node* rhs = new(GC) Node(NODE_EXP);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_LSHIFTEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_SHIFTL);
+  Node* rhs = new(GC) Node(NODE_SHIFTL);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_RSHIFTEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_SHIFTR);
+  Node* rhs = new(GC) Node(NODE_SHIFTR);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_ANDEQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_BITAND);
+  Node* rhs = new(GC) Node(NODE_BITAND);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_OREQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_BITOR);
+  Node* rhs = new(GC) Node(NODE_BITOR);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
 } | lvalue TOK_XOREQ assignterm {
-  $$ = new Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->setLine($2);
-  Node* rhs = new Node(NODE_BITXOR);
+  Node* rhs = new(GC) Node(NODE_BITXOR);
   rhs->addChild($1);
   rhs->addChild($3);
   rhs->setLine($2);
@@ -716,7 +716,7 @@ assignterm: lambda
 }
 
 lambdaterm: lambdaterm TOK_OR orterm {
-  $$ = new Node(NODE_OR);
+  $$ = new(GC) Node(NODE_OR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -726,12 +726,12 @@ lambdaterm: lambdaterm TOK_OR orterm {
 
 /* lambda function */
 lambda: TOK_LAMBDA formal_params TOK_COLON assignterm {
-  $$ = new Node(NODE_LAMBDA);
+  $$ = new(GC) Node(NODE_LAMBDA);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
 } | TOK_LAMBDA TOK_COLON assignterm {
-  $$ = new Node(NODE_LAMBDA);
+  $$ = new(GC) Node(NODE_LAMBDA);
   $$->addChild($3);
   $$->setLine($1);
 }  
@@ -739,7 +739,7 @@ lambda: TOK_LAMBDA formal_params TOK_COLON assignterm {
 
 /* and operator */
 orterm: orterm TOK_AND andterm {
-  $$ = new Node(NODE_AND);
+  $$ = new(GC) Node(NODE_AND);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -749,7 +749,7 @@ orterm: orterm TOK_AND andterm {
 
 /* not operator */
 andterm: TOK_NOT andterm {
-  $$ = new Node(NODE_NOT);
+  $$ = new(GC) Node(NODE_NOT);
   $$->addChild($2);
 } | notterm {
   $$ = $1;
@@ -757,32 +757,32 @@ andterm: TOK_NOT andterm {
 
 /* relational operators */
 notterm: notterm TOK_LT relterm {
-  $$ = new Node(NODE_LT);
+  $$ = new(GC) Node(NODE_LT);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | notterm TOK_GT relterm {
-  $$ = new Node(NODE_GT);
+  $$ = new(GC) Node(NODE_GT);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | notterm TOK_LTE relterm {
-  $$ = new Node(NODE_LTE);
+  $$ = new(GC) Node(NODE_LTE);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | notterm TOK_GTE relterm {
-  $$ = new Node(NODE_GTE);
+  $$ = new(GC) Node(NODE_GTE);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | notterm TOK_EQ relterm {
-  $$ = new Node(NODE_EQ);
+  $$ = new(GC) Node(NODE_EQ);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | notterm TOK_NEQ relterm {
-  $$ = new Node(NODE_NEQ);
+  $$ = new(GC) Node(NODE_NEQ);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -792,7 +792,7 @@ notterm: notterm TOK_LT relterm {
 
 /* | operator */
 relterm: relterm TOK_BITOR bitorterm {
-  $$ = new Node(NODE_BITOR);
+  $$ = new(GC) Node(NODE_BITOR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -802,7 +802,7 @@ relterm: relterm TOK_BITOR bitorterm {
 
 /* ^ operator */
 bitorterm: bitorterm TOK_BITXOR xorterm {
-  $$ = new Node(NODE_BITXOR);
+  $$ = new(GC) Node(NODE_BITXOR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -812,7 +812,7 @@ bitorterm: bitorterm TOK_BITXOR xorterm {
 
 /* & operator */
 xorterm: xorterm TOK_BITAND bitandterm {
-  $$ = new Node(NODE_BITAND);
+  $$ = new(GC) Node(NODE_BITAND);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -822,12 +822,12 @@ xorterm: xorterm TOK_BITAND bitandterm {
 
 /* << and >> operator */
 bitandterm: bitandterm TOK_LSHIFT shiftterm {
-  $$ = new Node(NODE_SHIFTL);
+  $$ = new(GC) Node(NODE_SHIFTL);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | bitandterm TOK_RSHIFT shiftterm {
-  $$ = new Node(NODE_SHIFTR);
+  $$ = new(GC) Node(NODE_SHIFTR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -837,12 +837,12 @@ bitandterm: bitandterm TOK_LSHIFT shiftterm {
 
 /* + and - operator */
 shiftterm: shiftterm TOK_PLUS plusterm {
-  $$ = new Node(NODE_PLUS);
+  $$ = new(GC) Node(NODE_PLUS);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | shiftterm TOK_MINUS plusterm {
-  $$ = new Node(NODE_MINUS);
+  $$ = new(GC) Node(NODE_MINUS);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -852,17 +852,17 @@ shiftterm: shiftterm TOK_PLUS plusterm {
 
 /* * / % operators */
 plusterm: plusterm TOK_TIMES timesterm {
-  $$ = new Node(NODE_TIMES);
+  $$ = new(GC) Node(NODE_TIMES);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | plusterm TOK_DIVIDE timesterm {
-  $$ = new Node(NODE_DIVIDE);
+  $$ = new(GC) Node(NODE_DIVIDE);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | plusterm TOK_MODULUS timesterm {
-  $$ = new Node(NODE_MODULUS);
+  $$ = new(GC) Node(NODE_MODULUS);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -876,13 +876,13 @@ timesterm: TOK_PLUS timesterm {
   $$ = $2;
 } | TOK_MINUS timesterm {
   /* subtract from zero */
-  $$ = new Node(NODE_MINUS);
-  Node* zero = new Node(NODE_INTVAL);
+  $$ = new(GC) Node(NODE_MINUS);
+  Node* zero = new(GC) Node(NODE_INTVAL);
   zero->setIntval(0);
   $$->addChild(zero);
   $$->addChild($2);
 } | TOK_BITNOT timesterm {
-  $$ = new Node(NODE_BITNOT);
+  $$ = new(GC) Node(NODE_BITNOT);
   $$->addChild($2);
 } | unaryterm {
   $$ = $1;
@@ -890,7 +890,7 @@ timesterm: TOK_PLUS timesterm {
 
 /* exponent operator - this is right associative!!! */
 unaryterm: interm TOK_EXP unaryterm {
-  $$ = new Node(NODE_EXP);
+  $$ = new(GC) Node(NODE_EXP);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -900,7 +900,7 @@ unaryterm: interm TOK_EXP unaryterm {
 
 /* in operator */
 interm: interm TOK_IN expterm {
-  $$ = new Node(NODE_IN);
+  $$ = new(GC) Node(NODE_IN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -910,7 +910,7 @@ interm: interm TOK_IN expterm {
 
 /* expterm */
 expterm: expterm TOK_DOT funcall {
-  $$ = new Node(NODE_METHOD_CALL);
+  $$ = new(GC) Node(NODE_METHOD_CALL);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -925,19 +925,19 @@ rvalue: funcall {
 } | TOK_LEFTPARENS expression TOK_RIGHTPARENS {
   $$ = $2;
 } | TOK_INTVAL {
-  $$ = new Node(NODE_INTVAL);
+  $$ = new(GC) Node(NODE_INTVAL);
   $$->setIntval($1);
 } | TOK_REALVAL {
-  $$ = new Node(NODE_REALVAL);
+  $$ = new(GC) Node(NODE_REALVAL);
   $$->setRealval($1);
 } | TOK_BOOLVAL {
-  $$ = new Node(NODE_BOOLVAL);
+  $$ = new(GC) Node(NODE_BOOLVAL);
   $$->setBoolval($1);
 } | TOK_STRINGVAL {
-  $$ = new Node(NODE_STRINGVAL);
+  $$ = new(GC) Node(NODE_STRINGVAL);
   $$->setStringval($1);
 } | TOK_NONE {
-  $$ = new Node(NODE_NONEVAL);
+  $$ = new(GC) Node(NODE_NONEVAL);
 } | vector_value {
   $$ = $1;
 } | tuple_value {
@@ -945,17 +945,17 @@ rvalue: funcall {
 } | dict_value {
   $$ = $1;
 } | TOK_SELF { 
-  $$ = new Node(NODE_SELF);
+  $$ = new(GC) Node(NODE_SELF);
 } | lvalue {
   $$ = $1;
 }
 
 lvalue: expterm index {
-  $$ = new Node(NODE_INDEX);
+  $$ = new(GC) Node(NODE_INDEX);
   $$->addChild($1);
   $$->addChild($2);
 } | expterm TOK_DOT identifier { 
-  $$ = new Node(NODE_DOT);
+  $$ = new(GC) Node(NODE_DOT);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -965,13 +965,13 @@ lvalue: expterm index {
 /* a vector literal */
 vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
   /* an empty vector definition */
-  $$ = new Node(NODE_VECVAL);
+  $$ = new(GC) Node(NODE_VECVAL);
 
 } | TOK_LEFTBRACKET expression TOK_ELLIPSIS expression TOK_RIGHTBRACKET {
   /* a vector with elipsis eg [1 .. 5] */
 /* create a range node for these (this code used to build up a chain of VECVAL's manually, but that
        killed memory when we did [1 ... 100000] */
-  $$ = new Node(NODE_VECRANGE);
+  $$ = new(GC) Node(NODE_VECRANGE);
 
   /* check that the values are legit */
   $$->addChild($2);
@@ -984,44 +984,44 @@ vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
 
 /* one or more expressions to be made into a vector */
 vector_values: expression TOK_COMMA vector_values {
-             $$ = new Node(NODE_VECVAL);
+             $$ = new(GC) Node(NODE_VECVAL);
   $$->addChild($1);
   $$->addChild($3);
 } | expression {
-  $$ = new Node(NODE_VECVAL);
+  $$ = new(GC) Node(NODE_VECVAL);
   $$->addChild($1);
 }
 
 /* a tuple literal */
 tuple_value: TOK_LEFTPARENS TOK_RIGHTPARENS {
   /* an empty vector definition */
-  $$ = new Node(NODE_TUPVAL);
+  $$ = new(GC) Node(NODE_TUPVAL);
 
 } | TOK_LEFTPARENS expression TOK_COMMA TOK_RIGHTPARENS {
   /* one tuple initializer */
-  $$ = new Node(NODE_TUPVAL); 
+  $$ = new(GC) Node(NODE_TUPVAL); 
   $$->addChild($2);
 } | TOK_LEFTPARENS expression TOK_COMMA tuple_values TOK_RIGHTPARENS{
   /* a set of two or more tuple initializers */
-  $$ = new Node(NODE_TUPVAL); 
+  $$ = new(GC) Node(NODE_TUPVAL); 
   $$->addChild($2);
   $$->addChild($4);
 } 
 
 /* zero or more expressions to be made into a tuple */
 tuple_values: expression TOK_COMMA tuple_values {
-  $$ = new Node(NODE_TUPVAL);
+  $$ = new(GC) Node(NODE_TUPVAL);
   $$->addChild($1);
   $$->addChild($3);
 } | expression {
-  $$ = new Node(NODE_TUPVAL);
+  $$ = new(GC) Node(NODE_TUPVAL);
   $$->addChild($1);
 }
 
 /* a dictionary literal */
 dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
   /* an empty dictionary */
-  $$ = new Node(NODE_DICTVAL);
+  $$ = new(GC) Node(NODE_DICTVAL);
 
 } | TOK_LEFTBRACE dict_values TOK_RIGHTBRACE {
   /* a literal dictionary with one or more key-val pairs */
@@ -1030,12 +1030,12 @@ dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
 
 /* one or more expressions to be made into a vector */
 dict_values: expression TOK_COLON expression TOK_COMMA dict_values {
-  $$ = new Node(NODE_DICTVAL);
+  $$ = new(GC) Node(NODE_DICTVAL);
   $$->addChild($1);
   $$->addChild($3);
   $$->addChild($5);
 } | expression TOK_COLON expression {
-  $$ = new Node(NODE_DICTVAL);
+  $$ = new(GC) Node(NODE_DICTVAL);
   $$->addChild($1);
   $$->addChild($3);
 }
@@ -1047,19 +1047,19 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
-  $$ = new Node(NODE_IDENTIFIER);
+  $$ = new(GC) Node(NODE_IDENTIFIER);
   $$->setStringval($1);
   $$->setLine(yylineno);
 }  
 
 /* a function call */
 funcall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
-  $$ = new Node(NODE_FUNCALL);
+  $$ = new(GC) Node(NODE_FUNCALL);
   $$->addChild($1);
   $$->setLine($2);
 
 } | identifier TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
-  $$ = new Node(NODE_FUNCALL);
+  $$ = new(GC) Node(NODE_FUNCALL);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -1067,12 +1067,12 @@ funcall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
 
 /* a list of at least one parameter */
 actual_param_list: expression TOK_COMMA actual_param_list {
-  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
+  $$ = new(GC) Node(NODE_ACTUAL_PARAM_LIST);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
 } | expression {
-  $$ = new Node(NODE_ACTUAL_PARAM_LIST);
+  $$ = new(GC) Node(NODE_ACTUAL_PARAM_LIST);
   $$->addChild($1);
 }
 

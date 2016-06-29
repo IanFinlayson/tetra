@@ -34,7 +34,7 @@ return varScope.declareReference(varName);
 }
 */
 
-std::list<std::pair<pthread_t, TData<void*> > >&
+std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
 TetraScope::declareThreadSpecificVariable(const std::string& name) {
   return varScope.declareParForVar(name);
 }
@@ -81,10 +81,12 @@ TetraContext::TetraContext() {
   assert(success == 0);
   // Only need to initialize this if in debug mde
   if (TetraEnvironment::isDebugMode()) {
-    parForVars = new std::vector<std::string>();
-    scopes = new std::stack<const Node*>();
-    refTables = new std::stack<std::map<std::string, int> >();
-    globRefTable = new std::map<std::string, int>();
+    parForVars = new(GC) std::vector<std::string, gc_allocator<std::string> >();
+    scopes = new(GC) std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > >();
+    refTables = new(GC) std::stack<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
+              std::deque<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
+              gc_allocator<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > > > > >();
+    globRefTable = new(GC) std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >();
   } else {  // Set to NULL so no problems when deleteing
     parForVars = NULL;
     scopes = NULL;
@@ -111,10 +113,12 @@ TetraContext::TetraContext(long tID) {
 
   // Only need to instantiate debug info if in debug mode
   if (TetraEnvironment::isDebugMode()) {
-    parForVars = new std::vector<std::string>();
-    scopes = new std::stack<const Node*>();
-    globRefTable = new std::map<std::string, int>();
-    refTables = new std::stack<std::map<std::string, int> >();
+    parForVars = new(GC) std::vector<std::string, gc_allocator<std::string> >();
+    scopes = new(GC) std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > >();
+    globRefTable = new(GC) std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >();
+    refTables = new(GC) std::stack<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >,
+              std::deque<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
+              gc_allocator<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > > > > >();
   } else {  // Set to NULL so no problems when deleteing
     parForVars = NULL;
     scopes = NULL;
@@ -202,10 +206,10 @@ void TetraContext::exitScope() { progStack.pop(); }
 // clean up the TetraContext stack
 TetraContext::~TetraContext() {
   // Delete the debug variables if they have been initialized
-  delete parForVars;
-  delete globRefTable;
-  delete refTables;
-  delete scopes;
+  //delete parForVars;
+  //delete globRefTable;
+  //delete refTables;
+  //delete scopes;
   //	while(!progStack.empty()) {
   //		progStack.pop();
   //	}
@@ -263,7 +267,7 @@ void TetraContext::setupParallel() { progStack.top().setupParallel(); }
 
 void TetraContext::endParallel() { progStack.top().endParallel(); }
 
-std::list<std::pair<pthread_t, TData<void*> > >&
+std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
 TetraContext::declareThreadSpecificVariable(const std::string& name) {
   return progStack.top()->declareThreadSpecificVariable(name);
 }
@@ -318,7 +322,7 @@ bool TetraContext::isParallelForVariable(std::string varName) {
 // Returns an untyped pointer to a given variable
 // Returns NULL if not found
 void* TetraContext::fetchVariable(std::string s) {
-  const std::map<std::string, int>& refTable = refTables->top();
+  const std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >& refTable = refTables->top();
 
   if (isParallelForVariable(s)) {
     // lookup type doesn;t really matter, it will be cast back into a void*,
@@ -374,7 +378,7 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
   // We might need to push a new table to the stack, or add a new entry to the
   // present table
   if (node->kind() == NODE_FUNCTION) {
-    refTables->push(std::map<std::string, int>());
+    refTables->push(std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >());
     // Push the formal params on
     Node* paramNode = node->child(0);
 

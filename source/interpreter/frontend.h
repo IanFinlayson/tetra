@@ -6,6 +6,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#define GC_THREADS
+#include "/usr/local/include/gc/gc_cpp.h"
+#include "/usr/local/include/gc/gc_allocator.h"
 
 using namespace std;
 
@@ -130,7 +133,7 @@ class DataType {
   DataType(const DataType& other);
   ~DataType();
   DataTypeKind getKind() const;
-  std::vector<DataType>* subtypes;
+  std::vector<DataType, gc_allocator<DataType> >* subtypes;
   std::string* className;
   DataType operator=(const DataType& other);
   bool isEmptyContainerType() const;
@@ -207,7 +210,7 @@ class Node {
 
   /* the symbol table used for this Node - currently only function nodes have
    * one */
-  map<string, Symbol>* symtable;
+  std::map<string, Symbol, less<std::string>, gc_allocator<pair<std::string,Symbol> > >* symtable;
 
  private:
   /* the children nodes of this node */
@@ -243,7 +246,7 @@ class Node {
  */
 class FunctionMap {
  private:
-  std::map<std::string, Node*> lookup;
+  std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > lookup;
 
  public:
   FunctionMap();
@@ -272,7 +275,7 @@ class FunctionMap {
 
   //renames functions with the name provided and returns them as a
   //vector of pairs
-  std::map<std::string, Node*> remove(std::string);
+  std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > remove(std::string);
 
   //wrapper around std::map.insert
   void insert(std::pair<string, Node*>);
@@ -294,11 +297,11 @@ class ClassContext {
     Symbol getMember(std::string);
     DataType* getMethods(std::string);
     const Node* getMethod(DataType*, std::string);
-    std::map<std::string,Node*> removeInits();
+    std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Node*> > > removeInits();
   private:
     string name;
     FunctionMap methods;
-    std::map<string, Symbol> members;
+    std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > members;
 };
 
 /* takes a tree of actual params and builds a tuple_type */
@@ -318,7 +321,7 @@ void reset_lexer();
 Node* parseFile(const string& fname);
 
 /* the global symbol table */
-extern map<string, Symbol> globals;
+extern std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
 
 /* the global function map */
 extern FunctionMap functions;

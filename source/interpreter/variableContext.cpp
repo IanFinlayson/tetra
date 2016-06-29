@@ -12,7 +12,7 @@
 #include "frontend.h"
 using std::string;
 
-VarTable::VarTable() : varMap(30), parForVars(3) {
+VarTable::VarTable() : varMap(30)/*, parForVars(3)*/ {
   // pthread_mutex_init(&table_mutex,NULL);
   pthread_rwlock_init(&table_mutex, NULL);
 }
@@ -23,7 +23,7 @@ VarTable::~VarTable() { pthread_rwlock_destroy(&table_mutex); }
 
 // Declares a variable name that can hold different values across threads
 // Numthreads needed so the container does not attempt to resize itself during
-std::list<std::pair<pthread_t, TData<void*> > >& VarTable::declareParForVar(
+std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >& VarTable::declareParForVar(
     const string& varName) {
   // We will check if the variable already exists. To do so, we must obtain a
   // read lock
@@ -38,7 +38,7 @@ std::list<std::pair<pthread_t, TData<void*> > >& VarTable::declareParForVar(
     // std::find_if(parForVars.begin(),parForVars.end(),CheckName(varName))->second;
     // Assemble the return value, so we can release the lock before returning
 
-    std::list<std::pair<pthread_t, TData<void*> > >& ret =
+    std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >& ret =
         std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName))
             ->second;
 
@@ -51,7 +51,7 @@ std::list<std::pair<pthread_t, TData<void*> > >& VarTable::declareParForVar(
   // obtain write privelages
   pthread_rwlock_unlock(&table_mutex);
 
-  std::list<std::pair<pthread_t, TData<void*> > > array;
+  std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > array;
   // Append to the end of the array, so we can return the end
 
   // This must be done under the lock of a mutex, in case another thread starts
@@ -71,11 +71,11 @@ std::list<std::pair<pthread_t, TData<void*> > >& VarTable::declareParForVar(
   }
 
   parForVars.push_back(
-      std::pair<string, std::list<std::pair<pthread_t, TData<void*> > > >(
+      std::pair<string, std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > >(
           varName, array));
   // Note that with this syntax, it is illegal to modify the array so as to
   // invalidate this pointer
-  std::list<std::pair<pthread_t, TData<void*> > >* ret_ptr =
+  std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >* ret_ptr =
       &parForVars.rbegin()->second;
   // pthread_mutex_unlock(&table_mutex);
   pthread_rwlock_unlock(&table_mutex);
