@@ -25,8 +25,10 @@ void Console::setUpConnections(MainWindow* parent) {
 
 void Console::updateSettings() {
     /* set colors */
-    setStyleSheet("background-color: " + SettingsManager::termBackground().name() + ";");
-    setStyleSheet(styleSheet().append("color: " + SettingsManager::termForeground().name() + ";"));
+    setStyleSheet("QPlainTextEdit {"
+            "background-color: " + SettingsManager::termBackground().name() + ";"
+            "color: " + SettingsManager::termForeground().name() + ";"
+            "}");
 
     /* set font */
     QFont font = SettingsManager::font();

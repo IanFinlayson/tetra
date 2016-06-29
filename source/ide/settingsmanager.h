@@ -51,20 +51,6 @@ class SettingsManager {
     private:
         static QSettings* qset;
 
-        struct ColorScheme {
-            QString name;
-            QColor foreground;
-            QColor background;
-            QColor keywords;;
-            QColor types;
-            QColor values;
-            QColor comments;
-            QColor functions;
-            QColor termForeground;
-            QColor termBackground;
-            QColor linesForeground;
-            QColor linesBackground;
-        };
 };
 
 #endif

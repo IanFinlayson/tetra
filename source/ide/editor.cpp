@@ -38,10 +38,14 @@ void Editor::updateSettings() {
 
     /* set the font and colors */
     setFont(SettingsManager::font());
-    setStyleSheet("background-color: " + SettingsManager::background().name() + ";");
-    setStyleSheet(styleSheet().append("color: " + SettingsManager::foreground().name() + ";"));
-    lineNumberArea->setStyleSheet("background-color: " + SettingsManager::background().name() + ";");
-    lineNumberArea->setStyleSheet(styleSheet().append("color: " + SettingsManager::foreground().name() + ";"));
+    setStyleSheet("QPlainTextEdit {"
+            "background-color: " + SettingsManager::background().name() + ";"
+            "color: " + SettingsManager::foreground().name() + ";"
+            "}");
+
+    lineNumberArea->setStyleSheet(
+            "background-color: " + SettingsManager::background().name() + ";"
+            "color: " + SettingsManager::foreground().name() + ";");
 
     /* update syntax highlighting */
     delete highlighter;

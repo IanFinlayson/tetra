@@ -10,5 +10,3 @@ def main( ):
     print("Enter n: ")
     n = read_int( )
     print(n, "! = ", fact(n))
-
-

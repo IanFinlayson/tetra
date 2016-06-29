@@ -13,6 +13,7 @@ class SettingsDialog : public QDialog, public Ui::Settings {
         void on_buttonBox_clicked(QAbstractButton* button);
         void askFont();
         void askColor();
+        void selectTheme(int index);
 
     public:
         SettingsDialog(QWidget* parent);

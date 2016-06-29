@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QLabel>
 #include <QObject>
+#include <QStyleFactory>
 
 #include "settingsmanager.h"
 #include "editor.h"
