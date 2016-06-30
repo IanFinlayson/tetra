@@ -78,7 +78,7 @@ void MicroStack<T>::push(T newData) {
   // static long x = 0;
   // x++;
   // std::cout<<x<<std::endl;
-  Node* newNode = new Node(newData);
+  Node* newNode = new(GC) Node(newData);
   Node* temp = head;
   head = newNode;
   newNode->next = temp;
@@ -89,7 +89,7 @@ T MicroStack<T>::pop() {
   Node* temp = head;
   head = head->next;
   T ret = temp->data;
-  delete temp;
+  //delete temp;
   return ret;
 }
 

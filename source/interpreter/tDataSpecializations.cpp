@@ -17,19 +17,19 @@ TData<void*>::TData(const TData<void*>& other)
     // the value into the new memory location
     switch (other.pointedTo.getKind()) {
       case TYPE_INT:
-        data = new int(*static_cast<int*>(other.data));
+        data = new(GC) int(*static_cast<int*>(other.data));
         break;
       case TYPE_REAL:
-        data = new double(*static_cast<double*>(other.data));
+        data = new(GC) double(*static_cast<double*>(other.data));
         break;
       case TYPE_BOOL:
-        data = new bool(*static_cast<bool*>(other.data));
+        data = new(GC) bool(*static_cast<bool*>(other.data));
         break;
       case TYPE_STRING:
-        data = new string(*static_cast<string*>(other.data));
+        data = new(GC) string(*static_cast<string*>(other.data));
         break;
       case TYPE_VECTOR:
-        data = new TArray(*static_cast<TArray*>(other.data));
+        data = new(GC) TArray(*static_cast<TArray*>(other.data));
         break;
       default:
         std::cout
@@ -51,19 +51,19 @@ TData<void*>::~TData() {
   if (pointedTo != TYPE_NONE) {
     switch (pointedTo.getKind()) {
       case TYPE_INT:
-        delete (static_cast<int*>(data));
+        //delete (static_cast<int*>(data));
         break;
       case TYPE_REAL:
-        delete (static_cast<double*>(data));
+        //delete (static_cast<double*>(data));
         break;
       case TYPE_BOOL:
-        delete (static_cast<bool*>(data));
+        //delete (static_cast<bool*>(data));
         break;
       case TYPE_STRING:
-        delete (static_cast<string*>(data));
+        //delete (static_cast<string*>(data));
         break;
       case TYPE_VECTOR:
-        delete (static_cast<TArray*>(data));
+        //delete (static_cast<TArray*>(data));
         break;
       default:
         std::cout << "Warning, attempted to delete unsupported type ID: "
@@ -216,24 +216,24 @@ TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
     // std::cout << "Utilizing new" << std::endl;
     switch (other.pointedTo.getKind()) {
       case TYPE_INT:
-        delete static_cast<int*>(data);
-        data = new int(*static_cast<int*>(other.data));
+        //delete static_cast<int*>(data);
+        data = new(GC) int(*static_cast<int*>(other.data));
         break;
       case TYPE_REAL:
-        delete static_cast<double*>(data);
-        data = new double(*static_cast<double*>(other.data));
+        //delete static_cast<double*>(data);
+        data = new(GC) double(*static_cast<double*>(other.data));
         break;
       case TYPE_BOOL:
-        delete static_cast<bool*>(data);
-        data = new bool(*static_cast<bool*>(other.data));
+        //delete static_cast<bool*>(data);
+        data = new(GC) bool(*static_cast<bool*>(other.data));
         break;
       case TYPE_STRING:
-        delete static_cast<string*>(data);
-        data = new string(*static_cast<string*>(other.data));
+        //delete static_cast<string*>(data);
+        data = new(GC) string(*static_cast<string*>(other.data));
         break;
       case TYPE_VECTOR:
-        delete static_cast<TArray*>(data);
-        data = new TArray(*static_cast<TArray*>(other.data));
+        //delete static_cast<TArray*>(data);
+        data = new(GC) TArray(*static_cast<TArray*>(other.data));
         break;
       default:
         std::cout

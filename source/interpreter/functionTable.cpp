@@ -72,16 +72,16 @@ void FunctionMap::insert(std::pair<string,Node*> pair) {
   lookup.insert(pair);
 }
 
-std::map<std::string, Node*> FunctionMap::remove(std::string name) {
+std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > FunctionMap::remove(std::string name) {
 
   //make a map to store the pairs to return
-  std::map<string,Node*> pairs;
+  std::map<string,Node*, less<std::string>, gc_allocator<pair<string,Node*> > > pairs;
 
   //make a vector to store keys to remove
-  std::vector<std::string> keys;
+  std::vector<std::string, gc_allocator<string> > keys;
 
   // find the functions
-  for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
+  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
@@ -105,7 +105,7 @@ std::map<std::string, Node*> FunctionMap::remove(std::string name) {
 
 bool FunctionMap::hasFuncNamed(std::string name) {
   //loop through all elements in the map
-  for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
+  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
@@ -122,10 +122,10 @@ bool FunctionMap::hasFuncNamed(std::string name) {
 DataType* FunctionMap::getFunctionsNamed(std::string name) {
 
   //create a dataType to return
-  DataType* retType = new DataType(TYPE_OVERLOAD);  
+  DataType* retType = new(GC) DataType(TYPE_OVERLOAD);  
 
   //loop through all elements in the map
-  for (std::map<std::string, Node*>::iterator it = lookup.begin(); 
+  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = lookup.begin(); 
       it != lookup.end(); it ++) {
 
     //check for a name match

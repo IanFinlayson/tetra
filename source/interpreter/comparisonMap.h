@@ -69,9 +69,10 @@ class ComparisonList {
   }
 
  private:
-  std::map<NodeKind, bool (ComparisonList<T>::*)(T, T)> functionMap;
+  std::map<NodeKind, bool (ComparisonList<T>::*)(T, T), less<NodeKind>, gc_allocator<pair<NodeKind, bool (ComparisonList<T>::*)(T, T)> > > functionMap;
   std::map<NodeKind,
-           bool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&)>
+           bool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&),less<NodeKind>, gc_allocator<pair<NodeKind,
+           bool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&)> > >
       compMap;
 
   // Define all the operations in function form, so they can be dynamically

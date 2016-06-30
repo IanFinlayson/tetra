@@ -12,10 +12,10 @@
 extern Node* root;
 
 /* the symbol table for storing constants and globals */
-map<std::string, Symbol> globals;
+std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
 
 /* map for storing classes */
-map<std::string, ClassContext> classes;
+std::map<std::string, ClassContext, less<std::string>, gc_allocator<pair<std::string, ClassContext> > > classes;
 
 /* map for storing free functions */
 FunctionMap functions;
@@ -155,7 +155,7 @@ bool ClassContext::hasMethodNamed(std::string name) {
   return methods.hasFuncNamed(name);
 }
 
-std::map<std::string,Node*> ClassContext::removeInits(){
+std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Node*> > > ClassContext::removeInits(){
 
   /* remove any inits from the list of methods 
    * and return them */
@@ -165,21 +165,21 @@ std::map<std::string,Node*> ClassContext::removeInits(){
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
-  this->subtypes = new std::vector<DataType>;
-  this->className = new std::string;
+  this->subtypes = new(GC) std::vector<DataType, gc_allocator<DataType> >;
+  this->className = new(GC) std::string;
 }
 
 DataType::DataType(const DataType& other) {
   this->kind = other.kind;  
-  this->subtypes = new std::vector<DataType>;
-  this->className = new std::string;
+  this->subtypes = new(GC) std::vector<DataType, gc_allocator<DataType> >;
+  this->className = new(GC) std::string;
   *this->subtypes = *other.subtypes;
   *this->className = *other.className;
 }
 
 DataType::~DataType() {
-  delete(className);
-  delete(subtypes);
+  //delete(className);
+  //delete(subtypes);
 }
 
 /* return true if the type represents an empty
@@ -350,7 +350,7 @@ DataType* inferLen(Node* funcall, Node* func) {
   }
 
   /* should return an int */
-  return new DataType(TYPE_INT);
+  return new(GC) DataType(TYPE_INT);
 }
 
 DataType* inferRead(Node* funcall) {
@@ -361,10 +361,10 @@ DataType* inferRead(Node* funcall) {
   }
 
   /* get the return type right */
-  if (funcall->child(0)->getString() == "read_string") return new DataType(TYPE_STRING);
-  if (funcall->child(0)->getString() == "read_int") return new DataType(TYPE_INT);
-  if (funcall->child(0)->getString() == "read_real") return new DataType(TYPE_REAL);
-  if (funcall->child(0)->getString() == "read_bool") return new DataType(TYPE_BOOL);
+  if (funcall->child(0)->getString() == "read_string") return new(GC) DataType(TYPE_STRING);
+  if (funcall->child(0)->getString() == "read_int") return new(GC) DataType(TYPE_INT);
+  if (funcall->child(0)->getString() == "read_real") return new(GC) DataType(TYPE_REAL);
+  if (funcall->child(0)->getString() == "read_bool") return new(GC) DataType(TYPE_BOOL);
 
   throw Error("This should not happen!", funcall->getLine());
 }
@@ -533,7 +533,7 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
   /* check if it's a lambda param first */
   /* look for lambdas first */
   Node* lambda = nextLambda(expr);
-  Symbol* sym = new Symbol();
+  Symbol* sym = new(GC) Symbol();
   bool found = false;
   while (lambda && !found) {
     /* if we found the identifier, get its symbol*/
@@ -613,7 +613,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           if (!sym && !rhs->isEmptyContainerType()) {
                               /* infer it! */ 
                               lhs = rhs;
-                              func->insertSymbol(*new Symbol(expr->child(0)->getString(),
+                              func->insertSymbol(*new(GC) Symbol(expr->child(0)->getString(),
                                     lhs,expr->child(0)->getLine()));
                             
                           /* if it doesn't exist and it IS NOT inferable... */
@@ -669,7 +669,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             expr->getLine());
                       }
                       /* the result is a bool as well */
-                      return new DataType(TYPE_BOOL);
+                      return new(GC) DataType(TYPE_BOOL);
     case NODE_LT:
     case NODE_LTE:
     case NODE_GT:
@@ -691,7 +691,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       }
 
                       /* the result is a bool */
-                      return new DataType(TYPE_BOOL);
+                      return new(GC) DataType(TYPE_BOOL);
 
     case NODE_EQ:
     case NODE_NEQ:
@@ -706,7 +706,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       }
 
                       /* the result is a bool */
-                      return new DataType(TYPE_BOOL);
+                      return new(GC) DataType(TYPE_BOOL);
 
     case NODE_NOT:
                       /* check that the operand is bool */
@@ -714,7 +714,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       if (lhs->getKind() != TYPE_BOOL) {
                         throw Error("Operand of not must be a bool", expr->getLine());
                       }
-                      return new DataType(TYPE_BOOL);
+                      return new(GC) DataType(TYPE_BOOL);
 
     case NODE_IN: {
                     /* get the types of both sides */ 
@@ -732,7 +732,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             , expr->getLine());
                       /* if we got here then it matched */
                       } else {
-                        return new DataType(TYPE_BOOL);
+                        return new(GC) DataType(TYPE_BOOL);
                       }
 
                     /* if the container on the right is a tuple... */
@@ -743,7 +743,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* if one type matches the left side... */
                         if (*lhs == (*(rhs->subtypes))[i]) {
                           /* then it passes type checking */
-                          return new DataType(TYPE_BOOL); 
+                          return new(GC) DataType(TYPE_BOOL); 
                         }
                       /* if we get here, then the tuple doesn't have any
                        * element that is the same type as the left operand */
@@ -755,7 +755,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                     } else if (rhs->getKind() == TYPE_STRING) {
                       /* make sure the right side is too */
                       if (lhs->getKind() == TYPE_STRING) {
-                        return new DataType(TYPE_BOOL);
+                        return new(GC) DataType(TYPE_BOOL);
                       /* otherwise, COMPLAIN */
                       } else { 
                         throw Error("Mismatched operands to 'in' operator.",
@@ -783,7 +783,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       }
 
                       /* returns an integer back */
-                      return new DataType(TYPE_INT);
+                      return new(GC) DataType(TYPE_INT);
 
     case NODE_BITNOT:
                       /* check that the operand is an int */
@@ -792,7 +792,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         throw Error("Operand to bitwise not must be an integer",
                             expr->getLine());
                       }
-                      return new DataType(TYPE_INT);
+                      return new(GC) DataType(TYPE_INT);
 
     case NODE_PLUS:
     case NODE_MINUS:
@@ -823,7 +823,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                       /* if it's a vector, we need to copy the type! */
                       if (lhs->getKind() == TYPE_VECTOR) {
-                        DataType* vec = new DataType(TYPE_VECTOR);
+                        DataType* vec = new(GC) DataType(TYPE_VECTOR);
 
                         /* copy subs all the way */
                         DataType* sub = &(*(lhs->subtypes))[0];
@@ -841,7 +841,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       }
 
                       /* return the same type back */
-                      return new DataType(lhs->getKind());
+                      return new(GC) DataType(lhs->getKind());
 
     case NODE_INDEX: {
                        /* check children */
@@ -910,8 +910,8 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           }
 
                           /* a vecrange can only possibly be a vector of ints */
-                          DataType* t = new DataType(TYPE_VECTOR);
-                          t->subtypes->push_back(*new DataType(TYPE_INT));
+                          DataType* t = new(GC) DataType(TYPE_VECTOR);
+                          t->subtypes->push_back(*new(GC) DataType(TYPE_INT));
                           return t;
                         }
 
@@ -927,7 +927,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          /* infer the identifier */
                          lhs = inferExpression(expr->child(0),func);
                          /* make an empty tuple type for the params */
-                         DataType* rhsParams = new DataType(TYPE_TUPLE);
+                         DataType* rhsParams = new(GC) DataType(TYPE_TUPLE);
                          /* if there are arguments... */
                          if (expr->numChildren() > 1) {
                            /* add them to the tuple */
@@ -982,7 +982,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                               /* if we make it here, we need to add this declaration to this
                                * function's sym table */
-                              func->insertSymbol(*new Symbol(expr->getString(),
+                              func->insertSymbol(*new(GC) Symbol(expr->getString(),
                                     expr->type(), expr->getLine())); 
                               /* then just return the type it already has */
                               return expr->type();
@@ -1005,17 +1005,17 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                           /* return these types */
     case NODE_INTVAL:
-                          return new DataType(TYPE_INT);
+                          return new(GC) DataType(TYPE_INT);
     case NODE_REALVAL:
-                          return new DataType(TYPE_REAL);
+                          return new(GC) DataType(TYPE_REAL);
     case NODE_BOOLVAL:
-                          return new DataType(TYPE_BOOL);
+                          return new(GC) DataType(TYPE_BOOL);
     case NODE_STRINGVAL:
-                          return new DataType(TYPE_STRING);
+                          return new(GC) DataType(TYPE_STRING);
     case NODE_NONEVAL:
-                          return new DataType(TYPE_NONE);
+                          return new(GC) DataType(TYPE_NONE);
     case NODE_VECVAL: {
-                        DataType* dt = new DataType(TYPE_VECTOR);
+                        DataType* dt = new(GC) DataType(TYPE_VECTOR);
                         Node * currNode = expr;
                         /* traverse the subtree of vecvals */
                         while(currNode && currNode->numChildren() > 0){
@@ -1037,7 +1037,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       }
 
     case NODE_DICTVAL: {
-                         DataType* dt = new DataType(TYPE_DICT);
+                         DataType* dt = new(GC) DataType(TYPE_DICT);
                          Node * currNode = expr;
                          /* traverse the subtree of dictvals */
                          while(currNode && currNode->numChildren() > 0) {
@@ -1062,7 +1062,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        }
 
     case NODE_TUPVAL: {
-                       DataType* dt = new DataType(TYPE_TUPLE);
+                       DataType* dt = new(GC) DataType(TYPE_TUPLE);
                        Node* currNode = expr;
                        /* traverse the subtree of vecvals */
                        while(currNode && currNode->numChildren() > 0) {
@@ -1122,7 +1122,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       }
 
                       /* return the class' type */
-                      DataType* type = new DataType(TYPE_CLASS);
+                      DataType* type = new(GC) DataType(TYPE_CLASS);
                       *(type->className) = classNode->getString();
                       return type;
 
@@ -1131,7 +1131,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
     case NODE_METHOD_CALL: {
                              lhs = inferExpression(expr->child(0),func);  
                              /* infer the tuple_type of the actual params */
-                             DataType* rhsParams = new DataType(TYPE_TUPLE);
+                             DataType* rhsParams = new(GC) DataType(TYPE_TUPLE);
 
                              /* if there are actual params... */
                              if (expr->child(1)->numChildren() > 1) {
@@ -1212,8 +1212,8 @@ void checkMuTasks(Node* block, Node* func) {
      * and it's not a wait node*/ 
     if (!sym && block->kind() != NODE_WAIT){
       /* make a symbol for it */
-      sym = new Symbol(block->child(0)->getString(), 
-            new DataType(kind), block->child(0)->getLine());
+      sym = new(GC) Symbol(block->child(0)->getString(), 
+            new(GC) DataType(kind), block->child(0)->getLine());
       /* add to this function's symtable */
       func->insertSymbol(*sym);  
 
@@ -1270,7 +1270,7 @@ void inferBlock(Node* block, Node* func) {
                         if (block->child(0)) {
                           ret = inferExpression(block->child(0), func);
                         } else {
-                          ret = new DataType(TYPE_NONE);
+                          ret = new(GC) DataType(TYPE_NONE);
                         }
 
                         /* check that it matches the return type */
@@ -1412,7 +1412,7 @@ void inferParams(Node* node, Node* func) {
       || node->kind() == NODE_LAMBDA){
 
     /* make a new function datatype */
-    DataType* type = new DataType(TYPE_FUNCTION);
+    DataType* type = new(GC) DataType(TYPE_FUNCTION);
     /* add an empty param tuple */
     type->subtypes->push_back(DataType(TYPE_TUPLE));
     /* add the return type (if it has one)*/
@@ -1551,14 +1551,14 @@ void addMembers(ClassContext* context, Node* node) {
 void initSquared(ClassContext context) {
 
   /* remove the init functions */
-  std::map<std::string,Node*> inits 
+  std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Node*> > > inits 
     = context.removeInits();
   
-  DataType* type = new DataType(TYPE_CLASS);
+  DataType* type = new(GC) DataType(TYPE_CLASS);
   *(type->className) = context.getName();
 
   /* loop through any inits*/
-  for (std::map<std::string, Node*>::iterator it = inits.begin(); 
+  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = inits.begin(); 
     it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
@@ -1573,11 +1573,11 @@ void initSquared(ClassContext context) {
   /* if there were no inits... */
   if (!inits.size()) {
     /* make a default one and add it! */
-    Node* node = new Node(NODE_FUNCTION);
+    Node* node = new(GC) Node(NODE_FUNCTION);
     node->setStringval(context.getName());
-    node->setDataType(new DataType(TYPE_FUNCTION));
+    node->setDataType(new(GC) DataType(TYPE_FUNCTION));
     /* add the empty param type */
-    node->type()->subtypes->push_back(*(new DataType(TYPE_TUPLE)));
+    node->type()->subtypes->push_back(*(new(GC) DataType(TYPE_TUPLE)));
     /* add the return type */
     node->type()->subtypes->push_back(*type); 
     std::string key = context.getName() + "()";

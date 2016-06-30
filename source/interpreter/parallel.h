@@ -123,7 +123,7 @@ void wrapEvaluation(void* args) {
         contextCopy.getThreadID());
   }
 
-  delete static_cast<evalArgs<T>*>(args);
+  //delete static_cast<evalArgs<T>*>(args);
   //	cout << "Thread finished: " << time(0) << endl;
   // pthread_exit(NULL);
 }
@@ -211,8 +211,8 @@ void wrapMultiEvaluation(void* args) {
   // Delete the memory allocated for the arguments of this thread
   // Note that the args needed for execution (argList.args_ptr) get deleted in
   // wrapEvaluation
-  delete argList.args_ptr;
-  delete &argList;
+  //delete argList.args_ptr;
+  //delete &argList;
   // cout << "parfor finished" << endl;
 }
 
@@ -228,9 +228,9 @@ pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
   pthread_attr_init(&attributes);
 
   evalArgs<T>* execArgs =
-      new evalArgs<T>(node, ret, context.getScopeRef(),
+      new(GC) evalArgs<T>(node, ret, context.getScopeRef(),
                       &(context.getGlobalScopeRef()), &context);
-  evalForArgs<T>* args = new evalForArgs<T>(execArgs, &varName, nextJob_mutex,
+  evalForArgs<T>* args = new(GC) evalForArgs<T>(execArgs, &varName, nextJob_mutex,
                                             nextJob, loopValues);
   pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
 
@@ -249,7 +249,7 @@ pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
   pthread_attr_t attributes;
   pthread_attr_init(&attributes);
 
-  evalArgs<T>* args = new evalArgs<T>(node, ret, context.getScopeRef(),
+  evalArgs<T>* args = new(GC) evalArgs<T>(node, ret, context.getScopeRef(),
                                       &(context.getGlobalScopeRef()), &context);
   pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
   // cout <<"!!\n"<<endl;
@@ -290,11 +290,11 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
 
       const int NUM_THREADS = TetraEnvironment::getMaxThreads();
 
-      std::vector<pthread_t> workers;
+      std::vector<pthread_t, gc_allocator<pthread_t> > workers;
 
       // Note that dataqueue is a handle to the actual array in the Variable
       // Table
-      std::list<std::pair<pthread_t, TData<void*> > > dataQueue =
+      auto dataQueue =
           context.declareThreadSpecificVariable(node->child(0)->getString());
 
       // The debugger must be informed that we are using threadSpecific

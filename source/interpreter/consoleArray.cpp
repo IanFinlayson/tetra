@@ -5,20 +5,20 @@
 int singleConsolePolicy(int, bool) { return 0; }
 
 ConsoleArray::ConsoleArray() {
-  consoles = std::vector<VirtualConsole*>();
+  consoles = std::vector<VirtualConsole*, gc_allocator<VirtualConsole*> >();
   setConsolePolicy(singleConsolePolicy);
 }
 
 ConsoleArray::ConsoleArray(int(policy)(int, bool)) {
-  consoles = std::vector<VirtualConsole*>();
+  consoles = std::vector<VirtualConsole*, gc_allocator<VirtualConsole*> >();
   setConsolePolicy(policy);
 }
 
 // Delete the dynamically allocated threading primitives
 ConsoleArray::~ConsoleArray() {
   for (unsigned int x = 0; x < consoleMutexes.size(); ++x) {
-    delete consoleMutexes[x].first;
-    delete consoleMutexes[x].second;
+    //delete consoleMutexes[x].first;
+    //delete consoleMutexes[x].second;
   }
 }
 
@@ -53,10 +53,10 @@ void ConsoleArray::setConsolePolicy(int(policy)(int, bool)) {
 // Registers the console and creates an associated mutex
 int ConsoleArray::registerConsole(VirtualConsole& newConsole) {
   consoles.push_back(&newConsole);
-  pthread_mutex_t* cMut = new pthread_mutex_t();
+  pthread_mutex_t* cMut = new(GC) pthread_mutex_t();
   int success = pthread_mutex_init(cMut, NULL);
   assert(success == 0);
-  pthread_cond_t* cCon = new pthread_cond_t();
+  pthread_cond_t* cCon = new(GC) pthread_cond_t();
   success = pthread_cond_init(cCon, NULL);
   assert(success == 0);
   consoleMutexes.push_back(

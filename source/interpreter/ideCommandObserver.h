@@ -14,7 +14,7 @@ bool operator==(Breakpoint a, Breakpoint b);
 
 class IDECommandObserver : public CommandObserver {
  private:
-  std::vector<Breakpoint> breakpoints;
+  std::vector<Breakpoint, gc_allocator<Breakpoint> > breakpoints;
   // Breakpoint lastLine;
   // bool stepping;
   // bool stopAtNext;
@@ -23,7 +23,7 @@ class IDECommandObserver : public CommandObserver {
   // them specially
   // std::stack<std::vector<std::string> > threadSpecificVars;
 
-  std::vector<long> waitingThreads;
+  std::vector<long, gc_allocator<long> > waitingThreads;
   long allowedThread;
   bool yieldEnabled;  // Some imlementations may find it more useful to disable
                       // this feature
@@ -68,5 +68,5 @@ class IDECommandObserver : public CommandObserver {
   void setYieldEnabled(bool);
 
   // Returns a list of linenumbers of stopped threads
-  std::vector<int> getThreadLocations();
+  std::vector<int, gc_allocator<int> > getThreadLocations();
 };

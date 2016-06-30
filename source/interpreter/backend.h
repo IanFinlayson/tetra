@@ -64,7 +64,7 @@ class TData {
   ~TData();
 
   /* If this object is storing a pointer to a dynamically allocated variable,
-   * it must use this method to inform the object that it should delete
+   * it must use this method to inform the object that it should //delete
    * something when it is done. In essence, this method notifies the object
    * that it is no longer being used in an ordinary case, but has ownership
    * of some dynamically allocated memory */
@@ -177,10 +177,10 @@ class TArray {
   /* utility methods used for iterating over the vector in for (-each) loops,
    * and vector cleanup	 */
   const std::vector<
-      TData<void*> /*, mmap_allocator<TData<void*> >*/>::const_iterator
+      TData<void*>, gc_allocator<TData<void*> > /*, mmap_allocator<TData<void*> >*/>::const_iterator
   begin() const;
   const std::vector<
-      TData<void*> /*, mmap_allocator<TData<void*> >*/>::const_iterator
+      TData<void*>, gc_allocator<TData<void*> > /*, mmap_allocator<TData<void*> >*/>::const_iterator
   end() const;
 
   /* get the size of the array */
@@ -271,10 +271,10 @@ class TArray {
   class vec_ptr {
    public:
     vec_ptr() {
-      ptr = new std::vector<TData<void*> >;
-      refCount = new int();
+      ptr = new(GC) std::vector<TData<void*>, gc_allocator<TData<void*> > >;
+      refCount = new(GC) int();
       *refCount = 0;
-      array_mutex_ptr = new pthread_mutex_t();
+      array_mutex_ptr = new(GC) pthread_mutex_t();
       pthread_mutex_init(array_mutex_ptr, NULL);
       addReference();
     }
@@ -322,8 +322,8 @@ class TArray {
     }
 
     /* methods to simulate pointer functionality */
-    std::vector<TData<void*> >& operator*() const { return *ptr; }
-    std::vector<TData<void*> >* operator->() const { return ptr; }
+    std::vector<TData<void*>, gc_allocator<TData<void*> > >& operator*() const { return *ptr; }
+    std::vector<TData<void*>, gc_allocator<TData<void*> > >* operator->() const { return ptr; }
 
    private:
     void addReference() {
@@ -332,27 +332,27 @@ class TArray {
       pthread_mutex_unlock(array_mutex_ptr);
     }
     void removeReference() {
-      pthread_mutex_lock(array_mutex_ptr);
+      // pthread_mutex_lock(array_mutex_ptr);
 
       /* bool used to flag if the mutex can be destroyed
        * (since we cannot destroy it while holding it) */
-      bool destroyable = false;
+      //bool destroyable = false;
 
-      (*refCount)--;
-      if (*refCount == 0) {
-        delete refCount;
-        delete ptr;
+      //(*refCount)--;
+      //if (*refCount == 0) {
+        //delete refCount;
+        //delete ptr;
         /* used temporarily to insure that if a race condition occurs, a
          * stale pointer does not still coincidentally point at an ok value */
-        ptr = NULL;
-        destroyable = true;
-      }
+       // ptr = NULL;
+       // destroyable = true;
+      //}
 
-      pthread_mutex_unlock(array_mutex_ptr);
+      //pthread_mutex_unlock(array_mutex_ptr);
 
-      if (destroyable) {
-        delete array_mutex_ptr;
-      }
+     // if (destroyable) {
+        //delete array_mutex_ptr;
+      //}
     }
 
     /* for the copy constructor, we must insure that the source does not get
@@ -362,7 +362,7 @@ class TArray {
 
     void unlockArray() const { pthread_mutex_unlock(array_mutex_ptr); }
 
-    std::vector<TData<void*> /* , mmap_allocator<TData<void*> >*/>* ptr;
+    std::vector<TData<void*>, gc_allocator<TData<void*> > /* , mmap_allocator<TData<void*> >*/>* ptr;
     int* refCount;
 
     /* because threads can be copied in different threads (see, pass by
@@ -570,7 +570,7 @@ class VarTable {
     deleted when this variableContext goes out of scope TData<void*>&
     declareReference(const std::string varName); */
 
-  std::list<std::pair<pthread_t, TData<void*> > >& declareParForVar(
+  std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >& declareParForVar(
       const std::string&);
 
  private:
@@ -587,16 +587,14 @@ class VarTable {
   given lookup value 2) if so, obtain the vector for that value 3) search the
   pairs of the inner vector to see if the calling thread has an entry for
   that variable 4) return the correct variable for that thread */
-  std::list<
-      std::pair<std::string, std::list<std::pair<pthread_t, TData<void*> > > > >
-      parForVars;
-
+  typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
+  std::list<std::pair<std::string, pairList>, gc_allocator<std::pair<std::string, pairList> > > parForVars;
   // Predicate functions for the lookupVar function
   // This code used from stack overflow question 12008059
   struct CheckName {
     CheckName(std::string pVal) : searchVal(pVal) {}
     bool operator()(
-        std::pair<std::string, std::list<std::pair<pthread_t, TData<void*> > > >
+        std::pair<std::string, std::list<std::pair<pthread_t, TData<void*> >,gc_allocator<std::pair<pthread_t, TData<void*> > > > >
             val) {
       return searchVal == val.first;
     }
@@ -624,20 +622,19 @@ T* VarTable::lookupVar(const std::string varName) {
   // Check whether this variable is a parallel for variable. Ideally there won't
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
-  std::list<std::pair<
-      std::string, std::list<std::pair<pthread_t, TData<void*> > > > >::iterator
-      loc;
+//  std::list<std::pair<
+ //     std::string, std::list<std::pair<pthread_t, TData<void*> > > > >::iterator
+  //    loc;
 
   pthread_rwlock_rdlock(&table_mutex);
 
   // Check if variable is a thread-specific variable (e.g. parallel for loop
   // variable)
   // TODO fix this race condition (as of 11/10/14)
-  loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
+  auto loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
   if (loc != parForVars.end()) {
-    std::list<std::pair<pthread_t, TData<void*> > >& varList = (*loc).second;
-    std::list<std::pair<pthread_t, TData<void*> > >::iterator value;
-    value = std::find_if(varList.begin(), varList.end(),
+    auto varList = (*loc).second;
+    auto value = std::find_if(varList.begin(), varList.end(),
                          CheckThread(pthread_self()));
     if (value != varList.end()) {
       T* ret = static_cast<T*>(value->second.getData());
@@ -648,7 +645,7 @@ T* VarTable::lookupVar(const std::string varName) {
       // eventually obtain write privelages
       pthread_rwlock_unlock(&table_mutex);
 
-      T* newData_ptr = new T();
+      T* newData_ptr = new(GC) T();
       // cout << "New Data: " << newData_ptr << endl;
       TData<void*> insertable(newData_ptr);
       // Ensure that insertable gets copied correctly, and deleted correctly
@@ -682,7 +679,7 @@ T* VarTable::lookupVar(const std::string varName) {
     pthread_rwlock_unlock(&table_mutex);
     // If the variable does not yet exist, we need to allocate memory for the
     // TData to point to!
-    T* newData_ptr = new T();  //() should zero the memory for primitive types,
+    T* newData_ptr = new(GC) T();  //() should zero the memory for primitive types,
                                //so that all types have a default value
     TData<void*> insertable(newData_ptr);
     // Must notify TData that it is pointing at dynamically allocated memory
@@ -732,20 +729,16 @@ T* VarTable::lookupVar(const Node* varNode) {
   // Check whether this variable is a parallel for variable. Ideally there won;t
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
-  std::list<std::pair<
-      std::string, std::list<std::pair<pthread_t, TData<void*> > > > >::iterator
-      loc;
 
   pthread_rwlock_rdlock(&table_mutex);
 
   // Check if variable is a thread-specific variable (e.g. parallel for loop
   // variable)
   // TODO fix this race condition (as of 11/10/14)
-  loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
+  auto loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
   if (loc != parForVars.end()) {
-    std::list<std::pair<pthread_t, TData<void*> > >& varList = (*loc).second;
-    std::list<std::pair<pthread_t, TData<void*> > >::iterator value;
-    value = std::find_if(varList.begin(), varList.end(),
+    auto varList = (*loc).second;
+    auto value = std::find_if(varList.begin(), varList.end(),
                          CheckThread(pthread_self()));
     if (value != varList.end()) {
       T* ret = static_cast<T*>(value->second.getData());
@@ -756,7 +749,7 @@ T* VarTable::lookupVar(const Node* varNode) {
       // eventually obtain write privelages
       pthread_rwlock_unlock(&table_mutex);
 
-      T* newData_ptr = new T();
+      T* newData_ptr = new(GC) T();
       // cout << "New Data: " << newData_ptr << endl;
       TData<void*> insertable(newData_ptr);
       // Ensure that insertable gets copied correctly, and deleted correctly
@@ -789,7 +782,7 @@ T* VarTable::lookupVar(const Node* varNode) {
     pthread_rwlock_unlock(&table_mutex);
     // If the variable does not yet exist, we need to allocate memory for the
     // TData to point to!
-    T* newData_ptr = new T();  //() should zero the memory for primitive types,
+    T* newData_ptr = new(GC) T();  //() should zero the memory for primitive types,
                                //so that all types have a default value
     // Obtain write privelages before we insert
     pthread_rwlock_wrlock(&table_mutex);
@@ -828,7 +821,7 @@ T* VarTable::lookupVar(const Node* varNode) {
 class ThreadPool {
  private:
   pthread_mutex_t threadCount_mutex;
-  std::vector<pthread_t> currentThreads;
+  std::vector<pthread_t, gc_allocator<pthread_t> > currentThreads;
 
  public:
   ThreadPool();
@@ -860,16 +853,14 @@ class ThreadEnvironment {
   //instructions)
   // Mutex insures that threads don;t simultaneously try to destroy
   // themselves/add new threads
-  std::vector<pthread_t> currentThreads;
+  std::vector<pthread_t, gc_allocator<pthread_t> > currentThreads;
   pthread_mutex_t threadCount_mutex;
   ThreadPool backgroundThreads;
 
   // This vector holds each MUTEX lock created by the program
   // By putting them all in one global location, we allow threads to query
   // whether a particular mutex has been created or not
-  std::map<
-      std::string,
-      pthread_mutex_t* /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/>
+  std::map< std::string, pthread_mutex_t*, less<std::string>, gc_allocator<pair<std::string, pthread_mutex_t*> > /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/>
       mutexes;
   pthread_mutex_t map_mutex;
 
@@ -961,7 +952,7 @@ class TetraScope {
   TData<void*>& declareReference(const std::string varName);
 
   // declare a variable that can hold different values across different threads
-  std::list<std::pair<pthread_t, TData<void*> > >&
+  std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
   declareThreadSpecificVariable(const std::string&);
 
   // Used by loops and constrol statements to determine if they can proceed, or
@@ -997,14 +988,14 @@ class TetraScope {
 class scope_ptr {
  public:
   scope_ptr(const Node* callNode) {
-    ptr = new TetraScope(callNode);
-    refCount = new int();  // Zero initialized
+    ptr = new(GC) TetraScope(callNode);
+    refCount = new(GC) int();  // Zero initialized
     *refCount = 0;
     status = NORMAL;
     ///*std::stack<ThreadPool*>*/ spawnedThreads =
     ///std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
     MicroStack<ThreadPool*> spawnedThreads;
-    refCount_mutex_ptr = new pthread_mutex_t();
+    refCount_mutex_ptr = new(GC) pthread_mutex_t();
     addReference();
   }
 
@@ -1012,14 +1003,14 @@ class scope_ptr {
   // initializing funciton parameters. Note that scope does not include spawned
   // threads.
   scope_ptr(const TetraScope& newScope) {
-    ptr = new TetraScope(newScope);
-    refCount = new int();  // Zero initialized
+    ptr = new(GC) TetraScope(newScope);
+    refCount = new(GC) int();  // Zero initialized
     *refCount = 0;
     status = NORMAL;
     // std::stack<ThreadPool*> spawnedThreads;
     // spawnedThreads = std::stack<ThreadPool*>(std::deque<ThreadPool*>(2));
     MicroStack<ThreadPool*> spawnedThreads;
-    refCount_mutex_ptr = new pthread_mutex_t();
+    refCount_mutex_ptr = new(GC) pthread_mutex_t();
     addReference();
   }
   // Copy constructor aliases this Scope to the other, rather than performing a
@@ -1086,7 +1077,7 @@ class scope_ptr {
   void setupParallel() {
     // Since each scope_ptr gets its own copy of spawnedThreads (even if
     // everything else is an alias), this is threadsafe
-    ThreadPool* newPool = new ThreadPool();
+    ThreadPool* newPool = new(GC) ThreadPool();
 
     lockScope();
     spawnedThreads.push(newPool);
@@ -1097,7 +1088,7 @@ class scope_ptr {
     // cout << "Main finished: " << time(0) << endl;
     spawnedThreads.top()->waitTillEmpty();
     // cout << "All joined: " << time(0) << endl;
-    delete spawnedThreads.top();
+    //delete spawnedThreads.top();
     spawnedThreads.pop();
   }
 
@@ -1128,22 +1119,23 @@ class scope_ptr {
   // copy constructing, it is a)holding a reference and b) not deleting that
   // reference
   void removeReference() {
-    pthread_mutex_lock(refCount_mutex_ptr);
+    /*pthread_mutex_lock(refCount_mutex_ptr);
 
     // Bool is used to check if we need to destroy the mutex at the end
     bool destroyable = false;
 
     (*refCount)--;
     if (*refCount == 0) {
-      delete refCount;
-      delete ptr;
+      //delete refCount;
+      //delete ptr;
       destroyable = true;
     }
 
     pthread_mutex_unlock(refCount_mutex_ptr);
     if (destroyable) {
-      delete refCount_mutex_ptr;
+      //delete refCount_mutex_ptr;
     }
+    */
   }
 
   void lockScope() const { pthread_mutex_lock(refCount_mutex_ptr); }
@@ -1263,7 +1255,7 @@ class TetraContext {
   void normalizeStatus();
 
   // Declares  variable that can have different values across different threads
-  std::list<std::pair<pthread_t, TData<void*> > >&
+  std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
   declareThreadSpecificVariable(const std::string&);
 
   // Performs a deep copy of the current context
@@ -1279,8 +1271,8 @@ class TetraContext {
   // For use when debugging
   int getLastLineNum();
   void* fetchVariable(std::string s);
-  std::map<std::string, int>& getRefTable() { return refTables->top(); }
-  std::map<std::string, int>& getGlobRefTable() { return *globRefTable; }
+  std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string,int> > >& getRefTable() { return refTables->top(); }
+  std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string,int> > >& getGlobRefTable() { return *globRefTable; }
   void updateVarReferenceTable(const Node* node);
   void popReferenceTable();
 
@@ -1310,7 +1302,7 @@ class TetraContext {
   // void copyDebugsInfo(std::stack<std::map<std::string, int> >& pRefs,
   // std::map<std::string, int>& pGlobs);
 
-  std::stack<const Node*>& getScopes() { return *scopes; }
+  std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > > & getScopes() { return *scopes; }
 
   // Prints a stack trace
   void printStackTrace() const;
@@ -1322,9 +1314,11 @@ class TetraContext {
 
   // For use when debugging
   int lastLineNo;
-  std::stack<const Node*>* scopes;
-  std::stack<std::map<std::string, int> >* refTables;
-  std::map<std::string, int>* globRefTable;
+  std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > >* scopes;
+  std::stack<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
+    std::deque<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
+    gc_allocator<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > > > > >* refTables;
+  std::map<std::string, int, less<std::string>,gc_allocator<pair<std::string, int> > >* globRefTable;
   bool stepping;
   bool stopAtNext;
   bool resume;
@@ -1332,7 +1326,7 @@ class TetraContext {
   // TODO candidate for read-write mutex, though this is not exactly a
   // fought-over mutex
   pthread_mutex_t parallelList_mutex;
-  std::vector<std::string>* parForVars;
+  std::vector<std::string, gc_allocator<std::string> >* parForVars;
 };
 
 // Header for Tetra Standard Library
@@ -1388,9 +1382,9 @@ class VirtualConsole {
 
 class ConsoleArray {
  private:
-  std::vector<VirtualConsole*> consoles;
+  std::vector<VirtualConsole*, gc_allocator<VirtualConsole*> > consoles;
   // Used to insure that only one thread has control of a particular console
-  std::vector<std::pair<pthread_mutex_t*, pthread_cond_t*> > consoleMutexes;
+  std::vector<std::pair<pthread_mutex_t*, pthread_cond_t*>, gc_allocator<std::pair<pthread_mutex_t*, pthread_cond_t*> > > consoleMutexes;
   int (*invokeConsolePolicy)(int, bool);
 
  public:

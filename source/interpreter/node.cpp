@@ -59,7 +59,7 @@ int Node::numChildren() const { return num_children; }
 void Node::insertSymbol(Symbol sym) {
   /* create symtable if needed */
   if (!symtable) {
-    symtable = new map<string, Symbol>();
+    symtable = new(GC) std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > >();
   }
 
   /* check if it's there first */
@@ -79,7 +79,7 @@ Symbol Node::lookupSymbol(string name, int lineno) const {
     throw Error("Symbol '" + name + "' not found!", lineno);
   }
 
-  map<string, Symbol>::iterator it = symtable->find(name);
+  std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > >::iterator it = symtable->find(name);
 
   if (it == symtable->end()) {
     throw Error("Symbol '" + name + "' not found!", lineno);
