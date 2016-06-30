@@ -414,7 +414,6 @@ void MainWindow::getInput() {
         text = QInputDialog::getText(this, tr("Enter Input"), tr("Enter Input"), QLineEdit::Normal, "", &ok);
     } while (!ok);
 
-    qDebug() << "main sees input as " << text << "\n";
     fileRunner->receiveInput(text);
 }
 
