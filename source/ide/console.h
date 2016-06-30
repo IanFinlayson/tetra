@@ -16,7 +16,7 @@ class QWidget;
 QT_END_NAMESPACE
 
 
-class Console : public QPlainTextEdit, public VirtualConsole {
+class Console : public QPlainTextEdit {
     Q_OBJECT
   public:
     Console(MainWindow* mainWindow = NULL);
@@ -26,11 +26,6 @@ class Console : public QPlainTextEdit, public VirtualConsole {
 
     /* update the settings */
     void updateSettings();
-
-    /* functions for communicating with tetra I/O */
-    std::string receiveStandardInput();
-    void processStandardOutput(const std::string& text);
-
 
   protected:
     virtual void keyPressEvent(QKeyEvent* e);

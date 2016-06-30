@@ -11,15 +11,15 @@
 int interpret(Node* tree, int debug, int threads);
 
 /* create the FileRunner and save the window it's associated with */
-FileRunner::FileRunner(MainWindow* mainWindow) {
+FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
     this->mainWindow = mainWindow;
 }
 
 /* run or debugs file */
 void FileRunner::runFile(bool debug) {
     ConsoleArray consoleArray;
-    Console console(mainWindow);
-    consoleArray.registerConsole(console);
+    consoleArray.registerConsole(*this);
+
     Node* program_root;
     IDECommandObserver debugger = IDECommandObserver();
     TetraEnvironment::setObserver(debugger);
@@ -27,18 +27,47 @@ void FileRunner::runFile(bool debug) {
 
     try {
         program_root = parseFile(mainWindow->getOpenFile().toStdString());
+
         if (debug) {
             interpret(program_root, true, 1);
         } else {
             interpret(program_root, false, 8);
         }
+
     } catch (RuntimeError e) {
-        qDebug() << "error";
+        qDebug() << "RE: " << e.getMessage().c_str() << "\n";
     } catch (SystemError e) {
-        qDebug() << "error";
+        qDebug() << "SE: " << e.getMessage().c_str() << "\n";
     } catch (Error e) {
-        qDebug() << "error";
+        qDebug() << "E: " << e.getMessage().c_str() << "\n";
     }
+    QThread::currentThread()->quit();
     emit finished();
 }
+
+/* TODO change this to use the actual console itself the difficulty in that is
+ * that we can't return right away like we must for the interface... */
+std::string FileRunner::receiveStandardInput() {
+
+    return "42";
+
+    /*
+    while (true) {
+        bool ok;
+        QString text = QInputDialog::getText(parent, "Enter Input", "Enter Input", QLineEdit::Normal, "", &ok);
+        if (ok) {
+            return text.toStdString();
+        }
+    } */
+}
+
+void FileRunner::processStandardOutput(const std::string& text) {
+    /*QTextCursor* cursor = new QTextCursor(document());
+    cursor->movePosition(QTextCursor::End);
+    cursor->insertText(QString(text.c_str()));
+    */
+
+    qDebug() << text.c_str();
+}
+
 

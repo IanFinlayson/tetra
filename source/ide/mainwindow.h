@@ -51,6 +51,7 @@ class MainWindow : public QMainWindow {
     void doOpen(QString fname);
 
     Ui::MainWindow* ui;
+    Console* console;
 
   private slots:
     void on_actionCopy_triggered();
@@ -74,6 +75,7 @@ class MainWindow : public QMainWindow {
     void updateCoordinates();
 
     void on_actionRun_triggered();
+    void exitRunMode();
     void on_actionDebug_triggered();
 
     void on_actionStep_triggered();

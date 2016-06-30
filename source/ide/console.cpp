@@ -8,7 +8,7 @@
 #include "ui_mainwindow.h"
 #include "settingsmanager.h"
 
-Console::Console(MainWindow* parent) : QPlainTextEdit(parent), VirtualConsole() {
+Console::Console(MainWindow* parent) : QPlainTextEdit(parent) {
     setContentsMargins(50, 50, 50, 50);
 
     ensureCursorVisible();
@@ -34,25 +34,6 @@ void Console::updateSettings() {
     QFont font = SettingsManager::font();
     setFont(font);
 }
-
-/* TODO change this to use the actual console itself the difficulty in that is
- * that we can't return right away like we must for the interface... */
-std::string Console::receiveStandardInput() {
-    while (true) {
-        bool ok;
-        QString text = QInputDialog::getText(parent, "Enter Input", "Enter Input", QLineEdit::Normal, "", &ok);
-        if (ok) {
-            return text.toStdString();
-        }
-    }
-}
-
-void Console::processStandardOutput(const std::string& text) {
-    QTextCursor* cursor = new QTextCursor(document());
-    cursor->movePosition(QTextCursor::End);
-    cursor->insertText(QString(text.c_str()));
-}
-
 /* when keys are pressed in the widget */
 void Console::keyPressEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_Right) {
