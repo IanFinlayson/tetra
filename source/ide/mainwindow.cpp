@@ -68,7 +68,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     /* set up running so we know when we are done */
     connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
-    console = ui->console;
 }
 
 MainWindow::~MainWindow() {
@@ -379,6 +378,10 @@ void MainWindow::on_actionDebug_triggered() {
     QMessageBox msgBox;
     msgBox.setText("TODO");
     msgBox.exec();
+}
+
+void MainWindow::receiveOutput(QString text) {
+    ui->console->write(text);
 }
 
 void MainWindow::on_actionRun_triggered() {

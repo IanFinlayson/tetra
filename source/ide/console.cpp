@@ -52,4 +52,10 @@ void Console::resizeEvent(QResizeEvent* e) {
 }
 
 
+void Console::write(QString text) {
+    QTextCursor* cursor = new QTextCursor(document());
+    cursor->movePosition(QTextCursor::End);
+    cursor->insertText(text);
+}
+
 

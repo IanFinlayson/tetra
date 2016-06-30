@@ -51,7 +51,6 @@ class MainWindow : public QMainWindow {
     void doOpen(QString fname);
 
     Ui::MainWindow* ui;
-    Console* console;
 
   private slots:
     void on_actionCopy_triggered();
@@ -82,6 +81,8 @@ class MainWindow : public QMainWindow {
     void on_actionContinue_triggered();
     void on_actionNext_triggered();
     void on_actionStop_triggered();
+
+    void receiveOutput(QString text);
 
   private:
 

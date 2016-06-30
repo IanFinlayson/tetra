@@ -27,6 +27,9 @@ class Console : public QPlainTextEdit {
     /* update the settings */
     void updateSettings();
 
+    /* for I/O */
+    void write(QString text);
+
   protected:
     virtual void keyPressEvent(QKeyEvent* e);
     void resizeEvent(QResizeEvent* event);

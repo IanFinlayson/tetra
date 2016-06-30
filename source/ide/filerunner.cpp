@@ -13,6 +13,7 @@ int interpret(Node* tree, int debug, int threads);
 /* create the FileRunner and save the window it's associated with */
 FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
     this->mainWindow = mainWindow;
+    connect(this, SIGNAL(output(QString)), mainWindow, SLOT(receiveOutput(QString)));
 }
 
 /* run or debugs file */
@@ -62,12 +63,7 @@ std::string FileRunner::receiveStandardInput() {
 }
 
 void FileRunner::processStandardOutput(const std::string& text) {
-    /*QTextCursor* cursor = new QTextCursor(document());
-    cursor->movePosition(QTextCursor::End);
-    cursor->insertText(QString(text.c_str()));
-    */
-
-    qDebug() << text.c_str();
+    QString qtext = QString(text.c_str());
+    emit output(qtext);
 }
-
 
