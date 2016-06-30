@@ -76,7 +76,6 @@ class Highlighter : public QSyntaxHighlighter {
     QTextCharFormat quotationFormat;
     QTextCharFormat valueFormat;
     QTextCharFormat builtinFormat;
-    ;
 };
 
 #endif

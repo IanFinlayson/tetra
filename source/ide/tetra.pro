@@ -2,10 +2,11 @@
 QMAKE_CXX = clang++
 QMAKE_LINK = clang++
 
-# set options
-CONFIG += qt debug thread warnoff
+# set compiler flags
+QMAKE_CXXFLAGS += -std=c++11 -W -Wall -pedantic
 
-# TODO specify icons
+# set options
+CONFIG += qt debug thread
 
 # set the QT modules we need
 QT += core gui
@@ -19,10 +20,9 @@ TEMPLATE = app
 INCLUDEPATH += $$PWD/../interpreter
 DEPENDPATH += $$PWD/../interpreter
 
-# link to the tetra interpreter library
-# temporarily use the one in this dir...
+# link to the tetra interpreter library, and the gc library
 PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
-LIBS += -L$$PWD/../interpreter/ -ltetra
+LIBS += -L$$PWD/../interpreter/ -ltetra -lgc
 
 # add target to reformat code
 format.commands = clang-format -i *.cpp *.h

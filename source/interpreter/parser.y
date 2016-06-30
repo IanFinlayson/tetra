@@ -1090,8 +1090,12 @@ void yyerror(const char* str) {
 /* parse from a file */
 extern istream* in;
 Node* parseFile(const string& fname) {
-
+    /* reset all of the lexer stuff */
     reset_lexer( );
+
+    /* clear the type state information */
+    globals.clear();
+    functions.clearAll();
 
     /* open the file */
     ifstream file(fname.c_str( ));
@@ -1114,7 +1118,7 @@ Node* parseFile(const string& fname) {
     /* call yyparse */
     yyparse();
 
-    dumpTreeGraphviz(root);
+    //dumpTreeGraphviz(root);
 
     /* check and infer the types in the tree */
     initTypes(root);

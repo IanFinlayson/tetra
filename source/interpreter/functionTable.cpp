@@ -72,6 +72,11 @@ void FunctionMap::insert(std::pair<string,Node*> pair) {
   lookup.insert(pair);
 }
 
+/* clear all functions from the map */
+void FunctionMap::clearAll() {
+    lookup.clear();
+}
+
 std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > FunctionMap::remove(std::string name) {
 
   //make a map to store the pairs to return

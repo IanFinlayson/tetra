@@ -62,6 +62,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     /* set up connections of signals with the current editor */
     currentEditor()->setUpConnections(this);
+
+    qRegisterMetaType<QTextBlock>("QTextBlock");
+    qRegisterMetaType<QTextCursor>("QTextCursor");
+
+    /* set up running so we know when we are done */
+    connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
+    console = ui->console;
 }
 
 MainWindow::~MainWindow() {
@@ -369,26 +376,38 @@ void MainWindow::on_actionDocumentation_triggered() {
 
 /* run and debug functions */
 void MainWindow::on_actionDebug_triggered() {
-    /* make sure the bottom dock is shown */
-    ui->dock->show();
-
-    /* test getting input */ 
-    std::string resp = ui->console->receiveStandardInput();
-
     QMessageBox msgBox;
-    msgBox.setText(resp.c_str());
+    msgBox.setText("TODO");
     msgBox.exec();
 }
 
 void MainWindow::on_actionRun_triggered() {
-    static int time = 1;
-    char msg[256];
+    /* if it's not saved, we can't run */
+    if (currentEditor()->save()) {
+        updateTitle();
+    } else {
+        return;
+    }
 
     /* make sure the bottom dock is shown */
     ui->dock->show();
+    ui->console->document()->setPlainText("");
 
-    sprintf(msg, "Hello #%d\n", time++);
-    ui->console->processStandardOutput(msg);
+    /* disable run again */
+    ui->actionRun->setDisabled(true);
+    statusBar()->showMessage("Running.");
+
+    /* start the worker thread which runs the programs */
+    fileRunner->moveToThread(tetraThread);
+    tetraThread->start();
+    QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,false));
+}
+
+/* finish running this */
+void MainWindow::exitRunMode(){
+    tetraThread->wait();
+    ui->actionRun->setEnabled(true);
+    statusBar()->showMessage("Ready.");
 }
 
 /* debugger functions */

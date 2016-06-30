@@ -10,10 +10,14 @@
 #include "mainwindow.h"
 
 class MainWindow;
-class FileRunner : public QObject {
+class FileRunner : public QObject, public VirtualConsole{
     Q_OBJECT
   public:
     FileRunner(MainWindow* mainWindow);
+
+    /* functions for communicating with tetra I/O */
+    std::string receiveStandardInput();
+    void processStandardOutput(const std::string& text);
 
   private:
     MainWindow* mainWindow;
