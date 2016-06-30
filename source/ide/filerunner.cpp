@@ -1,7 +1,9 @@
 /* filerunner.cpp
  * code to run or debug a program */
 
+#include <QInputDialog> 
 #include <QDebug>
+#include <QMutex>
 
 #include "console.h"
 #include "filerunner.h"
@@ -12,8 +14,14 @@ int interpret(Node* tree, int debug, int threads);
 
 /* create the FileRunner and save the window it's associated with */
 FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
-    this->mainWindow = mainWindow;
+    /* output */
     connect(this, SIGNAL(output(QString)), mainWindow, SLOT(receiveOutput(QString)));
+
+    /* input */
+    connect(this, SIGNAL(needInput()), mainWindow, SLOT(getInput()));
+
+    /* save main window ref */
+    this->mainWindow = mainWindow;
 }
 
 /* run or debugs file */
@@ -46,24 +54,35 @@ void FileRunner::runFile(bool debug) {
     emit finished();
 }
 
-/* TODO change this to use the actual console itself the difficulty in that is
- * that we can't return right away like we must for the interface... */
+/* this function is called from the interpreter when it needs string input from the user */
 std::string FileRunner::receiveStandardInput() {
+    /* tell the main window we need input */
+    emit needInput();
 
-    return "42";
+    /* wait for the main thread to provide it */
+    QMutex mutex;
+    mutex.lock();
+    inputReady.wait(&mutex);
+    mutex.unlock();
 
-    /*
-    while (true) {
-        bool ok;
-        QString text = QInputDialog::getText(parent, "Enter Input", "Enter Input", QLineEdit::Normal, "", &ok);
-        if (ok) {
-            return text.toStdString();
-        }
-    } */
+    /* and now give it back to the interpreter */
+    return myInput;
 }
 
 void FileRunner::processStandardOutput(const std::string& text) {
+    /* send this string to the main window for display */
     QString qtext = QString(text.c_str());
     emit output(qtext);
 }
+
+/* this function is called from the main thread and unlocks the interpreter
+ * thread which was waiting for input */
+void FileRunner::receiveInput(QString input) {
+    /* set member variable to waht main read */
+    myInput = input.toStdString();
+
+    /* wake up the thread waiting for input */
+    inputReady.wakeAll();
+}
+
 

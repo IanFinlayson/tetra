@@ -49,8 +49,11 @@ class MainWindow : public QMainWindow {
     void updateTitle();
 
     void doOpen(QString fname);
-
     Ui::MainWindow* ui;
+
+  public slots:
+    void receiveOutput(QString text);
+    void getInput();
 
   private slots:
     void on_actionCopy_triggered();
@@ -82,7 +85,6 @@ class MainWindow : public QMainWindow {
     void on_actionNext_triggered();
     void on_actionStop_triggered();
 
-    void receiveOutput(QString text);
 
   private:
 

@@ -406,6 +406,18 @@ void MainWindow::on_actionRun_triggered() {
     QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,false));
 }
 
+/* we were requested to get input from the running program */
+void MainWindow::getInput() {
+    bool ok;
+    QString text;
+    do {
+        text = QInputDialog::getText(this, tr("Enter Input"), tr("Enter Input"), QLineEdit::Normal, "", &ok);
+    } while (!ok);
+
+    qDebug() << "main sees input as " << text << "\n";
+    fileRunner->receiveInput(text);
+}
+
 /* finish running this */
 void MainWindow::exitRunMode(){
     tetraThread->wait();
