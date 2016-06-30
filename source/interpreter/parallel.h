@@ -2,12 +2,11 @@
 #include <iostream>
 #include <list>
 #include <string>
-#include "backend.h"
-#include "frontend.h"
 
 #include <assert.h>
 #include <pthread.h>
 
+#include "backend.h"
 using namespace std;  // This will eventually be removed
 
 /*
@@ -71,6 +70,11 @@ struct evalForArgs {
 // New thread executes a tetra statement
 template <typename T>
 void wrapEvaluation(void* args) {
+  /* gc stuff */
+//GC_stack_base sb;
+//GC_get_stack_base(&sb);
+//GC_register_my_thread(&sb);
+
   // cout << "Thread Start time: " << time(0) << endl;
   evalArgs<T>& argList = *static_cast<evalArgs<T>*>(args);
 
@@ -126,6 +130,9 @@ void wrapEvaluation(void* args) {
   //delete static_cast<evalArgs<T>*>(args);
   //	cout << "Thread finished: " << time(0) << endl;
   // pthread_exit(NULL);
+  
+  /* boehm gc things */
+ // GC_unregister_my_thread();
 }
 
 // This function is executed by parallel for worker threads to repeatedly
@@ -133,6 +140,11 @@ void wrapEvaluation(void* args) {
 template <typename T>
 void wrapMultiEvaluation(void* args) {
   evalForArgs<T>& argList = *static_cast<evalForArgs<T>*>(args);
+
+  /* gc stuff */
+//GC_stack_base sb;
+//GC_get_stack_base(&sb);
+//GC_register_my_thread(&sb);
 
   // Initializes a call stack for this thread, having as its base a pointer
   // to the current call stack
@@ -214,6 +226,9 @@ void wrapMultiEvaluation(void* args) {
   //delete argList.args_ptr;
   //delete &argList;
   // cout << "parfor finished" << endl;
+  
+  /* boehm gc things */
+ // GC_unregister_my_thread();
 }
 
 // Spawns a worker thread that iwll work on iterations of a parFor loop

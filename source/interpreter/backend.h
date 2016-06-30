@@ -15,8 +15,8 @@
 #include <stack>
 #include <string>
 #include <vector>
-
 #include "frontend.h"
+
 #include "microStack.h"
 
 /* macro to squelch unused variable warnings */
@@ -622,19 +622,18 @@ T* VarTable::lookupVar(const std::string varName) {
   // Check whether this variable is a parallel for variable. Ideally there won't
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
-//  std::list<std::pair<
- //     std::string, std::list<std::pair<pthread_t, TData<void*> > > > >::iterator
-  //    loc;
+  typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
+  std::list<std::pair<std::string, pairList>, gc_allocator<std::pair<std::string, pairList> > >::iterator loc;
 
   pthread_rwlock_rdlock(&table_mutex);
 
   // Check if variable is a thread-specific variable (e.g. parallel for loop
   // variable)
   // TODO fix this race condition (as of 11/10/14)
-  auto loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
+  loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
   if (loc != parForVars.end()) {
-    auto varList = (*loc).second;
-    auto value = std::find_if(varList.begin(), varList.end(),
+    pairList& varList = (*loc).second;
+    pairList::iterator value = std::find_if(varList.begin(), varList.end(),
                          CheckThread(pthread_self()));
     if (value != varList.end()) {
       T* ret = static_cast<T*>(value->second.getData());
@@ -729,16 +728,18 @@ T* VarTable::lookupVar(const Node* varNode) {
   // Check whether this variable is a parallel for variable. Ideally there won;t
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
+  typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
+  std::list<std::pair<std::string, pairList>, gc_allocator<std::pair<std::string, pairList> > >::iterator loc;
 
   pthread_rwlock_rdlock(&table_mutex);
 
   // Check if variable is a thread-specific variable (e.g. parallel for loop
   // variable)
   // TODO fix this race condition (as of 11/10/14)
-  auto loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
+  loc = std::find_if(parForVars.begin(), parForVars.end(), CheckName(varName));
   if (loc != parForVars.end()) {
-    auto varList = (*loc).second;
-    auto value = std::find_if(varList.begin(), varList.end(),
+    pairList& varList = (*loc).second;
+    pairList::iterator value = std::find_if(varList.begin(), varList.end(),
                          CheckThread(pthread_self()));
     if (value != varList.end()) {
       T* ret = static_cast<T*>(value->second.getData());

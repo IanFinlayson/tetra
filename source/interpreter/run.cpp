@@ -4,12 +4,11 @@
  * access to a method which will build and run the program
  */
 
+#include "backend.h"
 #include <argp.h>
 #include <cstdlib>
 #include <iostream>
-#include "backend.h"
 #include "commandObserver.h"
-#include "frontend.h"
 
 
 /* the info for the command line parameters */
@@ -81,6 +80,9 @@ struct argp info = {options, parse_opt, args_doc, doc, 0, 0, 0};
 
 /* the main function */
 int main(int argc, char** argv) {
+  /* initiate the garbage collector */
+  GC_INIT();
+
   /* set up the arguments structure */
   struct arguments args;
 

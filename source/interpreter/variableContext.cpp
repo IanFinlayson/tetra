@@ -13,6 +13,13 @@
 using std::string;
 
 VarTable::VarTable() : varMap(30)/*, parForVars(3)*/ {
+  typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
+	pairList emptyList;
+	for(int i = 0; i < 3; i++) {
+		parForVars.push_back(
+				std::pair<string, std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > >(
+						"", emptyList));
+	}
   // pthread_mutex_init(&table_mutex,NULL);
   pthread_rwlock_init(&table_mutex, NULL);
 }
