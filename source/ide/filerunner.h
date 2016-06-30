@@ -5,6 +5,7 @@
 #define FILERUNNER_H
 
 #include <sys/types.h>
+#include <QElapsedTimer>
 #include <QObject>
 #include <QWaitCondition>
 #include "backend.h"
@@ -32,6 +33,7 @@ class FileRunner : public QObject, public VirtualConsole {
   private:
     MainWindow* mainWindow;
     QWaitCondition inputReady;
+    QElapsedTimer programTimer;
     std::string myInput;
 };
 

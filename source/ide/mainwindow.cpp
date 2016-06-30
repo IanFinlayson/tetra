@@ -92,6 +92,9 @@ void MainWindow::setupShortcuts() {
     ui->actionUndo->setShortcuts(QKeySequence::Undo);
 
     ui->actionDocumentation->setShortcuts(QKeySequence::HelpContents);
+
+    ui->actionRun->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
+    ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
@@ -398,6 +401,7 @@ void MainWindow::on_actionRun_triggered() {
 
     /* disable run again */
     ui->actionRun->setDisabled(true);
+    ui->actionDebug->setDisabled(true);
     statusBar()->showMessage("Running.");
 
     /* start the worker thread which runs the programs */
@@ -406,7 +410,8 @@ void MainWindow::on_actionRun_triggered() {
     QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,false));
 }
 
-/* we were requested to get input from the running program */
+/* we were requested to get input from the running program
+ * TODO make this much fancier! */
 void MainWindow::getInput() {
     bool ok;
     QString text;
@@ -421,6 +426,7 @@ void MainWindow::getInput() {
 void MainWindow::exitRunMode(){
     tetraThread->wait();
     ui->actionRun->setEnabled(true);
+    ui->actionDebug->setEnabled(true);
     statusBar()->showMessage("Ready.");
 }
 

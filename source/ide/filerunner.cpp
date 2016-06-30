@@ -29,6 +29,9 @@ void FileRunner::runFile(bool debug) {
     ConsoleArray consoleArray;
     consoleArray.registerConsole(*this);
 
+    /* start timer */
+    programTimer.start();
+
     Node* program_root;
     IDECommandObserver debugger = IDECommandObserver();
     TetraEnvironment::setObserver(debugger);
@@ -51,6 +54,10 @@ void FileRunner::runFile(bool debug) {
         qDebug() << "E: " << e.getMessage().c_str() << "\n";
     }
     QThread::currentThread()->quit();
+
+    double seconds = programTimer.elapsed() / 1000.0;
+    emit output("\nProgram Finished in " + QString::number(seconds, 'f', 2) + " seconds");
+
     emit finished();
 }
 
