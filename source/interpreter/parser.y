@@ -1090,8 +1090,12 @@ void yyerror(const char* str) {
 /* parse from a file */
 extern istream* in;
 Node* parseFile(const string& fname) {
-
+    /* reset all of the lexer stuff */
     reset_lexer( );
+
+    /* clear the type state information */
+    globals.clear();
+    functions.clearAll();
 
     /* open the file */
     ifstream file(fname.c_str( ));

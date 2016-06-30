@@ -279,6 +279,9 @@ class FunctionMap {
 
   //wrapper around std::map.insert
   void insert(std::pair<string, Node*>);
+
+  // clear everything out of the function map, e.g. to reuse it
+  void clearAll();
 };
 
 /* stores a class definition's context (methods & members) */
