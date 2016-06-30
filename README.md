@@ -29,15 +29,26 @@ be non-deterministic and thus hard to find.
 Installation
 ------------
 
-Tetra has thus far only works on Linux systems.  To install:
+Tetra thus far only works on Linux systems.  To install:
 
 1 Download Tetra, either by cloning the repository, or by downloading a zip file.
 
 2 Install dependencies
 ```
-sudo apt-get install build-essential clang bison qt5-default
+sudo apt-get install build-essential clang bison qt5-default libatomic-ops-dev
 ```
-3 Compile it:
+
+3 Install the Hans Boehm GC library:
+```
+wget http://www.hboehm.info/gc/gc_source/gc-7.4.4.tar.gz
+tar -xzvf gc-7.4.4.tar.gz
+cd gc-7.4.4
+./configure --enable-threads=posix --enable-thread-local-alloc --enable-parallel-mark --enable-cplusplus
+make
+sudo make install
+```
+
+4 Compile Tetra:
 ```
 cd tetra
 ./build
