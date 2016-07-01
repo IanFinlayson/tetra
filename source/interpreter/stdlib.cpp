@@ -30,35 +30,35 @@ void print(const Node* args, TetraContext& context) {
         // Prints the value, flushes the buffer WITHOUT a new line
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str().c_str());
+        console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_REAL: {
         TData<double> value;
         evaluateNode<double>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str().c_str());
+        console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_BOOL: {
         TData<bool> value;
         evaluateNode<bool>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str().c_str());
+        console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_STRING: {
         TData<tstring> value;
         evaluateNode<tstring>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str().c_str());
+        console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_VECTOR: {
         TData<TArray> value;
         evaluateNode<TArray>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str().c_str());
+        console.processStandardOutput(formattedData.str());
       } break;
       default:
         // print that we did not recognize whatever it is we are supposed to

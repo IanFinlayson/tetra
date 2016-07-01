@@ -148,19 +148,19 @@ Node* parseFile(const tstring& fname);
 
 /* a program is a list of functions */
 program: toplevels {
-  root = $1;
+       root = $1;
 }
 
 /* zero or more new lines */
 newl_star: TOK_NEWLINE newl_star {}
-  | {}
+         | {}
 
 /* one or more new lines */
 newl_plus: TOK_NEWLINE newl_star {}
 
 /* a list of functions */
 toplevels: newl_star function toplevels {
-  $$ = new(GC) Node(NODE_TOPLEVEL_LIST);
+         $$ = new(GC) Node(NODE_TOPLEVEL_LIST);
   $$->setLine(0);
   $$->addChild($2);
   $$->addChild($3);
@@ -185,7 +185,7 @@ toplevels: newl_star function toplevels {
 
 /* modules */
 identifiers: identifier TOK_COMMA identifiers {
-  $$ = new(GC) Node(NODE_IDENTIFIERS);
+           $$ = new(GC) Node(NODE_IDENTIFIERS);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
@@ -196,11 +196,11 @@ identifiers: identifier TOK_COMMA identifiers {
 }
 
 module: TOK_OPEN identifiers {
-  $$ = new(GC) Node(NODE_OPEN); 
+      $$ = new(GC) Node(NODE_OPEN); 
   $$->setLine(yylineno);
   $$->addChild($2);
 
-  } | TOK_IMPORT identifiers {
+} | TOK_IMPORT identifiers {
   $$ = new(GC) Node(NODE_IMPORT); 
   $$->setLine(yylineno);
   $$->addChild($2);
@@ -209,19 +209,19 @@ module: TOK_OPEN identifiers {
 
 /* class */
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
-  $$ = new(GC) Node(NODE_CLASS);
+     $$ = new(GC) Node(NODE_CLASS);
   $$->setStringval(tstring($2));
   $$->addChild($5);
 }
 
 class_block: TOK_INDENT class_parts TOK_DEDENT {
-  $$ = $2;
+           $$ = $2;
 } | TOK_INDENT pass_statement newl_star TOK_DEDENT{
   $$ = $2;
 }
 
 class_parts: class_part class_parts {
-  $$ = new(GC) Node(NODE_CLASS_PART);
+           $$ = new(GC) Node(NODE_CLASS_PART);
   $$->addChild($1);
   $$->addChild($2);
   $$->setLine($1->getLine( ));
@@ -231,13 +231,13 @@ class_parts: class_part class_parts {
 }
 
 class_part: function 
-  | typed_identifier newl_plus
+          | typed_identifier newl_plus
   | init_function {
   $$ = $1;
 }
 
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
-  $$ = new(GC) Node(NODE_FUNCTION);
+             $$ = new(GC) Node(NODE_FUNCTION);
   $$->setDataType(new(GC) DataType(TYPE_CLASS));
   $$->setStringval("init");
   $$->addChild($3);
@@ -247,7 +247,7 @@ init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
 
 /* a data declaration - either a constant or global */
 datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
-  $$ = new(GC) Node(NODE_CONST);
+        $$ = new(GC) Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($4);
 } | TOK_CONST typed_identifier TOK_ASSIGN assignterm {
@@ -283,7 +283,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
 
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
-  $$ = new(GC) Node(NODE_FUNCTION);
+        $$ = new(GC) Node(NODE_FUNCTION);
   $$->setStringval(tstring($2));
   $$->setDataType($4);
   $$->addChild($3);
@@ -293,7 +293,7 @@ function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
 
 /* a parameter list (with bananas) */
 formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
-  $$ = $2;
+                 $$ = $2;
   $$->setLine(yylineno);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
   $$ = NULL;
@@ -301,7 +301,7 @@ formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
 
 /* a list of at least one parameter */
 formal_params: declaration TOK_COMMA formal_params {
-  $$ = new(GC) Node(NODE_FORMAL_PARAM_LIST);
+             $$ = new(GC) Node(NODE_FORMAL_PARAM_LIST);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
@@ -312,7 +312,7 @@ formal_params: declaration TOK_COMMA formal_params {
 
 /* a single parameter */
 declaration: TOK_IDENTIFIER type {
-  $$ = new(GC) Node(NODE_DECLARATION);
+           $$ = new(GC) Node(NODE_DECLARATION);
   $$->setLine(yylineno);
   $$->setStringval(tstring($1));
   $$->setDataType($2);
@@ -320,7 +320,7 @@ declaration: TOK_IDENTIFIER type {
 
 /* tuple types */
 type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
-  $$ = new(GC) DataType(TYPE_TUPLE);
+              $$ = new(GC) DataType(TYPE_TUPLE);
   Node* decs = $2;
   while(decs){
     $$->subtypes->push_back(*decs->type());
@@ -334,7 +334,7 @@ type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
 }
 
 type_decs: type TOK_COMMA type_decs {
-  $$ = new(GC) Node(NODE_TUPLE_TYPES);
+         $$ = new(GC) Node(NODE_TUPLE_TYPES);
   $$->setDataType($1);
   $$->addChild($3);
 } | type {
@@ -344,7 +344,7 @@ type_decs: type TOK_COMMA type_decs {
 
 /* types just primitives and vectors for now */
 type: TOK_INT {
-  $$ = new(GC) DataType(TYPE_INT);
+    $$ = new(GC) DataType(TYPE_INT);
 } | TOK_REAL {
   $$ = new(GC) DataType(TYPE_REAL);
 } | TOK_STRING {
@@ -371,21 +371,21 @@ type: TOK_INT {
 
 /* function_type */
 function_type: type_dec_tuple TOK_RIGHTARROW return_type{
-  $$ = new(GC) DataType(TYPE_FUNCTION);
+             $$ = new(GC) DataType(TYPE_FUNCTION);
   $$->subtypes->push_back(*$1);
   $$->subtypes->push_back(*$3);
 }
 
 /* dict_type */
 dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
-  $$ = new(GC) DataType(TYPE_DICT);
+         $$ = new(GC) DataType(TYPE_DICT);
   $$->subtypes->push_back(*$2);
   $$->subtypes->push_back(*$4);
 }
 
 /* a return type is either a simple type or none which means void */
 return_type: type {
-  $$ = $1;
+           $$ = $1;
 } | TOK_NONE {
   $$ = new(GC) DataType(TYPE_NONE);
 }  | {
@@ -394,12 +394,12 @@ return_type: type {
 
 /* a block is a set of statements, indented over */
 block: newl_plus TOK_INDENT statements TOK_DEDENT {
-  $$ = $3;
+     $$ = $3;
 }
 
 /* a list of at least one statement */
 statements: statement statements {
-  $$ = new(GC) Node(NODE_STATEMENT);
+          $$ = new(GC) Node(NODE_STATEMENT);
   $$->addChild($1);
   $$->addChild($2);
   $$->setLine($1->getLine( ));
@@ -409,13 +409,13 @@ statements: statement statements {
 
 /* a single statement */
 statement: simple_statements
-  | compound_statement {
+         | compound_statement {
   $$ = $1;
 }
 
 /* simple statements are a list of simple statements separated by semi-conlons on one line */
 simple_statements: simple_statement TOK_SEMICOLON simple_statements {
-  $$ = new(GC) Node(NODE_STATEMENT);
+                 $$ = new(GC) Node(NODE_STATEMENT);
   $$->setLine(yylineno);
   $$->addChild($1);
   $$->addChild($3);
@@ -425,7 +425,7 @@ simple_statements: simple_statement TOK_SEMICOLON simple_statements {
 
 /* a simple statement is a one-liner that can't be broken down */
 simple_statement: pass_statement
-  | return_statement
+                | return_statement
   | break_statement
   | continue_statement
   | wait_statement
@@ -442,14 +442,14 @@ simple_statement: pass_statement
 }
 
 typed_identifier: identifier TOK_AS type {
-  $$ = $1;
+                $$ = $1;
   $$->setLine(yylineno);
   $1->setDataType($3);
 }
 
 /* a compound statement is one which has a block of code under it */
 compound_statement: if_statement
-  | elif_statement
+                  | elif_statement
   | for_statement
   | while_statement 
   | parfor
@@ -461,11 +461,11 @@ compound_statement: if_statement
 
 /* simple statements */
 pass_statement: TOK_PASS {
-  $$ = new(GC) Node(NODE_PASS);
+              $$ = new(GC) Node(NODE_PASS);
   $$->setLine(yylineno);
 }
 return_statement: TOK_RETURN {
-  $$ = new(GC) Node(NODE_RETURN);
+                $$ = new(GC) Node(NODE_RETURN);
   $$->setLine(yylineno);
 
 } | TOK_RETURN expression {
@@ -474,50 +474,50 @@ return_statement: TOK_RETURN {
   $$->setLine($1);
 }
 break_statement: TOK_BREAK {
-  $$ = new(GC) Node(NODE_BREAK);
+               $$ = new(GC) Node(NODE_BREAK);
   $$->setLine(yylineno);
 }
 continue_statement: TOK_CONTINUE {
-  $$ = new(GC) Node(NODE_CONTINUE);
+                  $$ = new(GC) Node(NODE_CONTINUE);
   $$->setLine(yylineno);
 }
 wait_statement: TOK_WAIT identifier{
-  $$ = new(GC) Node(NODE_WAIT);
+              $$ = new(GC) Node(NODE_WAIT);
   $$->addChild($2);
   $$->setLine(yylineno);
 }
 
 /* if statement with or without else */
 if_statement: TOK_IF expression TOK_COLON block else_option {
-  $$ = new(GC) Node(NODE_IF);
+            $$ = new(GC) Node(NODE_IF);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
 
-  if ($5) {
+if ($5) {
     $$->addChild($5);
   }
 }
 
 /* either an else block or nothing */
 else_option: TOK_ELSE TOK_COLON block {
-  $$ = $3;
+           $$ = $3;
 } | {
   $$ = NULL;
 }
 
 /* an elif statement */
 elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
-  $$ = new(GC) Node(NODE_ELIF);
-  
-  /* make a node for the first clause */
+              $$ = new(GC) Node(NODE_ELIF);
+
+/* make a node for the first clause */
   Node* c1 = new(GC) Node(NODE_ELIF_CLAUSE);
   c1->addChild($2);
   c1->addChild($4);
   $$->addChild(c1);
   $$->setLine($1);
 
-  $$->addChild($5);
+$$->addChild($5);
   if ($6) {
     $$->addChild($6);
   }
@@ -525,7 +525,7 @@ elif_statement: TOK_IF expression TOK_COLON block elif_clauses else_option {
 
 /* one or more elif clauses */
 elif_clauses: elif_clause elif_clauses {
-  $$ = new(GC) Node(NODE_ELIF_CHAIN);
+            $$ = new(GC) Node(NODE_ELIF_CHAIN);
   $$->addChild($1);
   $$->addChild($2);
   $$->setLine($1->getLine( ));
@@ -535,7 +535,7 @@ elif_clauses: elif_clause elif_clauses {
 
 /* a single elif clause */
 elif_clause: TOK_ELIF expression TOK_COLON block {
-  $$ = new(GC) Node(NODE_ELIF_CLAUSE);
+           $$ = new(GC) Node(NODE_ELIF_CLAUSE);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -543,7 +543,7 @@ elif_clause: TOK_ELIF expression TOK_COLON block {
 
 /* a for loop */
 for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
-  $$ = new(GC) Node(NODE_FOR);
+             $$ = new(GC) Node(NODE_FOR);
   $$->addChild($2);
   $$->addChild($4);
   $$->addChild($6);
@@ -552,7 +552,7 @@ for_statement: TOK_FOR identifier TOK_IN expression TOK_COLON block {
 
 /* a parallel for loop */
 parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
-  $$ = new(GC) Node(NODE_PARFOR);
+      $$ = new(GC) Node(NODE_PARFOR);
   $$->addChild($3);
   $$->addChild($5);
   $$->addChild($7);
@@ -561,7 +561,7 @@ parfor: TOK_PARALLEL TOK_FOR identifier TOK_IN expression TOK_COLON block {
 
 /* a while loop */
 while_statement: TOK_WHILE expression TOK_COLON block {
-  $$ = new(GC) Node(NODE_WHILE);
+               $$ = new(GC) Node(NODE_WHILE);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -569,14 +569,14 @@ while_statement: TOK_WHILE expression TOK_COLON block {
 
 /* a parallel block */
 parblock: TOK_PARALLEL TOK_COLON block {
-  $$ = new(GC) Node(NODE_PARALLEL);
+        $$ = new(GC) Node(NODE_PARALLEL);
   $$->addChild($3);
   $$->setLine($1);
 }
 
 /* a background block */
 background: TOK_BACKGROUND TOK_COLON block {
-  $$ = new(GC) Node(NODE_BACKGROUND);
+          $$ = new(GC) Node(NODE_BACKGROUND);
   $$->addChild($3);
   $$->setLine($1);
 
@@ -589,13 +589,13 @@ background: TOK_BACKGROUND TOK_COLON block {
 
 /* a lock statement */
 lock_statement: TOK_LOCK TOK_COLON block {
-  $$ = new(GC) Node(NODE_LOCK);
+              $$ = new(GC) Node(NODE_LOCK);
   $$->addChild($3);
   $$->setLine($1);
 }
 
 lock_statement: TOK_LOCK identifier TOK_COLON block {
-  $$ = new(GC) Node(NODE_LOCK);
+              $$ = new(GC) Node(NODE_LOCK);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -603,7 +603,7 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
 
 /* expressions - assignments first */
 expression: lvalue TOK_ASSIGN expression {
-  $$ = new(GC) Node(NODE_ASSIGN);
+          $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -711,12 +711,12 @@ expression: lvalue TOK_ASSIGN expression {
 }
 
 assignterm: lambda
-  | lambdaterm{
+          | lambdaterm{
   $$ = $1;
 }
 
 lambdaterm: lambdaterm TOK_OR orterm {
-  $$ = new(GC) Node(NODE_OR);
+          $$ = new(GC) Node(NODE_OR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -726,7 +726,7 @@ lambdaterm: lambdaterm TOK_OR orterm {
 
 /* lambda function */
 lambda: TOK_LAMBDA formal_params TOK_COLON assignterm {
-  $$ = new(GC) Node(NODE_LAMBDA);
+      $$ = new(GC) Node(NODE_LAMBDA);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -739,7 +739,7 @@ lambda: TOK_LAMBDA formal_params TOK_COLON assignterm {
 
 /* and operator */
 orterm: orterm TOK_AND andterm {
-  $$ = new(GC) Node(NODE_AND);
+      $$ = new(GC) Node(NODE_AND);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -749,7 +749,7 @@ orterm: orterm TOK_AND andterm {
 
 /* not operator */
 andterm: TOK_NOT andterm {
-  $$ = new(GC) Node(NODE_NOT);
+       $$ = new(GC) Node(NODE_NOT);
   $$->addChild($2);
 } | notterm {
   $$ = $1;
@@ -757,7 +757,7 @@ andterm: TOK_NOT andterm {
 
 /* relational operators */
 notterm: notterm TOK_LT relterm {
-  $$ = new(GC) Node(NODE_LT);
+       $$ = new(GC) Node(NODE_LT);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -792,7 +792,7 @@ notterm: notterm TOK_LT relterm {
 
 /* | operator */
 relterm: relterm TOK_BITOR bitorterm {
-  $$ = new(GC) Node(NODE_BITOR);
+       $$ = new(GC) Node(NODE_BITOR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -802,7 +802,7 @@ relterm: relterm TOK_BITOR bitorterm {
 
 /* ^ operator */
 bitorterm: bitorterm TOK_BITXOR xorterm {
-  $$ = new(GC) Node(NODE_BITXOR);
+         $$ = new(GC) Node(NODE_BITXOR);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -812,7 +812,7 @@ bitorterm: bitorterm TOK_BITXOR xorterm {
 
 /* & operator */
 xorterm: xorterm TOK_BITAND bitandterm {
-  $$ = new(GC) Node(NODE_BITAND);
+       $$ = new(GC) Node(NODE_BITAND);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -822,7 +822,7 @@ xorterm: xorterm TOK_BITAND bitandterm {
 
 /* << and >> operator */
 bitandterm: bitandterm TOK_LSHIFT shiftterm {
-  $$ = new(GC) Node(NODE_SHIFTL);
+          $$ = new(GC) Node(NODE_SHIFTL);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -837,7 +837,7 @@ bitandterm: bitandterm TOK_LSHIFT shiftterm {
 
 /* + and - operator */
 shiftterm: shiftterm TOK_PLUS plusterm {
-  $$ = new(GC) Node(NODE_PLUS);
+         $$ = new(GC) Node(NODE_PLUS);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -852,7 +852,7 @@ shiftterm: shiftterm TOK_PLUS plusterm {
 
 /* * / % operators */
 plusterm: plusterm TOK_TIMES timesterm {
-  $$ = new(GC) Node(NODE_TIMES);
+        $$ = new(GC) Node(NODE_TIMES);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -872,7 +872,7 @@ plusterm: plusterm TOK_TIMES timesterm {
 
 /* unary operators */
 timesterm: TOK_PLUS timesterm {
-  /* why would anybody do this??? */
+         /* why would anybody do this??? */
   $$ = $2;
 } | TOK_MINUS timesterm {
   /* subtract from zero */
@@ -890,7 +890,7 @@ timesterm: TOK_PLUS timesterm {
 
 /* exponent operator - this is right associative!!! */
 unaryterm: interm TOK_EXP unaryterm {
-  $$ = new(GC) Node(NODE_EXP);
+         $$ = new(GC) Node(NODE_EXP);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -900,7 +900,7 @@ unaryterm: interm TOK_EXP unaryterm {
 
 /* in operator */
 interm: interm TOK_IN expterm {
-  $$ = new(GC) Node(NODE_IN);
+      $$ = new(GC) Node(NODE_IN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -910,7 +910,7 @@ interm: interm TOK_IN expterm {
 
 /* expterm */
 expterm: expterm TOK_DOT funcall {
-  $$ = new(GC) Node(NODE_METHOD_CALL);
+       $$ = new(GC) Node(NODE_METHOD_CALL);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -921,7 +921,7 @@ expterm: expterm TOK_DOT funcall {
 
 /* indivisible thing */
 rvalue: funcall {
-  $$ = $1;
+      $$ = $1;
 } | TOK_LEFTPARENS expression TOK_RIGHTPARENS {
   $$ = $2;
 } | TOK_INTVAL {
@@ -951,7 +951,7 @@ rvalue: funcall {
 }
 
 lvalue: expterm index {
-  $$ = new(GC) Node(NODE_INDEX);
+      $$ = new(GC) Node(NODE_INDEX);
   $$->addChild($1);
   $$->addChild($2);
 } | expterm TOK_DOT identifier { 
@@ -964,7 +964,7 @@ lvalue: expterm index {
 } 
 /* a vector literal */
 vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
-  /* an empty vector definition */
+            /* an empty vector definition */
   $$ = new(GC) Node(NODE_VECVAL);
 
 } | TOK_LEFTBRACKET expression TOK_ELLIPSIS expression TOK_RIGHTBRACKET {
@@ -973,7 +973,7 @@ vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
        killed memory when we did [1 ... 100000] */
   $$ = new(GC) Node(NODE_VECRANGE);
 
-  /* check that the values are legit */
+/* check that the values are legit */
   $$->addChild($2);
   $$->addChild($4);
 
@@ -994,7 +994,7 @@ vector_values: expression TOK_COMMA vector_values {
 
 /* a tuple literal */
 tuple_value: TOK_LEFTPARENS TOK_RIGHTPARENS {
-  /* an empty vector definition */
+           /* an empty vector definition */
   $$ = new(GC) Node(NODE_TUPVAL);
 
 } | TOK_LEFTPARENS expression TOK_COMMA TOK_RIGHTPARENS {
@@ -1010,7 +1010,7 @@ tuple_value: TOK_LEFTPARENS TOK_RIGHTPARENS {
 
 /* zero or more expressions to be made into a tuple */
 tuple_values: expression TOK_COMMA tuple_values {
-  $$ = new(GC) Node(NODE_TUPVAL);
+            $$ = new(GC) Node(NODE_TUPVAL);
   $$->addChild($1);
   $$->addChild($3);
 } | expression {
@@ -1020,7 +1020,7 @@ tuple_values: expression TOK_COMMA tuple_values {
 
 /* a dictionary literal */
 dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
-  /* an empty dictionary */
+          /* an empty dictionary */
   $$ = new(GC) Node(NODE_DICTVAL);
 
 } | TOK_LEFTBRACE dict_values TOK_RIGHTBRACE {
@@ -1030,7 +1030,7 @@ dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
 
 /* one or more expressions to be made into a vector */
 dict_values: expression TOK_COLON expression TOK_COMMA dict_values {
-  $$ = new(GC) Node(NODE_DICTVAL);
+           $$ = new(GC) Node(NODE_DICTVAL);
   $$->addChild($1);
   $$->addChild($3);
   $$->addChild($5);
@@ -1047,14 +1047,14 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
-  $$ = new(GC) Node(NODE_IDENTIFIER);
+          $$ = new(GC) Node(NODE_IDENTIFIER);
   $$->setStringval($1);
   $$->setLine(yylineno);
 }  
 
 /* a function call */
 funcall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
-  $$ = new(GC) Node(NODE_FUNCALL);
+       $$ = new(GC) Node(NODE_FUNCALL);
   $$->addChild($1);
   $$->setLine($2);
 
@@ -1067,7 +1067,7 @@ funcall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
 
 /* a list of at least one parameter */
 actual_param_list: expression TOK_COMMA actual_param_list {
-  $$ = new(GC) Node(NODE_ACTUAL_PARAM_LIST);
+                 $$ = new(GC) Node(NODE_ACTUAL_PARAM_LIST);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -1093,34 +1093,34 @@ Node* parseFile(const tstring& fname) {
     /* reset all of the lexer stuff */
     reset_lexer( );
 
-    /* clear the type state information */
+/* clear the type state information */
     globals.clear();
     functions.clearAll();
 
-    /* open the file */
+/* open the file */
     ifstream file(fname.c_str( ));
 
-    /* if it's not open, we failed */
+/* if it's not open, we failed */
     if (!file.is_open( )) {
         throw Error("Could not open file '" + fname + "'");
     }
 
-    /* set the in stream (defined in lexer.cpp) */
+/* set the in stream (defined in lexer.cpp) */
     in = &file;
 
-    /* Check parsing only */
+/* Check parsing only */
     /*int token;
     while ((token = yylex())) {
       printf("%d\n", token); 
     }
     */
-    
-    /* call yyparse */
+
+/* call yyparse */
     yyparse();
 
-    //dumpTreeGraphviz(root);
+//dumpTreeGraphviz(root);
 
-    /* check and infer the types in the tree */
+/* check and infer the types in the tree */
     initTypes(root);
     inferTypes(root);
     /* return the root of the parse tree */
