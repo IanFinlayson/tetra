@@ -18,8 +18,8 @@ class FileRunner : public QObject, public VirtualConsole {
     FileRunner(MainWindow* mainWindow);
 
     /* functions for communicating with tetra I/O */
-    std::string receiveStandardInput();
-    void processStandardOutput(const std::string& text);
+    tstring receiveStandardInput();
+    void processStandardOutput(const tstring& text);
     void receiveInput(QString input);
 
   signals:
@@ -38,7 +38,7 @@ class FileRunner : public QObject, public VirtualConsole {
     QWaitCondition inputReady;
 
     /* stores the input as supllied by the console */
-    std::string myInput;
+    QString myInput;
 
     /* these keep track of the elapsed running time and time waiting for input */
     QElapsedTimer programTimer;

@@ -39,7 +39,7 @@ void FileRunner::runFile(bool debug) {
     TetraEnvironment::initialize(consoleArray);
 
     try {
-        program_root = parseFile(mainWindow->getOpenFile().toStdString());
+        program_root = parseFile(mainWindow->getOpenFile().toStdString().c_str());
 
         if (debug) {
             interpret(program_root, true, 1);
@@ -64,7 +64,7 @@ void FileRunner::runFile(bool debug) {
 }
 
 /* this function is called from the interpreter when it needs string input from the user */
-std::string FileRunner::receiveStandardInput() {
+tstring FileRunner::receiveStandardInput() {
     /* tell the main window we need input */
     emit needInput();
 
@@ -82,10 +82,10 @@ std::string FileRunner::receiveStandardInput() {
     inputTimer += thisInputTime.elapsed();
 
     /* and now give it back to the interpreter */
-    return myInput;
+    return myInput.toStdString().c_str();
 }
 
-void FileRunner::processStandardOutput(const std::string& text) {
+void FileRunner::processStandardOutput(const tstring& text) {
     /* send this string to the main window for display */
     QString qtext = QString(text.c_str());
     emit output(qtext);
@@ -95,7 +95,7 @@ void FileRunner::processStandardOutput(const std::string& text) {
  * thread which was waiting for input */
 void FileRunner::receiveInput(QString input) {
     /* set member variable to waht main read */
-    myInput = input.toStdString();
+    myInput = input.toStdString().c_str();
 
     /* wake up the thread waiting for input */
     inputReady.wakeAll();
