@@ -22,6 +22,11 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     fileName = "";
 
     updateSettings();
+
+    copyAvail = redoAvail = undoAvail = false;
+    connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvail(bool)));
+    connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvail(bool)));
+    connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvail(bool)));
 }
 
 
@@ -76,6 +81,29 @@ void Editor::setUpConnections(MainWindow* parent) {
     connect(this, SIGNAL(cursorPositionChanged()), parent, SLOT(updateCoordinates()));
 }
 
+void Editor::setCopyAvail(bool is) {
+    copyAvail = is;
+}
+
+void Editor::setRedoAvail(bool is) {
+    redoAvail = is;
+}
+
+void Editor::setUndoAvail(bool is) {
+    undoAvail = is;
+}
+
+bool Editor::canCopy() {
+    return copyAvail;
+}
+
+bool Editor::canUndo() {
+    return undoAvail;
+}
+
+bool Editor::canRedo() {
+    return redoAvail;
+}
 
 /* save as - ask the user for a file name, save the file, and return success/failure */
 bool Editor::saveas() {
@@ -121,7 +149,7 @@ bool Editor::open(QString fname) {
         setPlainText(fileText);
         return true;
     } 
-    
+
     return false;
 }
 

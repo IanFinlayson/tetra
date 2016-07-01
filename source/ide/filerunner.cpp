@@ -1,7 +1,9 @@
 /* filerunner.cpp
  * code to run or debug a program */
 
+#include <QInputDialog> 
 #include <QDebug>
+#include <QMutex>
 
 #include "console.h"
 #include "filerunner.h"
@@ -12,6 +14,13 @@ int interpret(Node* tree, int debug, int threads);
 
 /* create the FileRunner and save the window it's associated with */
 FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
+    /* output */
+    connect(this, SIGNAL(output(QString)), mainWindow, SLOT(receiveOutput(QString)));
+
+    /* input */
+    connect(this, SIGNAL(needInput()), mainWindow, SLOT(getInput()));
+
+    /* save main window ref */
     this->mainWindow = mainWindow;
 }
 
@@ -19,6 +28,10 @@ FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
 void FileRunner::runFile(bool debug) {
     ConsoleArray consoleArray;
     consoleArray.registerConsole(*this);
+
+    /* start timer */
+    inputTimer = 0;
+    programTimer.start();
 
     Node* program_root;
     IDECommandObserver debugger = IDECommandObserver();
@@ -42,32 +55,50 @@ void FileRunner::runFile(bool debug) {
         qDebug() << "E: " << e.getMessage().c_str() << "\n";
     }
     QThread::currentThread()->quit();
+
+    /* calculate elapsed running time */
+    double seconds = (programTimer.elapsed() - inputTimer) / 1000.0;
+    emit output("\nProgram Finished in " + QString::number(seconds, 'f', 2) + " seconds");
+
     emit finished();
 }
 
-/* TODO change this to use the actual console itself the difficulty in that is
- * that we can't return right away like we must for the interface... */
+/* this function is called from the interpreter when it needs string input from the user */
 std::string FileRunner::receiveStandardInput() {
+    /* tell the main window we need input */
+    emit needInput();
 
-    return "42";
+    /* start the input timer so we count off time spent waiting for input */
+    QElapsedTimer thisInputTime;
+    thisInputTime.start();
 
-    /*
-    while (true) {
-        bool ok;
-        QString text = QInputDialog::getText(parent, "Enter Input", "Enter Input", QLineEdit::Normal, "", &ok);
-        if (ok) {
-            return text.toStdString();
-        }
-    } */
+    /* wait for the main thread to provide it */
+    QMutex mutex;
+    mutex.lock();
+    inputReady.wait(&mutex);
+    mutex.unlock();
+
+    /* add this to input timer */
+    inputTimer += thisInputTime.elapsed();
+
+    /* and now give it back to the interpreter */
+    return myInput;
 }
 
 void FileRunner::processStandardOutput(const std::string& text) {
-    /*QTextCursor* cursor = new QTextCursor(document());
-    cursor->movePosition(QTextCursor::End);
-    cursor->insertText(QString(text.c_str()));
-    */
+    /* send this string to the main window for display */
+    QString qtext = QString(text.c_str());
+    emit output(qtext);
+}
 
-    qDebug() << text.c_str();
+/* this function is called from the main thread and unlocks the interpreter
+ * thread which was waiting for input */
+void FileRunner::receiveInput(QString input) {
+    /* set member variable to waht main read */
+    myInput = input.toStdString();
+
+    /* wake up the thread waiting for input */
+    inputReady.wakeAll();
 }
 
 
