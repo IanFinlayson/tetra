@@ -30,15 +30,22 @@ class Console : public QPlainTextEdit {
     /* for I/O */
     void write(QString text);
 
+    /* begin accepting input */
+    void beginInput();
+
   signals:
     void enterPressed(QString);
 
   protected:
     virtual void keyPressEvent(QKeyEvent* e);
     void resizeEvent(QResizeEvent* event);
+    void mousePressEvent(QMouseEvent *event);
 
   private:
     MainWindow* parent;
+
+    /* the position of the cursor at the start of the input */
+    int inputStart;
 };
 #endif
 

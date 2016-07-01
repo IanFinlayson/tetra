@@ -9,4 +9,5 @@ def fact(x int) int:
 def main( ):
     print("Enter n: ")
     n = read_int( )
-    print(n, "! = ", fact(n))
+    print(n, "! = ", fact(n), "\n")
+    

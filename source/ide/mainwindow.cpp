@@ -428,22 +428,18 @@ void MainWindow::on_actionRun_triggered() {
 
 /* we were requested to get input from the running program */
 void MainWindow::getInput() {
-    /*
-       bool ok;
-       QString text;
-       do {
-       text = QInputDialog::getText(this, tr("Enter Input"), tr("Enter Input"), QLineEdit::Normal, "", &ok);
-       } while (!ok);
-       */
-
     /* set the console to be editable */
     ui->console->setReadOnly(false);
+    ui->console->beginInput();;
 
     /* focus it */
     ui->console->setFocus(Qt::OtherFocusReason);
 
     /* set status bar */
     statusBar()->showMessage("Waiting for input.");
+
+    /* make it un-closable */
+    ui->dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
 
     /* now we do nothing until the user hits enter in the console which will
      * cause it to call receiveInput below */
@@ -456,6 +452,9 @@ void MainWindow::receiveInput(QString text) {
 
     /* set the console to not be editable */
     ui->console->setReadOnly(true);
+
+    /* make it closable */
+    ui->dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
 
     /* set the editor to have focus again */
     currentEditor()->setFocus(Qt::OtherFocusReason);
