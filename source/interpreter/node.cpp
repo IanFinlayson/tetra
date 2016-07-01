@@ -34,7 +34,7 @@ void Node::addChild(Node* child) {
 
 void Node::setDataType(DataType* data_type) { this->data_type = data_type; }
 
-void Node::setStringval(const string& stringval) {
+void Node::setStringval(const tstring& stringval) {
   this->stringval = stringval;
 }
 
@@ -47,7 +47,7 @@ void Node::setRealval(double realval) { this->realval = realval; }
 void Node::setLine(int lineno) { this->lineno = lineno; }
 
 int Node::getLine() const { return lineno; }
-string Node::getString() const { return stringval; }
+tstring Node::getString() const { return stringval; }
 int Node::getInt() const { return intval; }
 double Node::getReal() const { return realval; }
 Node* Node::getParent() const {return parent;}
@@ -59,7 +59,7 @@ int Node::numChildren() const { return num_children; }
 void Node::insertSymbol(Symbol sym) {
   /* create symtable if needed */
   if (!symtable) {
-    symtable = new(GC) std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > >();
+    symtable = new(GC) std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > >();
   }
 
   /* check if it's there first */
@@ -69,17 +69,17 @@ void Node::insertSymbol(Symbol sym) {
   }
 
   /* add it in */
-  symtable->insert(pair<string, Symbol>(sym.getName(), sym));
+  symtable->insert(pair<tstring, Symbol>(sym.getName(), sym));
 }
 
 /* lookup a symbol from a symbol table */
-Symbol Node::lookupSymbol(string name, int lineno) const {
+Symbol Node::lookupSymbol(tstring name, int lineno) const {
   /* if there is no symbol table, it's not found! */
   if (!symtable) {
     throw Error("Symbol '" + name + "' not found!", lineno);
   }
 
-  std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > >::iterator it = symtable->find(name);
+  std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > >::iterator it = symtable->find(name);
 
   if (it == symtable->end()) {
     throw Error("Symbol '" + name + "' not found!", lineno);
@@ -89,7 +89,7 @@ Symbol Node::lookupSymbol(string name, int lineno) const {
   return it->second;
 }
 
-bool Node::hasSymbol(const string& name) const {
+bool Node::hasSymbol(const tstring& name) const {
   if (!symtable) {
     return false;
   }
@@ -97,7 +97,7 @@ bool Node::hasSymbol(const string& name) const {
 }
 
 /* these are also here */
-Symbol::Symbol(string name, DataType* type, int lineno, bool constant) {
+Symbol::Symbol(tstring name, DataType* type, int lineno, bool constant) {
   this->name = name;
   this->type = type;
   this->lineno = lineno;
@@ -107,7 +107,7 @@ Symbol::Symbol(string name, DataType* type, int lineno, bool constant) {
 bool Symbol::isConst(){return constant;}
 
 int Symbol::getLine() const { return lineno; }
-string Symbol::getName() const { return name; }
+tstring Symbol::getName() const { return name; }
 DataType* Symbol::getType() const { return type; }
 
 Symbol::Symbol() {

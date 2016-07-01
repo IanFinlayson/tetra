@@ -45,7 +45,7 @@ extern YYSTYPE yylval;
 istream* in;
 
 /* look up a string and return its token code */
-int lookupId(const string& id) {
+int lookupId(const tstring& id) {
   yylval.lineno = yylineno;
   if (id == "if") {
     return TOK_IF;
@@ -164,7 +164,7 @@ int lookupId(const string& id) {
 
 /* lex an identifier (or reserved word) given a start */
 int lexIdent(int start) {
-  string id;
+  tstring id;
   id.push_back((char)start);
 
   while (isalnum(in->peek()) || in->peek() == '_') {
@@ -177,7 +177,7 @@ int lexIdent(int start) {
 /* lex a number
  * TODO handle more bases, scientific notation etc. */
 int lexNumber(int start) {
-  string number;
+  tstring number;
   number.push_back((char)start);
 
   /* have we seen a decimal point yet? */
@@ -218,7 +218,7 @@ int lexNumber(int start) {
   }
 
   /* if there's no decimal its an int */
-  if (number.find('.') == string::npos) {
+  if (number.find('.') == tstring::npos) {
     yylval.intval = atoi(number.c_str());
     return TOK_INTVAL;
   } else {
@@ -229,7 +229,7 @@ int lexNumber(int start) {
 
 /* lex a string constant */
 int lexString() {
-  string str;
+  tstring str;
   while (true) {
     char next = in->get();
     if (next == '\\') {
@@ -590,7 +590,7 @@ int yylex() {
   }
 
   /* if we get down here, there must be a lexer error :( */
-  throw Error(string(next, 1) + " is not a valid lexeme.", yylineno);
+  throw Error(tstring(next, 1) + " is not a valid lexeme.", yylineno);
   return 0;
 }
 

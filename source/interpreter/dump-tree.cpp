@@ -14,8 +14,8 @@
 using namespace std;
 
 /* returns a string representation of a node type */
-string stringType(Node* node) {
-  stringstream ss;
+tstring stringType(Node* node) {
+  tstringstream ss;
 
   switch (node->kind()) {
     /* statements and groups */
@@ -173,16 +173,16 @@ string stringType(Node* node) {
 }
 
 /* generate a unique label for a node */
-string genId() {
+tstring genId() {
   static int count = 0;
   count++;
-  stringstream ss;
+  tstringstream ss;
   ss << "n" << count;
   return ss.str();
 }
 
 /* dump a single node to a graphviz dot file */
-void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
+void dumpNodeGraphviz(Node* node, tstring id, ofstream& out) {
   if (!node) {
     return;
   }
@@ -195,7 +195,7 @@ void dumpNodeGraphviz(Node* node, string id, ofstream& out) {
   /* for each child */
   for (int i = 0; i < node->numChildren(); i++) {
     /* generate a new id */
-    string childId = genId();
+    tstring childId = genId();
 
     /* dump the connection */
     out << "  " << id << " -> " << childId << ";\n";

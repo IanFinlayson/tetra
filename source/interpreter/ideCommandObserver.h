@@ -21,7 +21,7 @@ class IDECommandObserver : public CommandObserver {
   // std::stack<const Node*> scopes;
   // Stack of vectors of thread-specific variables so the observer can treat
   // them specially
-  // std::stack<std::vector<std::string> > threadSpecificVars;
+  // std::stack<std::vector<tstring> > threadSpecificVars;
 
   std::vector<long, gc_allocator<long> > waitingThreads;
   long allowedThread;
@@ -56,7 +56,7 @@ class IDECommandObserver : public CommandObserver {
  public:
   IDECommandObserver();
   void notify_E(const Node*, TetraContext& context);
-  void notifyThreadSpecificVariable_E(std::string);
+  void notifyThreadSpecificVariable_E(tstring);
   void threadCreated_E(int, TetraContext&);
   void threadDestroyed_E(int);
   void step_E(TetraContext&);

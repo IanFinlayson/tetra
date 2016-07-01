@@ -37,7 +37,7 @@ TData<void*>& TArray::elementAt(unsigned int index) {
     return (*elements)[index];
   } else {
     // Print error message and terminate
-    std::stringstream message;
+    tstringstream message;
     message << "Attempted to access an array out of bounds.\nRequested element "
             << index << " for array of size " << elements->size();
     Error e(message.str(), 0);
@@ -52,7 +52,7 @@ const TData<void*>& TArray::elementAt(unsigned int index) const {
   if (index < elements->size()) {
     return (*elements)[index];
   } else {
-    std::stringstream message;
+    std::basic_stringstream<char,char_traits<char>, gc_allocator<char> > message;
     message << "Attempted to access an array out of bounds.\nRequested element "
             << index << " for array of size " << elements->size();
     Error e(message.str(), 0);

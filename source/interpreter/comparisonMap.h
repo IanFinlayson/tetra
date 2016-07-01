@@ -29,7 +29,7 @@ bool negator(T a) {
 // The string negation will check for an empty string, which is as close to NULL
 // as the language presently becomes
 template <>
-bool negator<string>(string a) {
+bool negator<tstring>(tstring a) {
   return a != "";
 }
 

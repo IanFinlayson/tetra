@@ -26,62 +26,62 @@ void evaluateNode(const Node*, TData<T>&, TetraContext&);
 // later. also prevents us from having to make too many special cases for
 // strings.  By default, all "improper" operations will return a blank string,
 // since any other behavior would be non-intuitive for now.
-string operator/(string a, string b) {
+tstring operator/(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
 
-string operator*(string a, string b) {
+tstring operator*(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator-(string a, string b) {
+tstring operator-(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator^(string a, string b) {
+tstring operator^(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator||(string a, string b) {
+tstring operator||(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator&&(string a, string b) {
+tstring operator&&(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator|(string a, string b) {
+tstring operator|(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator&(string a, string b) {
+tstring operator&(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator<<(string a, string b) {
+tstring operator<<(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator>>(string a, string b) {
+tstring operator>>(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
 }
-string operator!(string a) {
+tstring operator!(tstring a) {
   UNUSED(a)
   return "";
 }
-string operator%(string a, string b) {
+tstring operator%(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";
@@ -94,7 +94,7 @@ template <typename T>
 T calculateExponential(T a, T b) {
   return pow(static_cast<double>(a), static_cast<double>(b));
 }
-string calculateExponential(string a, string b) {
+tstring calculateExponential(tstring a, tstring b) {
   UNUSED(a)
   UNUSED(b)
   return "";

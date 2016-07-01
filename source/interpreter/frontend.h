@@ -12,6 +12,8 @@
 #include "/usr/local/include/gc/gc_allocator.h"
 
 using namespace std;
+typedef std::basic_string<char, char_traits<char>, gc_allocator<char> > tstring;
+typedef std::basic_stringstream<char, char_traits<char>, gc_allocator<char> > tstringstream;
 
 /* types of nodes */
 enum NodeKind {
@@ -97,12 +99,12 @@ enum NodeKind {
 /* any type of error is handled with this exception */
 class Error {
  public:
-  Error(const string& mesg, int lineno = 0);
-  string getMessage() const;
+  Error(const tstring& mesg, int lineno = 0);
+  tstring getMessage() const;
   int getLine() const;
 
  private:
-  string mesg;
+  tstring mesg;
   int lineno;
 };
 
@@ -135,7 +137,7 @@ class DataType {
   ~DataType();
   DataTypeKind getKind() const;
   std::vector<DataType, gc_allocator<DataType> >* subtypes;
-  std::string* className;
+  tstring* className;
   DataType operator=(const DataType& other);
   bool isEmptyContainerType() const;
 
@@ -148,20 +150,20 @@ bool operator==(const DataType& lhs, const DataType& rhs);
 bool operator!=(const DataType& lhs, const DataType& rhs);
 
 /* function which returns a string representation of a data type */
-string typeToString(DataType* t);
+tstring typeToString(DataType* t);
 
 /* an entry in the symbol table */
 class Symbol {
  public:
   Symbol();
-  Symbol(string name, DataType* type, int lineno, bool constant = false);
+  Symbol(tstring name, DataType* type, int lineno, bool constant = false);
   int getLine() const;
-  string getName() const;
+  tstring getName() const;
   DataType* getType() const;
   bool isConst();
 
  private:
-  string name;
+  tstring name;
   DataType* type;
   bool constant;
   int lineno;
@@ -175,7 +177,7 @@ class Node {
   /* constructor and modifiers */
   Node(NodeKind type);
   void setDataType(DataType* data_type);
-  void setStringval(const string& stringval);
+  void setStringval(const tstring& stringval);
   void setIntval(int intval);
   void setBoolval(bool boolval);
   void setRealval(double realval);
@@ -183,7 +185,7 @@ class Node {
 
   /* accessors */
   int getLine() const;
-  string getString() const;
+  tstring getString() const;
   int getInt() const;
   double getReal() const;
   bool getBool() const;
@@ -206,12 +208,12 @@ class Node {
 
   /* symbol functions */
   void insertSymbol(Symbol sym);
-  Symbol lookupSymbol(string name, int lineno) const;
-  bool hasSymbol(const string& name) const;
+  Symbol lookupSymbol(tstring name, int lineno) const;
+  bool hasSymbol(const tstring& name) const;
 
   /* the symbol table used for this Node - currently only function nodes have
    * one */
-  std::map<string, Symbol, less<std::string>, gc_allocator<pair<std::string,Symbol> > >* symtable;
+  std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring,Symbol> > >* symtable;
 
  private:
   /* the children nodes of this node */
@@ -225,7 +227,7 @@ class Node {
   DataType* data_type;
 
   /* the values associated with the node (many will be blank) */
-  string stringval;
+  tstring stringval;
   double realval;
   int intval;
   bool boolval;
@@ -247,39 +249,39 @@ class Node {
  */
 class FunctionMap {
  private:
-  std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > lookup;
+  std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > > lookup;
 
  public:
   FunctionMap();
   // Returns the address of a node containing the function body of the function
   // denoted by functionSignature
-  const Node* getFunctionNode(const std::string functionSignature);
-  const Node* getFunctionNode(DataType*, std::string);
+  const Node* getFunctionNode(const tstring functionSignature);
+  const Node* getFunctionNode(DataType*, tstring);
 
   const Node* getFunctionNode(const Node* callNode);
 
   // Generates a unique function signature based on the name AND the arguments
-  static std::string getFunctionSignature(const Node* node);
+  static tstring getFunctionSignature(const Node* node);
 
   // Fills the function map given the specified base node
   void build(Node* tree);
 
   // returns true if the map contains a function with the
   // provided name, regardless of params and return types
-  bool hasFuncNamed(std::string name);
+  bool hasFuncNamed(tstring name);
 
   //returns true if the map contains the function
   bool hasFunction(Node* node);
-  bool hasFunction(DataType*, std::string);
+  bool hasFunction(DataType*, tstring);
 
-  DataType* getFunctionsNamed(std::string) ;
+  DataType* getFunctionsNamed(tstring) ;
 
   //renames functions with the name provided and returns them as a
   //vector of pairs
-  std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > remove(std::string);
+  std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > > remove(tstring);
 
   //wrapper around std::map.insert
-  void insert(std::pair<string, Node*>);
+  void insert(std::pair<tstring, Node*>);
 
   // clear everything out of the function map, e.g. to reuse it
   void clearAll();
@@ -288,24 +290,24 @@ class FunctionMap {
 /* stores a class definition's context (methods & members) */
 class ClassContext {
   public:
-    ClassContext(string name);
+    ClassContext(tstring name);
     ClassContext();
-    string getName();
-    bool hasMember(std::string);
-    bool hasMethod(DataType*, std::string);
-    bool hasMethodNamed(std::string);
+    tstring getName();
+    bool hasMember(tstring);
+    bool hasMethod(DataType*, tstring);
+    bool hasMethodNamed(tstring);
     void addMember(Symbol);
     void addMembers(Node* node);
     void addMethod(Node*);
     void addMethods(Node*);
-    Symbol getMember(std::string);
-    DataType* getMethods(std::string);
-    const Node* getMethod(DataType*, std::string);
-    std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Node*> > > removeInits();
+    Symbol getMember(tstring);
+    DataType* getMethods(tstring);
+    const Node* getMethod(DataType*, tstring);
+    std::map<tstring,Node*, less<tstring>, gc_allocator<pair<tstring,Node*> > > removeInits();
   private:
-    string name;
+    tstring name;
     FunctionMap methods;
-    std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > members;
+    std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > > members;
 };
 
 /* takes a tree of actual params and builds a tuple_type */
@@ -322,10 +324,10 @@ void inferTypes(Node* node);
 void reset_lexer();
 
 /* function which parses a file and returns the parse tree */
-Node* parseFile(const string& fname);
+Node* parseFile(const tstring& fname);
 
 /* the global symbol table */
-extern std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
+extern std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > > globals;
 
 /* the global function map */
 extern FunctionMap functions;
@@ -340,6 +342,6 @@ void dumpTreeGraphviz(Node*);
 void inferParams(Node*,Node* func=NULL);
 
 /* recursively provides string representation of a datatype */
-string typeToString(DataType*);
+tstring typeToString(DataType*);
 
 #endif

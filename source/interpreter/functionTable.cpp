@@ -20,12 +20,12 @@ using std::string;
 
 // Given a function signature, returns the adress of a node containing the
 // function definition for that signature
-const Node* FunctionMap::getFunctionNode(const string functionSignature) {
+const Node* FunctionMap::getFunctionNode(const tstring functionSignature) {
   // if function is not there, will return default Node* (i.e. NULL)
   return lookup[functionSignature];
 }
 
-const Node* FunctionMap::getFunctionNode(DataType* params, std::string name) {
+const Node* FunctionMap::getFunctionNode(DataType* params, tstring name) {
   return lookup[name + typeToString(params)];
 }
 
@@ -67,7 +67,7 @@ void FunctionMap::build(Node* tree) {
 }
 
 /* wrapper around std::map's insert function */
-void FunctionMap::insert(std::pair<string,Node*> pair) {
+void FunctionMap::insert(std::pair<tstring,Node*> pair) {
 
   lookup.insert(pair);
 }
@@ -77,16 +77,16 @@ void FunctionMap::clearAll() {
     lookup.clear();
 }
 
-std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > > FunctionMap::remove(std::string name) {
+std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > > FunctionMap::remove(tstring name) {
 
   //make a map to store the pairs to return
-  std::map<string,Node*, less<std::string>, gc_allocator<pair<string,Node*> > > pairs;
+  std::map<tstring,Node*, less<tstring>, gc_allocator<pair<tstring,Node*> > > pairs;
 
   //make a vector to store keys to remove
-  std::vector<std::string, gc_allocator<string> > keys;
+  std::vector<tstring, gc_allocator<tstring> > keys;
 
   // find the functions
-  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = lookup.begin(); 
+  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
@@ -108,9 +108,9 @@ std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, N
   return pairs;
 }
 
-bool FunctionMap::hasFuncNamed(std::string name) {
+bool FunctionMap::hasFuncNamed(tstring name) {
   //loop through all elements in the map
-  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = lookup.begin(); 
+  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
@@ -124,13 +124,13 @@ bool FunctionMap::hasFuncNamed(std::string name) {
   return false;
 }
 
-DataType* FunctionMap::getFunctionsNamed(std::string name) {
+DataType* FunctionMap::getFunctionsNamed(tstring name) {
 
   //create a dataType to return
   DataType* retType = new(GC) DataType(TYPE_OVERLOAD);  
 
   //loop through all elements in the map
-  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = lookup.begin(); 
+  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = lookup.begin(); 
       it != lookup.end(); it ++) {
 
     //check for a name match
@@ -155,14 +155,14 @@ bool FunctionMap::hasFunction(Node* node) {
   return lookup.count(getFunctionSignature(node));
 }
 
-bool FunctionMap::hasFunction(DataType* type, std::string name) {
+bool FunctionMap::hasFunction(DataType* type, tstring name) {
   return lookup.count(name+typeToString(type));
 }
 
 // Given a NODE_FUNCTION (seen by the build method) or NODE_FUNCALL (seen at
 // runtime)
 // Assembles the function signature for the function
-string FunctionMap::getFunctionSignature(const Node* node) {
+tstring FunctionMap::getFunctionSignature(const Node* node) {
 
   return node->getString() + typeToString(&((*(node->type()->subtypes))[0]));
 }

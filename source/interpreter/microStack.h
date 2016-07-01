@@ -34,7 +34,7 @@ MicroStack<T>::MicroStack() {
 
 template <typename T>
 MicroStack<T>::~MicroStack() {
-  while (!empty()) pop();
+//  while (!empty()) pop();
 }
 
 template <typename T>

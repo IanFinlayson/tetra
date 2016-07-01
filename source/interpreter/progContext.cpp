@@ -35,7 +35,7 @@ return varScope.declareReference(varName);
 */
 
 std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
-TetraScope::declareThreadSpecificVariable(const std::string& name) {
+TetraScope::declareThreadSpecificVariable(const tstring& name) {
   return varScope.declareParForVar(name);
 }
 
@@ -48,7 +48,7 @@ ExecutionStatus TetraScope::queryExecutionStatus() { return executionStatus; }
   executionStatus = status;
   }*/
 
-bool TetraScope::containsVar(std::string varName) const {
+bool TetraScope::containsVar(tstring varName) const {
   return varScope.containsVar(varName);
 }
 
@@ -81,12 +81,12 @@ TetraContext::TetraContext() {
   assert(success == 0);
   // Only need to initialize this if in debug mde
   if (TetraEnvironment::isDebugMode()) {
-    parForVars = new(GC) std::vector<std::string, gc_allocator<std::string> >();
+    parForVars = new(GC) std::vector<tstring, gc_allocator<tstring> >();
     scopes = new(GC) std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > >();
-    refTables = new(GC) std::stack<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
-              std::deque<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
-              gc_allocator<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > > > > >();
-    globRefTable = new(GC) std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >();
+    refTables = new(GC) std::stack<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >, 
+              std::deque<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >, 
+              gc_allocator<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > > > > >();
+    globRefTable = new(GC) std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >();
   } else {  // Set to NULL so no problems when deleteing
     parForVars = NULL;
     scopes = NULL;
@@ -113,12 +113,12 @@ TetraContext::TetraContext(long tID) {
 
   // Only need to instantiate debug info if in debug mode
   if (TetraEnvironment::isDebugMode()) {
-    parForVars = new(GC) std::vector<std::string, gc_allocator<std::string> >();
+    parForVars = new(GC) std::vector<tstring, gc_allocator<tstring> >();
     scopes = new(GC) std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > >();
-    globRefTable = new(GC) std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >();
-    refTables = new(GC) std::stack<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >,
-              std::deque<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
-              gc_allocator<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > > > > >();
+    globRefTable = new(GC) std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >();
+    refTables = new(GC) std::stack<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >,
+              std::deque<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >, 
+              gc_allocator<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > > > > >();
   } else {  // Set to NULL so no problems when deleteing
     parForVars = NULL;
     scopes = NULL;
@@ -191,10 +191,10 @@ void TetraContext::branchOff(const scope_ptr baseScope, scope_ptr* globals) {
 
   // Debug variables should already be initialized
   /*if(TetraEnvironment::isDebugMode()) {
-    parForVars = new std::vector<std::string>();
+    parForVars = new std::vector<tstring>();
     scopes = new std::stack<const Node*>();
-    globRefTable = new std::map<std::string, int>();
-    refTables = new std::stack<std::map<std::string, int> >();
+    globRefTable = new std::map<tstring, int>();
+    refTables = new std::stack<std::map<tstring, int> >();
     }*/
   // cout << "X after branch: " <<  *(lookupVar<TArray>("x")) << endl;;
 }
@@ -268,7 +268,7 @@ void TetraContext::setupParallel() { progStack.top().setupParallel(); }
 void TetraContext::endParallel() { progStack.top().endParallel(); }
 
 std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
-TetraContext::declareThreadSpecificVariable(const std::string& name) {
+TetraContext::declareThreadSpecificVariable(const tstring& name) {
   return progStack.top()->declareThreadSpecificVariable(name);
 }
 
@@ -307,7 +307,7 @@ void TetraContext::printStackTrace() const {
 // Debugger specific methods
 
 // Returns true if the name references a parallel for variable, false otherwise
-bool TetraContext::isParallelForVariable(std::string varName) {
+bool TetraContext::isParallelForVariable(tstring varName) {
   bool isParallelFor = false;
   pthread_mutex_lock(&parallelList_mutex);
   {
@@ -321,8 +321,8 @@ bool TetraContext::isParallelForVariable(std::string varName) {
 
 // Returns an untyped pointer to a given variable
 // Returns NULL if not found
-void* TetraContext::fetchVariable(std::string s) {
-  const std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >& refTable = refTables->top();
+void* TetraContext::fetchVariable(tstring s) {
+  const std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >& refTable = refTables->top();
 
   if (isParallelForVariable(s)) {
     // lookup type doesn;t really matter, it will be cast back into a void*,
@@ -378,7 +378,7 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
   // We might need to push a new table to the stack, or add a new entry to the
   // present table
   if (node->kind() == NODE_FUNCTION) {
-    refTables->push(std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >());
+    refTables->push(std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >());
     // Push the formal params on
     Node* paramNode = node->child(0);
 
@@ -443,7 +443,7 @@ void TetraContext::updateVarReferenceTable(const Node* node) {
   // else, we don't need to do anything
 }
 
-void TetraContext::registerParallelForVariable(std::string varName) {
+void TetraContext::registerParallelForVariable(tstring varName) {
   pthread_mutex_lock(&parallelList_mutex);
   {
     // there is a possibility that this variable might be 'instantiated' many

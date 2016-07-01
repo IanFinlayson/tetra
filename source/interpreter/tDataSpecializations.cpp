@@ -26,7 +26,7 @@ TData<void*>::TData(const TData<void*>& other)
         data = new(GC) bool(*static_cast<bool*>(other.data));
         break;
       case TYPE_STRING:
-        data = new(GC) string(*static_cast<string*>(other.data));
+        data = new(GC) tstring(*static_cast<tstring*>(other.data));
         break;
       case TYPE_VECTOR:
         data = new(GC) TArray(*static_cast<TArray*>(other.data));
@@ -100,7 +100,7 @@ bool TData<bool>::setData<bool>(const bool& pData) {
 
 template <>
 template <>
-bool TData<string>::setData<string>(const string& pData) {
+bool TData<tstring>::setData<tstring>(const tstring& pData) {
   data = pData;
   return true;
 }
@@ -136,7 +136,7 @@ bool TData<bool*>::setData<bool*>(bool* const& pData) {
 
 template <>
 template <>
-bool TData<string*>::setData<string*>(string* const& pData) {
+bool TData<tstring*>::setData<tstring*>(tstring* const& pData) {
   data = pData;
   return true;
 }
@@ -181,7 +181,7 @@ void TData<void*>::setDeletableType<bool>() {
 
 template <>
 template <>
-void TData<void*>::setDeletableType<string>() {
+void TData<void*>::setDeletableType<tstring>() {
   pointedTo = DataType(TYPE_STRING);
 }
 
@@ -229,7 +229,7 @@ TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
         break;
       case TYPE_STRING:
         //delete static_cast<string*>(data);
-        data = new(GC) string(*static_cast<string*>(other.data));
+        data = new(GC) tstring(*static_cast<tstring*>(other.data));
         break;
       case TYPE_VECTOR:
         //delete static_cast<TArray*>(data);
