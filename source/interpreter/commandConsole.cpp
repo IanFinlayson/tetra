@@ -2,7 +2,7 @@
 #include "backend.h"
 
 tstring CommandConsole::receiveStandardInput() {
-  char input [1024];
+  tstring input;
   std::cin >> input;
 
   return input;
