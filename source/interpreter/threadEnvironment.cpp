@@ -96,11 +96,11 @@ ThreadEnvironment::ThreadEnvironment() : backgroundThreads(), mutexes() {
 
 // Destructor destroys the allocated mutexes
 ThreadEnvironment::~ThreadEnvironment() {
-  for (std::map<tstring, pthread_mutex_t*, less<tstring>, gc_allocator<pair<tstring, pthread_mutex_t*> > >
+  /*for (std::map<tstring, pthread_mutex_t*, less<tstring>, gc_allocator<pair<tstring, pthread_mutex_t*> > >
       ::iterator iter = mutexes.begin();
        iter != mutexes.end(); iter++) {
-    //delete iter->second;
-  }
+      delete iter->second;
+  }*/
 }
 
 // Since the threadCount is a less-visited area, we will use a coarse mutex for

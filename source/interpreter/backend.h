@@ -549,7 +549,7 @@ class VarHash {
  * This class represents the variables present at various scopes within a tetra
  * program
  */
-class VarTable {
+class VarTable: virtual gc_cleanup {
  public:
   VarTable();
   ~VarTable();
