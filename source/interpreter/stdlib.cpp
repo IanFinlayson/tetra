@@ -20,7 +20,7 @@ void print(const Node* args, TetraContext& context) {
   }
   // If args is an expression, actually print it!
   else {
-    std::stringstream formattedData;
+    tstringstream formattedData;
     VirtualConsole& console =
         TetraEnvironment::getConsole(context.getThreadID(), false);
     switch (args->type()->getKind()) {
@@ -30,35 +30,35 @@ void print(const Node* args, TetraContext& context) {
         // Prints the value, flushes the buffer WITHOUT a new line
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str());
+        console.processStandardOutput(formattedData.str().c_str());
       } break;
       case TYPE_REAL: {
         TData<double> value;
         evaluateNode<double>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str());
+        console.processStandardOutput(formattedData.str().c_str());
       } break;
       case TYPE_BOOL: {
         TData<bool> value;
         evaluateNode<bool>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str());
+        console.processStandardOutput(formattedData.str().c_str());
       } break;
       case TYPE_STRING: {
-        TData<string> value;
-        evaluateNode<string>(args, value, context);
+        TData<tstring> value;
+        evaluateNode<tstring>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str());
+        console.processStandardOutput(formattedData.str().c_str());
       } break;
       case TYPE_VECTOR: {
         TData<TArray> value;
         evaluateNode<TArray>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
-        console.processStandardOutput(formattedData.str());
+        console.processStandardOutput(formattedData.str().c_str());
       } break;
       default:
         // print that we did not recognize whatever it is we are supposed to
@@ -72,7 +72,7 @@ void print(const Node* args, TetraContext& context) {
 int readInt(int threadNum) {
   int ret = 0;
   // while(!(cin >> ret)) {
-  while (!(stringstream(TetraEnvironment::getConsole(threadNum, false)
+  while (!(tstringstream(TetraEnvironment::getConsole(threadNum, false)
                             .receiveStandardInput()) >>
            ret)) {
     // Moves down the stream until it finds a readable number
@@ -85,7 +85,7 @@ int readInt(int threadNum) {
 double readReal(int threadNum) {
   double ret = 0;
   // while(!(cin >> ret)) {
-  while (!(stringstream(TetraEnvironment::getConsole(threadNum, false)
+  while (!(tstringstream(TetraEnvironment::getConsole(threadNum, false)
                             .receiveStandardInput()) >>
            ret)) {
     // moves along the buffer until it finds a readable value
@@ -97,7 +97,7 @@ double readReal(int threadNum) {
 
 bool readBool(int threadNum) {
   // Returns false on some variation of 'false', 'no', or 0
-  std::string input =
+  tstring input =
       TetraEnvironment::getConsole(threadNum, false).receiveStandardInput();
   // Compare input against the recognized values for false
   if (input == "false" || input == "no" || input == "0") {
@@ -106,8 +106,8 @@ bool readBool(int threadNum) {
     return true;
 }
 
-string readString(int threadNum) {
-  std::string ret =
+tstring readString(int threadNum) {
+  tstring ret =
       TetraEnvironment::getConsole(threadNum, false).receiveStandardInput();
 
   return ret;
@@ -115,4 +115,4 @@ string readString(int threadNum) {
 
 int len(TArray& arg) { return arg.size(); }
 
-int len(string& arg) { return arg.size(); }
+int len(tstring& arg) { return arg.size(); }

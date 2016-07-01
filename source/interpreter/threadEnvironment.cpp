@@ -46,7 +46,8 @@ void ThreadPool::addThread(pthread_t aThread) {
 void ThreadPool::removeThread(pthread_t rThread) {
   // cout << "Removing mutex thread" << endl;
   pthread_mutex_lock(&threadCount_mutex);
-  for (auto element = currentThreads.begin();
+  for (std::vector<pthread_t, gc_allocator<pthread_t> >::iterator 
+      element = currentThreads.begin();
        element < currentThreads.end(); element++) {
     if (*element == rThread) {
       currentThreads.erase(element);
@@ -95,7 +96,7 @@ ThreadEnvironment::ThreadEnvironment() : backgroundThreads(), mutexes() {
 
 // Destructor destroys the allocated mutexes
 ThreadEnvironment::~ThreadEnvironment() {
-  for (std::map<std::string, pthread_mutex_t*, less<std::string>, gc_allocator<pair<string, pthread_mutex_t*> > >
+  for (std::map<tstring, pthread_mutex_t*, less<tstring>, gc_allocator<pair<tstring, pthread_mutex_t*> > >
       ::iterator iter = mutexes.begin();
        iter != mutexes.end(); iter++) {
     //delete iter->second;
@@ -153,7 +154,7 @@ void ThreadEnvironment::joinDetachedThreads() {
 // This method returns the mutex associated with a string, or creates a new
 // mutex associated with the string and returns that
 // TODO:This is a candidate for a read/write mutex
-pthread_mutex_t* ThreadEnvironment::identifyMutex(string mutexName) {
+pthread_mutex_t* ThreadEnvironment::identifyMutex(tstring mutexName) {
   // cout << "Identifying mutex" << endl;
   pthread_mutex_lock(&instance.map_mutex);
 

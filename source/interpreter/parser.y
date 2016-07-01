@@ -23,7 +23,7 @@ void yyerror(const char* str);
 Node* root;
 
 /* this function calls yyparse on a file and returns the parse tree node */
-Node* parseFile(const string& fname);
+Node* parseFile(const tstring& fname);
 
 %}
 
@@ -210,7 +210,7 @@ module: TOK_OPEN identifiers {
 /* class */
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
   $$ = new(GC) Node(NODE_CLASS);
-  $$->setStringval(string($2));
+  $$->setStringval(tstring($2));
   $$->addChild($5);
 }
 
@@ -284,7 +284,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
   $$ = new(GC) Node(NODE_FUNCTION);
-  $$->setStringval(string($2));
+  $$->setStringval(tstring($2));
   $$->setDataType($4);
   $$->addChild($3);
   $$->addChild($6);
@@ -314,7 +314,7 @@ formal_params: declaration TOK_COMMA formal_params {
 declaration: TOK_IDENTIFIER type {
   $$ = new(GC) Node(NODE_DECLARATION);
   $$->setLine(yylineno);
-  $$->setStringval(string($1));
+  $$->setStringval(tstring($1));
   $$->setDataType($2);
 } 
 
@@ -1089,7 +1089,7 @@ void yyerror(const char* str) {
 
 /* parse from a file */
 extern istream* in;
-Node* parseFile(const string& fname) {
+Node* parseFile(const tstring& fname) {
     /* reset all of the lexer stuff */
     reset_lexer( );
 

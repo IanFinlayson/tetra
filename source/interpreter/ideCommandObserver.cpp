@@ -4,10 +4,10 @@
 #include "frontend.h"
 
 // Global symbol table
-extern std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
+extern std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > > globals;
 
 // as a courtesy, we will provide this method
-/*std::string statusToString(ThreadStatus status) {
+/*tstring statusToString(ThreadStatus status) {
         switch(status) {
         case RUNNING: return "Running";
         case STOPPED: return "Stopped";
@@ -107,7 +107,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
     {
       if (std::find(waitingThreads.begin(), waitingThreads.end(),
                     context.getThreadID()) == waitingThreads.end()) {
-        std::stringstream msg;
+        tstringstream msg;
 
         msg << "\nThread " << context.getThreadID() << ":" << endl;
         msg << "Breakpoint reached at line: " << currentLine << endl;
@@ -123,7 +123,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
         context.getThreadID(), false);
 
     if (allowedThread == -1 || allowedThread == context.getThreadID()) {
-      std::string ret = " ";
+      tstring ret = " ";
 
       // Now that the thread will have some console time, it can resume
       // executing once it is done here
@@ -136,7 +136,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
       allowedThread = -1;
 
       while (ret == " ") {
-        /*std::stringstream infoStr;
+        /*tstringstream infoStr;
         pthread_mutex_lock(&threadList_mutex);//As a courtesy, insure that the
         directions are not cut off by an incoming thread
         {
@@ -152,7 +152,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
         switch (ret[0]) {
           case 'a':  // repeat the prompt
           case 'A': {
-            std::stringstream msg;
+            tstringstream msg;
 
             msg << "\nThread " << context.getThreadID() << ":" << endl;
             msg << "Breakpoint reached at line: " << currentLine << endl;
@@ -176,7 +176,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
             break;
           case 'i':  // Interrupt thread
           case 'I': {
-            std::string arg = " ";
+            tstring arg = " ";
             arg = console.receiveStandardInput();
             int threadNum = atoi(arg.c_str());
 
@@ -212,7 +212,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
           } break;
           case 'l':
           case 'L': {
-            std::string arg = " ";
+            tstring arg = " ";
             // When a case is encountered, filter value may be adjusted to
             // determine what values should be included/excluded
             int filter = 1;
@@ -239,9 +239,9 @@ void IDECommandObserver::notify_E(const Node* foundNode,
                 // get the function node which has the local scope's symbol
                 // table
                 const Node* nodey = context.getScopes().top();
-                std::stringstream output;
+                tstringstream output;
                 output << "-----\n";
-                for (std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >::const_iterator varIterator =
+                for (std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >::const_iterator varIterator =
                          ((filter == 0) ? context.getGlobRefTable()
                                         : context.getRefTable())
                              .begin();
@@ -273,7 +273,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
               case 't':  // all threads
               case 'T':  // filter will be 1
               {
-                std::stringstream output;
+                tstringstream output;
                 output << "-----\n";
                 pthread_mutex_lock(&context_mutex);
                 {
@@ -297,7 +297,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
                 console.processStandardOutput(output.str());
               } break;
               default: {
-                std::stringstream errMessage;
+                tstringstream errMessage;
                 errMessage << "Unrecognized list option: " << arg
                            << ".\nAvailable list options are:\n(c)allstack "
                               "(v)ariables (g)lobals (t)hreads (r)unning "
@@ -310,7 +310,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
           } break;
           case 'b':  // break
           case 'B': {
-            std::string breakP = console.receiveStandardInput();
+            tstring breakP = console.receiveStandardInput();
             int lineNo = 0;
 
             lineNo = atoi(breakP.c_str());
@@ -323,7 +323,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
               // Note that this method is threadsafe
               success = break_E(lineNo /*,context.getThreadID()*/);
 
-              std::stringstream confirmationMessage;
+              tstringstream confirmationMessage;
               if (success) {
                 confirmationMessage << "Breakpoint set at line: " << lineNo
                                     << "\n\n";
@@ -339,7 +339,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
           } break;
           case 'r':  // remove (breakpoint)
           case 'R': {
-            std::string breakP = console.receiveStandardInput();
+            tstring breakP = console.receiveStandardInput();
             int lineNo = atoi(breakP.c_str());
             if (lineNo == 0) {
               console.processStandardOutput(
@@ -351,7 +351,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
               success = remove_E(lineNo);
 
               pthread_mutex_unlock(&breakList_mutex);
-              std::stringstream confirmationMessage;
+              tstringstream confirmationMessage;
               if (success) {
                 confirmationMessage
                     << "Breakpoint removed from line: " << lineNo << "\n\n";
@@ -366,10 +366,10 @@ void IDECommandObserver::notify_E(const Node* foundNode,
           } break;
           case 'p':  // print
           case 'P': {
-            std::string varName = console.receiveStandardInput();
+            tstring varName = console.receiveStandardInput();
             void* var = context.fetchVariable(varName);
             if (var != NULL) {
-              std::stringstream message;
+              tstringstream message;
               message << varName;
               // get the function node which has the local scope's symbol table
               const Node* nodey = context.getScopes().top();
@@ -393,7 +393,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
                   break;
                 case TYPE_STRING:
                   // message << " (string): ";
-                  message << *static_cast<std::string*>(var);
+                  message << *static_cast<tstring*>(var);
                   break;
                 case TYPE_BOOL:
                   // message << " (bool): ";
@@ -489,7 +489,7 @@ void IDECommandObserver::notify_E(const Node* foundNode,
 // threadNum = 4, but before threadNum = 2
 void IDECommandObserver::threadCreated_E(int threadNum, TetraContext& context) {
   /*pthread_mutex_lock(&context_mutex);
-  std::stringstream threadMessage;
+  tstringstream threadMessage;
   threadMessage << "Thread launched: " << threadNum << "\n";
 
   TetraEnvironment::getConsole(context.getThreadID(),true).processStandardOutput(threadMessage.str());
@@ -592,7 +592,7 @@ void IDECommandObserver::leftScope_E(TetraContext& context) {
   CommandObserver::leftScope_E(context);
 }
 
-void IDECommandObserver::notifyThreadSpecificVariable_E(std::string varName) {
+void IDECommandObserver::notifyThreadSpecificVariable_E(tstring varName) {
   CommandObserver::notifyThreadSpecificVariable_E(varName);
 }
 

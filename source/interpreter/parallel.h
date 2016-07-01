@@ -51,12 +51,12 @@ struct evalArgs {
 template <typename T>
 struct evalForArgs {
   evalArgs<T>* args_ptr;
-  const string* varName_ptr;
+  const tstring* varName_ptr;
   pthread_mutex_t* count_mutex_ptr;
   int* countVal_ptr;
   TArray* values_ptr;
 
-  evalForArgs(evalArgs<T>* pArgs, const string* pName, pthread_mutex_t* pMutex,
+  evalForArgs(evalArgs<T>* pArgs, const tstring* pName, pthread_mutex_t* pMutex,
               int* pCount, TArray* pValues)
       : args_ptr(pArgs),
         varName_ptr(pName),
@@ -176,7 +176,7 @@ void wrapMultiEvaluation(void* args) {
         *static_cast<T*>(
             (argList.values_ptr)->elementAt(*(argList.countVal_ptr)).getData());
 
-    // string x = *(argList.varName_ptr
+    // tstring x = *(argList.varName_ptr
     // T* temp = argList.args_->ptr->scope->template lookupVar<T>(namer);
 
     (*(argList.countVal_ptr))++;
@@ -236,7 +236,7 @@ void wrapMultiEvaluation(void* args) {
 // variable
 template <typename T>
 pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
-                      const string& varName, TArray* loopValues, int* nextJob,
+                      const tstring& varName, TArray* loopValues, int* nextJob,
                       pthread_mutex_t* nextJob_mutex) {
   pthread_t newThread;
   pthread_attr_t attributes;
@@ -358,8 +358,8 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
                 collection.getData(), &currentIteration, &iter_mutex);
           } break;
           case TYPE_STRING: {
-            TData<std::string> stub;
-            workers[x] = spawnWorker<std::string>(
+            TData<tstring> stub;
+            workers[x] = spawnWorker<tstring>(
                 node->child(2), stub, context, node->child(0)->getString(),
                 collection.getData(), &currentIteration, &iter_mutex);
           } break;
@@ -370,10 +370,9 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
                 collection.getData(), &currentIteration, &iter_mutex);
           } break;
           default:
-            std::stringstream message;
-            message << "Error attempting to deduce type for parallel for. ID: "
-                    << node->child(0)->type()->getKind();
-            Error e(message.str(), node->getLine());
+            tstring message = "Error attempting to deduce type for parallel for. ID: "
+                    + typeToString(node->child(0)->type());
+            Error e(message, node->getLine());
             pthread_mutex_unlock(&iter_mutex);
             throw e;
             // cout << "worker after: " << workers[x] << endl;

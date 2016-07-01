@@ -12,10 +12,10 @@
 extern Node* root;
 
 /* the symbol table for storing constants and globals */
-std::map<std::string, Symbol, less<std::string>, gc_allocator<pair<std::string, Symbol> > > globals;
+std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > > globals;
 
 /* map for storing classes */
-std::map<std::string, ClassContext, less<std::string>, gc_allocator<pair<std::string, ClassContext> > > classes;
+std::map<tstring, ClassContext, less<tstring>, gc_allocator<pair<tstring, ClassContext> > > classes;
 
 /* map for storing free functions */
 FunctionMap functions;
@@ -26,14 +26,14 @@ void checkClassTypes(Node*);
 DataType* inferExpression(Node*,Node*); 
 
 /* return a string of an int */
-string itoa(int num) {
-  stringstream ss;
+tstring itoa(int num) {
+  basic_stringstream<char, char_traits<char>, gc_allocator<char> > ss;
   ss << num;
   return ss.str();
 }
 
 /* return a string of a data type */
-string typeToString(DataType* t) {
+tstring typeToString(DataType* t) {
   switch (t->getKind()) {
     case TYPE_NONE:
       return "none";
@@ -55,7 +55,7 @@ string typeToString(DataType* t) {
       return "{" + typeToString(&((*(t->subtypes))[0])) + ":" 
         + typeToString(&((*(t->subtypes))[1])) + "}";
     case TYPE_TUPLE:{
-                      std::string typeString = "(";
+                      tstring typeString = "(";
                       for(unsigned long int i = 0; i < t->subtypes->size(); i++){
                         typeString += typeToString(&((*(t->subtypes))[i])) + ","; 
                       }
@@ -78,7 +78,7 @@ string typeToString(DataType* t) {
 }
 
 /* class context functions */
-ClassContext::ClassContext(std::string name) {
+ClassContext::ClassContext(tstring name) {
   this->name = name;
 }
 
@@ -86,15 +86,15 @@ ClassContext::ClassContext() {
   this->name = "#ImBroken";
 }
 
-string ClassContext::getName(){ 
+tstring ClassContext::getName(){ 
   return this->name;
 }
 
-bool ClassContext::hasMember(std::string varName) {
+bool ClassContext::hasMember(tstring varName) {
   return this->members.count(varName); 
 }
 
-bool ClassContext::hasMethod(DataType* type, std::string name) {
+bool ClassContext::hasMethod(DataType* type, tstring name) {
   return this->methods.hasFunction(type,name);
 }
 
@@ -139,23 +139,23 @@ void ClassContext::addMembers(Node* node) {
   }
 }
 
-Symbol ClassContext::getMember(std::string name){
+Symbol ClassContext::getMember(tstring name){
   return members[name]; 
 }
 
-const Node* ClassContext::getMethod(DataType* type, std::string name) {
+const Node* ClassContext::getMethod(DataType* type, tstring name) {
   return methods.getFunctionNode(type, name);
 }
 
-DataType* ClassContext::getMethods(std::string name) {
+DataType* ClassContext::getMethods(tstring name) {
   return methods.getFunctionsNamed(name);
 }
 
-bool ClassContext::hasMethodNamed(std::string name) {
+bool ClassContext::hasMethodNamed(tstring name) {
   return methods.hasFuncNamed(name);
 }
 
-std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Node*> > > ClassContext::removeInits(){
+std::map<tstring,Node*, less<tstring>, gc_allocator<pair<tstring,Node*> > > ClassContext::removeInits(){
 
   /* remove any inits from the list of methods 
    * and return them */
@@ -166,13 +166,13 @@ std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Nod
 DataType::DataType(DataTypeKind kind) {
   this->kind = kind;
   this->subtypes = new(GC) std::vector<DataType, gc_allocator<DataType> >;
-  this->className = new(GC) std::string;
+  this->className = new(GC) tstring;
 }
 
 DataType::DataType(const DataType& other) {
   this->kind = other.kind;  
   this->subtypes = new(GC) std::vector<DataType, gc_allocator<DataType> >;
-  this->className = new(GC) std::string;
+  this->className = new(GC) tstring;
   *this->subtypes = *other.subtypes;
   *this->className = *other.className;
 }
@@ -1453,7 +1453,7 @@ void inferParams(Node* node, Node* func) {
 void inferGlobal(Node* node, bool isConst = false) {
 
   /* name for errors */
-  string varType;
+  tstring varType;
   isConst ? varType = "Constant" : varType = "Global";
 
   /* check if this symbol exists already, (it shouldn't)*/
@@ -1488,7 +1488,7 @@ void inferGlobal(Node* node, bool isConst = false) {
     node->child(0)->setDataType(rhs);
   }
   /* add it in */
-  globals.insert(pair<string, Symbol>(
+  globals.insert(pair<tstring, Symbol>(
         node->child(0)->getString(),
         Symbol(node->child(0)->getString(), node->type(), node->getLine())));
 }
@@ -1512,14 +1512,14 @@ void inferGlobals(Node* node){
 /* add stl functions to the list of globals */
 void addStls() {
 
-  string stls [] = {"len", "read_string", "read_int", 
+  tstring stls [] = {"len", "read_string", "read_int", 
     "read_real", "read_bool", "print"};
 
   for (unsigned long i = 0; i < sizeof(stls)/sizeof(stls[0]); i++) {
     /* add them to the globals */
     DataType type(TYPE_FUNCTION);
 
-    globals.insert(pair<string, Symbol>( "len",
+    globals.insert(pair<tstring, Symbol>( "len",
           Symbol(stls[i], &type, 0, true)));
   }
 }
@@ -1551,14 +1551,14 @@ void addMembers(ClassContext* context, Node* node) {
 void initSquared(ClassContext context) {
 
   /* remove the init functions */
-  std::map<std::string,Node*, less<std::string>, gc_allocator<pair<std::string,Node*> > > inits 
+  std::map<tstring,Node*, less<tstring>, gc_allocator<pair<tstring,Node*> > > inits 
     = context.removeInits();
   
   DataType* type = new(GC) DataType(TYPE_CLASS);
   *(type->className) = context.getName();
 
   /* loop through any inits*/
-  for (std::map<std::string, Node*, less<std::string>, gc_allocator<pair<std::string, Node*> > >::iterator it = inits.begin(); 
+  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = inits.begin(); 
     it != inits.end(); it ++) {
 
     /* update the return types to this class's type*/
@@ -1566,7 +1566,7 @@ void initSquared(ClassContext context) {
       [it->second->type()->subtypes->size() - 1] = *type;
     
     /* rename the functions and insert them */
-    functions.insert(std::pair<string,Node*>(context.getName() 
+    functions.insert(std::pair<tstring,Node*>(context.getName() 
           + it->first.substr((it->first).find_first_of("(")), it->second));
   }
 
@@ -1580,8 +1580,8 @@ void initSquared(ClassContext context) {
     node->type()->subtypes->push_back(*(new(GC) DataType(TYPE_TUPLE)));
     /* add the return type */
     node->type()->subtypes->push_back(*type); 
-    std::string key = context.getName() + "()";
-    functions.insert(std::pair<string,Node*> (key, node)); 
+    tstring key = context.getName() + "()";
+    functions.insert(std::pair<tstring,Node*> (key, node)); 
   }
 }
 

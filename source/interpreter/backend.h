@@ -404,7 +404,7 @@ template <>
 bool TData<bool>::setData<bool>(const bool&);
 template <>
 template <>
-bool TData<std::string>::setData<std::string>(const std::string&);
+bool TData<tstring>::setData<tstring>(const tstring&);
 template <>
 template <>
 bool TData<int*>::setData<int*>(int* const&);
@@ -413,7 +413,7 @@ template <>
 bool TData<double*>::setData<double*>(double* const&);
 template <>
 template <>
-bool TData<std::string*>::setData<std::string*>(std::string* const&);
+bool TData<tstring*>::setData<tstring*>(tstring* const&);
 template <>
 template <>
 bool TData<bool*>::setData<bool*>(bool* const&);
@@ -434,7 +434,7 @@ template <>
 void TData<void*>::setDeletableType<bool>();
 template <>
 template <>
-void TData<void*>::setDeletableType<std::string>();
+void TData<void*>::setDeletableType<tstring>();
 template <>
 template <>
 void TData<void*>::setDeletableType<void>();
@@ -445,7 +445,7 @@ bool TData<TArray>::setData<TArray>(const TArray&);
 /* this class is a bare bones hash table for variable lookup */
 class VarHash {
  private:
-  typedef std::pair<std::string, TData<void*> > keyVal;
+  typedef std::pair<tstring, TData<void*> > keyVal;
   keyVal table[30];
   int hashSize;
 
@@ -454,7 +454,7 @@ class VarHash {
   int loops;
   int vars;
 
-  int hash(const std::string& name) const {
+  int hash(const tstring& name) const {
     unsigned int accum = 0;
     for (unsigned int x = 0; x < name.size(); x++) {
       accum += static_cast<unsigned int>(name[0]) * 33;
@@ -483,7 +483,7 @@ class VarHash {
     return table[abs(index)].second;
   }
 
-  TData<void*>& operator[](const std::string& name) {
+  TData<void*>& operator[](const tstring& name) {
     /* get the hash key for the var name, and the associated pair */
     int hashVal = hash(name);
     int origVal = hashVal;
@@ -515,7 +515,7 @@ class VarHash {
     return table[hashVal].second;
   }
 
-  bool exists(std::string name) const {
+  bool exists(tstring name) const {
     /* get the hash key for the var name, and the associated pair */
     int hashVal = hash(name);
     keyVal const* comp = &table[hashVal];
@@ -557,21 +557,21 @@ class VarTable {
   /* returns a reference to the storage location of the variable. The
    * interpreter supplies the expected type. */
   template <typename T>
-  T* lookupVar(std::string varName);
+  T* lookupVar(tstring varName);
   template <typename T>
   T* lookupVar(const Node* varNode);
 
   /* checks whether a named variable is in the scope, without actually adding
    * it if it does not exist */
-  bool containsVar(const std::string varName) const;
+  bool containsVar(const tstring varName) const;
   bool containsVar(const Node* varNode) const;
   /* Returns a TData from within varMap containing an invalid reference. The
     reference can be set to something valid, and that thing will not be
     deleted when this variableContext goes out of scope TData<void*>&
-    declareReference(const std::string varName); */
+    declareReference(const tstring varName); */
 
   std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >& declareParForVar(
-      const std::string&);
+      const tstring&);
 
  private:
   /* this is private and not defined -- non-copyabe object */
@@ -588,19 +588,19 @@ class VarTable {
   pairs of the inner vector to see if the calling thread has an entry for
   that variable 4) return the correct variable for that thread */
   typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
-  std::list<std::pair<std::string, pairList>, gc_allocator<std::pair<std::string, pairList> > > parForVars;
+  std::list<std::pair<tstring, pairList>, gc_allocator<std::pair<tstring, pairList> > > parForVars;
   // Predicate functions for the lookupVar function
   // This code used from stack overflow question 12008059
   struct CheckName {
-    CheckName(std::string pVal) : searchVal(pVal) {}
+    CheckName(tstring pVal) : searchVal(pVal) {}
     bool operator()(
-        std::pair<std::string, std::list<std::pair<pthread_t, TData<void*> >,gc_allocator<std::pair<pthread_t, TData<void*> > > > >
+        std::pair<tstring, std::list<std::pair<pthread_t, TData<void*> >,gc_allocator<std::pair<pthread_t, TData<void*> > > > >
             val) {
       return searchVal == val.first;
     }
 
    private:
-    std::string searchVal;
+    tstring searchVal;
   };
 
   struct CheckThread {
@@ -615,7 +615,7 @@ class VarTable {
 };
 
 template <typename T>
-T* VarTable::lookupVar(const std::string varName) {
+T* VarTable::lookupVar(const tstring varName) {
   // cout << varName <<"<<<<<"<<endl;
   // pthread_mutex_lock(&table_mutex);
 
@@ -623,7 +623,7 @@ T* VarTable::lookupVar(const std::string varName) {
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
   typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
-  std::list<std::pair<std::string, pairList>, gc_allocator<std::pair<std::string, pairList> > >::iterator loc;
+  std::list<std::pair<tstring, pairList>, gc_allocator<std::pair<tstring, pairList> > >::iterator loc;
 
   pthread_rwlock_rdlock(&table_mutex);
 
@@ -722,14 +722,14 @@ T* VarTable::lookupVar(const std::string varName) {
 template <typename T>
 T* VarTable::lookupVar(const Node* varNode) {
   // pthread_mutex_lock(&table_mutex);
-  std::string varName = varNode->getString();
+  tstring varName = varNode->getString();
   // Index may be negative if a global variable is being referenced
 //  int index = abs(varNode->getInt());
   // Check whether this variable is a parallel for variable. Ideally there won;t
   // be many of these floating around, but we can implement a non-linear
   // algorithm later if needed
   typedef std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > pairList;
-  std::list<std::pair<std::string, pairList>, gc_allocator<std::pair<std::string, pairList> > >::iterator loc;
+  std::list<std::pair<tstring, pairList>, gc_allocator<std::pair<tstring, pairList> > >::iterator loc;
 
   pthread_rwlock_rdlock(&table_mutex);
 
@@ -861,7 +861,7 @@ class ThreadEnvironment {
   // This vector holds each MUTEX lock created by the program
   // By putting them all in one global location, we allow threads to query
   // whether a particular mutex has been created or not
-  std::map< std::string, pthread_mutex_t*, less<std::string>, gc_allocator<pair<std::string, pthread_mutex_t*> > /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/>
+  std::map< tstring, pthread_mutex_t*, less<tstring>, gc_allocator<pair<tstring, pthread_mutex_t*> > /*, std::less<string>, mmap_allocator<std::pair<const string, pthread_mutex_t* > >*/>
       mutexes;
   pthread_mutex_t map_mutex;
 
@@ -891,7 +891,7 @@ class ThreadEnvironment {
 
   // This method returns the mutex associated with a string, or creates a new
   // mutex associated with the string and returns that
-  static pthread_mutex_t* identifyMutex(std::string mutexName);
+  static pthread_mutex_t* identifyMutex(tstring mutexName);
 };
 
 
@@ -939,22 +939,22 @@ class TetraScope {
   // Returns a pointer to the data referenced by the given variable name 'name',
   // or creates a place for it if it does not yet exist
   template <typename T>
-  T* lookupVar(/*std::string*/ const Node* name) {
+  T* lookupVar(/*tstring*/ const Node* name) {
     return varScope.lookupVar<T>(name);
   }
 
   template <typename T>
-  T* lookupVar(std::string name) {
+  T* lookupVar(tstring name) {
     return varScope.lookupVar<T>(name);
   }  // Used for aliasing an array
   // Returns an unitialized pointer that will be associated with varName
   // The calling program can set this pointer to point to whatever varname
   // should alias.
-  TData<void*>& declareReference(const std::string varName);
+  TData<void*>& declareReference(const tstring varName);
 
   // declare a variable that can hold different values across different threads
   std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
-  declareThreadSpecificVariable(const std::string&);
+  declareThreadSpecificVariable(const tstring&);
 
   // Used by loops and constrol statements to determine if they can proceed, or
   // if they should return
@@ -963,7 +963,7 @@ class TetraScope {
   // sets the execution status to the specified value
   void setExecutionStatus(ExecutionStatus status);
 
-  bool containsVar(std::string varName) const;
+  bool containsVar(tstring varName) const;
   bool containsVar(const Node* varNode) const;
 
   // Used by the TetraContext to obtain a stack trace
@@ -1191,7 +1191,7 @@ class TetraContext {
   // Wraps a call to lookupVar of the current scope after checking that there
   // are no globals
   template <typename T>
-  T* lookupVar(/*std::string*/ const Node* varNode) {
+  T* lookupVar(/*tstring*/ const Node* varNode) {
     // cout << "VarNode: " <<varNode << endl;
     if (/*getGlobalScopeRef()->containsVar(varNode)*/ varNode->getInt() < 0) {
       // cout <<"Looking for: " << varNode->getString() << endl;
@@ -1205,7 +1205,7 @@ class TetraContext {
   }
 
   template <typename T>
-  T* lookupVar(std::string name) {
+  T* lookupVar(tstring name) {
     if (getGlobalScopeRef()->containsVar(name)) {
       return (getGlobalScopeRef()->lookupVar<T>(name));
     } else {
@@ -1213,7 +1213,7 @@ class TetraContext {
     }
   }
   // Wraps a call of declareReference for the current scope
-  // TData<void*>& declareReference(const std::string varName);
+  // TData<void*>& declareReference(const tstring varName);
 
   // Overloaded function call, one when there is no initial setup for a scope
   // (i.e. a function call with no formal parameters that must be initialized)
@@ -1257,7 +1257,7 @@ class TetraContext {
 
   // Declares  variable that can have different values across different threads
   std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >&
-  declareThreadSpecificVariable(const std::string&);
+  declareThreadSpecificVariable(const tstring&);
 
   // Performs a deep copy of the current context
   TetraContext& operator=(const TetraContext&);
@@ -1271,9 +1271,9 @@ class TetraContext {
 
   // For use when debugging
   int getLastLineNum();
-  void* fetchVariable(std::string s);
-  std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string,int> > >& getRefTable() { return refTables->top(); }
-  std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string,int> > >& getGlobRefTable() { return *globRefTable; }
+  void* fetchVariable(tstring s);
+  std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring,int> > >& getRefTable() { return refTables->top(); }
+  std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring,int> > >& getGlobRefTable() { return *globRefTable; }
   void updateVarReferenceTable(const Node* node);
   void popReferenceTable();
 
@@ -1283,14 +1283,14 @@ class TetraContext {
   bool getStopAtNext() { return stopAtNext; }
   bool getResume() { return resume; }
   ThreadStatus getRunStatus() { return runStatus; }
-  bool isParallelForVariable(std::string);
+  bool isParallelForVariable(tstring);
 
   void setLastLineNo(int pLast) { lastLineNo = pLast; }
   void setStepping(bool pStepping) { stepping = pStepping; }
   void setStopAtNext(bool pStopAtNext) { stopAtNext = pStopAtNext; }
   void setResume(bool pResume) { resume = pResume; }
   void setRunStatus(ThreadStatus pStatus) { runStatus = pStatus; }
-  void registerParallelForVariable(std::string);
+  void registerParallelForVariable(tstring);
 
   // used to give debug info to newly created threads
   // TODO find a less criminally inefficient, less hackish way to do this
@@ -1300,8 +1300,8 @@ class TetraContext {
     *globRefTable = *(baseContext->globRefTable);
     scopes->push(baseContext->scopes->top());
   }
-  // void copyDebugsInfo(std::stack<std::map<std::string, int> >& pRefs,
-  // std::map<std::string, int>& pGlobs);
+  // void copyDebugsInfo(std::stack<std::map<tstring, int> >& pRefs,
+  // std::map<tstring, int>& pGlobs);
 
   std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > > & getScopes() { return *scopes; }
 
@@ -1316,10 +1316,10 @@ class TetraContext {
   // For use when debugging
   int lastLineNo;
   std::stack<const Node*, std::deque<const Node*, gc_allocator<const Node*> > >* scopes;
-  std::stack<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
-    std::deque<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > >, 
-    gc_allocator<std::map<std::string, int, less<std::string>, gc_allocator<pair<std::string, int> > > > > >* refTables;
-  std::map<std::string, int, less<std::string>,gc_allocator<pair<std::string, int> > >* globRefTable;
+  std::stack<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >, 
+    std::deque<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > >, 
+    gc_allocator<std::map<tstring, int, less<tstring>, gc_allocator<pair<tstring, int> > > > > >* refTables;
+  std::map<tstring, int, less<tstring>,gc_allocator<pair<tstring, int> > >* globRefTable;
   bool stepping;
   bool stopAtNext;
   bool resume;
@@ -1327,7 +1327,7 @@ class TetraContext {
   // TODO candidate for read-write mutex, though this is not exactly a
   // fought-over mutex
   pthread_mutex_t parallelList_mutex;
-  std::vector<std::string, gc_allocator<std::string> >* parForVars;
+  std::vector<tstring, gc_allocator<tstring> >* parForVars;
 };
 
 // Header for Tetra Standard Library
@@ -1336,10 +1336,10 @@ void print(const Node*, TetraContext&);
 int readInt(int thread);
 double readReal(int thread);
 bool readBool(int thread);
-std::string readString(int thread);
+tstring readString(int thread);
 // All len functions count as a single function for TSL_FUNCS
 int len(TArray&);
-int len(std::string&);
+int len(tstring&);
 
 /*
  * This class is used in reporting runtime errors
@@ -1347,7 +1347,7 @@ int len(std::string&);
 
 class RuntimeError : public Error {
  public:
-  RuntimeError(const std::string& pMessage, int pLine, TetraContext& pContext);
+  RuntimeError(const tstring& pMessage, int pLine, TetraContext& pContext);
   TetraContext& getContext();
 
  private:
@@ -1362,7 +1362,7 @@ class RuntimeError : public Error {
 
 class SystemError : public Error {
  public:
-  SystemError(const std::string& pMessage, int pLine, const Node* pNode);
+  SystemError(const tstring& pMessage, int pLine, const Node* pNode);
   const Node* getNode();
 
  private:
@@ -1375,10 +1375,10 @@ class VirtualConsole {
  public:
   // Used to input standard input. Implementation should return the user input
   // as a string
-  virtual std::string receiveStandardInput() = 0;
+  virtual tstring receiveStandardInput() = 0;
   // Used for standard output. Argument is a string containing what the Tetra
   // Program is requesting to output.
-  virtual void processStandardOutput(const std::string&) = 0;
+  virtual void processStandardOutput(const tstring&) = 0;
 };
 
 class ConsoleArray {
@@ -1407,11 +1407,11 @@ class ConsoleArray {
 class VirtualObserver {
  public:
   virtual void notify_E(const Node*, TetraContext& context) = 0;
-  virtual void notifyThreadSpecificVariable_E(std::string) = 0;
+  virtual void notifyThreadSpecificVariable_E(tstring) = 0;
   virtual void threadCreated_E(int, TetraContext&) = 0;
   virtual void threadDestroyed_E(int) = 0;
   virtual void leftScope_E(TetraContext&) = 0;
-  void* fetchVariable(std::string s, TetraContext& context) const;
+  void* fetchVariable(tstring s, TetraContext& context) const;
   void updateVarReferenceTable(const Node*);
   void popReferenceTable();
 };
@@ -1435,7 +1435,7 @@ class TetraEnvironment {
   static void setOutputStream(ostream&);
   static VirtualObserver& getObserver();
   static void setObserver(VirtualObserver&);
-  static std::string parseFlags(std::string*, int);
+  static tstring parseFlags(tstring*, int);
   static void setDebug(bool);
   static bool isDebugMode();
   static int obtainNewThreadID();
@@ -1452,9 +1452,9 @@ class TetraEnvironment {
 
 class CommandConsole : public VirtualConsole {
  public:
-  std::string receiveStandardInput();
+  tstring receiveStandardInput();
 
-  void processStandardOutput(const std::string& output);
+  void processStandardOutput(const tstring& output);
 };
 
 #endif

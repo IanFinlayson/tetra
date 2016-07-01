@@ -264,8 +264,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
             evaluateNode<T>(node->child(2), ret, context);
             break;
           case TYPE_STRING:
-            *(context.lookupVar<string>(node->child(0) /*->getString()*/)) =
-                *static_cast<string*>((*iter).getData());
+            *(context.lookupVar<tstring>(node->child(0) /*->getString()*/)) =
+                *static_cast<tstring*>((*iter).getData());
             evaluateNode<T>(node->child(2), ret, context);
             break;
           case TYPE_VECTOR:
@@ -278,11 +278,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
             evaluateNode<T>(node->child(2), ret, context);
             break;
           default:
-            std::stringstream message;
-            message
-                << "Attempting to assign to unknown DataType in for loop. ID: "
-                << node->child(0)->type()->getKind();
-            SystemError e(message.str(), node->getLine(), node);
+            tstring message = "Attempting to assign to unknown DataType in for loop.";
+            SystemError e(message, node->getLine(), node);
             throw e;
         }
         // Check the current status flag to see if we have to break out
@@ -301,10 +298,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       return;
       break;
     default:
-      std::stringstream message;
-      message << "Encountered unsupported NodeKind in statement. ID: "
-              << node->kind();
-      Error e(message.str(), node->getLine());
+      tstring message = "Encountered unsupported NodeKind in statement.";
+      Error e(message, node->getLine());
   }
 }
 
@@ -339,7 +334,7 @@ void pasteArgList(const Node* node1, const Node* node2,
         paste<bool>(node1, node2, destinationScope, sourceContext);
         break;
       case TYPE_STRING:
-        paste<string>(node1, node2, destinationScope, sourceContext);
+        paste<tstring>(node1, node2, destinationScope, sourceContext);
         break;
       case TYPE_VECTOR:
         // Check if the array exists in memory by the fact that it has a name.
@@ -353,10 +348,8 @@ void pasteArgList(const Node* node1, const Node* node2,
         //}
         break;
       default:
-        std::stringstream message;
-        message << "Attempting to pass unknown DataType (ID = "
-                << node1->type()->getKind() << ") to function";
-        SystemError e(message.str(), node1->getLine(), node1);
+        tstring message = "Attempting to pass unknown DataType to function.";
+        SystemError e(message, node1->getLine(), node1);
         throw e;
     }
   }
@@ -368,9 +361,9 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
   // Check to see if it is a TSL function
   // This is a point for optimization. We could agree to some similarity of all
   // TSL names to check 1 condiitonal
-  // std::string funcName = node->getString();
+  // std::tstring funcName = node->getString();
 
-  std::string funcName = node->child(0)->getString();
+  tstring funcName = node->child(0)->getString();
   if (funcName == "print") {
     if (node->child(1) != NULL) {
       print(node->child(1), context);
@@ -387,7 +380,7 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
     ret.setData(readBool(context.getThreadID()));
   } else if (funcName == "len") {
     if (node->child(1)->child(0)->type()->getKind() == TYPE_STRING) {
-      TData<string> value;
+      TData<tstring> value;
       evaluateNode(node->child(1)->child(0), value, context);
       ret.setData(len(value.getData()));
     } else if (node->child(1)->child(0)->type()->getKind() == TYPE_VECTOR) {
@@ -395,10 +388,8 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
       evaluateNode(node->child(1)->child(0), value, context);
       ret.setData(len(value.getData()));
     } else {  // attempting to take length of another type is an error
-      std::stringstream message;
-      message << "Attempted to obtain length of unknown type. ID: "
-              << node->child(1)->type()->getKind();
-      SystemError e(message.str(), node->getLine(), node);
+      tstring message = "Attempted to obtain length of unknown type.";
+      SystemError e(message, node->getLine(), node);
       throw e;
     }
   } else {
@@ -509,16 +500,14 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
         ret.setData(context.lookupVar<bool>(node /*->getString()*/));
         break;
       case TYPE_STRING:
-        ret.setData(context.lookupVar<string>(node /*->getString()*/));
+        ret.setData(context.lookupVar<tstring>(node /*->getString()*/));
         break;
       case TYPE_VECTOR:
         ret.setData(context.lookupVar<TArray>(node /*->getString()*/));
         break;
       default:
-        std::stringstream message;
-        message << "Attempting to evaluate reference to unknown DataType ID: "
-                << node->type()->getKind() << endl;
-        SystemError e(message.str(), node->getLine(), node);
+        tstring message = "Attempting to evaluate reference to unknown.";
+        SystemError e(message, node->getLine(), node);
         throw e;
     }
   } else if (node->kind() == NODE_INDEX) {  // If LHS is an array index (i.e.
@@ -529,10 +518,8 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
     // Note that node->shild(1) MUST be a NODE_INDEX
     evaluateVecRef<T>(node->child(1), vec, ret, context);
   } else {
-    std::stringstream message;
-    message << "Attempted to obtain address of unrecognized LHS NodeKind. ID: "
-            << node->kind() << "\n";
-    SystemError e(message.str(), node->getLine(), node);
+    tstring message = "Attempted to obtain address of unrecognized LHS NodeKind.";
+    SystemError e(message, node->getLine(), node);
     throw e;
   }
 }
@@ -609,16 +596,14 @@ void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
       ret.setData(paste<bool>(node->child(0), node->child(1), context));
       break;
     case TYPE_STRING:
-      ret.setData(paste<string>(node->child(0), node->child(1), context));
+      ret.setData(paste<tstring>(node->child(0), node->child(1), context));
       break;
     case TYPE_VECTOR:
       ret.setData(paste<TArray>(node->child(0), node->child(1), context));
       break;
     default:
-      std::stringstream message;
-      message << "Attempting to assign value of unknown DataType ID: "
-              << node->type()->getKind();
-      SystemError e(message.str(), node->getLine(), node);
+      tstring message = "Attempting to assign value of unknown DataType.";
+      SystemError e(message, node->getLine(), node);
       throw e;
   }
 }
@@ -631,7 +616,7 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
   static ComparisonList<int> compInt;
   static ComparisonList<double> compReal;
   static ComparisonList<bool> compBool;
-  static ComparisonList<string> compString;
+  static ComparisonList<tstring> compString;
   static ComparisonList<TArray> compList;
 
   assert(node->child(0)->type() != NULL);
@@ -674,10 +659,10 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
                                    context));
     } break;
     case TYPE_STRING: {
-      /*TData<string> op1;
-        evaluateNode<string>(node->child(0),op1,context);
-        TData<string> op2;
-        evaluateNode<string>(node->child(1),op2,context);
+      /*TData<tstring> op1;
+        evaluateNode<tstring>(node->child(0),op1,context);
+        TData<tstring> op2;
+        evaluateNode<tstring>(node->child(1),op2,context);
         ret.setData(compString.execute(node->kind(),op1,op2));*/
       ret.setData(compString.execute(node->kind(), node->child(0),
                                      node->child(1), context));
@@ -693,10 +678,8 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
                                    context));
     } break;
     default:
-      std::stringstream message;
-      message << "Attempting to compare values with unknown DataType ID: "
-              << node->child(0)->type()->getKind();
-      Error e(message.str(), node->getLine());
+      tstring message =  "Attempting to compare values with unknown DataType.";
+      Error e(message, node->getLine());
   }
 }
 
@@ -744,7 +727,7 @@ void evaluateVectorComponent(const Node* node, TetraContext& context,
 template <typename T>
 void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
   // if we need to lookup a variable, do so, Note that "lookupVar" handles if we
-  // have not seen the string before
+  // have not seen the tstring before
   // However, we must check the type so that we know what to allocate if needed
   // (optimizaiton point for later?)
   if (node->kind() == NODE_IDENTIFIER) {
@@ -813,18 +796,15 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
               // returnArray.outputElements<bool>();
               break;
             case TYPE_STRING:
-              evaluateVectorComponent<string>(node, context, returnArray);
-              // returnArray.outputElements<string>();
+              evaluateVectorComponent<tstring>(node, context, returnArray);
+              // returnArray.outputElements<tstring>();
               break;
             case TYPE_VECTOR:
               evaluateVectorComponent<TArray>(node, context, returnArray);
               break;
             default:
-              std::stringstream message;
-              message
-                  << "Attempted to initialize array with unknown subtype (ID: "
-                  << node->child(0)->type()->getKind() << ")";
-              SystemError e(message.str(), node->getLine(), node);
+              tstring message = "Attempted to initialize array with unknown subtype.";
+              SystemError e(message, node->getLine(), node);
               throw e;
           }
         }
@@ -832,10 +812,8 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
         ret.setData(returnArray);
       } break;
       default:
-        std::stringstream message;
-        message << "Attempting to evaluate unknown immediate NodeType (ID: "
-                << node->kind() << ")";
-        SystemError e(message.str(), node->getLine(), node);
+        tstring message = "Attempting to evaluate unknown immediate NodeType.";
+        SystemError e(message, node->getLine(), node);
         throw e;
     }
   }
@@ -860,10 +838,8 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
       context.notifyReturn();
       break;
     default:
-      std::stringstream message;
-      message << "Unexpected execution flag type encountered: "
-              << static_cast<int>(node->kind());
-      SystemError e(message.str(), node->getLine(), node);
+      tstring message = "Unexpected execution flag type encountered.";
+      SystemError e(message, node->getLine(), node);
       throw e;
       break;
   }
@@ -954,11 +930,8 @@ void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
       evaluateParallel<T>(node, ret, context);
       break;
     default:
-      std::stringstream message;
-      message << "Warnminig: unexpected node kind encountered when attempting "
-                 "to classify node: "
-              << node->kind() << endl;
-      SystemError e(message.str(), node->getLine(), node);
+      tstring message = "Warning: unexpected node kind encountered when attempting to classify node.";
+      SystemError e(message, node->getLine(), node);
       throw e;
   }
 
@@ -988,9 +961,8 @@ int interpret(Node* tree, int debug, int threads) {
 
   // If Main was not found, print an error
   if (start == NULL) {
-    std::stringstream message;
-    message << "Attempted to call undefined function: main()";
-    Error e(message.str(), 0);
+    tstring message = "Attempted to call undefined function: main()";
+    Error e(message, 0);
     throw e;
   }
 

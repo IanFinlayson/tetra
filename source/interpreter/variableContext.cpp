@@ -17,7 +17,7 @@ VarTable::VarTable() : varMap(30)/*, parForVars(3)*/ {
 	pairList emptyList;
 	for(int i = 0; i < 3; i++) {
 		parForVars.push_back(
-				std::pair<string, std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > >(
+				std::pair<tstring, std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > >(
 						"", emptyList));
 	}
   // pthread_mutex_init(&table_mutex,NULL);
@@ -31,7 +31,7 @@ VarTable::~VarTable() { pthread_rwlock_destroy(&table_mutex); }
 // Declares a variable name that can hold different values across threads
 // Numthreads needed so the container does not attempt to resize itself during
 std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > >& VarTable::declareParForVar(
-    const string& varName) {
+    const tstring& varName) {
   // We will check if the variable already exists. To do so, we must obtain a
   // read lock
   pthread_rwlock_rdlock(&table_mutex);
@@ -78,7 +78,7 @@ std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t,
   }
 
   parForVars.push_back(
-      std::pair<string, std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > >(
+      std::pair<tstring, std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t, TData<void*> > > > >(
           varName, array));
   // Note that with this syntax, it is illegal to modify the array so as to
   // invalidate this pointer
@@ -92,7 +92,7 @@ std::list<std::pair<pthread_t, TData<void*> >, gc_allocator<std::pair<pthread_t,
 
 // Checks to see if varName is in this scope, but does not add it if it does not
 // find it
-bool VarTable::containsVar(std::string varName) const {
+bool VarTable::containsVar(tstring varName) const {
   // return varMap.find(varName) != varMap.end();
   return varMap.exists(varName);
 }

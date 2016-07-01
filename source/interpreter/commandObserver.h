@@ -18,7 +18,7 @@ typedef struct BreakPoint Breakpoint;
 // Overload == operator for use in std::find. Only care if lineNo is the same
 bool operator==(Breakpoint a, Breakpoint b);
 
-std::string statusToString(ThreadStatus status);
+tstring statusToString(ThreadStatus status);
 class CommandObserver : public VirtualObserver {
  private:
   std::vector<Breakpoint, gc_allocator<Breakpoint> > breakpoints;
@@ -28,7 +28,7 @@ class CommandObserver : public VirtualObserver {
   // std::stack<const Node*> scopes;
   // Stack of vectors of thread-specific variables so the observer can treat
   // them specially
-  // std::stack<std::vector<std::string> > threadSpecificVars;
+  // std::stack<std::vector<tstring> > threadSpecificVars;
 
   std::vector<long, gc_allocator<long> > waitingThreads;
   long allowedThread;
@@ -63,7 +63,7 @@ class CommandObserver : public VirtualObserver {
  public:
   CommandObserver();
   void notify_E(const Node*, TetraContext& context);
-  void notifyThreadSpecificVariable_E(std::string);
+  void notifyThreadSpecificVariable_E(tstring);
   void threadCreated_E(int, TetraContext&);
   void threadDestroyed_E(int);
   void step_E(TetraContext&);
