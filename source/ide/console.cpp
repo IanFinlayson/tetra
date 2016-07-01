@@ -16,11 +16,15 @@ Console::Console(MainWindow* parent) : QPlainTextEdit(parent) {
     setReadOnly(true);
     this->parent = parent;
 
+    /* update all settings for the console */
     updateSettings();
 }
 
 void Console::setUpConnections(MainWindow* parent) {
     this->parent = parent;
+
+    /* set it up so that console can pass input to main window */
+    connect(this, SIGNAL(enterPressed(QString)), parent, SLOT(receiveInput(QString)));
 }
 
 void Console::updateSettings() {
@@ -33,12 +37,20 @@ void Console::updateSettings() {
     /* set font */
     QFont font = SettingsManager::font();
     setFont(font);
+
+    /* set the cursor to be a block */
+    QFontMetrics fm(font);
+    setCursorWidth( fm.averageCharWidth() );
 }
 /* when keys are pressed in the widget */
 void Console::keyPressEvent(QKeyEvent* e) {
     if (e->key() == Qt::Key_Right) {
         int* seven = NULL;
         *seven = 7;
+    }
+
+    else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
+        emit enterPressed("7");
     }
 
     /* else, just pass it */

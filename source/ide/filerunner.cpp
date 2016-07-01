@@ -30,6 +30,7 @@ void FileRunner::runFile(bool debug) {
     consoleArray.registerConsole(*this);
 
     /* start timer */
+    inputTimer = 0;
     programTimer.start();
 
     Node* program_root;
@@ -55,7 +56,8 @@ void FileRunner::runFile(bool debug) {
     }
     QThread::currentThread()->quit();
 
-    double seconds = programTimer.elapsed() / 1000.0;
+    /* calculate elapsed running time */
+    double seconds = (programTimer.elapsed() - inputTimer) / 1000.0;
     emit output("\nProgram Finished in " + QString::number(seconds, 'f', 2) + " seconds");
 
     emit finished();
@@ -66,11 +68,18 @@ std::string FileRunner::receiveStandardInput() {
     /* tell the main window we need input */
     emit needInput();
 
+    /* start the input timer so we count off time spent waiting for input */
+    QElapsedTimer thisInputTime;
+    thisInputTime.start();
+
     /* wait for the main thread to provide it */
     QMutex mutex;
     mutex.lock();
     inputReady.wait(&mutex);
     mutex.unlock();
+
+    /* add this to input timer */
+    inputTimer += thisInputTime.elapsed();
 
     /* and now give it back to the interpreter */
     return myInput;

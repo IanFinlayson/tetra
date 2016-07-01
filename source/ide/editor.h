@@ -56,10 +56,19 @@ class Editor : public QPlainTextEdit {
     void moveCursor(int);
     QString getCoordinates();
 
+    /* functions for the main window to just ask if these are available */
+    bool canCopy();
+    bool canUndo();
+    bool canRedo();
+
   private slots:
     void updateCursorCoordinates();
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect&, int);
+
+    void setCopyAvail(bool);
+    void setRedoAvail(bool);
+    void setUndoAvail(bool);
 
   protected:
     virtual void keyPressEvent(QKeyEvent* e);
@@ -76,6 +85,7 @@ class Editor : public QPlainTextEdit {
     int tabWidth;
     Highlighter* highlighter;
     MainWindow* parent;
+    bool copyAvail, redoAvail, undoAvail;
 };
 
 class LineNumberArea : public QWidget {

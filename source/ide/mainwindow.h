@@ -52,8 +52,14 @@ class MainWindow : public QMainWindow {
     Ui::MainWindow* ui;
 
   public slots:
+    /* when the file runner has output for us */
     void receiveOutput(QString text);
+
+    /* when the file runner wants input from us */
     void getInput();
+
+    /* when the console has input for us to pass to program */
+    void receiveInput(QString text);
 
   private slots:
     void on_actionCopy_triggered();
@@ -75,6 +81,7 @@ class MainWindow : public QMainWindow {
 
     void documentWasModified();
     void updateCoordinates();
+    void onTabChange(int);
 
     void on_actionRun_triggered();
     void exitRunMode();

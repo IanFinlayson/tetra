@@ -63,6 +63,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     /* set up connections of signals with the current editor */
     currentEditor()->setUpConnections(this);
 
+    /* connect tab changes so we can update buttons */
+    connect(ui->tabBar, SIGNAL(currentChanged(int)), this, SLOT(onTabChange(int)));
+
+    /* set up connections with the console */
+    ui->console->setUpConnections(this);
+
     qRegisterMetaType<QTextBlock>("QTextBlock");
     qRegisterMetaType<QTextCursor>("QTextCursor");
 
@@ -94,7 +100,7 @@ void MainWindow::setupShortcuts() {
     ui->actionDocumentation->setShortcuts(QKeySequence::HelpContents);
 
     ui->actionRun->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_R));
-    ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_D));
+    ui->actionDebug->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_R));
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
@@ -109,6 +115,16 @@ QString MainWindow::getOpenFile() {
 // gives stripped name of file (removes file path)
 QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
+}
+
+void MainWindow::onTabChange(int) {
+    /* update button states */
+    if (currentEditor()) {
+        ui->actionCopy->setEnabled(currentEditor()->canCopy());
+        ui->actionCut->setEnabled(currentEditor()->canCopy());
+        ui->actionUndo->setEnabled(currentEditor()->canUndo());
+        ui->actionRedo->setEnabled(currentEditor()->canRedo());
+    }
 }
 
 /* load an initial file e.g. as an open file */
@@ -410,17 +426,44 @@ void MainWindow::on_actionRun_triggered() {
     QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,false));
 }
 
-/* we were requested to get input from the running program
- * TODO make this much fancier! */
+/* we were requested to get input from the running program */
 void MainWindow::getInput() {
-    bool ok;
-    QString text;
-    do {
-        text = QInputDialog::getText(this, tr("Enter Input"), tr("Enter Input"), QLineEdit::Normal, "", &ok);
-    } while (!ok);
+    /*
+       bool ok;
+       QString text;
+       do {
+       text = QInputDialog::getText(this, tr("Enter Input"), tr("Enter Input"), QLineEdit::Normal, "", &ok);
+       } while (!ok);
+       */
 
+    /* set the console to be editable */
+    ui->console->setReadOnly(false);
+
+    /* focus it */
+    ui->console->setFocus(Qt::OtherFocusReason);
+
+    /* set status bar */
+    statusBar()->showMessage("Waiting for input.");
+
+    /* now we do nothing until the user hits enter in the console which will
+     * cause it to call receiveInput below */
+}
+
+/* when the console has input for us to pass to program */
+void MainWindow::receiveInput(QString text) {
+    /* set status bar */
+    statusBar()->showMessage("Running.");
+
+    /* set the console to not be editable */
+    ui->console->setReadOnly(true);
+
+    /* set the editor to have focus again */
+    currentEditor()->setFocus(Qt::OtherFocusReason);
+
+    /* just pass it to the file runner */
     fileRunner->receiveInput(text);
 }
+
 
 /* finish running this */
 void MainWindow::exitRunMode(){

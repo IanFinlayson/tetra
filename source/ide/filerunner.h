@@ -31,10 +31,18 @@ class FileRunner : public QObject, public VirtualConsole {
     void runFile(bool debug);
 
   private:
+    /* pointer to the main window */
     MainWindow* mainWindow;
+
+    /* the file runner uses this to wait until input is ready */
     QWaitCondition inputReady;
-    QElapsedTimer programTimer;
+
+    /* stores the input as supllied by the console */
     std::string myInput;
+
+    /* these keep track of the elapsed running time and time waiting for input */
+    QElapsedTimer programTimer;
+    qint64 inputTimer;
 };
 
 #endif
