@@ -28,6 +28,8 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvail(bool)));
     connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvail(bool)));
     connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvail(bool)));
+
+    connect(this, SIGNAL(textChanged()), SLOT(unhighlightLine()));
 }
 
 
@@ -171,12 +173,6 @@ QString Editor::getOpenFile() {
 
 /* overrides default navigation for smart editing */
 void Editor::keyPressEvent(QKeyEvent* e) {
-    /* unhighlight the line if it is highlighted */
-    qDebug() << "A";
-    if(checkLineHighlighted()){
-        qDebug() << "B";
-        unhighlightLine();
-    }
 
     /* if we're not doing smart editing, just pass it up */
     if (!SettingsManager::smartEdit()) {
@@ -205,7 +201,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
             }
         }
 
-        /* when enter key is pressed, auto indents new line */
+    /* when enter key is pressed, auto indents new line */
     } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         int leadingSpaces = getLeadingSpaces();
         if (cursor.block().text().endsWith(":")) {
