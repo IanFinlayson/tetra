@@ -463,6 +463,14 @@ void MainWindow::receiveInput(QString text) {
     fileRunner->receiveInput(text);
 }
 
+/* called when the program has some type of error */
+void MainWindow::reportError(QString mesg, int line) {
+    QString full = "Error on line " + QString::number(line) + ": " + mesg;
+    ui->console->write(full);
+
+    currentEditor()->moveCursor(line);
+    currentEditor()->highlightLine(QColor(Qt::red));
+}
 
 /* finish running this */
 void MainWindow::exitRunMode(){

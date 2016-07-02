@@ -20,6 +20,9 @@ FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
     /* input */
     connect(this, SIGNAL(needInput()), mainWindow, SLOT(getInput()));
 
+    /* errors */
+    connect(this, SIGNAL(errorSeen(QString, int)), mainWindow, SLOT(reportError(QString, int)));
+
     /* save main window ref */
     this->mainWindow = mainWindow;
 }
@@ -47,12 +50,8 @@ void FileRunner::runFile(bool debug) {
             interpret(program_root, false, 8);
         }
 
-    } catch (RuntimeError e) {
-        qDebug() << "RE: " << e.getMessage().c_str() << "\n";
-    } catch (SystemError e) {
-        qDebug() << "SE: " << e.getMessage().c_str() << "\n";
     } catch (Error e) {
-        qDebug() << "E: " << e.getMessage().c_str() << "\n";
+        emit errorSeen(e.getMessage().c_str(), e.getLine());
     }
     QThread::currentThread()->quit();
 

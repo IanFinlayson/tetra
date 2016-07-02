@@ -20,6 +20,7 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     ensureCursorVisible();
     setCenterOnScroll(false);
     fileName = "";
+    lineHighlighted = false;
 
     updateSettings();
 
@@ -170,6 +171,12 @@ QString Editor::getOpenFile() {
 
 /* overrides default navigation for smart editing */
 void Editor::keyPressEvent(QKeyEvent* e) {
+    /* unhighlight the line if it is highlighted */
+    qDebug() << "A";
+    if(checkLineHighlighted()){
+        qDebug() << "B";
+        unhighlightLine();
+    }
 
     /* if we're not doing smart editing, just pass it up */
     if (!SettingsManager::smartEdit()) {
@@ -386,6 +393,8 @@ void Editor::moveCursor(int lineNumberToHighlight) {
 }
 
 void Editor::highlightLine(QColor color) {
+    lineHighlighted = true;
+
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
@@ -405,6 +414,10 @@ void Editor::highlightLine(QColor color) {
 void Editor::unhighlightLine() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
+}
+
+bool Editor::checkLineHighlighted(){
+    return lineHighlighted;
 }
 
 void Editor::setTabWidth(int tabWidth) {
