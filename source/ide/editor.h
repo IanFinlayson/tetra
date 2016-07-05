@@ -32,7 +32,7 @@ class Editor : public QPlainTextEdit {
 
     /* allows the highlighting of lines for reporting errors and warnings */
     void highlightLine(QColor);
-    void unhighlightLine();
+    bool checkLineHighlighted();
 
     /* updat the editor based on the settings from the settings manager */
     void updateSettings();
@@ -65,6 +65,7 @@ class Editor : public QPlainTextEdit {
     void updateCursorCoordinates();
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect&, int);
+    void unhighlightLine();
 
     void setCopyAvail(bool);
     void setRedoAvail(bool);
@@ -86,6 +87,7 @@ class Editor : public QPlainTextEdit {
     Highlighter* highlighter;
     MainWindow* parent;
     bool copyAvail, redoAvail, undoAvail;
+    bool lineHighlighted;
 };
 
 class LineNumberArea : public QWidget {

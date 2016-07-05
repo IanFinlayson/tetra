@@ -20,6 +20,7 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     ensureCursorVisible();
     setCenterOnScroll(false);
     fileName = "";
+    lineHighlighted = false;
 
     updateSettings();
 
@@ -27,6 +28,8 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvail(bool)));
     connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvail(bool)));
     connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvail(bool)));
+
+    connect(this, SIGNAL(textChanged()), SLOT(unhighlightLine()));
 }
 
 
@@ -198,7 +201,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
             }
         }
 
-        /* when enter key is pressed, auto indents new line */
+    /* when enter key is pressed, auto indents new line */
     } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         int leadingSpaces = getLeadingSpaces();
         if (cursor.block().text().endsWith(":")) {
@@ -386,6 +389,8 @@ void Editor::moveCursor(int lineNumberToHighlight) {
 }
 
 void Editor::highlightLine(QColor color) {
+    lineHighlighted = true;
+
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
@@ -405,6 +410,10 @@ void Editor::highlightLine(QColor color) {
 void Editor::unhighlightLine() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
+}
+
+bool Editor::checkLineHighlighted(){
+    return lineHighlighted;
 }
 
 void Editor::setTabWidth(int tabWidth) {

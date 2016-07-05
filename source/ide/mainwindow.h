@@ -86,6 +86,7 @@ class MainWindow : public QMainWindow {
     void on_actionRun_triggered();
     void exitRunMode();
     void on_actionDebug_triggered();
+    void reportError(QString mesg, int line);
 
     void on_actionStep_triggered();
     void on_actionContinue_triggered();

@@ -26,6 +26,7 @@ class FileRunner : public QObject, public VirtualConsole {
     void finished();
     void output(QString text);
     void needInput();
+    void errorSeen(QString message, int line);
 
   public slots:
     void runFile(bool debug);
