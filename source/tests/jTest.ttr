@@ -33,6 +33,7 @@ def cally(spleen int, spleen2 int , spleen3 int) int:
       zoinks += 1
       continue
       platter += 100
+   return 0
 
 def fact(num int) int:
    if num <= 1:

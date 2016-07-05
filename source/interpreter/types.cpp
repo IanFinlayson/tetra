@@ -502,10 +502,9 @@ bool checkReturns(Node* node) {
 
     case NODE_ELIF_CLAUSE:
       /* returns true if the block returns true */
-      return checkReturns(node->child(0));
+      return checkReturns(node->child(1));
 
     case NODE_FUNCTION:
-    case NODE_LOCK:
       /* returns what it's block returns */
       return checkReturns(node->child(node->numChildren()-1));
 
