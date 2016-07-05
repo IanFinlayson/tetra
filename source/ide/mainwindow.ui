@@ -97,6 +97,7 @@
    <addaction name="separator"/>
    <addaction name="actionRun"/>
    <addaction name="actionDebug"/>
+   <addaction name="actionStop"/>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">

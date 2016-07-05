@@ -33,7 +33,6 @@ void FileRunner::runFile(bool debug) {
     consoleArray.registerConsole(*this);
 
     /* start timer */
-    inputTimer = 0;
     programTimer.start();
 
     Node* program_root;
@@ -56,8 +55,8 @@ void FileRunner::runFile(bool debug) {
     QThread::currentThread()->quit();
 
     /* calculate elapsed running time */
-    double seconds = (programTimer.elapsed() - inputTimer) / 1000.0;
-    emit output("\nProgram Finished in " + QString::number(seconds, 'f', 2) + " seconds");
+    double seconds = programTimer.elapsed() / 1000.0;
+    emit output("\nProgram finished in " + QString::number(seconds, 'f', 2) + " seconds");
 
     emit finished();
 }
@@ -76,9 +75,6 @@ tstring FileRunner::receiveStandardInput() {
     mutex.lock();
     inputReady.wait(&mutex);
     mutex.unlock();
-
-    /* add this to input timer */
-    inputTimer += thisInputTime.elapsed();
 
     /* and now give it back to the interpreter */
     return myInput.toStdString().c_str();
@@ -100,4 +96,16 @@ void FileRunner::receiveInput(QString input) {
     inputReady.wakeAll();
 }
 
+/* stop the running program in its tracks */
+void FileRunner::halt(QThread* running) {
+    /* terminate the thread */
+    running->terminate();
+
+    /* calculate elapsed running time */
+    double seconds = programTimer.elapsed() / 1000.0;
+    emit output("\nProgram terminated after " + QString::number(seconds, 'f', 2) + " seconds");
+
+    /* tell main we are done */
+    emit finished();
+}
 

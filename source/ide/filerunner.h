@@ -22,6 +22,9 @@ class FileRunner : public QObject, public VirtualConsole {
     void processStandardOutput(const tstring& text);
     void receiveInput(QString input);
 
+    /* halt the running program in its tracks */
+    void halt(QThread* running);
+
   signals:
     void finished();
     void output(QString text);
@@ -41,9 +44,8 @@ class FileRunner : public QObject, public VirtualConsole {
     /* stores the input as supllied by the console */
     QString myInput;
 
-    /* these keep track of the elapsed running time and time waiting for input */
+    /* these keep track of the elapsed running time */
     QElapsedTimer programTimer;
-    qint64 inputTimer;
 };
 
 #endif
