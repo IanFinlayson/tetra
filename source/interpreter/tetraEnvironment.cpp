@@ -11,20 +11,12 @@
 void TetraEnvironment::initialize() {
   maxThreads = 8;
   consoleArray_ptr = NULL;
-  // pthread_mutex_init(&next_thread_mutex, NULL);
-  // It would seem that this method is not supported on this platform
-  // maxThreads = pthread_num_processors_np();
-  // cout <<"Max threads:" <<maxThreads;
   outputStream = &std::cout;
 }
 
 void TetraEnvironment::initialize(ConsoleArray& console) {
   maxThreads = 8;
   consoleArray_ptr = &console;
-  // pthread_mutex_init(&next_thread_mutex, NULL);
-  // It would seem that this method is not supported on this platform
-  // maxThreads = pthread_num_processors_np();
-  // cout <<"Max threads:" <<maxThreads;
   outputStream = &std::cout;
 }
 void TetraEnvironment::setMaxThreads(int pNum) { maxThreads = pNum; }
@@ -53,6 +45,19 @@ void TetraEnvironment::setObserver(VirtualObserver& pObserver) {
   observer = &pObserver;
 }
 
+// halt the given program ASAP - used so the user can halt buggy programs
+void TetraEnvironment::halt() {
+    TetraEnvironment::running = false;
+}
+
+bool TetraEnvironment::isRunning() {
+    return running;
+}
+
+void TetraEnvironment::setRunning() {
+    running = true;
+}
+
 // Determines whether the interpreter should be executing in debug mode or not
 void TetraEnvironment::setDebug(bool toggle) { debugMode = toggle; }
 
@@ -74,3 +79,4 @@ int TetraEnvironment::maxThreads = 8;
 bool TetraEnvironment::debugMode = false;
 ostream* TetraEnvironment::outputStream = &std::cout;
 VirtualObserver* TetraEnvironment::observer = NULL;
+bool TetraEnvironment::running = true;

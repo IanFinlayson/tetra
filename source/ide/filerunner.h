@@ -44,6 +44,9 @@ class FileRunner : public QObject, public VirtualConsole {
     /* stores the input as supllied by the console */
     QString myInput;
 
+    /* whether the input was interrupted by a stop */
+    bool inputInterrupted;
+
     /* these keep track of the elapsed running time */
     QElapsedTimer programTimer;
 };

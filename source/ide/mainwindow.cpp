@@ -492,6 +492,12 @@ void MainWindow::exitRunMode(){
     ui->actionDebug->setEnabled(true);
     ui->actionStop->setVisible(false);
     statusBar()->showMessage("Ready.");
+
+    /* set the console to not be editable */
+    ui->console->setReadOnly(true);
+    ui->dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    currentEditor()->setFocus(Qt::OtherFocusReason);
+
 }
 
 /* debugger functions */

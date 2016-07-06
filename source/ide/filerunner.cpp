@@ -35,6 +35,9 @@ void FileRunner::runFile(bool debug) {
     /* start timer */
     programTimer.start();
 
+    /* assume normal completion */
+    bool interrupted = false;
+
     Node* program_root;
     IDECommandObserver debugger = IDECommandObserver();
     TetraEnvironment::setObserver(debugger);
@@ -49,14 +52,22 @@ void FileRunner::runFile(bool debug) {
             interpret(program_root, false, 8);
         }
 
-    } catch (Error e) {
+    } catch (InterruptError e) {
+        interrupted = true;
+    }
+    catch (Error e) {
         emit errorSeen(e.getMessage().c_str(), e.getLine());
     }
     QThread::currentThread()->quit();
 
     /* calculate elapsed running time */
     double seconds = programTimer.elapsed() / 1000.0;
-    emit output("\nProgram finished in " + QString::number(seconds, 'f', 2) + " seconds");
+
+    if (!interrupted) {
+        emit output("\nProgram finished in " + QString::number(seconds, 'f', 2) + " seconds");
+    } else {
+        emit output("\nProgram interupted after " + QString::number(seconds, 'f', 2) + " seconds");
+    }
 
     emit finished();
 }
@@ -66,15 +77,19 @@ tstring FileRunner::receiveStandardInput() {
     /* tell the main window we need input */
     emit needInput();
 
-    /* start the input timer so we count off time spent waiting for input */
-    QElapsedTimer thisInputTime;
-    thisInputTime.start();
+    /* this will tell us if input was interrupted */
+    inputInterrupted = false;
 
     /* wait for the main thread to provide it */
     QMutex mutex;
     mutex.lock();
     inputReady.wait(&mutex);
     mutex.unlock();
+
+    /* if input was interrupted, don't return back */
+    if (inputInterrupted) {
+        throw InterruptError();
+    } 
 
     /* and now give it back to the interpreter */
     return myInput.toStdString().c_str();
@@ -98,14 +113,11 @@ void FileRunner::receiveInput(QString input) {
 
 /* stop the running program in its tracks */
 void FileRunner::halt(QThread* running) {
-    /* terminate the thread */
-    running->terminate();
+    /* tell the program to stop when it can */
+    TetraEnvironment::halt();
 
-    /* calculate elapsed running time */
-    double seconds = programTimer.elapsed() / 1000.0;
-    emit output("\nProgram terminated after " + QString::number(seconds, 'f', 2) + " seconds");
-
-    /* tell main we are done */
-    emit finished();
+    /* free up the input lock, which no longer matters */
+    inputInterrupted = true;
+    inputReady.wakeAll();
 }
 

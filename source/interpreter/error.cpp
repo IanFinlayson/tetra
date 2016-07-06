@@ -99,3 +99,5 @@ SystemError::SystemError(const tstring& pMessage, int pLine,
 const Node* SystemError::getNode() { return node; }
 
 
+InterruptError::InterruptError() : Error("Program Interrupted", -1) {}
+
