@@ -20,7 +20,6 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     ensureCursorVisible();
     setCenterOnScroll(false);
     fileName = "";
-    lineHighlighted = false;
 
     updateSettings();
 
@@ -29,6 +28,7 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvail(bool)));
     connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvail(bool)));
 
+    /* remove search and error highlights when text is changed */
     connect(this, SIGNAL(textChanged()), SLOT(unhighlightLine()));
 }
 
@@ -231,7 +231,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
             }
         }
 
-    /* when enter key is pressed, auto indents new line */
+        /* when enter key is pressed, auto indents new line */
     } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         int leadingSpaces = getLeadingSpaces();
         if (cursor.block().text().endsWith(":")) {
@@ -404,24 +404,21 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
     }
 }
 
-void Editor::moveCursor(int lineNumberToHighlight) {
+void Editor::moveCursor(int line, int col) {
     int currentLineNumber = cursor.blockNumber() + 1;
-    int moves = lineNumberToHighlight - currentLineNumber;
-    if (moves) {
-        if (moves < 0) {
-            cursor.movePosition(QTextCursor::Up, QTextCursor::MoveAnchor, -moves);
-        } else {
-            cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, moves);
-        }
-        cursor.movePosition(QTextCursor::StartOfLine);
-        setTextCursor(cursor);
+    int moves = line - currentLineNumber;
+    if (moves < 0) {
+        cursor.movePosition(QTextCursor::Up, QTextCursor::MoveAnchor, -moves);
+    } else {
+        cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, moves);
     }
+    cursor.movePosition(QTextCursor::StartOfLine);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, col);
+    setTextCursor(cursor);
 }
 
 /* highlight the current line red for an error message */
-void Editor::highlightLine(QColor color) {
-    lineHighlighted = true;
-
+void Editor::errorHighlight(QColor color) {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
@@ -438,15 +435,10 @@ void Editor::highlightLine(QColor color) {
     setExtraSelections(extraSelections);
 }
 
-/* remove the error highlighting */
+/* remove all line highlighting */
 void Editor::unhighlightLine() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
-}
-
-/* check if there is a line highlighted in error */
-bool Editor::checkLineHighlighted(){
-    return lineHighlighted;
 }
 
 /* get and set the tab width for this file */
@@ -456,3 +448,98 @@ void Editor::setTabWidth(int tabWidth) {
 int Editor::getTabWidth() {
     return this->tabWidth;
 }
+
+
+/* highlight a search term */
+void Editor::highlightAll(QString term) {
+    QColor color = QColor(Qt::yellow);
+
+    /* clear any existing ones */
+    unhighlightLine();
+
+    /* the list of selected highlighted words */
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    /* for each line */
+    QStringList lines = toPlainText().split('\n');
+    for (int i = 0; i < lines.size(); i++) {
+        QString line = lines.at(i);
+
+        /* keep track of last match if any to highlight all */
+        int last = -1;
+
+        /* if this line matches */
+        int col = line.indexOf(term);
+        while (col > last) {
+            /* add a highlight for it */
+            moveCursor(i + 1, col);
+
+            QTextEdit::ExtraSelection currentWord;
+            QTextCursor cursor = textCursor();
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, term.size());
+
+            currentWord.format.setBackground(color);
+            currentWord.cursor = cursor;
+            extraSelections.append(currentWord);
+
+            /* find next instance, if any */
+            col = line.indexOf(term, col + 1);
+        }
+    }
+
+    /* add all of these */
+    setExtraSelections(extraSelections);
+}
+
+/* perform a search with jumps and highlights */
+bool Editor::searchDir(QString term, bool forward) {
+    bool found = false;
+
+    /* remember cursor (highlight ruins it) */
+    QTextCursor c = textCursor();
+
+    /* do the highlighting of search terms */
+    highlightAll(term);
+
+    /* try to search forwards */
+    QString text = toPlainText();
+    int pos;
+
+    if (forward) {
+        pos = text.indexOf(term, c.position() + 1);
+    } else {
+        pos = text.lastIndexOf(term, c.position() - 1); 
+    }
+
+    if (pos != -1) {
+        /* move to this position */
+        c.setPosition(pos, QTextCursor::MoveAnchor);
+        found = true;
+    } else {
+        /* wrap around */
+        int pos;
+        if (forward) {
+            pos = text.indexOf(term, 0);
+        } else {
+            pos = text.lastIndexOf(term, -1);
+        }
+        if (pos != -1) {
+            /* move to this position */
+            c.setPosition(pos, QTextCursor::MoveAnchor);
+        found = true;
+        }
+    }
+
+    /* reset it at new place */
+    setTextCursor(c);
+    return found;
+}
+
+bool Editor::searchNext(QString term) {
+    return searchDir(term, true);
+}
+
+bool Editor::searchPrev(QString term) {
+    return searchDir(term, false);
+}
+

@@ -112,7 +112,7 @@ void FileRunner::receiveInput(QString input) {
 }
 
 /* stop the running program in its tracks */
-void FileRunner::halt(QThread* running) {
+void FileRunner::halt() {
     /* tell the program to stop when it can */
     TetraEnvironment::halt();
 

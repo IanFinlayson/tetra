@@ -69,9 +69,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     /* set up connections with the console */
     ui->console->setUpConnections(this);
 
-    qRegisterMetaType<QTextBlock>("QTextBlock");
-    qRegisterMetaType<QTextCursor>("QTextCursor");
+    /* hide the search area by default */
+    hideSearch();
 
+    /* set up the search box signals */
+    connect(ui->findClose, SIGNAL(pressed()), this, SLOT(hideSearch()));
+    connect(ui->findNext, SIGNAL(pressed()), this, SLOT(searchNext()));
+    connect(ui->findPrev, SIGNAL(pressed()), this, SLOT(searchPrev()));
+    connect(ui->searchBox, SIGNAL(returnPressed()), this, SLOT(searchNext()));
+    connect(ui->searchBox, SIGNAL(textChanged(QString)), this, SLOT(clearSearchColor(QString)));
+    connect(ui->searchBox, SIGNAL(closeSearch()), this, SLOT(hideSearch()));
 }
 
 MainWindow::~MainWindow() {
@@ -358,9 +365,7 @@ void MainWindow::on_actionPaste_triggered() {
 }
 
 void MainWindow::on_actionFind_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
+    showSearch();
 }
 
 /* help and about functions */
@@ -475,7 +480,7 @@ void MainWindow::reportError(QString mesg, int line) {
     ui->console->write(full);
 
     currentEditor()->moveCursor(line);
-    currentEditor()->highlightLine(QColor(Qt::red));
+    currentEditor()->errorHighlight(QColor(Qt::red));
 }
 
 /* finish running this */
@@ -500,6 +505,61 @@ void MainWindow::exitRunMode(){
 
 }
 
+void MainWindow::on_actionStop_triggered() {
+    /* tell the running thread to stop whatever it's doing */
+    fileRunner->halt();
+}
+
+/* show and hide all components of the search window */
+void MainWindow::hideSearch() {
+    ui->findClose->setVisible(false);
+    ui->findNext->setVisible(false);
+    ui->findPrev->setVisible(false);
+    ui->searchBox->setVisible(false);
+    currentEditor()->unhighlightLine();
+    ui->searchBox->setStyleSheet("");
+}
+void MainWindow::showSearch() {
+    ui->findClose->setVisible(true);
+    ui->findNext->setVisible(true);
+    ui->findPrev->setVisible(true);
+    ui->searchBox->setVisible(true);
+    ui->searchBox->setFocus(Qt::OtherFocusReason);
+    ui->searchBox->setStyleSheet("");
+    ui->searchBox->setSelection(0, ui->searchBox->text().size());
+}
+
+/* actually execute the searches */
+void MainWindow::searchNext() {
+    if (currentEditor()->searchNext(ui->searchBox->text())) {
+        ui->searchBox->setStyleSheet("");
+        currentEditor()->setFocus(Qt::OtherFocusReason);
+    } else {
+        ui->searchBox->setStyleSheet("background-color: red;");
+    }
+}
+void MainWindow::searchPrev() {
+    if (currentEditor()->searchPrev(ui->searchBox->text())) {
+        ui->searchBox->setStyleSheet("");
+        currentEditor()->setFocus(Qt::OtherFocusReason);
+    } else {
+        ui->searchBox->setStyleSheet("background-color: red;");
+    }
+}
+
+/* called also when the text is changed */
+void MainWindow::clearSearchColor(QString) {
+        ui->searchBox->setStyleSheet("");
+}
+
+
+
+
+
+
+
+
+
 /* debugger functions */
 void MainWindow::on_actionStep_triggered() {
     QMessageBox msgBox;
@@ -518,9 +578,3 @@ void MainWindow::on_actionNext_triggered() {
     msgBox.setText("TODO");
     msgBox.exec();
 }
-
-void MainWindow::on_actionStop_triggered() {
-    /* tell the running thread to stop whatever it's doing */
-    fileRunner->halt(tetraThread);
-}
-

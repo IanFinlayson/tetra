@@ -36,6 +36,7 @@ SOURCES += main.cpp\
     console.cpp \
     settingsdialog.cpp \
     settingsmanager.cpp \
+    searchbox.cpp \
     filerunner.cpp
 
 HEADERS  += \
@@ -45,6 +46,7 @@ HEADERS  += \
     console.h \
     settingsdialog.h \
     settingsmanager.h \
+    searchbox.h \
     filerunner.h
 
 FORMS    += \

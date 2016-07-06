@@ -93,6 +93,10 @@ class MainWindow : public QMainWindow {
     void on_actionNext_triggered();
     void on_actionStop_triggered();
 
+    void hideSearch();
+    void searchNext();
+    void searchPrev();
+    void clearSearchColor(QString);
 
   private:
 
@@ -111,6 +115,8 @@ class MainWindow : public QMainWindow {
     QThread* tetraThread;
 
     QLabel* coords;
+
+    void showSearch();
 
     void createStatusBar();
 

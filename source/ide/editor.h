@@ -31,8 +31,7 @@ class Editor : public QPlainTextEdit {
     int lineNumberAreaWidth();
 
     /* allows the highlighting of lines for reporting errors and warnings */
-    void highlightLine(QColor);
-    bool checkLineHighlighted();
+    void errorHighlight(QColor);
 
     /* updat the editor based on the settings from the settings manager */
     void updateSettings();
@@ -54,7 +53,7 @@ class Editor : public QPlainTextEdit {
     QString getOpenFile(); 
 
     /* move the cursors and get the coordinates of it */
-    void moveCursor(int);
+    void moveCursor(int line, int col = 0);
     QString getCoordinates();
 
     /* functions for the main window to just ask if these are available */
@@ -62,7 +61,13 @@ class Editor : public QPlainTextEdit {
     bool canUndo();
     bool canRedo();
 
-  private slots:
+    /* implement searching with highlights and jumps */
+    void highlightAll(QString term);
+    bool searchNext(QString term);
+    bool searchPrev(QString term);
+
+
+  public slots:
     void updateCursorCoordinates();
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect&, int);
@@ -88,7 +93,7 @@ class Editor : public QPlainTextEdit {
     Highlighter* highlighter;
     MainWindow* parent;
     bool copyAvail, redoAvail, undoAvail;
-    bool lineHighlighted;
+    bool searchDir(QString term, bool forward);
 };
 
 class LineNumberArea : public QWidget {
