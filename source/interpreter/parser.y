@@ -621,7 +621,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_MINUS);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -630,7 +630,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_TIMES);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -639,7 +639,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_DIVIDE);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -648,7 +648,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_MODULUS);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -657,7 +657,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_EXP);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -666,7 +666,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_SHIFTL);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -675,7 +675,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_SHIFTR);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -684,7 +684,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_BITAND);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -693,7 +693,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_BITOR);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -702,7 +702,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_BITXOR);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
