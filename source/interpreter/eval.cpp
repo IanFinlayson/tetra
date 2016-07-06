@@ -445,36 +445,42 @@ void evaluateExpression(const Node* node, TData<T>& ret,
 // Simplifies a vector reference (i.e. x[1] in "x[1] = 7)
 // Note that T is going to be a pointer type
 template <typename T>
-void evaluateVecRef(const Node* node, TArray* vec, TData<T>& ret,
-                    TetraContext& context) {
-  TData<int> indexNum;
-  // assuming a node index MUST simplify to an integer
-  evaluateNode<int>(node->child(0), indexNum, context);
-  // Check if there are further idecies which must be evaluated
-  if (node->numChildren() == 2) {
-    // Get the vector pointed to by this index
-    TArray* nextVec;
-    try {
-      // elementAt may throw
-      nextVec =
-          static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
-    } catch (Error e) {
-      // In the case of array out of bounds, propogate the error after tacking
-      // on line number info
-      RuntimeError e2(e.getMessage(), node->getLine(), context);
-      throw e2;
-    }
-    evaluateVecRef<T>(node->child(1), nextVec, ret, context);
-  } else {  // If we have accounted for all the indeces
-    T value;
-    try {
-      value = static_cast<T>(vec->elementAt(indexNum.getData()).getData());
-    } catch (Error e) {
-      RuntimeError e2(e.getMessage(), node->getLine(), context);
-      throw e2;
-    }
-    ret.setData(value);
+TArray* evaluateVecRef(const Node* node, TData<T>& ret,
+                    TetraContext& context, TArray* vec = NULL) {
+
+  // mark the top call
+  bool top;
+  if (!vec) {
+    top = true;
+  }else {
+    top = false;
   }
+
+  //get the index
+  TData<int> indexNum;
+  evaluateNode<int>(node->child(1), indexNum, context);
+   
+  //if there are more indices below this
+  if (node->child(0)->kind() == NODE_INDEX) {
+    //evaluate them first
+    vec = evaluateVecRef(node->child(0), ret, context, vec);
+  //otherwise get the array
+  } else {
+    vec = context.lookupVar<TArray>(node->child(0));
+  } 
+
+  T value;
+  try {
+    value = static_cast<T>(vec->elementAt(indexNum.getData()).getData());
+    if (!top) {
+      vec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
+    }
+  } catch (Error e) {
+    RuntimeError e2(e.getMessage(), node->getLine(), context);
+    throw e2;
+  }
+  ret.setData(value);
+  return vec;
 }
 
 // used to get references to variables (for assignment, and possibly other
@@ -514,9 +520,8 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
                                              // x[12]), then we must evaluate
                                              // its address before we can paste
                                              // to it
-    TArray* vec = context.lookupVar<TArray>(node->child(0) /*->getString()*/);
     // Note that node->shild(1) MUST be a NODE_INDEX
-    evaluateVecRef<T>(node->child(1), vec, ret, context);
+    evaluateVecRef<T>(node, ret, context);
   } else {
     tstring message = "Attempted to obtain address of unrecognized LHS NodeKind.";
     SystemError e(message, node->getLine(), node);
