@@ -1,11 +1,16 @@
 global x = 1
 
 def main() int:
+   print("x = ",x,"\n")
    parallel:
       lock y:
          x += 1
+         print("x = ",x,"\n")
       lock y:
          x += 1
+         print("x = ",x,"\n")
       lock y:
          x += 1
+         print("x = ",x,"\n")
+   print("x = ",x,"\n")
    return x

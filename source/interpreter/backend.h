@@ -1193,7 +1193,7 @@ class TetraContext {
   template <typename T>
   T* lookupVar(/*tstring*/ const Node* varNode) {
     // cout << "VarNode: " <<varNode << endl;
-    if (/*getGlobalScopeRef()->containsVar(varNode)*/ varNode->getInt() < 0) {
+    if (getGlobalScopeRef()->containsVar(varNode)/* varNode->getInt() < 0*/) {
       // cout <<"Looking for: " << varNode->getString() << endl;
       return (getGlobalScopeRef()->lookupVar<T>(varNode));
       // T* ret = (getGlobalScopeRef()->lookupVar<T>(varNode));

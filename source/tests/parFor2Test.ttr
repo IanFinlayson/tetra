@@ -4,7 +4,7 @@ def main() int:
       parallel for j in i:
          parallel:
             parFor([1.1,2.2,3.3])
-            lock sum:
+            lock sumLock:
                sum += j
    return sum
 
