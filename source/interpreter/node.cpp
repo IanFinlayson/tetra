@@ -24,6 +24,23 @@ Node::Node(NodeKind node_type) {
   num_children = 0;
 }
 
+Node::Node(Node* other) {
+  this->node_type = other->node_type;
+  if (other->data_type) {
+    this->data_type = new(GC) DataType(*other->data_type);
+  } else {
+    this->data_type = NULL;
+  }
+  stringval = other->stringval;
+  intval = other->intval;
+  realval = other->realval;
+  boolval = other->boolval;
+  parent = NULL; 
+  symtable = NULL;
+  lineno = other->lineno; /* this is often inaccurate! */
+  num_children = 0;
+}
+
 void Node::addChild(Node* child) {
   if (child) {
     children[num_children] = child;
@@ -114,4 +131,24 @@ Symbol::Symbol() {
   name = "";
   type = NULL;
   lineno = 0;
+}
+
+/* copy a subtree of nodes */
+Node* cloneTree(Node* foot) {
+  /* base case */
+  if (!foot)
+    return NULL; 
+
+  /* make this node */
+  Node* newRoot = new(GC) Node(foot);
+
+  /* make and attach its children */
+  for (int i = 0; i < foot->numChildren(); i++) {
+    /* make the child */
+    Node* newChild = cloneTree(foot->child(i));
+    /* add it */
+    newRoot->addChild(newChild);
+  }
+
+  return newRoot;
 }

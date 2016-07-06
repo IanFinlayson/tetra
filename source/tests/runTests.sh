@@ -8,7 +8,7 @@ echo "LOGFILE:" > testLog.txt
 
 retVal=-1
 successFlag=1
-tetraPath=..
+tetraPath=../interpreter
 
 prefixes[0]="j";	results[0]=120
 prefixes[1]="k";	results[1]=3

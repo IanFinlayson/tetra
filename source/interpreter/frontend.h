@@ -176,6 +176,7 @@ class Node {
  public:
   /* constructor and modifiers */
   Node(NodeKind type);
+  Node(Node* other);
   void setDataType(DataType* data_type);
   void setStringval(const tstring& stringval);
   void setIntval(int intval);
@@ -343,5 +344,8 @@ void inferParams(Node*,Node* func=NULL);
 
 /* recursively provides string representation of a datatype */
 tstring typeToString(DataType*);
+
+/* clone a tree */
+Node* cloneTree(Node*);
 
 #endif

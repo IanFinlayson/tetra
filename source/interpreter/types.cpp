@@ -655,7 +655,6 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                         /* return the type of the rhs */
                         expr->child(0)->setDataType(lhs);
                         return rhs;
-                        break;
                       }
 
     case NODE_OR:
@@ -881,7 +880,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          if (rhs->getKind() != TYPE_INT){
                           throw Error("Vector index must be an integer.", expr->getLine());
                          }
-                         return &(*(lhs->subtypes))[0]; 
+                         return new(GC) DataType((*(lhs->subtypes))[0]); 
 
                        /* strings */
                        } else if (kind == TYPE_STRING) {

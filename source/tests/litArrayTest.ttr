@@ -1,4 +1,4 @@
-def main() int:
+def main():
    o = [1,2,3]
    call(o)
 

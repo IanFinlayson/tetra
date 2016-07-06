@@ -595,7 +595,7 @@ lock_statement: TOK_LOCK TOK_COLON block {
 }
 
 lock_statement: TOK_LOCK identifier TOK_COLON block {
-              $$ = new(GC) Node(NODE_LOCK);
+  $$ = new(GC) Node(NODE_LOCK);
   $$->addChild($2);
   $$->addChild($4);
   $$->setLine($1);
@@ -603,7 +603,7 @@ lock_statement: TOK_LOCK identifier TOK_COLON block {
 
 /* expressions - assignments first */
 expression: lvalue TOK_ASSIGN expression {
-          $$ = new(GC) Node(NODE_ASSIGN);
+  $$ = new(GC) Node(NODE_ASSIGN);
   $$->addChild($1);
   $$->addChild($3);
   $$->setLine($2);
@@ -612,7 +612,7 @@ expression: lvalue TOK_ASSIGN expression {
   $$->addChild($1);
   $$->setLine($2);
   Node* rhs = new(GC) Node(NODE_PLUS);
-  rhs->addChild($1);
+  rhs->addChild(cloneTree($1));
   rhs->addChild($3);
   rhs->setLine($2);
   $$->addChild(rhs);
@@ -951,7 +951,7 @@ rvalue: funcall {
 }
 
 lvalue: expterm index {
-      $$ = new(GC) Node(NODE_INDEX);
+  $$ = new(GC) Node(NODE_INDEX);
   $$->addChild($1);
   $$->addChild($2);
 } | expterm TOK_DOT identifier { 
@@ -1047,7 +1047,7 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
-          $$ = new(GC) Node(NODE_IDENTIFIER);
+  $$ = new(GC) Node(NODE_IDENTIFIER);
   $$->setStringval($1);
   $$->setLine(yylineno);
 }  
