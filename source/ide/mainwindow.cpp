@@ -40,9 +40,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setupShortcuts(); 
 
     /* set up the thread and file runner for running programs */
-    tetraThread = new QThread;
-    fileRunner = new FileRunner(this);
-    mainValue = 0;
+    tetraThread = NULL;
+    fileRunner = NULL;
 
     /* set up the status bar */
     statusBar()->showMessage("Ready.");
@@ -54,11 +53,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tabBar->setDocumentMode(true);
     ui->tabBar->setTabText(0, "Unsaved");
 
-    /* set these as disabled (they are enabled dynamically */
+    /* set these as disabled (they are enabled dynamically) */
     ui->actionCut->setEnabled(false);
     ui->actionCopy->setEnabled(false);
     ui->actionRedo->setEnabled(false);
     ui->actionUndo->setEnabled(false);
+    ui->actionStop->setVisible(false);
 
     /* set up connections of signals with the current editor */
     currentEditor()->setUpConnections(this);
@@ -72,8 +72,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     qRegisterMetaType<QTextBlock>("QTextBlock");
     qRegisterMetaType<QTextCursor>("QTextCursor");
 
-    /* set up running so we know when we are done */
-    connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
 }
 
 MainWindow::~MainWindow() {
@@ -411,6 +409,13 @@ void MainWindow::on_actionRun_triggered() {
         return;
     }
 
+    /* start a thread */
+    tetraThread = new QThread;
+    fileRunner = new FileRunner(this);
+
+    /* set up running so we know when we are done */
+    connect(fileRunner, SIGNAL(finished()), this, SLOT(exitRunMode()));
+
     /* make sure the bottom dock is shown */
     ui->dock->show();
     ui->console->document()->setPlainText("");
@@ -418,6 +423,7 @@ void MainWindow::on_actionRun_triggered() {
     /* disable run again */
     ui->actionRun->setDisabled(true);
     ui->actionDebug->setDisabled(true);
+    ui->actionStop->setVisible(true);
     statusBar()->showMessage("Running.");
 
     /* start the worker thread which runs the programs */
@@ -474,9 +480,17 @@ void MainWindow::reportError(QString mesg, int line) {
 
 /* finish running this */
 void MainWindow::exitRunMode(){
-    tetraThread->wait();
+    /* get rid of the running thread */
+    delete tetraThread;
+    delete fileRunner;
+    tetraThread = NULL;
+    fileRunner = NULL;
+
+    /* go back to editing mode */
+    ui->console->setReadOnly(true);
     ui->actionRun->setEnabled(true);
     ui->actionDebug->setEnabled(true);
+    ui->actionStop->setVisible(false);
     statusBar()->showMessage("Ready.");
 }
 
@@ -500,8 +514,7 @@ void MainWindow::on_actionNext_triggered() {
 }
 
 void MainWindow::on_actionStop_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
+    /* tell the running thread to stop whatever it's doing */
+    fileRunner->halt(tetraThread);
 }
 

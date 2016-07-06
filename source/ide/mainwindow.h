@@ -104,7 +104,6 @@ class MainWindow : public QMainWindow {
     QString strippedName(const QString& fullFileName);
 
     bool maybeSave();
-    int mainValue;
     bool buildSuccessful;
 
     QString mode;

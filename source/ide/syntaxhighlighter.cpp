@@ -40,13 +40,12 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
                     << "\\bbackground\\b"
                     << "\\bwait\\b"
                     << "\\block\\b"
-                    << "\\binit\\b"
                     << "\\bglobal\\b"
                     << "\\binit\\b"
                     << "\\bself\\b"
                     << "\\bconstant\\b"
                     << "\\bnone\\b"
-                    << "\\bas\\b";
+                    << "\\bpass\\b";
 
     foreach (const QString& pattern, keywordPatterns) {
         rule.pattern = QRegExp(pattern);
