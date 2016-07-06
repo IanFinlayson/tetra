@@ -30,38 +30,42 @@ void evaluateAddress(const Node*, TData<T>&, TetraContext&);
 // Simplifies an indexed vector value (i.e. x[5][2])
 // T should be the expected return type of evaluating the reference
 template <typename T>
-void evaluateVecVal(const Node* node, TArray* vec, TData<T>& ret,
-                    TetraContext& context) {
-  TData<int> indexNum;
-  // assuming a node index MUST simplify to an integer
-  evaluateNode<int>(node->child(1), indexNum, context);
+TArray* evaluateVecVal(const Node* node, TData<T>& ret,
+                    TetraContext& context, TArray* vec = NULL) {
 
-  // Check if there are further idecies which must be evaluated (i.e. x[0] v.
-  // x[0][0])
- /* if (node->numChildren() == 2) {
-    // Get the vector pointed to by this index
-    TArray* nextVec;
-    try {
-      // elementAt may throw
-      nextVec =
-          static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
-    } catch (Error e) {
-      // If we catch an exception, propogate it after adding info about the line
-      // number
-      RuntimeError e2(e.getMessage(), node->getLine(), context);
-      throw e2;
+  // mark the top call
+  bool top;
+  if (!vec) {
+    top = true;
+  }else {
+    top = false;
+  }
+
+  //get the index
+  TData<int> indexNum;
+  evaluateNode<int>(node->child(1), indexNum, context);
+   
+  //if there are more indices below this
+  if (node->child(0)->kind() == NODE_INDEX) {
+    //evaluate them first
+    vec = evaluateVecVal(node->child(0), ret, context, vec);
+  //otherwise get the array
+  } else {
+    vec = context.lookupVar<TArray>(node->child(0));
+  } 
+
+  T value;
+  try {
+    value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
+    if (!top) {
+      vec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
     }
-    evaluateVecVal<T>(node->child(1), nextVec, ret, context);
-  } else { */ // If we have accounted for all the indeces, set the return value
-    T value;
-    try {
-      value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
-    } catch (Error e) {
-      RuntimeError e2(e.getMessage(), node->getLine(), context);
-      throw e2;
-    }
-    ret.setData(value);
-  //}
+  } catch (Error e) {
+    RuntimeError e2(e.getMessage(), node->getLine(), context);
+    throw e2;
+  }
+  ret.setData(value);
+  return vec;
 }
 
 // Executes structural statements
@@ -204,9 +208,9 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       // Here, T should be the type that needs to be returned, if not, then we
       // really didn;t need it anyways
       evaluateStatement<T>(node->child(0), ret, context);
-      TArray* lookupArray =
-          context.lookupVar<TArray>(node->child(0) /*->getString()*/);
-      evaluateVecVal<T>(node, lookupArray, ret, context);
+      //TArray* lookupArray =
+       //   context.lookupVar<TArray>(node->child(0) /*->getString()*/);
+      evaluateVecVal<T>(node, ret, context);
     } break;
     case NODE_FOR: {
       // Obtain the list of elements we need to loop over
@@ -446,7 +450,7 @@ void evaluateExpression(const Node* node, TData<T>& ret,
 // Note that T is going to be a pointer type
 template <typename T>
 TArray* evaluateVecRef(const Node* node, TData<T>& ret,
-                    TetraContext& context, TArray* vec = NULL) {
+                    TetraContext& context, TArray* vec=NULL) {
 
   // mark the top call
   bool top;

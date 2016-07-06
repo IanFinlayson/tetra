@@ -877,10 +877,11 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                        /* vectors */
                        } else if (kind == TYPE_VECTOR) {
                          /* check the index type */
-                         if (rhs->getKind() != TYPE_INT){
+                         if (rhs->getKind() != TYPE_INT) {
                           throw Error("Vector index must be an integer.", expr->getLine());
                          }
-                         return new(GC) DataType((*(lhs->subtypes))[0]); 
+                         DataType* dt = new(GC) DataType(((*(lhs->subtypes))[0])); 
+                         return dt;//new(GC) DataType(((*(lhs->subtypes))[0])); 
 
                        /* strings */
                        } else if (kind == TYPE_STRING) {
