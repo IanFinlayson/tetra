@@ -137,6 +137,32 @@ bool Editor::save() {
     }
 }
 
+/* infer the tab width of this file */
+void Editor::inferTabWidth(QString fileText) {
+    /* loop through all of the lines */
+    QStringList lines = fileText.split('\n');
+    for (int i = 0; i < lines.size(); i++) {
+        QString line = lines.at(i);
+
+        /* if this line starts with a space */
+        if (line.at(0) == ' ') {
+            /* count them */
+            int spaces = 1;
+
+            while (spaces < line.size() && line.at(spaces) == ' ') {
+                spaces++;
+            }
+            
+            /* set it and return, we are done */
+            setTabWidth(spaces);
+            return;
+        }
+    }
+
+    /* if NO lines started with a space, then leave default */
+    setTabWidth(SettingsManager::tabWidth());
+}
+
 /* open a file and return success or failure */
 bool Editor::open(QString fname) {
     if (fname.isEmpty()) {
@@ -150,6 +176,10 @@ bool Editor::open(QString fname) {
         QString fileText = in.readAll();
         ttrFile.close();
         setPlainText(fileText);
+
+        /* infer the tab width in this file */
+        inferTabWidth(fileText);
+
         return true;
     } 
 
@@ -388,6 +418,7 @@ void Editor::moveCursor(int lineNumberToHighlight) {
     }
 }
 
+/* highlight the current line red for an error message */
 void Editor::highlightLine(QColor color) {
     lineHighlighted = true;
 
@@ -407,19 +438,21 @@ void Editor::highlightLine(QColor color) {
     setExtraSelections(extraSelections);
 }
 
+/* remove the error highlighting */
 void Editor::unhighlightLine() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
 }
 
+/* check if there is a line highlighted in error */
 bool Editor::checkLineHighlighted(){
     return lineHighlighted;
 }
 
+/* get and set the tab width for this file */
 void Editor::setTabWidth(int tabWidth) {
     this->tabWidth = tabWidth;
 }
-
 int Editor::getTabWidth() {
     return this->tabWidth;
 }

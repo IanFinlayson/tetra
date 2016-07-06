@@ -40,7 +40,8 @@ class Editor : public QPlainTextEdit {
     /* the editor must know the indent width for doing smart editing */
     void setTabWidth(int width);
     int getTabWidth();
-    
+    void inferTabWidth(QString fileText);
+
     /* functions to save and open files */
     bool save();
     bool saveas();
