@@ -63,7 +63,11 @@ class Editor : public QPlainTextEdit {
 
     /* implement searching with highlights and jumps */
     void highlightAll(QString term, bool matchCase);
-    bool searchDir(QString term, bool forward, bool matchCase);
+    bool searchDir(QString term, bool forward, bool matchCase, bool highlight);
+
+    /* implement replacing */
+    void replaceNext(QString before, QString after, bool matchCase);
+    void replaceAll(QString before, QString after, bool matchCase);
 
 
   public slots:

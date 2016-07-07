@@ -45,24 +45,26 @@ void ReplaceDialog::cancel() {
     close();
 }
 
-/* TODO replace the next instance */
+/* replace the next instance */
 void ReplaceDialog::replace() {
-    /* save checked ness into settings */
-    SettingsManager::setMatchCase(ui->matchCase->checkState() == Qt::Checked);
-    qDebug() << "repl";
+    if (ui->find->text().size() > 0) {
+        mainWindow->currentEditor()->replaceNext(ui->find->text(), ui->replace->text(),
+                ui->matchCase->checkState() == Qt::Checked);
+    }
 }
 
 /* replace all instances */
 void ReplaceDialog::replaceAll() {
-    /* save checked ness into settings */
-    SettingsManager::setMatchCase(ui->matchCase->checkState() == Qt::Checked);
-    qDebug() << "all";
+    if (ui->find->text().size() > 0) {
+        mainWindow->currentEditor()->replaceAll(ui->find->text(), ui->replace->text(),
+                ui->matchCase->checkState() == Qt::Checked);
+    }
 }
 
 /* called when it's time to do a search */
 void ReplaceDialog::next() {
     if (ui->find->text().size() > 0) {
-        mainWindow->currentEditor()->searchDir(ui->find->text(), true, ui->matchCase->checkState() == Qt::Checked);
+        mainWindow->currentEditor()->searchDir(ui->find->text(), true, ui->matchCase->checkState() == Qt::Checked, true);
     }
 }
 

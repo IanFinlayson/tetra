@@ -490,7 +490,7 @@ void Editor::highlightAll(QString term, bool matchCase) {
 }
 
 /* perform a search with jumps and highlights */
-bool Editor::searchDir(QString term, bool forward, bool matchCase) {
+bool Editor::searchDir(QString term, bool forward, bool matchCase, bool highlight) {
     Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
     bool found = false;
@@ -499,7 +499,9 @@ bool Editor::searchDir(QString term, bool forward, bool matchCase) {
     QTextCursor c = textCursor();
 
     /* do the highlighting of search terms */
-    highlightAll(term, matchCase);
+    if (highlight) {
+        highlightAll(term, matchCase);
+    }
 
     /* try to search forwards */
     QString text = toPlainText();
@@ -526,7 +528,7 @@ bool Editor::searchDir(QString term, bool forward, bool matchCase) {
         if (pos != -1) {
             /* move to this position */
             c.setPosition(pos, QTextCursor::MoveAnchor);
-        found = true;
+            found = true;
         }
     }
 
@@ -535,3 +537,30 @@ bool Editor::searchDir(QString term, bool forward, bool matchCase) {
     return found;
 }
 
+void Editor::replaceNext(QString before, QString after, bool matchCase) {
+    /* search forward first */
+    if (!searchDir(before, true, matchCase, false)) {
+        return;
+    }
+
+    /* select the text given */
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, before.size());
+    //setTextCursor(cursor);
+    cursor.insertText(after);
+}
+
+/* replace all text in the document */
+void Editor::replaceAll(QString before, QString after, bool matchCase) {
+    /* get the text */
+    QString text = toPlainText();
+
+    /* do the actual replacement */
+    text.replace(before, after, matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+    /* set the text back
+     * this is done using the cursor so as not to erase all history! */
+    QTextCursor cursor(document());
+    cursor.select(QTextCursor::Document);
+    cursor.insertText(text);
+}

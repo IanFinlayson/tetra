@@ -552,7 +552,8 @@ void MainWindow::doSearch(bool next) {
     }
 
     /* search and check if found */
-    if (currentEditor()->searchDir(ui->searchBox->text(), next, ui->matchCase->checkState() == Qt::Checked)) {
+    if (currentEditor()->searchDir(ui->searchBox->text(), next,
+                ui->matchCase->checkState() == Qt::Checked, true)) {
         ui->searchBox->setStyleSheet("");
         currentEditor()->setFocus(Qt::OtherFocusReason);
     } else {
