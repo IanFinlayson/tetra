@@ -18,6 +18,7 @@
 #include "../interpreter/frontend.h"
 #include "filerunner.h"
 #include "syntaxhighlighter.h"
+#include "replacedialog.h"
 
 class Editor;
 class FileRunner;
@@ -50,6 +51,8 @@ class MainWindow : public QMainWindow {
 
     void doOpen(QString fname);
     Ui::MainWindow* ui;
+
+    ReplaceDialog repl;
 
   public slots:
     /* when the file runner has output for us */
@@ -98,6 +101,7 @@ class MainWindow : public QMainWindow {
     void searchPrev();
     void doSearch(bool forward);
     void clearSearchColor(QString);
+    void on_actionReplace_triggered();
 
   private:
 

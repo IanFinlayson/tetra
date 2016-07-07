@@ -20,12 +20,13 @@
 
 #include "mainwindow.h"
 #include "settingsdialog.h"
+#include "replacedialog.h"
 #include "settingsmanager.h"
 #include "editor.h"
 #include "ui_mainwindow.h"
 #include "ui_about.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), repl(this) {
     /* set the menu bar to work natively for systems with global bars */
     menuBar()->setNativeMenuBar(true);
 
@@ -71,6 +72,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     /* hide the search area by default */
     hideSearch();
+
+    /* hide the console by default */
+    ui->dock->hide();
 
     /* set up the search box signals */
     connect(ui->findClose, SIGNAL(pressed()), this, SLOT(hideSearch()));
@@ -398,7 +402,7 @@ void MainWindow::on_actionDocumentation_triggered() {
 /* run and debug functions */
 void MainWindow::on_actionDebug_triggered() {
     QMessageBox msgBox;
-    msgBox.setText("TODO");
+    msgBox.setText("Debugging not supported yet :(");
     msgBox.exec();
 }
 
@@ -558,6 +562,10 @@ void MainWindow::clearSearchColor(QString) {
         ui->searchBox->setStyleSheet("");
 }
 
+/* launch the replace dialog */
+void MainWindow::on_actionReplace_triggered() {
+    repl.show();
+}
 
 
 
