@@ -84,6 +84,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->searchBox, SIGNAL(textChanged(QString)), this, SLOT(clearSearchColor(QString)));
     connect(ui->searchBox, SIGNAL(closeSearch()), this, SLOT(hideSearch()));
     connect(ui->matchCase, SIGNAL(stateChanged(int)), this, SLOT(saveMatchCase(int)));
+
+    /* TODO enable debugging when it is working */
+    ui->actionDebug->setVisible(false);
 }
 
 MainWindow::~MainWindow() {
@@ -400,13 +403,6 @@ void MainWindow::on_actionDocumentation_triggered() {
     QDesktopServices::openUrl(QUrl("http://tetra-lang.org/ide-reference"));
 }
 
-/* run and debug functions */
-void MainWindow::on_actionDebug_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("Debugging not supported yet :(");
-    msgBox.exec();
-}
-
 void MainWindow::receiveOutput(QString text) {
     ui->console->write(text);
 }
@@ -587,21 +583,16 @@ void MainWindow::on_actionReplace_triggered() {
 
 
 
-/* debugger functions */
+/* TODO debugger functions */
+void MainWindow::on_actionDebug_triggered() {
+}
+
 void MainWindow::on_actionStep_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
 }
 
 void MainWindow::on_actionContinue_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
 }
 
 void MainWindow::on_actionNext_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
 }
+
