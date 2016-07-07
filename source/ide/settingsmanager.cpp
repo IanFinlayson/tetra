@@ -26,6 +26,10 @@ bool SettingsManager::smartEdit() {
     return qset->value("editor/smartEdit", true).toBool() ;
 }
 
+bool SettingsManager::matchCase() {
+    return qset->value("editor/matchCase", true).toBool() ;
+}
+
 QFont SettingsManager::font() {
     /* start with the generic monospace font */
     QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
@@ -50,6 +54,9 @@ void SettingsManager::setFont(QFont font) {
     qset->setValue("editor/font", font);
 }
 
+void SettingsManager::setMatchCase(bool mc) {
+    qset->setValue("editor/matchCase", mc);
+}
 
 QColor SettingsManager::foreground() {
     return qset->value("color/foreground", QColor(schemes[0].foreground)).value<QColor>();

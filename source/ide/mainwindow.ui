@@ -23,6 +23,9 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="findClose">
+        <property name="toolTip">
+         <string>Close Search</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -46,7 +49,17 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="matchCase">
+        <property name="text">
+         <string>Match Case</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="findPrev">
+        <property name="toolTip">
+         <string>Find Previous</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -64,6 +77,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="findNext">
+        <property name="toolTip">
+         <string>Find Next</string>
+        </property>
         <property name="text">
          <string/>
         </property>

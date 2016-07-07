@@ -52,7 +52,7 @@ class MainWindow : public QMainWindow {
     void doOpen(QString fname);
     Ui::MainWindow* ui;
 
-    ReplaceDialog repl;
+    Editor* currentEditor();
 
   public slots:
     /* when the file runner has output for us */
@@ -102,12 +102,12 @@ class MainWindow : public QMainWindow {
     void doSearch(bool forward);
     void clearSearchColor(QString);
     void on_actionReplace_triggered();
+    void saveMatchCase(int);
 
   private:
 
     void setupShortcuts();
 
-    Editor* currentEditor();
 
     QSignalMapper* windowMapper;
     QString strippedName(const QString& fullFileName);
@@ -119,6 +119,7 @@ class MainWindow : public QMainWindow {
     FileRunner* fileRunner;
     QThread* tetraThread;
 
+    ReplaceDialog repl;
     QLabel* coords;
 
     void showSearch();

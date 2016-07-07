@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->searchBox, SIGNAL(returnPressed()), this, SLOT(searchNext()));
     connect(ui->searchBox, SIGNAL(textChanged(QString)), this, SLOT(clearSearchColor(QString)));
     connect(ui->searchBox, SIGNAL(closeSearch()), this, SLOT(hideSearch()));
+    connect(ui->matchCase, SIGNAL(stateChanged(int)), this, SLOT(saveMatchCase(int)));
 }
 
 MainWindow::~MainWindow() {
@@ -516,6 +517,7 @@ void MainWindow::on_actionStop_triggered() {
 
 /* show and hide all components of the search window */
 void MainWindow::hideSearch() {
+    ui->matchCase->setVisible(false);
     ui->findClose->setVisible(false);
     ui->findNext->setVisible(false);
     ui->findPrev->setVisible(false);
@@ -524,6 +526,10 @@ void MainWindow::hideSearch() {
     ui->searchBox->setStyleSheet("");
 }
 void MainWindow::showSearch() {
+    /* set the checked ness of this based on settings */
+    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked : Qt::Unchecked);
+
+    ui->matchCase->setVisible(true);
     ui->findClose->setVisible(true);
     ui->findNext->setVisible(true);
     ui->findPrev->setVisible(true);
@@ -531,6 +537,11 @@ void MainWindow::showSearch() {
     ui->searchBox->setFocus(Qt::OtherFocusReason);
     ui->searchBox->setStyleSheet("");
     ui->searchBox->setSelection(0, ui->searchBox->text().size());
+}
+
+void MainWindow::saveMatchCase(int) {
+    /* save checked ness into settings */
+    SettingsManager::setMatchCase(ui->matchCase->checkState() == Qt::Checked);
 }
 
 /* actually execute the searches */
@@ -541,7 +552,7 @@ void MainWindow::doSearch(bool next) {
     }
 
     /* search and check if found */
-    if (currentEditor()->searchDir(ui->searchBox->text(), next)) {
+    if (currentEditor()->searchDir(ui->searchBox->text(), next, ui->matchCase->checkState() == Qt::Checked)) {
         ui->searchBox->setStyleSheet("");
         currentEditor()->setFocus(Qt::OtherFocusReason);
     } else {
@@ -564,6 +575,7 @@ void MainWindow::clearSearchColor(QString) {
 
 /* launch the replace dialog */
 void MainWindow::on_actionReplace_triggered() {
+    repl.updateSettings();
     repl.show();
 }
 

@@ -62,8 +62,8 @@ class Editor : public QPlainTextEdit {
     bool canRedo();
 
     /* implement searching with highlights and jumps */
-    void highlightAll(QString term);
-    bool searchDir(QString term, bool forward);
+    void highlightAll(QString term, bool matchCase);
+    bool searchDir(QString term, bool forward, bool matchCase);
 
 
   public slots:

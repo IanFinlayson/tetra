@@ -16,6 +16,7 @@ class SettingsManager {
         static bool lineNo();
         static bool smartEdit();
         static QFont font();
+        static bool matchCase();
 
         static QColor foreground();
         static QColor background();
@@ -36,6 +37,7 @@ class SettingsManager {
         static void setLineNo(bool);
         static void setSmartEdit(bool);
         static void setFont(QFont);
+        static void setMatchCase(bool);
 
         static void setForeground(QColor);
         static void setBackground(QColor);

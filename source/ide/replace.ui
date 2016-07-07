@@ -50,16 +50,12 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="case_2">
+      <widget class="QCheckBox" name="matchCase">
        <property name="text">
         <string>Match case</string>
        </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="regex">
-       <property name="text">
-        <string>Regular Expression</string>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

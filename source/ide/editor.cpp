@@ -449,7 +449,9 @@ int Editor::getTabWidth() {
 
 
 /* highlight a search term */
-void Editor::highlightAll(QString term) {
+void Editor::highlightAll(QString term, bool matchCase) {
+    Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
     /* clear any existing ones */
     unhighlightLine();
 
@@ -465,7 +467,7 @@ void Editor::highlightAll(QString term) {
         int last = -1;
 
         /* if this line matches */
-        int col = line.indexOf(term);
+        int col = line.indexOf(term, 0, cs);
         while (col > last) {
             /* add a highlight for it */
             moveCursor(i + 1, col);
@@ -479,7 +481,7 @@ void Editor::highlightAll(QString term) {
             extraSelections.append(currentWord);
 
             /* find next instance, if any */
-            col = line.indexOf(term, col + 1);
+            col = line.indexOf(term, col + 1, cs);
         }
     }
 
@@ -488,23 +490,25 @@ void Editor::highlightAll(QString term) {
 }
 
 /* perform a search with jumps and highlights */
-bool Editor::searchDir(QString term, bool forward) {
+bool Editor::searchDir(QString term, bool forward, bool matchCase) {
+    Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
     bool found = false;
 
     /* remember cursor (highlight ruins it) */
     QTextCursor c = textCursor();
 
     /* do the highlighting of search terms */
-    highlightAll(term);
+    highlightAll(term, matchCase);
 
     /* try to search forwards */
     QString text = toPlainText();
     int pos;
 
     if (forward) {
-        pos = text.indexOf(term, c.position() + 1);
+        pos = text.indexOf(term, c.position() + 1, cs);
     } else {
-        pos = text.lastIndexOf(term, c.position() - 1); 
+        pos = text.lastIndexOf(term, c.position() - 1, cs);
     }
 
     if (pos != -1) {
@@ -515,9 +519,9 @@ bool Editor::searchDir(QString term, bool forward) {
         /* wrap around */
         int pos;
         if (forward) {
-            pos = text.indexOf(term, 0);
+            pos = text.indexOf(term, 0, cs);
         } else {
-            pos = text.lastIndexOf(term, -1);
+            pos = text.lastIndexOf(term, -1, cs);
         }
         if (pos != -1) {
             /* move to this position */
