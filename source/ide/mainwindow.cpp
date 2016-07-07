@@ -480,7 +480,7 @@ void MainWindow::reportError(QString mesg, int line) {
     ui->console->write(full);
 
     currentEditor()->moveCursor(line);
-    currentEditor()->errorHighlight(QColor(Qt::red));
+    currentEditor()->errorHighlight();
 }
 
 /* finish running this */
@@ -530,21 +530,27 @@ void MainWindow::showSearch() {
 }
 
 /* actually execute the searches */
-void MainWindow::searchNext() {
-    if (currentEditor()->searchNext(ui->searchBox->text())) {
+void MainWindow::doSearch(bool next) {
+    /* only search for non empty strings */
+    if (ui->searchBox->text().size() == 0) {
+        return;
+    }
+
+    /* search and check if found */
+    if (currentEditor()->searchDir(ui->searchBox->text(), next)) {
         ui->searchBox->setStyleSheet("");
         currentEditor()->setFocus(Qt::OtherFocusReason);
     } else {
-        ui->searchBox->setStyleSheet("background-color: red;");
+        ui->searchBox->setStyleSheet("background-color: " + SettingsManager::error().name() + ";");
     }
 }
+
+void MainWindow::searchNext() {
+    doSearch(true);
+
+}
 void MainWindow::searchPrev() {
-    if (currentEditor()->searchPrev(ui->searchBox->text())) {
-        ui->searchBox->setStyleSheet("");
-        currentEditor()->setFocus(Qt::OtherFocusReason);
-    } else {
-        ui->searchBox->setStyleSheet("background-color: red;");
-    }
+    doSearch(false);
 }
 
 /* called also when the text is changed */

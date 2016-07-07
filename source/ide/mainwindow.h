@@ -96,6 +96,7 @@ class MainWindow : public QMainWindow {
     void hideSearch();
     void searchNext();
     void searchPrev();
+    void doSearch(bool forward);
     void clearSearchColor(QString);
 
   private:

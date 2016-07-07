@@ -418,15 +418,13 @@ void Editor::moveCursor(int line, int col) {
 }
 
 /* highlight the current line red for an error message */
-void Editor::errorHighlight(QColor color) {
+void Editor::errorHighlight() {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = color.lighter(160);
-
-        selection.format.setBackground(lineColor);
+        selection.format.setBackground(SettingsManager::error());
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
@@ -452,8 +450,6 @@ int Editor::getTabWidth() {
 
 /* highlight a search term */
 void Editor::highlightAll(QString term) {
-    QColor color = QColor(Qt::yellow);
-
     /* clear any existing ones */
     unhighlightLine();
 
@@ -478,7 +474,7 @@ void Editor::highlightAll(QString term) {
             QTextCursor cursor = textCursor();
             cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, term.size());
 
-            currentWord.format.setBackground(color);
+            currentWord.format.setBackground(SettingsManager::search());
             currentWord.cursor = cursor;
             extraSelections.append(currentWord);
 
@@ -533,13 +529,5 @@ bool Editor::searchDir(QString term, bool forward) {
     /* reset it at new place */
     setTextCursor(c);
     return found;
-}
-
-bool Editor::searchNext(QString term) {
-    return searchDir(term, true);
-}
-
-bool Editor::searchPrev(QString term) {
-    return searchDir(term, false);
 }
 

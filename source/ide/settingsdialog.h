@@ -18,6 +18,8 @@ struct ColorScheme {
     unsigned int termBackground;
     unsigned int linesForeground;
     unsigned int linesBackground;
+    unsigned int search;
+    unsigned int error;
 };
 
 class SettingsDialog : public QDialog, public Ui::Settings {

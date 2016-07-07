@@ -31,7 +31,7 @@ class Editor : public QPlainTextEdit {
     int lineNumberAreaWidth();
 
     /* allows the highlighting of lines for reporting errors and warnings */
-    void errorHighlight(QColor);
+    void errorHighlight();
 
     /* updat the editor based on the settings from the settings manager */
     void updateSettings();
@@ -63,8 +63,7 @@ class Editor : public QPlainTextEdit {
 
     /* implement searching with highlights and jumps */
     void highlightAll(QString term);
-    bool searchNext(QString term);
-    bool searchPrev(QString term);
+    bool searchDir(QString term, bool forward);
 
 
   public slots:
@@ -93,7 +92,6 @@ class Editor : public QPlainTextEdit {
     Highlighter* highlighter;
     MainWindow* parent;
     bool copyAvail, redoAvail, undoAvail;
-    bool searchDir(QString term, bool forward);
 };
 
 class LineNumberArea : public QWidget {

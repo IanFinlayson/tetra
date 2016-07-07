@@ -95,6 +95,14 @@ QColor SettingsManager::linesBackground() {
     return qset->value("color/linesBackground", QColor(schemes[0].linesBackground)).value<QColor>();
 }
 
+QColor SettingsManager::search() {
+    return qset->value("color/search", QColor(schemes[0].search)).value<QColor>();
+}
+
+QColor SettingsManager::error() {
+    return qset->value("color/error", QColor(schemes[0].error)).value<QColor>();
+}
+
 void SettingsManager::setForeground(QColor color) {
     qset->setValue("color/foreground", color);
 }
@@ -139,4 +147,13 @@ void SettingsManager::setLinesBackground(QColor color) {
 void SettingsManager::setLinesForeground(QColor color) {
     qset->setValue("color/linesForeground", color); 
 }
+
+void SettingsManager::setSearch(QColor color) {
+    qset->setValue("color/search", color); 
+}
+
+void SettingsManager::setError(QColor color) {
+    qset->setValue("color/error", color); 
+}
+
 
