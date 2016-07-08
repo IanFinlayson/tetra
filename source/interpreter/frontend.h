@@ -312,8 +312,11 @@ class ClassContext {
 };
 
 /* takes a tree of actual params and builds a tuple_type */
-void buildParamTupleType(DataType*, Node*, Node*);
+void buildParamTupleType(DataType*, const Node*);
   
+/* goes through list of params in function call and infers type of each */
+void inferActualParams(Node* node, Node* func); 
+
 /* this function does initial pass to populate 
  * globals/classes/free functions for type checker */
 void initTypes(Node* node);

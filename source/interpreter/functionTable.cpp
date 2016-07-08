@@ -31,7 +31,7 @@ const Node* FunctionMap::getFunctionNode(DataType* params, tstring name) {
 
 //lookup function node from funcall node
 const Node* FunctionMap::getFunctionNode(const Node* callNode) {
-  return lookup[getFunctionSignature(callNode->child(0))];
+  return lookup[getFunctionSignature(callNode)];
 }
 
 FunctionMap::FunctionMap() {
@@ -163,6 +163,16 @@ bool FunctionMap::hasFunction(DataType* type, tstring name) {
 // runtime)
 // Assembles the function signature for the function
 tstring FunctionMap::getFunctionSignature(const Node* node) {
+  if (node->kind() == NODE_FUNCTION) {
+    return node->getString() + typeToString(&((*(node->type()->subtypes))[0]));
+  } else if (node->kind() == NODE_FUNCALL ) {
+    //get the params
+    DataType* params = new(GC) DataType(TYPE_TUPLE); 
+    if (node->numChildren() > 1) {
+      buildParamTupleType(params,node->child(1));
+    }
 
-  return node->getString() + typeToString(&((*(node->type()->subtypes))[0]));
+    return node->child(0)->getString() + typeToString(params); 
+  }
+  throw Error("Cannot create Function signature.");
 }

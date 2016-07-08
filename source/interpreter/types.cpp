@@ -286,12 +286,23 @@ DataType DataType::operator=(const DataType& other) {
 }
 
 /* infer the param subtype from a function call */
-void buildParamTupleType(DataType* type, Node* node, Node* func) {
+void inferActualParams(Node* node, Node* func) {
   if (node && node->kind() == NODE_ACTUAL_PARAM_LIST) {
-    buildParamTupleType(type, node->child(0), func); 
-    buildParamTupleType(type, node->child(1), func); 
+    inferActualParams(node->child(0), func); 
+    inferActualParams(node->child(1), func); 
   } else if (node) {
-    type->subtypes->push_back(*inferExpression(node,func));
+    inferExpression(node,func);
+  } else {
+    return;
+  } 
+}
+
+void buildParamTupleType(DataType* type, const Node* node) {
+  if (node && node->kind() == NODE_ACTUAL_PARAM_LIST) {
+    buildParamTupleType(type, node->child(0)); 
+    buildParamTupleType(type, node->child(1)); 
+  } else if (node) {
+    type->subtypes->push_back(*node->type());
   } else {
     return;
   } 
@@ -934,8 +945,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          DataType* rhsParams = new(GC) DataType(TYPE_TUPLE);
                          /* if there are arguments... */
                          if (expr->numChildren() > 1) {
+                           /* infer them */
+                           inferActualParams(expr->child(1),func);
                            /* add them to the tuple */
-                           buildParamTupleType(rhsParams,expr->child(1),func);
+                           buildParamTupleType(rhsParams,expr->child(1));
                          } 
 
                          /* make sure that we found a matching function */
@@ -1139,8 +1152,10 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                              /* if there are actual params... */
                              if (expr->child(1)->numChildren() > 1) {
+                               /* infer them */
+                               inferActualParams(expr->child(1)->child(1),func);
                                /* add them to the tuple_type */
-                               buildParamTupleType(rhsParams,expr->child(1)->child(1),func);
+                               buildParamTupleType(rhsParams,expr->child(1)->child(1));
                              }
 
                              /* check that class exists */
