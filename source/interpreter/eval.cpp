@@ -31,34 +31,33 @@ void evaluateAddress(const Node*, TData<T>&, TetraContext&);
 // T should be the expected return type of evaluating the reference
 template <typename T>
 TArray* evaluateVecVal(const Node* node, TData<T>& ret,
-                    TetraContext& context, TArray* vec = NULL) {
+                    TetraContext& context, bool top = true) {
+  
 
-  // mark the top call
-  bool top;
-  if (!vec) {
-    top = true;
-  }else {
-    top = false;
-  }
-
+  TArray* vec;
   //get the index
   TData<int> indexNum;
   evaluateNode<int>(node->child(1), indexNum, context);
+  cout << "indexNum = " <<indexNum.getData()<< endl;
    
   //if there are more indices below this
   if (node->child(0)->kind() == NODE_INDEX) {
     //evaluate them first
-    vec = evaluateVecVal(node->child(0), ret, context, vec);
+    vec = evaluateVecVal(node->child(0), ret, context, false);
+    //cout << "just looked up the Array from below is: " << *vec  << endl;
   //otherwise get the array
   } else {
     vec = context.lookupVar<TArray>(node->child(0));
+    //cout << "at bottom, the Array is: " << *vec  << endl;
   } 
 
   T value;
   try {
     value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
+    //cout << "value is : " << value<<endl;
     if (!top) {
       vec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
+      //cout << "not at the top, vec is: " << *vec<<endl;
     }
   } catch (Error e) {
     RuntimeError e2(e.getMessage(), node->getLine(), context);
@@ -207,7 +206,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
     case NODE_INDEX: {
       // Here, T should be the type that needs to be returned, if not, then we
       // really didn;t need it anyways
-      evaluateStatement<T>(node->child(0), ret, context);
+      //evaluateStatement<T>(node->child(0), ret, context);
       //TArray* lookupArray =
        //   context.lookupVar<TArray>(node->child(0) /*->getString()*/);
       evaluateVecVal<T>(node, ret, context);
@@ -450,15 +449,9 @@ void evaluateExpression(const Node* node, TData<T>& ret,
 // Note that T is going to be a pointer type
 template <typename T>
 TArray* evaluateVecRef(const Node* node, TData<T>& ret,
-                    TetraContext& context, TArray* vec=NULL) {
+                    TetraContext& context, bool top=true) {
 
-  // mark the top call
-  bool top;
-  if (!vec) {
-    top = true;
-  }else {
-    top = false;
-  }
+  TArray* vec;
 
   //get the index
   TData<int> indexNum;
@@ -467,7 +460,7 @@ TArray* evaluateVecRef(const Node* node, TData<T>& ret,
   //if there are more indices below this
   if (node->child(0)->kind() == NODE_INDEX) {
     //evaluate them first
-    vec = evaluateVecRef(node->child(0), ret, context, vec);
+    vec = evaluateVecRef(node->child(0), ret, context, false);
   //otherwise get the array
   } else {
     vec = context.lookupVar<TArray>(node->child(0));
@@ -587,7 +580,6 @@ T paste(const Node* node1, const Node* node2, TetraScope& destinationScope,
 // At the end, ret will point to whatever value was assigned
 template <typename T>
 void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
-  // cout << "Assigning: " << node->child(0)->getString() << endl;
 
   assert(node->child(0)->type() != NULL);
 

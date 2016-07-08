@@ -1,6 +1,8 @@
 def main() int:
    dd = [[[1]]]
+   print(dd[0][0][0], "\n")
    for i in dd:
       for j in i:
          j[0] = 200
+         print(dd[0][0][0], "\n")
    return dd[0][0][0]
