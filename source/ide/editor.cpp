@@ -20,7 +20,6 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     ensureCursorVisible();
     setCenterOnScroll(false);
     fileName = "";
-    lineHighlighted = false;
 
     updateSettings();
 
@@ -29,6 +28,7 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvail(bool)));
     connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvail(bool)));
 
+    /* remove search and error highlights when text is changed */
     connect(this, SIGNAL(textChanged()), SLOT(unhighlightLine()));
 }
 
@@ -137,6 +137,32 @@ bool Editor::save() {
     }
 }
 
+/* infer the tab width of this file */
+void Editor::inferTabWidth(QString fileText) {
+    /* loop through all of the lines */
+    QStringList lines = fileText.split('\n');
+    for (int i = 0; i < lines.size(); i++) {
+        QString line = lines.at(i);
+
+        /* if this line starts with a space */
+        if (line.at(0) == ' ') {
+            /* count them */
+            int spaces = 1;
+
+            while (spaces < line.size() && line.at(spaces) == ' ') {
+                spaces++;
+            }
+            
+            /* set it and return, we are done */
+            setTabWidth(spaces);
+            return;
+        }
+    }
+
+    /* if NO lines started with a space, then leave default */
+    setTabWidth(SettingsManager::tabWidth());
+}
+
 /* open a file and return success or failure */
 bool Editor::open(QString fname) {
     if (fname.isEmpty()) {
@@ -150,6 +176,10 @@ bool Editor::open(QString fname) {
         QString fileText = in.readAll();
         ttrFile.close();
         setPlainText(fileText);
+
+        /* infer the tab width in this file */
+        inferTabWidth(fileText);
+
         return true;
     } 
 
@@ -201,7 +231,7 @@ void Editor::keyPressEvent(QKeyEvent* e) {
             }
         }
 
-    /* when enter key is pressed, auto indents new line */
+        /* when enter key is pressed, auto indents new line */
     } else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         int leadingSpaces = getLeadingSpaces();
         if (cursor.block().text().endsWith(":")) {
@@ -374,31 +404,27 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
     }
 }
 
-void Editor::moveCursor(int lineNumberToHighlight) {
+void Editor::moveCursor(int line, int col) {
     int currentLineNumber = cursor.blockNumber() + 1;
-    int moves = lineNumberToHighlight - currentLineNumber;
-    if (moves) {
-        if (moves < 0) {
-            cursor.movePosition(QTextCursor::Up, QTextCursor::MoveAnchor, -moves);
-        } else {
-            cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, moves);
-        }
-        cursor.movePosition(QTextCursor::StartOfLine);
-        setTextCursor(cursor);
+    int moves = line - currentLineNumber;
+    if (moves < 0) {
+        cursor.movePosition(QTextCursor::Up, QTextCursor::MoveAnchor, -moves);
+    } else {
+        cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, moves);
     }
+    cursor.movePosition(QTextCursor::StartOfLine);
+    cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, col);
+    setTextCursor(cursor);
 }
 
-void Editor::highlightLine(QColor color) {
-    lineHighlighted = true;
-
+/* highlight the current line red for an error message */
+void Editor::errorHighlight() {
     QList<QTextEdit::ExtraSelection> extraSelections;
 
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = color.lighter(160);
-
-        selection.format.setBackground(lineColor);
+        selection.format.setBackground(SettingsManager::error());
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
         selection.cursor = textCursor();
         selection.cursor.clearSelection();
@@ -407,19 +433,134 @@ void Editor::highlightLine(QColor color) {
     setExtraSelections(extraSelections);
 }
 
+/* remove all line highlighting */
 void Editor::unhighlightLine() {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
 }
 
-bool Editor::checkLineHighlighted(){
-    return lineHighlighted;
-}
-
+/* get and set the tab width for this file */
 void Editor::setTabWidth(int tabWidth) {
     this->tabWidth = tabWidth;
 }
-
 int Editor::getTabWidth() {
     return this->tabWidth;
+}
+
+
+/* highlight a search term */
+void Editor::highlightAll(QString term, bool matchCase) {
+    Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+    /* clear any existing ones */
+    unhighlightLine();
+
+    /* the list of selected highlighted words */
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    /* for each line */
+    QStringList lines = toPlainText().split('\n');
+    for (int i = 0; i < lines.size(); i++) {
+        QString line = lines.at(i);
+
+        /* keep track of last match if any to highlight all */
+        int last = -1;
+
+        /* if this line matches */
+        int col = line.indexOf(term, 0, cs);
+        while (col > last) {
+            /* add a highlight for it */
+            moveCursor(i + 1, col);
+
+            QTextEdit::ExtraSelection currentWord;
+            QTextCursor cursor = textCursor();
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, term.size());
+
+            currentWord.format.setBackground(SettingsManager::search());
+            currentWord.cursor = cursor;
+            extraSelections.append(currentWord);
+
+            /* find next instance, if any */
+            col = line.indexOf(term, col + 1, cs);
+        }
+    }
+
+    /* add all of these */
+    setExtraSelections(extraSelections);
+}
+
+/* perform a search with jumps and highlights */
+bool Editor::searchDir(QString term, bool forward, bool matchCase, bool highlight) {
+    Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+    bool found = false;
+
+    /* remember cursor (highlight ruins it) */
+    QTextCursor c = textCursor();
+
+    /* do the highlighting of search terms */
+    if (highlight) {
+        highlightAll(term, matchCase);
+    }
+
+    /* try to search forwards */
+    QString text = toPlainText();
+    int pos;
+
+    if (forward) {
+        pos = text.indexOf(term, c.position() + 1, cs);
+    } else {
+        pos = text.lastIndexOf(term, c.position() - 1, cs);
+    }
+
+    if (pos != -1) {
+        /* move to this position */
+        c.setPosition(pos, QTextCursor::MoveAnchor);
+        found = true;
+    } else {
+        /* wrap around */
+        int pos;
+        if (forward) {
+            pos = text.indexOf(term, 0, cs);
+        } else {
+            pos = text.lastIndexOf(term, -1, cs);
+        }
+        if (pos != -1) {
+            /* move to this position */
+            c.setPosition(pos, QTextCursor::MoveAnchor);
+            found = true;
+        }
+    }
+
+    /* reset it at new place */
+    setTextCursor(c);
+    return found;
+}
+
+void Editor::replaceNext(QString before, QString after, bool matchCase) {
+    /* search forward first */
+    if (!searchDir(before, true, matchCase, false)) {
+        return;
+    }
+
+    /* select the text given */
+    QTextCursor cursor = textCursor();
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, before.size());
+    //setTextCursor(cursor);
+    cursor.insertText(after);
+}
+
+/* replace all text in the document */
+void Editor::replaceAll(QString before, QString after, bool matchCase) {
+    /* get the text */
+    QString text = toPlainText();
+
+    /* do the actual replacement */
+    text.replace(before, after, matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+    /* set the text back
+     * this is done using the cursor so as not to erase all history! */
+    QTextCursor cursor(document());
+    cursor.select(QTextCursor::Document);
+    cursor.insertText(text);
 }

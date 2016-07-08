@@ -26,6 +26,10 @@ bool SettingsManager::smartEdit() {
     return qset->value("editor/smartEdit", true).toBool() ;
 }
 
+bool SettingsManager::matchCase() {
+    return qset->value("editor/matchCase", true).toBool() ;
+}
+
 QFont SettingsManager::font() {
     /* start with the generic monospace font */
     QFont font = QFontDatabase::systemFont(QFontDatabase::FixedFont);
@@ -50,6 +54,9 @@ void SettingsManager::setFont(QFont font) {
     qset->setValue("editor/font", font);
 }
 
+void SettingsManager::setMatchCase(bool mc) {
+    qset->setValue("editor/matchCase", mc);
+}
 
 QColor SettingsManager::foreground() {
     return qset->value("color/foreground", QColor(schemes[0].foreground)).value<QColor>();
@@ -93,6 +100,14 @@ QColor SettingsManager::linesForeground() {
 
 QColor SettingsManager::linesBackground() {
     return qset->value("color/linesBackground", QColor(schemes[0].linesBackground)).value<QColor>();
+}
+
+QColor SettingsManager::search() {
+    return qset->value("color/search", QColor(schemes[0].search)).value<QColor>();
+}
+
+QColor SettingsManager::error() {
+    return qset->value("color/error", QColor(schemes[0].error)).value<QColor>();
 }
 
 void SettingsManager::setForeground(QColor color) {
@@ -139,4 +154,13 @@ void SettingsManager::setLinesBackground(QColor color) {
 void SettingsManager::setLinesForeground(QColor color) {
     qset->setValue("color/linesForeground", color); 
 }
+
+void SettingsManager::setSearch(QColor color) {
+    qset->setValue("color/search", color); 
+}
+
+void SettingsManager::setError(QColor color) {
+    qset->setValue("color/error", color); 
+}
+
 

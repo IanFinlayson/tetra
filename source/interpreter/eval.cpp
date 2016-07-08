@@ -849,6 +849,11 @@ void evaluateFlag(const Node* node, TData<T>& ret, TetraContext& context) {
 // evaluates generic nodes
 template <typename T>
 void evaluateNode(const Node* node, TData<T>& ret, TetraContext& context) {
+    // check if we should end the program
+    if (!TetraEnvironment::isRunning()) {
+        throw InterruptError();
+    }
+
   if (TetraEnvironment::isDebugMode()) {
     // If we have encountered a new variable or new scope, context should be
     // expolicitely notified here
@@ -954,27 +959,27 @@ int interpret(Node* tree, int debug, int threads) {
   // set environment settings
   TetraEnvironment::setDebug(debug);
   TetraEnvironment::setMaxThreads(threads);
+  TetraEnvironment::setRunning();
 
   // Construct a TetraContext (this also initializes the global scope)
   TetraContext tContext(TetraEnvironment::obtainNewThreadID());
   // find address of main method
   const Node* start = functions.getFunctionNode("main()");
 
-  // If Main was not found, print an error
+  // If main was not found, print an error
   if (start == NULL) {
     tstring message = "Attempted to call undefined function: main()";
     Error e(message, 0);
     throw e;
   }
 
-  // Initialize global vars
+  // initialize global vars
   tContext.initializeGlobalVars(tree);
 
-  // Will hold value returned to OS. 0 if main does not return an int
+  // will hold value returned to OS. 0 if main does not return an int
   TData<int> retVal(0);
 
   // Initialize a scope fpr the main method, and run!
-
   tContext.initializeNewScope(start);
 
   // If debugging is on, set the breakpoint for the start. Don;t do it any

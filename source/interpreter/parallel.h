@@ -239,18 +239,14 @@ pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
                       const tstring& varName, TArray* loopValues, int* nextJob,
                       pthread_mutex_t* nextJob_mutex) {
   pthread_t newThread;
-  pthread_attr_t attributes;
-  pthread_attr_init(&attributes);
 
   evalArgs<T>* execArgs =
       new(GC) evalArgs<T>(node, ret, context.getScopeRef(),
                       &(context.getGlobalScopeRef()), &context);
   evalForArgs<T>* args = new(GC) evalForArgs<T>(execArgs, &varName, nextJob_mutex,
                                             nextJob, loopValues);
-  pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-
   int success =
-      pthread_create(&newThread, &attributes,
+      pthread_create(&newThread, NULL,
                      (void* (*)(void*))wrapMultiEvaluation<T>, (void*)(args));
   assert(success ==
          0);  // For now, we will assume that thread creations are correct
@@ -261,15 +257,11 @@ pthread_t spawnWorker(const Node* node, TData<T>& ret, TetraContext& context,
 template <typename T>
 pthread_t spawnThread(Node* node, TData<T>& ret, TetraContext& context) {
   pthread_t newThread;
-  pthread_attr_t attributes;
-  pthread_attr_init(&attributes);
 
   evalArgs<T>* args = new(GC) evalArgs<T>(node, ret, context.getScopeRef(),
                                       &(context.getGlobalScopeRef()), &context);
-  pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_JOINABLE);
-  // cout <<"!!\n"<<endl;
   int success =
-      pthread_create(&newThread, &attributes,
+      pthread_create(&newThread, NULL,
                      (void* (*)(void*))wrapEvaluation<T>, (void*)(args));
   assert(success ==
          0);  // For now, we will assume that thread creations are correct

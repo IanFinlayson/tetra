@@ -20,12 +20,13 @@
 
 #include "mainwindow.h"
 #include "settingsdialog.h"
+#include "replacedialog.h"
 #include "settingsmanager.h"
 #include "editor.h"
 #include "ui_mainwindow.h"
 #include "ui_about.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), repl(this) {
     /* set the menu bar to work natively for systems with global bars */
     menuBar()->setNativeMenuBar(true);
 
@@ -69,9 +70,23 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     /* set up connections with the console */
     ui->console->setUpConnections(this);
 
-    qRegisterMetaType<QTextBlock>("QTextBlock");
-    qRegisterMetaType<QTextCursor>("QTextCursor");
+    /* hide the search area by default */
+    hideSearch();
 
+    /* hide the console by default */
+    ui->dock->hide();
+
+    /* set up the search box signals */
+    connect(ui->findClose, SIGNAL(pressed()), this, SLOT(hideSearch()));
+    connect(ui->findNext, SIGNAL(pressed()), this, SLOT(searchNext()));
+    connect(ui->findPrev, SIGNAL(pressed()), this, SLOT(searchPrev()));
+    connect(ui->searchBox, SIGNAL(returnPressed()), this, SLOT(searchNext()));
+    connect(ui->searchBox, SIGNAL(textChanged(QString)), this, SLOT(clearSearchColor(QString)));
+    connect(ui->searchBox, SIGNAL(closeSearch()), this, SLOT(hideSearch()));
+    connect(ui->matchCase, SIGNAL(stateChanged(int)), this, SLOT(saveMatchCase(int)));
+
+    /* TODO enable debugging when it is working */
+    ui->actionDebug->setVisible(false);
 }
 
 MainWindow::~MainWindow() {
@@ -358,9 +373,7 @@ void MainWindow::on_actionPaste_triggered() {
 }
 
 void MainWindow::on_actionFind_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
+    showSearch();
 }
 
 /* help and about functions */
@@ -388,13 +401,6 @@ void MainWindow::on_actionSettings_triggered() {
 
 void MainWindow::on_actionDocumentation_triggered() {
     QDesktopServices::openUrl(QUrl("http://tetra-lang.org/ide-reference"));
-}
-
-/* run and debug functions */
-void MainWindow::on_actionDebug_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
 }
 
 void MainWindow::receiveOutput(QString text) {
@@ -475,7 +481,7 @@ void MainWindow::reportError(QString mesg, int line) {
     ui->console->write(full);
 
     currentEditor()->moveCursor(line);
-    currentEditor()->highlightLine(QColor(Qt::red));
+    currentEditor()->errorHighlight();
 }
 
 /* finish running this */
@@ -492,29 +498,101 @@ void MainWindow::exitRunMode(){
     ui->actionDebug->setEnabled(true);
     ui->actionStop->setVisible(false);
     statusBar()->showMessage("Ready.");
-}
 
-/* debugger functions */
-void MainWindow::on_actionStep_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
-}
+    /* set the console to not be editable */
+    ui->console->setReadOnly(true);
+    ui->dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    currentEditor()->setFocus(Qt::OtherFocusReason);
 
-void MainWindow::on_actionContinue_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
-}
-
-void MainWindow::on_actionNext_triggered() {
-    QMessageBox msgBox;
-    msgBox.setText("TODO");
-    msgBox.exec();
 }
 
 void MainWindow::on_actionStop_triggered() {
     /* tell the running thread to stop whatever it's doing */
-    fileRunner->halt(tetraThread);
+    fileRunner->halt();
+}
+
+/* show and hide all components of the search window */
+void MainWindow::hideSearch() {
+    ui->matchCase->setVisible(false);
+    ui->findClose->setVisible(false);
+    ui->findNext->setVisible(false);
+    ui->findPrev->setVisible(false);
+    ui->searchBox->setVisible(false);
+    currentEditor()->unhighlightLine();
+    ui->searchBox->setStyleSheet("");
+}
+void MainWindow::showSearch() {
+    /* set the checked ness of this based on settings */
+    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked : Qt::Unchecked);
+
+    ui->matchCase->setVisible(true);
+    ui->findClose->setVisible(true);
+    ui->findNext->setVisible(true);
+    ui->findPrev->setVisible(true);
+    ui->searchBox->setVisible(true);
+    ui->searchBox->setFocus(Qt::OtherFocusReason);
+    ui->searchBox->setStyleSheet("");
+    ui->searchBox->setSelection(0, ui->searchBox->text().size());
+}
+
+void MainWindow::saveMatchCase(int) {
+    /* save checked ness into settings */
+    SettingsManager::setMatchCase(ui->matchCase->checkState() == Qt::Checked);
+}
+
+/* actually execute the searches */
+void MainWindow::doSearch(bool next) {
+    /* only search for non empty strings */
+    if (ui->searchBox->text().size() == 0) {
+        return;
+    }
+
+    /* search and check if found */
+    if (currentEditor()->searchDir(ui->searchBox->text(), next,
+                ui->matchCase->checkState() == Qt::Checked, true)) {
+        ui->searchBox->setStyleSheet("");
+        currentEditor()->setFocus(Qt::OtherFocusReason);
+    } else {
+        ui->searchBox->setStyleSheet("background-color: " + SettingsManager::error().name() + ";");
+    }
+}
+
+void MainWindow::searchNext() {
+    doSearch(true);
+
+}
+void MainWindow::searchPrev() {
+    doSearch(false);
+}
+
+/* called also when the text is changed */
+void MainWindow::clearSearchColor(QString) {
+        ui->searchBox->setStyleSheet("");
+}
+
+/* launch the replace dialog */
+void MainWindow::on_actionReplace_triggered() {
+    repl.updateSettings();
+    repl.show();
+}
+
+
+
+
+
+
+
+
+/* TODO debugger functions */
+void MainWindow::on_actionDebug_triggered() {
+}
+
+void MainWindow::on_actionStep_triggered() {
+}
+
+void MainWindow::on_actionContinue_triggered() {
+}
+
+void MainWindow::on_actionNext_triggered() {
 }
 

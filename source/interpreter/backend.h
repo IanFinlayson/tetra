@@ -1354,6 +1354,11 @@ class RuntimeError : public Error {
   TetraContext context;
 };
 
+class InterruptError : public Error {
+ public:
+  InterruptError();
+};
+
 /*
  * These types of errors are thrown when the interpreter enters an invalid state
  * e.g. the interpreter fails to find information about the types of certain
@@ -1439,8 +1444,12 @@ class TetraEnvironment {
   static void setDebug(bool);
   static bool isDebugMode();
   static int obtainNewThreadID();
+  static void halt();
+  static bool isRunning();
+  static void setRunning();
 
  private:
+  static bool running;
   static int maxThreads;
   static ostream* outputStream;
   static ConsoleArray* consoleArray_ptr;

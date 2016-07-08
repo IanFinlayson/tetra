@@ -1093,36 +1093,37 @@ Node* parseFile(const tstring& fname) {
     /* reset all of the lexer stuff */
     reset_lexer( );
 
-/* clear the type state information */
+    /* clear the type state information */
     globals.clear();
     functions.clearAll();
 
-/* open the file */
+    /* open the file */
     ifstream file(fname.c_str( ));
 
-/* if it's not open, we failed */
+    /* if it's not open, we failed */
     if (!file.is_open( )) {
         throw Error("Could not open file '" + fname + "'");
     }
 
-/* set the in stream (defined in lexer.cpp) */
+    /* set the in stream (defined in lexer.cpp) */
     in = &file;
 
-/* Check parsing only */
+    /* Check parsing only */
     /*int token;
     while ((token = yylex())) {
       printf("%d\n", token); 
     }
     */
 
-/* call yyparse */
+    /* call yyparse */
     yyparse();
 
 //    dumpTreeGraphviz(root);
 
-/* check and infer the types in the tree */
+    /* check and infer the types in the tree */
     initTypes(root);
     inferTypes(root);
     /* return the root of the parse tree */
     return root;
 }
+

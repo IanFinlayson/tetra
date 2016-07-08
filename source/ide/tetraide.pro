@@ -36,6 +36,8 @@ SOURCES += main.cpp\
     console.cpp \
     settingsdialog.cpp \
     settingsmanager.cpp \
+    searchbox.cpp \
+    replacedialog.cpp \
     filerunner.cpp
 
 HEADERS  += \
@@ -45,12 +47,15 @@ HEADERS  += \
     console.h \
     settingsdialog.h \
     settingsmanager.h \
+    searchbox.h \
+    replacedialog.h \
     filerunner.h
 
 FORMS    += \
     mainwindow.ui \
     about.ui \
-    settings.ui
+    settings.ui \
+    replace.ui
 
 RESOURCES += \
     resources.qrc
