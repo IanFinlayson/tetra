@@ -1,0 +1,8 @@
+def main() int:
+   x = [2,4,6]
+   y = call(x)
+   x[1] = 10
+   return y[1]
+
+def call(a [int]) [int]:
+   return a

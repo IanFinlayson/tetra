@@ -1,0 +1,11 @@
+#Tests array assignment
+
+def main() int:
+   array1 = [1,2,3,4,5]
+   array2 = [6 ... 10]
+   array1 = array2
+
+   sum = 0
+   for num in array1:
+      sum += num
+   return sum

@@ -1,0 +1,6 @@
+def main():
+   o = [1,2,3]
+   call(o)
+
+def call(x [int]):
+   x[0] = 12

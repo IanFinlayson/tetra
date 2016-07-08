@@ -1,0 +1,28 @@
+def main() int:
+   x = [0]
+   #Test ability to handle many pass by references
+   parallel:
+      inc(x)
+      inc(x)
+      inc(x)
+      inc(x)
+      parInc(x)
+      inc(x)
+      inc(x)
+      inc(x)
+      parInc(x)
+   return x[0]
+
+
+def inc(z [int]):
+   lock p:
+      z[0] += 1
+
+def parInc(z [int]):
+   parallel:
+      inc(z)
+      inc(z)
+      inc(z)
+   lock p:
+      print("here","\n")
+      z[0] += 1

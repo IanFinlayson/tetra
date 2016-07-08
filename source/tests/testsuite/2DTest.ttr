@@ -1,0 +1,13 @@
+def main() int:
+   x = [[1,2],[3,4]]
+   x[1][1] = 9999
+   z = 0
+   for i in x:
+      if z == 0:
+         d = i[0]
+         k = i[1]
+      else:
+         p = i[0]
+         c = i[1]
+      z = z + 1
+   return x[0][1]

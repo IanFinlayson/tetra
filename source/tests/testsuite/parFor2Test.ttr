@@ -1,0 +1,18 @@
+def main() int:
+   sum = 0
+   parallel for i in [[1 ... 9],[1 ... 9],[1 ... 9],[1 ... 9],[1 ... 9]]:
+      parallel for j in i:
+         parallel:
+            parFor([1.1,2.2,3.3])
+            lock sumLock:
+               sum += j
+   return sum
+
+
+
+
+
+def parFor(x [real]):
+   sum = 0.0
+   parallel for d in x:
+      sum += d

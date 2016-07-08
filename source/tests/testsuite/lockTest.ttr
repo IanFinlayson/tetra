@@ -1,0 +1,22 @@
+def main() int:
+   a = 0
+   b = 0
+   c = 0
+   background:
+      while a < 100:
+         a += 1
+         lock sum:
+            c += 1
+   background:
+      while b < 100:
+         b += 1
+         lock sum:
+            c += 1
+
+   while a != 100 or b != 100:
+      pass
+   if a + b == c:
+      return c
+   print("a: ",a," b: ", b)
+   print("c:",c,"\n")
+   return c

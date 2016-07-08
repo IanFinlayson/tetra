@@ -1,0 +1,14 @@
+def main() int:
+   x = 4
+   y = 4
+   if x == y:
+      x + y
+      x / y
+      x * y
+      x - y
+      z = x + x
+      x = 2
+      y = 3
+      x = x + y
+      y = y + x
+   return x * y

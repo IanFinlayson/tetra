@@ -1,0 +1,7 @@
+def main() int:
+        sum = 0
+        parallel for t in [1 ... 100]:
+                lock x:
+                        num = t
+                        sum += t
+        return sum % 49 

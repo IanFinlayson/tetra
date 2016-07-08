@@ -1,0 +1,28 @@
+constant gC = 2
+
+
+def help():
+    gC = 2
+    pass
+
+constant PI = 3.1416
+global sum = PI * 2.0
+#constant nums = [1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0]
+constant nums = 1.0
+
+def main( ) int:
+    local = "hello"
+    print(local,"\n")
+    sum += nums
+    local2 = "goodbye"
+    print(local2,"\n")
+    print(sum,"\n")
+    if sum > 5.0 and sum < 7.0:
+        return 1
+    elif sum > 7.0:
+        return 2
+    else:
+        return 3 
+
+def getNum() int:
+    return 27

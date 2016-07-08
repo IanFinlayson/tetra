@@ -1,0 +1,26 @@
+def main() int:
+   #x = [1,2,3]
+   y = [[1,2,3],[4,5,6],[7,8,9]]
+   retVals = [0,0]
+   #call1(x,retVals)
+   call2(y,retVals)
+   dd = [[[1]]]
+   for i in dd:
+      for j in i:
+         j[0] = 123
+   return y[0][0] + dd[0][0][0]
+
+def call1(w [int],ret [int]):
+   for z in w:
+      z = z + 1
+   ret[0] = z
+   w[0] = 888
+
+def call2(q [[int]],ret [int]):
+   for z in q:
+      for f in z:
+         f += 1
+      call1(z,ret)
+      z[0] = 99
+   ret[1] = q[2][0]
+
