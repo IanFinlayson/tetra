@@ -395,6 +395,11 @@ DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
 /* accepts a node as a parameter and returns true if that node 
  * cannot be inside a lambda, false otherwise */
 bool noLambdaParents(Node* node) {
+
+  if (!node) {
+    return false;
+  } 
+
   NodeKind k = node->kind();
 
   if (!k || k == NODE_ASSIGN || k == NODE_LOCK 
@@ -415,7 +420,7 @@ Node* nextLambda(Node* startNode) {
 
   /* keep going until you reach a node that can't be contained
    * in a lambda expression. */
-  while (!noLambdaParents(curNode)) {
+  while (curNode && !noLambdaParents(curNode)) {
     /* if we reached a lambda, return it */
     if (curNode->kind() == NODE_LAMBDA) {
       return curNode;
