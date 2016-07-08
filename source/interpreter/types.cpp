@@ -1730,7 +1730,7 @@ void inferClass(Node* node) {
 
     /* if there is a return (not none) and all paths don't return */
     if ((*(node->type()->subtypes))[1].getKind() != TYPE_NONE 
-        && !checkReturns(node)) {
+        && node->getString() != "init" && !checkReturns(node)) {
       /* complain */
       throw Error("Function '" + node->getString() + 
           "' has declared return type, but all paths do not return.",
