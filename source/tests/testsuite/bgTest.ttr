@@ -1,9 +1,10 @@
-def main() int:
+def main():
    x = 0
+   print("Just set x = 0 and x = ", x, "\n")
    background:
       x += 10
    #delaying here virtually assures that the background thread executes
-   for q in [1 ... 100]:
+   for q in [1 ... 1000]:
       pass
 
-   return x
+   print("At the end of main an x = ", x, "\n")

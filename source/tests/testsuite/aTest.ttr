@@ -1,11 +1,16 @@
 #Tests array assignment
 
-def main() int:
+def main():
    array1 = [1,2,3,4,5]
+   print("Just created array1 and array1 = ", array1, "\n")
    array2 = [6 ... 10]
+   print("Just created array2 and array1 = ", array2, "\n")
    array1 = array2
+   print("Just changed set array1 = array2 and array1 = ", array1, "\n")
 
    sum = 0
+   print("Just created sum and sum = ", sum, "\n")
    for num in array1:
+      print("In for loop and num = ", num, "\n")
       sum += num
-   return sum
+      print("Just added num to sum and sum = ", sum, "\n")

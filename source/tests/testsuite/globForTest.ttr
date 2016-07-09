@@ -1,7 +1,9 @@
 global g = 0
 
-def main() int:
+def main():
+   print("In main and global g = ", g, "\n")
    parallel for x in [1 ... 200]:
       lock po:
          g += 1
-   return g
+         print("Holding lock, just added 1 to g and g = ", g, "\n")
+   print("Just exited parallel for loop and g = ", g, "\n")

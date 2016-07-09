@@ -1,5 +1,8 @@
-def main() int:
+def main():
    sum = 0
+   print("Just created sum and sum = ", sum, "\n")
    for num in [1 ... 10]:
+      print("In for loop and num = ", num, "\n")
       sum += num
-   return sum
+      print("Just added num to sum and sum = ", sum, "\n")
+   print("Just exited for loop and sum = ", sum, "\n")
