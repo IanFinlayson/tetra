@@ -38,26 +38,21 @@ TArray* evaluateVecVal(const Node* node, TData<T>& ret,
   //get the index
   TData<int> indexNum;
   evaluateNode<int>(node->child(1), indexNum, context);
-  cout << "indexNum = " <<indexNum.getData()<< endl;
    
   //if there are more indices below this
   if (node->child(0)->kind() == NODE_INDEX) {
     //evaluate them first
     vec = evaluateVecVal(node->child(0), ret, context, false);
-    //cout << "just looked up the Array from below is: " << *vec  << endl;
   //otherwise get the array
   } else {
     vec = context.lookupVar<TArray>(node->child(0));
-    //cout << "at bottom, the Array is: " << *vec  << endl;
   } 
 
   T value;
   try {
     value = *static_cast<T*>(vec->elementAt(indexNum.getData()).getData());
-    //cout << "value is : " << value<<endl;
     if (!top) {
       vec = static_cast<TArray*>(vec->elementAt(indexNum.getData()).getData());
-      //cout << "not at the top, vec is: " << *vec<<endl;
     }
   } catch (Error e) {
     RuntimeError e2(e.getMessage(), node->getLine(), context);

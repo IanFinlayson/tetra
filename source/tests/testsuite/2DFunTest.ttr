@@ -1,10 +1,17 @@
-def main() int:
+def main():
    x = [[5,5],[5,5]]
+   print("Just created x and x = ", x, "\n")
    cally(x)
-   return x[0][0] + x[0][1] + x[1][0] + x[1][1]
+   print("Just called cally(x) and x = ", x, "\n")
+   print("x[0][0] + x[0][1] + x[1][0] + x[1][1] = ",x[0][0] + x[0][1] + x[1][0] + x[1][1], "\n")
 
 def cally(q [[int]]):
+   print("Just entered cally() and q = ", q, "\n") 
    q[0][0] = 1
+   print("Just set q[0][0] = 1 and q = ", q, "\n") 
    q[0][1] = 1
+   print("Just set q[0][1] = 1 and q = ", q, "\n") 
    q[1][0] = 1
+   print("Just set q[1][0] = 1 and q = ", q, "\n") 
    q[1][1] = 1
+   print("Just set q[1][1] = 1 and q = ", q, "\n") 
