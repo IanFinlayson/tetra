@@ -1746,7 +1746,28 @@ void inferClass(Node* node) {
   } 
 }
 
+/* Called after functions are populated to verify that there is 
+ * a function called main that takes no arguments and returns none*/
 /* populates classes, free functions, and globals */
+void verifyMain() {
+
+  /* get the main with no arguments */
+  const Node* mainNode = functions.getFunctionNode("main()");
+
+  /* If we didn' find it... */
+  if (!mainNode) {
+    /* complain! */
+    throw Error("Program must contain a function called 'main' which takes no arguments and returns 'none'.");
+  } 
+
+  /* Otherwise, if it returns something...*/
+  if ((*(mainNode->type()->subtypes))[1] != TYPE_NONE) {
+    /* complain about that */
+    throw Error("Function 'main()' cannot have a return type other than 'none'.",
+        mainNode->getLine());
+  }
+}
+
 void initTypes(Node* node) {
   /* add all the stl functions to the global list
    * to reserve their names */
@@ -1757,6 +1778,9 @@ void initTypes(Node* node) {
 
   /* add all the free functions */
   functions.build(node);
+
+  /* check for a main() with no args and no return */
+  verifyMain(); 
 
   /* add and type check/infer all the globals/constants */
   inferGlobals(node);
