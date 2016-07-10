@@ -1,2 +1,49 @@
-y: 4
+Just set x = 2 and x = 2
+Just set y = 4 and y = 4
+Just set z = 12 and z = 12
+Just set f = 22 and f = 22
+In cally and spleen = 37, spleen2 = -36, and spleen3 = 2
+Just set zoinks = 2 + spleen + spleen2 + spleen3 and zoinks = 5
+Just set platter = 0 and platter = 0
+Just set x = 47 and x = 47
+In while loop and zoinks = 5
+Just added 2 to platter and platter = 2
+Just added 1 to zoinks and zoinks = 6
+In while loop and zoinks = 6
+Just added 2 to platter and platter = 4
+Just added 1 to zoinks and zoinks = 7
+In while loop and zoinks = 7
+Just added 2 to platter and platter = 6
+Just added 1 to zoinks and zoinks = 8
+In while loop and zoinks = 8
+Just added 2 to platter and platter = 8
+Just added 1 to zoinks and zoinks = 9
+Just returned from cally(37, -36, x) and x = 2
+In cally and spleen = 2, spleen2 = 2, and spleen3 = 2
+Just set zoinks = 2 + spleen + spleen2 + spleen3 and zoinks = 8
+Just set platter = 0 and platter = 0
+Just set x = 47 and x = 47
+In while loop and zoinks = 8
+Just added 2 to platter and platter = 2
+Just added 1 to zoinks and zoinks = 9
+Just returned from cally(2, 2, x) and x = 2
+Just set ret = -20 and ret = -20
+In while loop and x = 2
+Just set ret = 60 and ret = 60
+Just subtracted 1 from x and x = 1
+In while loop and x = 1
+Just set ret = 40 and ret = 40
+Just subtracted 1 from x and x = 0
+Exited the while loop and y =  4
+In fact() and num = 5
+Num > 1 and num = 5
+In fact() and num = 4
+Num > 1 and num = 4
+In fact() and num = 3
+Num > 1 and num = 3
+In fact() and num = 2
+Num > 1 and num = 2
+In fact() and num = 1
+Num <= 1 and num = 1
+In main, just set f5 = fact(5) and f5 = 120
 

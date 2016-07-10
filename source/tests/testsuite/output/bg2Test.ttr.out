@@ -1,1 +1,6 @@
+In main, global v = 0
+In doStuff(), just created x and x = 2
+Just returned to main from doStuff() and v = 0
+In background task in doStuff().
+Exited for loop, still in task, just added x to v and v = 2
 

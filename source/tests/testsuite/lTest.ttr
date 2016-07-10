@@ -1,21 +1,27 @@
-def main() int:
+def main():
    if getNum() == 20:
-      return 1
+      print("getNum() == 20","\n")
    elif getNum(1) == 20:
-      return 2
+      print("getNum(1) == 20","\n")
    elif getNum(1,1) == 20:
-      return 3
+      print("getNum(1,1) == 20","\n")
    else:
-      return 4
+      print("In else.","\n")
 
 def getNum() int:
+   print("In getNum(), about to return 10.\n")
    return 10
 
 def getNum(i int) int:
+   print("In getNum(int), about to return 20.\n")
    return 20
 
 def getNum(i int, j int) int:
+   print("In getNum(int, int), about to return 10.\n")
    return 10
 
 def getNum(i int, j int, k int) int:
+   print("In getNum(int, int, int), about to return 10.\n")
+   return 10
+   print("This should never print.\n")
    return 40

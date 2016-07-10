@@ -1,4 +1,28 @@
-indexNum = 0
-indexNum = 1
-indexNum = 1
+Just assigned val and val = Len = 4 Elements: {cccc, reghjgh, abbc, aaaaa}
+Just set val[0] = 'dfkjghkjghsdgksgsggjk' and val = Len = 4 Elements: {dfkjghkjghsdgksgsggjk, reghjgh, abbc, aaaaa}
+Just set val[1] = 'zzzzzzzzz' and val = Len = 4 Elements: {dfkjghkjghsdgksgsggjk, zzzzzzzzz, abbc, aaaaa}
+Just set val[2] = 'ddddddddd' and val = Len = 4 Elements: {dfkjghkjghsdgksgsggjk, zzzzzzzzz, ddddddddd, aaaaa}
+Just set val[3] = 'wwwwwwwww' and val = Len = 4 Elements: {dfkjghkjghsdgksgsggjk, zzzzzzzzz, ddddddddd, wwwwwwwww}
+Just set x = val[0] and x = dfkjghkjghsdgksgsggjk
+ x != val[1]. x = dfkjghkjghsdgksgsggjkand val[1] = zzzzzzzzz
+Just set val[2] = val[1] and val[2] = zzzzzzzzzand val[1] =zzzzzzzzz
+Just set z = 2 and z = 2
+In for loop, i = dfkjghkjghsdgksgsggjk
+Just set q = i and q = dfkjghkjghsdgksgsggjk
+In for loop, i = zzzzzzzzz
+Just set q = i and q = zzzzzzzzz
+In for loop, i = zzzzzzzzz
+Just set q = i and q = zzzzzzzzz
+In for loop, i = wwwwwwwww
+Just set q = i and q = wwwwwwwww
+Just assigned nums and nums = Len = 4 Elements: {1, 2, 3, 4}
+Just assigned sum and sum = 0
+In for loop, number = 1
+Just added number to sum and sum = 1
+In for loop, number = 2
+Just added number to sum and sum = 3
+In for loop, number = 3
+Just added number to sum and sum = 6
+In for loop, number = 4
+Just added number to sum and sum = 10
 

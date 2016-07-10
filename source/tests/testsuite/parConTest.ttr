@@ -1,5 +1,6 @@
-def main() int:
+def main():
         ret = 0
+        print("In main(), just set ret = 0 and ret = ", ret, "\n")
         parallel for x in [1 ... 10]:
                 if x == 5:
                         continue
@@ -7,4 +8,6 @@ def main() int:
                         continue
                 lock reg:
                         ret += 1
-        return ret
+                        print("Lock is held, just incremented ret and ret = ", ret,"\n")
+
+        print("Completed par for loop and ret = ", ret, "\n")

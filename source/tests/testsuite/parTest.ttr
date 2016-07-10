@@ -1,9 +1,12 @@
-def main() int:
+def main():
         x = 0
+        print("In main(), just set x = 0 and x = ", x, "\n")
         y = 0
+        print("In main(), just set y = 0 and y = ", y, "\n")
         z = 0
+        print("In main(), just set z = 0 and z = ", z, "\n")
         parallel:
                 x += 1
                 y += 1
                 z += 1
-        return x + y + z
+        print("End of main and x = ", x, ", y = ", y, ", and z = ", z, "\n")

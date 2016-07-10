@@ -1,8 +1,94 @@
-indexNum = 0
-indexNum = 2
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
+Just created x and x = Len = 3 Elements: {1, 2, 3}
+Just created y and y = Len = 3 Elements: {Len = 3 Elements: {1, 2, 3}, Len = 3 Elements: {4, 5, 6}, Len = 3 Elements: {7, 8, 9}}
+Just created retVals and retVals = Len = 2 Elements: {0, 0}
+
+
+In call1 and w = Len = 3 Elements: {1, 2, 3} and ret = Len = 2 Elements: {0, 0}
+In for loop and z = 1
+Just incremented z and z = 2
+In for loop and z = 2
+Just incremented z and z = 3
+In for loop and z = 3
+Just incremented z and z = 4
+Just set ret[0] = z and ret = Len = 2 Elements: {4, 0}
+Just set w[0] = 888 and w = Len = 3 Elements: {888, 2, 3}
+Just returned from call1(x,retVals) now: 
+x = Len = 3 Elements: {888, 2, 3} and retVals = Len = 2 Elements: {4, 0}
+
+In call2 and q = Len = 3 Elements: {Len = 3 Elements: {1, 2, 3}, Len = 3 Elements: {4, 5, 6}, Len = 3 Elements: {7, 8, 9}} and ret = Len = 2 Elements: {4, 0}
+In outer for loop and z = Len = 3 Elements: {1, 2, 3}
+In inner for loop and f = 1
+Just incremented f and f = 2
+In inner for loop and f = 2
+Just incremented f and f = 3
+In inner for loop and f = 3
+Just incremented f and f = 4
+Calling call1(z, ret) from call2().
+
+In call1 and w = Len = 3 Elements: {1, 2, 3} and ret = Len = 2 Elements: {4, 0}
+In for loop and z = 1
+Just incremented z and z = 2
+In for loop and z = 2
+Just incremented z and z = 3
+In for loop and z = 3
+Just incremented z and z = 4
+Just set ret[0] = z and ret = Len = 2 Elements: {4, 0}
+Just set w[0] = 888 and w = Len = 3 Elements: {888, 2, 3}
+
+Just returned from call1(x,retVals) to call2() now: 
+z = Len = 3 Elements: {888, 2, 3} and ret = Len = 2 Elements: {4, 0}
+Just set z[0] = 99 and z = Len = 3 Elements: {99, 2, 3}
+In outer for loop and z = Len = 3 Elements: {4, 5, 6}
+In inner for loop and f = 4
+Just incremented f and f = 5
+In inner for loop and f = 5
+Just incremented f and f = 6
+In inner for loop and f = 6
+Just incremented f and f = 7
+Calling call1(z, ret) from call2().
+
+In call1 and w = Len = 3 Elements: {4, 5, 6} and ret = Len = 2 Elements: {4, 0}
+In for loop and z = 4
+Just incremented z and z = 5
+In for loop and z = 5
+Just incremented z and z = 6
+In for loop and z = 6
+Just incremented z and z = 7
+Just set ret[0] = z and ret = Len = 2 Elements: {7, 0}
+Just set w[0] = 888 and w = Len = 3 Elements: {888, 5, 6}
+
+Just returned from call1(x,retVals) to call2() now: 
+z = Len = 3 Elements: {888, 5, 6} and ret = Len = 2 Elements: {7, 0}
+Just set z[0] = 99 and z = Len = 3 Elements: {99, 5, 6}
+In outer for loop and z = Len = 3 Elements: {7, 8, 9}
+In inner for loop and f = 7
+Just incremented f and f = 8
+In inner for loop and f = 8
+Just incremented f and f = 9
+In inner for loop and f = 9
+Just incremented f and f = 10
+Calling call1(z, ret) from call2().
+
+In call1 and w = Len = 3 Elements: {7, 8, 9} and ret = Len = 2 Elements: {7, 0}
+In for loop and z = 7
+Just incremented z and z = 8
+In for loop and z = 8
+Just incremented z and z = 9
+In for loop and z = 9
+Just incremented z and z = 10
+Just set ret[0] = z and ret = Len = 2 Elements: {10, 0}
+Just set w[0] = 888 and w = Len = 3 Elements: {888, 8, 9}
+
+Just returned from call1(x,retVals) to call2() now: 
+z = Len = 3 Elements: {888, 8, 9} and ret = Len = 2 Elements: {10, 0}
+Just set z[0] = 99 and z = Len = 3 Elements: {99, 8, 9}
+Just set ret[1] = q[2][0] and ret = Len = 2 Elements: {10, 99}
+
+Just returned from call2(y,retVals) now: 
+y = Len = 3 Elements: {Len = 3 Elements: {99, 2, 3}, Len = 3 Elements: {99, 5, 6}, Len = 3 Elements: {99, 8, 9}} and retVals = Len = 2 Elements: {10, 99}
+Just created dd and dd = Len = 1 Elements: {Len = 1 Elements: {Len = 1 Elements: {1}}}
+In outer for and i = Len = 1 Elements: {Len = 1 Elements: {1}}
+In inner for and j = Len = 1 Elements: {1}
+Just set j[0] = 123, now j = Len = 1 Elements: {123}
+End of main and y[0][0] + dd[0][0][0] = 222
 

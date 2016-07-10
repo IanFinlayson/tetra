@@ -1,4 +1,9 @@
-hello
-goodbye
-7.2832
+In main and constant gC = 2
+Also, constant PI = 3.1416,
+global sum = PI * 2.0 = 6.2832,
+and constant nums = 1
+Just set local = 'hello' and local = hello
+Just added nums to sum and sum = 7.2832
+Just set local2 = 'goodbye' and local2 = goodbye
+Sum > 7.0 , sum = 7.2832
 

@@ -1,19 +1,5 @@
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
+In main(), just set x = [0] and x = Len = 1 Elements: {0}
 here
-indexNum = 0
 here
-indexNum = 0
-indexNum = 0
+At the end of main and x[0] = 15
 

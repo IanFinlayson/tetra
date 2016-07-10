@@ -1,3 +1,6 @@
-def main() int:
-   return 2
+def main():
+   print("In main.\n")
+   return 
+   print("This should never print. a")
    x = 4
+   print("This should never print. b")

@@ -1,1 +1,14 @@
+In main(), just set x = 4 and x = 4
+In main(), just set y = 4 and y = 4
+x = y
+x + y = 8
+x / y = 1
+x * y = 16
+x - y = 0
+Performed unstored operations and x = 4 and y = 4
+Just set z = x + x and z = 8
+Just set x = 2 and x = 2
+Just set y = 3 and y = 3
+Just set x = x + y and x = 5
+Just set y = y + x and y = 8
 

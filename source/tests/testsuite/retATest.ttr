@@ -1,10 +1,15 @@
-def main() int:
+def main():
    z = [1,2]
+   print("In main(), just created z and z = ", z, "\n")
    x = getArray(z)
+   print("In main(), just created set x = getArray(z) and x = ", x, "\n")
    x[1] += 10
-   return x[1] + z[1]
+   print("In main(), just added 10 to x[1] and x = ", x, "\n")
 
 def getArray(x [int]) [int]:
+   print("In getArray() and x = ", x, "\n")
    x[0] += 10
+   print("In getArray() just added 10 to x[0] and x = ", x, "\n")
    x[1] += 10
+   print("In getArray() just added 10 to x[1] and x = ", x, "\n")
    return x

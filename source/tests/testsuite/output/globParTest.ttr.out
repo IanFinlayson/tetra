@@ -1,6 +1,6 @@
-x = 1
-x = 2
-x = 3
-x = 4
-x = 4
+In main and global x = 1
+Locked y, added 1 to x and x = 2
+Locked y, added 1 to x and x = 3
+Locked y, added 1 to x and x = 4
+Just completed parallel execution and x = 4
 

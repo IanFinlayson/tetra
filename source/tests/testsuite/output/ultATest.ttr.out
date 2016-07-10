@@ -1,9 +1,4 @@
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 0
-indexNum = 1
-indexNum = 1
-indexNum = 1
-indexNum = 1
+In main(), just created x and x = Len = 2 Elements: {Len = 2 Elements: {Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}, Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}}, Len = 2 Elements: {Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}, Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}}}
+In main(), just set x[0][0][0][0] = 20 and x = Len = 2 Elements: {Len = 2 Elements: {Len = 2 Elements: {Len = 2 Elements: {20, 2}, Len = 2 Elements: {1, 2}}, Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}}, Len = 2 Elements: {Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}, Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {1, 2}}}}
+x[0][0][0][0] + x[1][1][1][1] = 22
 

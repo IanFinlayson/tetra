@@ -1,6 +1,7 @@
-def main() int:
+def main():
    i = 12
+   print("In main(), just set i = 12 and i = ", i, "\n")
    if i == 12:
       i = 10
+      print("In if block and just set i = 10, now i = ", i, "\n")
 
-   return i

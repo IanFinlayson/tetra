@@ -1,1 +1,11 @@
+In main(), just set ret = 0 and ret = 0
+Lock is held, just incremented ret and ret = 1
+Lock is held, just incremented ret and ret = 2
+Lock is held, just incremented ret and ret = 3
+Lock is held, just incremented ret and ret = 4
+Lock is held, just incremented ret and ret = 5
+Lock is held, just incremented ret and ret = 6
+Lock is held, just incremented ret and ret = 7
+Lock is held, just incremented ret and ret = 8
+Completed par for loop and ret = 8
 

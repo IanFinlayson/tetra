@@ -1,7 +1,17 @@
-indexNum = 0
-indexNum = 0
-1 and true1 or trueindexNum = 0
-indexNum = 0
-indexNum = 0
-0 or trueindexNum = 0
+In main(), just created a and a = 1
+In main(), just created b and b = 0
+In main(), just created x and x = Len = 1 Elements: {0}
+In main(), just created c and c =  and true
+In main(), just created d and d =  or true
+In boolTest() and z = Len = 1 Elements: {0}
+In boolTest(), just added 10 to z[0] and z = Len = 1 Elements: {10}
+a and booltest(x) are both true.
+In main(), just added 2 to x[0] and x = Len = 1 Elements: {12}
+a or booltest(x) is true.
+In main(), just added 2 to x[0] and x = Len = 1 Elements: {14}
+In boolTest() and z = Len = 1 Elements: {14}
+In boolTest(), just added 10 to z[0] and z = Len = 1 Elements: {24}
+b or booltest(x) is true.
+In main(), just added 2 to x[0] and x = Len = 1 Elements: {26}
+End of main() and x = Len = 1 Elements: {26}
 

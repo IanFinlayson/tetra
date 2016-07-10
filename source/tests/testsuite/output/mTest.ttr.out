@@ -1,1 +1,7 @@
+In arga(), just set x = 2 and x = 2
+Just returned to main from arga().
+In argb(), just set x = 2 and x = 2
+Just returned to main from argb(1).
+In argc(), just set x = 2 and x = 2
+Just returned to main from argc(2,2).
 

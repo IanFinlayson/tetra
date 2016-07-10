@@ -1,12 +1,7 @@
-indexNum = 0
-indexNum = 0
-indexNum = 0
-1
-indexNum = 0
-indexNum = 0
-indexNum = 0
-200
-indexNum = 0
-indexNum = 0
-indexNum = 0
+In main(), just created dd and dd = Len = 1 Elements: {Len = 1 Elements: {Len = 1 Elements: {1}}}
+In outer for loop and i = Len = 1 Elements: {Len = 1 Elements: {1}}
+In inner for loop and j = Len = 1 Elements: {1}
+Just set j[0] = 200 and j = Len = 1 Elements: {200}
+dd[0][0][0] = 200
+Out of for loop and dd = Len = 1 Elements: {Len = 1 Elements: {Len = 1 Elements: {200}}}
 

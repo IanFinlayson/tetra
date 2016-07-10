@@ -1,7 +1,15 @@
-indexNum = 0
-indexNum = 1
-indexNum = 0
-indexNum = 1
-indexNum = 1
-indexNum = 0
+Just created x and x = Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {3, 4}}
+Just set x[1][1] = 9999 and x = Len = 2 Elements: {Len = 2 Elements: {1, 2}, Len = 2 Elements: {3, 9999}}
+Just created z and z = 0
+i = Len = 2 Elements: {1, 2}
+z = 0, see: 0
+Just set d = i[0] and d = 1
+Just set k = i[1] and k = 2
+Just added 1 to z and z = 1
+i = Len = 2 Elements: {3, 9999}
+z != 0, see: 1
+Just set p = i[0] and p = 3
+Just set c = i[1] and c = 9999
+Just added 1 to z and z = 2
+x[0][1] = 2
 
