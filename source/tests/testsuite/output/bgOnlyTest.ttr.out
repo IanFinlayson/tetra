@@ -1,0 +1,4 @@
+The following error was detected in your program:
+Error: (line 2) syntax error, unexpected NEWLINE, expecting ':'
+
+Execution aborted
