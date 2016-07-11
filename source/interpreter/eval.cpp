@@ -101,12 +101,12 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       }
     } break;
     case NODE_IF: {
-      TData<bool> conditional;
+      TData<tbool> conditional;
       // evaluate the condition
-      evaluateNode<bool>(node->child(0), conditional, context);
+      evaluateNode<tbool>(node->child(0), conditional, context);
 
       // if the condition was found to be true, execute the 2nd child (child(1))
-      if (conditional.getData() == true) {
+      if (conditional.getData()) {
         evaluateNode<T>(node->child(1), ret, context);
       } else {
         // check for else block and execute it (child(2)) if it exists
@@ -116,13 +116,13 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       }
     } break;
     case NODE_WHILE: {
-      TData<bool> conditional;
+      TData<tbool> conditional;
       // evaluate the condition
-      evaluateNode<bool>(node->child(0), conditional, context);
+      evaluateNode<tbool>(node->child(0), conditional, context);
 
       // if the condition was found to be true, execute the 2nd branch
       // Then, reevaluate the condition
-      while (conditional.getData() == true) {
+      while (conditional.getData()) {
         // Loop body
         evaluateNode<T>(node->child(1), ret, context);
 
@@ -148,7 +148,7 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
         }
 
         // check the condition again, and store the result in 'condiitonal'
-        evaluateNode<bool>(node->child(0), conditional, context);
+        evaluateNode<tbool>(node->child(0), conditional, context);
       }
     } break;
     case NODE_ELIF: {
@@ -187,11 +187,11 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
       }
     } break;
     case NODE_ELIF_CLAUSE: {
-      TData<bool> condition;
+      TData<tbool> condition;
       // evaluate the condition for this ELIF clause
-      evaluateNode<bool>(node->child(0), condition, context);
+      evaluateNode<tbool>(node->child(0), condition, context);
       // if condiiton is true ,execute the body
-      if (condition.getData() == true) {
+      if (condition.getData()) {
         // If we have successfully taken a branch, we should notify the
         // interpreter that it no longer needs to check other branches
         context.normalizeStatus();
@@ -257,8 +257,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
             evaluateNode<T>(node->child(2), ret, context);
             break;
           case TYPE_BOOL:
-            *(context.lookupVar<bool>(node->child(0) /*->getString()*/)) =
-                *static_cast<bool*>((*iter).getData());
+            *(context.lookupVar<tbool>(node->child(0) /*->getString()*/)) =
+                *static_cast<tbool*>((*iter).getData());
             evaluateNode<T>(node->child(2), ret, context);
             break;
           case TYPE_STRING:
@@ -329,7 +329,7 @@ void pasteArgList(const Node* node1, const Node* node2,
         paste<double>(node1, node2, destinationScope, sourceContext);
         break;
       case TYPE_BOOL:
-        paste<bool>(node1, node2, destinationScope, sourceContext);
+        paste<tbool>(node1, node2, destinationScope, sourceContext);
         break;
       case TYPE_STRING:
         paste<tstring>(node1, node2, destinationScope, sourceContext);
@@ -495,7 +495,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
         ret.setData(context.lookupVar<double>(node /*->getString()*/));
         break;
       case TYPE_BOOL:
-        ret.setData(context.lookupVar<bool>(node /*->getString()*/));
+        ret.setData(context.lookupVar<tbool>(node /*->getString()*/));
         break;
       case TYPE_STRING:
         ret.setData(context.lookupVar<tstring>(node /*->getString()*/));
@@ -535,7 +535,13 @@ T paste(const Node* node1, const Node* node2, TetraContext& context) {
   // Evaluate address where the value should be stored, and the value to be
   // stored
   evaluateAddress<T*>(node1, op1, context);
-  evaluateNode<T>(node2, op2, context);
+
+  // If there is a value to paste...
+  if (node2) {
+    //get it.
+    evaluateNode<T>(node2, op2, context);
+    //otherwise...
+  }
 
   // Perform assignment
   T ret = op2.getData();
@@ -589,7 +595,7 @@ void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
       ret.setData(paste<double>(node->child(0), node->child(1), context));
       break;
     case TYPE_BOOL:
-      ret.setData(paste<bool>(node->child(0), node->child(1), context));
+      ret.setData(paste<tbool>(node->child(0), node->child(1), context));
       break;
     case TYPE_STRING:
       ret.setData(paste<tstring>(node->child(0), node->child(1), context));
@@ -611,7 +617,7 @@ void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
   // operation node
   static ComparisonList<int> compInt;
   static ComparisonList<double> compReal;
-  static ComparisonList<bool> compBool;
+  static ComparisonList<tbool> compBool;
   static ComparisonList<tstring> compString;
   static ComparisonList<TArray> compList;
 
@@ -788,7 +794,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
               // returnArray.outputElements<double>();
               break;
             case TYPE_BOOL:
-              evaluateVectorComponent<bool>(node, context, returnArray);
+              evaluateVectorComponent<tbool>(node, context, returnArray);
               // returnArray.outputElements<bool>();
               break;
             case TYPE_STRING:

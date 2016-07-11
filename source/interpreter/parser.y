@@ -247,7 +247,7 @@ init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
 
 /* a data declaration - either a constant or global */
 datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
-        $$ = new(GC) Node(NODE_CONST);
+  $$ = new(GC) Node(NODE_CONST);
   $$->addChild($2);
   $$->addChild($4);
 } | TOK_CONST typed_identifier TOK_ASSIGN assignterm {

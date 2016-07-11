@@ -22,20 +22,20 @@ void evaluateNode(const Node*, TData<T>&, TetraContext&);
 // For all types except for which a specialization is declared, classic negation
 // will do
 template <typename T>
-bool negator(T a) {
+tbool negator(T a) {
   return !a;
 }
 
 // The string negation will check for an empty string, which is as close to NULL
 // as the language presently becomes
 template <>
-bool negator<tstring>(tstring a) {
+tbool negator<tstring>(tstring a) {
   return a != "";
 }
 
 // Specialization for bitwise array negation for now will just return null
 template <>
-bool negator<TArray>(TArray a) {
+tbool negator<TArray>(TArray a) {
   UNUSED(a)
   return false;
 }
@@ -57,28 +57,28 @@ class ComparisonList {
 
   // looks up the appropriate operator according to the given NODE_KIND and
   // executes it
-  bool execute(const NodeKind n, TData<T>& a, TData<T>& b) {
+  tbool execute(const NodeKind n, TData<T>& a, TData<T>& b) {
     // This method violates the short-circuit policy of the language
     assert(false);
     return (this->*functionMap[n])(a.getData(), b.getData());
   }
 
-  bool execute(NodeKind n, const Node* a, const Node* b,
+  tbool execute(NodeKind n, const Node* a, const Node* b,
                TetraContext& context) {
     return (this->*compMap[n])(a, b, context);
   }
 
  private:
-  std::map<NodeKind, bool (ComparisonList<T>::*)(T, T), less<NodeKind>, gc_allocator<pair<NodeKind, bool (ComparisonList<T>::*)(T, T)> > > functionMap;
+  std::map<NodeKind, tbool (ComparisonList<T>::*)(T, T), less<NodeKind>, gc_allocator<pair<NodeKind, tbool (ComparisonList<T>::*)(T, T)> > > functionMap;
   std::map<NodeKind,
-           bool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&),less<NodeKind>, gc_allocator<pair<NodeKind,
-           bool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&)> > >
+           tbool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&),less<NodeKind>, gc_allocator<pair<NodeKind,
+           tbool (ComparisonList<T>::*)(const Node*, const Node*, TetraContext&)> > >
       compMap;
 
   // Define all the operations in function form, so they can be dynamically
   // called:
 
-  bool lessThan(const Node* a, const Node* b, TetraContext& context) {
+  tbool lessThan(const Node* a, const Node* b, TetraContext& context) {
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     TData<T> op2;
@@ -86,7 +86,7 @@ class ComparisonList {
     return op1.getData() < op2.getData();
   }
 
-  bool lessThanEq(const Node* a, const Node* b, TetraContext& context) {
+  tbool lessThanEq(const Node* a, const Node* b, TetraContext& context) {
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     TData<T> op2;
@@ -94,7 +94,7 @@ class ComparisonList {
     return op1.getData() <= op2.getData();
   }
 
-  bool greaterThan(const Node* a, const Node* b, TetraContext& context) {
+  tbool greaterThan(const Node* a, const Node* b, TetraContext& context) {
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     TData<T> op2;
@@ -102,7 +102,7 @@ class ComparisonList {
     return op1.getData() > op2.getData();
   }
 
-  bool greaterThanEq(const Node* a, const Node* b, TetraContext& context) {
+  tbool greaterThanEq(const Node* a, const Node* b, TetraContext& context) {
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     TData<T> op2;
@@ -110,7 +110,7 @@ class ComparisonList {
     return op1.getData() >= op2.getData();
   }
 
-  bool equal(const Node* a, const Node* b, TetraContext& context) {
+  tbool equal(const Node* a, const Node* b, TetraContext& context) {
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     TData<T> op2;
@@ -118,7 +118,7 @@ class ComparisonList {
     return op1.getData() == op2.getData();
   }
 
-  bool notEqual(const Node* a, const Node* b, TetraContext& context) {
+  tbool notEqual(const Node* a, const Node* b, TetraContext& context) {
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     TData<T> op2;
@@ -130,26 +130,26 @@ class ComparisonList {
   // Since negaiton does not work for strings or arrays, we will offload it to a
   // specialized function
 
-  bool logNot(const Node* a, const Node* b, TetraContext& context) {
+  tbool logNot(const Node* a, const Node* b, TetraContext& context) {
     UNUSED(b)
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
     return negator(op1.getData());
   }
-  bool logNot(T a, T b) {
+  tbool logNot(T a, T b) {
     UNUSED(b)
     return negator(a);
   }
 
-  bool lessThan(T a, T b) { return a < b; }
+  tbool lessThan(T a, T b) { return a < b; }
 
-  bool lessThanEq(T a, T b) { return a <= b; }
+  tbool lessThanEq(T a, T b) { return a <= b; }
 
-  bool greaterThan(T a, T b) { return a > b; }
+  tbool greaterThan(T a, T b) { return a > b; }
 
-  bool greaterThanEq(T a, T b) { return a >= b; }
+  tbool greaterThanEq(T a, T b) { return a >= b; }
 
-  bool equal(T a, T b) { return a == b; }
+  tbool equal(T a, T b) { return a == b; }
 
-  bool notEqual(T a, T b) { return a != b; }
+  tbool notEqual(T a, T b) { return a != b; }
 };

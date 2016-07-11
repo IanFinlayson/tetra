@@ -23,7 +23,7 @@ TData<void*>::TData(const TData<void*>& other)
         data = new(GC) double(*static_cast<double*>(other.data));
         break;
       case TYPE_BOOL:
-        data = new(GC) bool(*static_cast<bool*>(other.data));
+        data = new(GC) tbool(*static_cast<tbool*>(other.data));
         break;
       case TYPE_STRING:
         data = new(GC) tstring(*static_cast<tstring*>(other.data));
@@ -93,7 +93,7 @@ bool TData<double>::setData<double>(const double& pData) {
 
 template <>
 template <>
-bool TData<bool>::setData<bool>(const bool& pData) {
+bool TData<tbool>::setData<tbool>(const tbool& pData) {
   data = pData;
   return true;
 }
@@ -129,7 +129,7 @@ bool TData<double*>::setData<double*>(double* const& pData) {
 
 template <>
 template <>
-bool TData<bool*>::setData<bool*>(bool* const& pData) {
+bool TData<tbool*>::setData<tbool*>(tbool* const& pData) {
   data = pData;
   return true;
 }
@@ -175,7 +175,7 @@ void TData<void*>::setDeletableType<double>() {
 
 template <>
 template <>
-void TData<void*>::setDeletableType<bool>() {
+void TData<void*>::setDeletableType<tbool>() {
   pointedTo = DataType(TYPE_BOOL);
 }
 

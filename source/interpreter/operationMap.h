@@ -111,62 +111,63 @@ TArray calculateExponential(TArray& a, TArray& b) {
 // our templated class might allow for 1.1 << 2.2, etc
 template <typename T>
 T bitLeftShift(T a, T b) {
-  return a << b;
-}
-double bitLeftShift(double a, double b) {
   UNUSED(a)
   UNUSED(b)
-  return 0;
+  return T();
+}
+
+int bitLeftShift(int a, int b) {
+  return a << b;
 }
 
 template <typename T>
 T bitRightShift(T a, T b) {
-  return a >> b;
-}
-double bitRightShift(double a, double b) {
   UNUSED(a)
   UNUSED(b)
-  return 0;
+  return T();
+}
+int bitRightShift(int a, int b) {
+  return a >> b;
 }
 
 template <typename T>
 T bitwiseOr(T a, T b) {
-  return a | b;
-}
-double bitwiseOr(double a, double b) {
   UNUSED(a)
   UNUSED(b)
-  return 0;
+  return T();
+}
+int bitwiseOr(int a, int b) {
+  return a | b;
 }
 
 template <typename T>
 T bitwiseAnd(T a, T b) {
-  return a & b;
-}
-double bitwiseAnd(double a, double b) {
   UNUSED(a)
   UNUSED(b)
-  return 0;
+  return T();
+}
+int bitwiseAnd(int a, int b) {
+  return a & b;
 }
 
 template <typename T>
 T bitwiseXOr(T a, T b) {
-  return a ^ b;
-}
-double bitwiseXOr(double a, double b) {
   UNUSED(a)
   UNUSED(b)
-  return 0;
+  return T();
+}
+int bitwiseXOr(int a, int b) {
+  return a ^ b;
 }
 
 template <typename T>
 T remainderDivision(T a, T b) {
-  return a % b;
-}
-double remainderDivision(double a, double b) {
   UNUSED(a)
   UNUSED(b)
-  return 0;
+  return T();
+}
+int remainderDivision(int a, int b) {
+  return a % b;
 }
 
 template <typename T>
@@ -179,14 +180,14 @@ T logicalAnd(Node* a, Node* b, TetraContext& context) {
 }
 
 template <>
-bool logicalAnd(Node* a, Node* b, TetraContext& context) {
-  TData<bool> op1;
-  evaluateNode<bool>(a, op1, context);
+tbool logicalAnd(Node* a, Node* b, TetraContext& context) {
+  TData<tbool> op1;
+  evaluateNode<tbool>(a, op1, context);
   if (!(op1.getData())) {
     return false;
   } else {
-    TData<bool> op2;
-    evaluateNode<bool>(b, op2, context);
+    TData<tbool> op2;
+    evaluateNode<tbool>(b, op2, context);
     return op2.getData();
   }
 }
@@ -201,14 +202,14 @@ T logicalOr(Node* a, Node* b, TetraContext& context) {
 }
 
 template <>
-bool logicalOr(Node* a, Node* b, TetraContext& context) {
-  TData<bool> op1;
-  evaluateNode<bool>(a, op1, context);
+tbool logicalOr(Node* a, Node* b, TetraContext& context) {
+  TData<tbool> op1;
+  evaluateNode<tbool>(a, op1, context);
   if (op1.getData()) {
     return true;
   } else {
-    TData<bool> op2;
-    evaluateNode<bool>(b, op2, context);
+    TData<tbool> op2;
+    evaluateNode<tbool>(b, op2, context);
     return op2.getData();
   }
 }

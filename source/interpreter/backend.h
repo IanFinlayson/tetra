@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 #include "frontend.h"
+#include "tTypes.h"
 
 #include "microStack.h"
 
@@ -401,7 +402,7 @@ template <>
 bool TData<double>::setData<double>(const double&);
 template <>
 template <>
-bool TData<bool>::setData<bool>(const bool&);
+bool TData<tbool>::setData<tbool>(const tbool&);
 template <>
 template <>
 bool TData<tstring>::setData<tstring>(const tstring&);
@@ -416,7 +417,7 @@ template <>
 bool TData<tstring*>::setData<tstring*>(tstring* const&);
 template <>
 template <>
-bool TData<bool*>::setData<bool*>(bool* const&);
+bool TData<tbool*>::setData<tbool*>(tbool* const&);
 template <>
 template <>
 bool TData<TArray*>::setData<TArray*>(TArray* const&);
@@ -431,7 +432,7 @@ template <>
 void TData<void*>::setDeletableType<double>();
 template <>
 template <>
-void TData<void*>::setDeletableType<bool>();
+void TData<void*>::setDeletableType<tbool>();
 template <>
 template <>
 void TData<void*>::setDeletableType<tstring>();
