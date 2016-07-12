@@ -31,9 +31,16 @@ class tbool {
     tbool operator>(const tbool& other) {return tbool(this->b > other.b);}
     tbool operator>=(const tbool& other) {return tbool(this->b >= other.b);}
 
+    /* tbool output */
+    friend ostream& operator<<(ostream& os, const tbool& tb) {
+      tb.b ? os << "true" : os << "false";
+      return os;
+    }
+
   private:
     bool b;
 };
+
 
 class tint {
   public:

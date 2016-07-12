@@ -1,8 +1,8 @@
 Just created q and q = 86
 Just created w and w = 4
 Just created e and e = 222
-Just created x and x = 0
-Just created y and y = 1
+Just created x and x = false
+Just created y and y = true
 Not x.
 Not x and not y.
 End of main.
