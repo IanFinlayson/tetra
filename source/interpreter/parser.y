@@ -1118,7 +1118,7 @@ Node* parseFile(const tstring& fname) {
     /* call yyparse */
     yyparse();
 
-    //dumpTreeGraphviz(root);
+//    dumpTreeGraphviz(root);
 
     /* check and infer the types in the tree */
     initTypes(root);

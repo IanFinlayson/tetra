@@ -40,8 +40,8 @@ void print(const Node* args, TetraContext& context) {
         console.processStandardOutput(formattedData.str());
       } break;
       case TYPE_BOOL: {
-        TData<bool> value;
-        evaluateNode<bool>(args, value, context);
+        TData<tbool> value;
+        evaluateNode<tbool>(args, value, context);
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
         console.processStandardOutput(formattedData.str());

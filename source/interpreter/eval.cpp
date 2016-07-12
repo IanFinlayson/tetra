@@ -745,7 +745,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
         ret.setData(node->getReal());
         break;
       case NODE_BOOLVAL:
-        ret.setData(node->getBool());
+        ret.setData(tbool(node->getBool()));
         break;
       case NODE_STRINGVAL:
         ret.setData(node->getString());

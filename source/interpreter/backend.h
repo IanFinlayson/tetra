@@ -650,7 +650,7 @@ T* VarTable::lookupVar(const tstring varName) {
       TData<void*> insertable(newData_ptr);
       // Ensure that insertable gets copied correctly, and deleted correctly
       // when we are done
-      insertable.setDeletableType<T>();
+//jon      insertable.setDeletableType<T>();
       // Obtain write privelages
       pthread_rwlock_wrlock(&table_mutex);
 
@@ -661,7 +661,7 @@ T* VarTable::lookupVar(const tstring varName) {
 
       varList.push_back(
           std::pair<pthread_t, TData<void*> >(pthread_self(), insertable));
-      (varList.rbegin())->second.setDeletableType<T>();
+//jon      (varList.rbegin())->second.setDeletableType<T>();
       T* ret = static_cast<T*>((varList.rbegin())->second.getData());
       pthread_rwlock_unlock(&table_mutex);
       // cout << "Ret: " << ret << endl;
@@ -683,7 +683,7 @@ T* VarTable::lookupVar(const tstring varName) {
                                //so that all types have a default value
     TData<void*> insertable(newData_ptr);
     // Must notify TData that it is pointing at dynamically allocated memory
-    insertable.setDeletableType<T>();
+//jon    insertable.setDeletableType<T>();
 
     // Obtain write privelages before we insert
     pthread_rwlock_wrlock(&table_mutex);
@@ -756,7 +756,7 @@ T* VarTable::lookupVar(const Node* varNode) {
       TData<void*> insertable(newData_ptr);
       // Ensure that insertable gets copied correctly, and deleted correctly
       // when we are done
-      insertable.setDeletableType<T>();
+//jon      insertable.setDeletableType<T>();
       // Obtain write privelages
       pthread_rwlock_wrlock(&table_mutex);
 
@@ -767,7 +767,7 @@ T* VarTable::lookupVar(const Node* varNode) {
 
       varList.push_back(
           std::pair<pthread_t, TData<void*> >(pthread_self(), insertable));
-      (varList.rbegin())->second.setDeletableType<T>();
+//jon      (varList.rbegin())->second.setDeletableType<T>();
       T* ret = static_cast<T*>((varList.rbegin())->second.getData());
       pthread_rwlock_unlock(&table_mutex);
       // cout << "Ret: " << ret << endl;
@@ -798,7 +798,7 @@ T* VarTable::lookupVar(const Node* varNode) {
       // Attempting to assemble the TData object before insertion will lead to
       // either an extra allocation and object copy or a memory leak
       varMap[varName] = TData<void*>(newData_ptr);
-      varMap[varName].setDeletableType<T>();
+//jon      varMap[varName].setDeletableType<T>();
     }
     // else do nothing, as the statement after this block will retrieve the
     // correct value
