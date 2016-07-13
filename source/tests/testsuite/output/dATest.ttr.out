@@ -1,6 +1,6 @@
-Just created x and x = Len = 3 Elements: {2, 4, 6}
-In call() and a = Len = 3 Elements: {2, 4, 6}
-Just created y, set y = call(x),  and y = Len = 3 Elements: {2, 4, 6}
-Just set x[1] = 10 and x = Len = 3 Elements: {2, 10, 6}
-and y = Len = 3 Elements: {2, 10, 6}
+Just created x and x = [2, 4, 6]
+In call() and a = [2, 4, 6]
+Just created y, set y = call(x),  and y = [2, 4, 6]
+Just set x[1] = 10 and x = [2, 10, 6]
+and y = [2, 10, 6]
 

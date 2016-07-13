@@ -84,7 +84,7 @@ tint TArray::size() const { return elements->size(); }
 // Friend function, operator for printing
 std::ostream& operator<<(std::ostream& outStream, const TArray obj) {
   tint size = obj.size();
-  outStream << "Len = " << size << " Elements: {";
+  outStream << "[";
   // Print all elements except the last one
   for (unsigned long x = 0; x < (unsigned long int) size; x++) {
     const TData<void*>& element = obj.elementAt(x);
@@ -116,6 +116,6 @@ std::ostream& operator<<(std::ostream& outStream, const TArray obj) {
     }
   }
   // close bracket
-  outStream << "}";
+  outStream << "]";
   return outStream;
 }

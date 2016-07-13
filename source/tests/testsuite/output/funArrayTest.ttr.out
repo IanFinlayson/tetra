@@ -1,10 +1,10 @@
-Just created passer and passer = Len = 3 Elements: {1, 2, 3}
-Just entered cally() and argx = Len = 3 Elements: {1, 2, 3}
-Just entered caller() and argy = Len = 3 Elements: {1, 2, 3}
-Just set argy[0] = 10 and argy = Len = 3 Elements: {10, 2, 3}
-Just set argy[1] = 20 and argy = Len = 3 Elements: {10, 20, 3}
-Just set argy[2] = 30 and argy = Len = 3 Elements: {10, 20, 30}
-In cally(), just returned from caller(argx), and argx = Len = 3 Elements: {10, 20, 30}
-In main, just returned from cally(passer) and passer = Len = 3 Elements: {10, 20, 30}
+Just created passer and passer = [1, 2, 3]
+Just entered cally() and argx = [1, 2, 3]
+Just entered caller() and argy = [1, 2, 3]
+Just set argy[0] = 10 and argy = [10, 2, 3]
+Just set argy[1] = 20 and argy = [10, 20, 3]
+Just set argy[2] = 30 and argy = [10, 20, 30]
+In cally(), just returned from caller(argx), and argx = [10, 20, 30]
+In main, just returned from cally(passer) and passer = [10, 20, 30]
 passer[0] + passer[1] + passer[2] = 60
 

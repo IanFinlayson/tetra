@@ -1,7 +1,7 @@
-In main(), just created z and z = Len = 2 Elements: {1, 2}
-In getArray() and x = Len = 2 Elements: {1, 2}
-In getArray() just added 10 to x[0] and x = Len = 2 Elements: {11, 2}
-In getArray() just added 10 to x[1] and x = Len = 2 Elements: {11, 12}
-In main(), just created set x = getArray(z) and x = Len = 2 Elements: {11, 12}
-In main(), just added 10 to x[1] and x = Len = 2 Elements: {11, 22}
+In main(), just created z and z = [1, 2]
+In getArray() and x = [1, 2]
+In getArray() just added 10 to x[0] and x = [11, 2]
+In getArray() just added 10 to x[1] and x = [11, 12]
+In main(), just created set x = getArray(z) and x = [11, 12]
+In main(), just added 10 to x[1] and x = [11, 22]
 

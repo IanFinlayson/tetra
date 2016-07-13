@@ -1,4 +1,4 @@
-In main(), just set x = [0] and x = Len = 1 Elements: {0}
+In main(), just set x = [0] and x = [0]
 here
 here
 At the end of main and x[0] = 15

@@ -1,6 +1,6 @@
-Just created array1 and array1 = Len = 5 Elements: {1, 2, 3, 4, 5}
-Just created array2 and array1 = Len = 5 Elements: {6, 7, 8, 9, 10}
-Just changed set array1 = array2 and array1 = Len = 5 Elements: {6, 7, 8, 9, 10}
+Just created array1 and array1 = [1, 2, 3, 4, 5]
+Just created array2 and array1 = [6, 7, 8, 9, 10]
+Just changed set array1 = array2 and array1 = [6, 7, 8, 9, 10]
 Just created sum and sum = 0
 In for loop and num = 6
 Just added num to sum and sum = 6

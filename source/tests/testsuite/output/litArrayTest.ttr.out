@@ -1,5 +1,5 @@
-In main(), just created o and o = Len = 3 Elements: {1, 2, 3}
-In call() and x = Len = 3 Elements: {1, 2, 3}
-In call(), just set x[0] = 12 and x = Len = 3 Elements: {12, 2, 3}
-In main(), just returned from call(o) and o = Len = 3 Elements: {12, 2, 3}
+In main(), just created o and o = [1, 2, 3]
+In call() and x = [1, 2, 3]
+In call(), just set x[0] = 12 and x = [12, 2, 3]
+In main(), just returned from call(o) and o = [12, 2, 3]
 
