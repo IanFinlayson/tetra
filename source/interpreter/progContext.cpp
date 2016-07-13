@@ -145,8 +145,8 @@ void TetraContext::initializeGlobalVars(const Node* tree) {
       }
 
       // perform assignment at this global scope
-      TData<int> dummy;
-      evaluateNode<int>(candidate, dummy, *this);
+      TData<tint> dummy;
+      evaluateNode<tint>(candidate, dummy, *this);
     }
 
     if (tree->child(1) != NULL) {

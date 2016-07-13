@@ -17,7 +17,7 @@ TData<void*>::TData(const TData<void*>& other)
     // the value into the new memory location
     switch (other.pointedTo.getKind()) {
       case TYPE_INT:
-        data = new(GC) int(*static_cast<int*>(other.data));
+        data = new(GC) tint(*static_cast<tint*>(other.data));
         break;
       case TYPE_REAL:
         data = new(GC) double(*static_cast<double*>(other.data));
@@ -79,7 +79,7 @@ TData<void*>::~TData() {
 // specialization
 template <>
 template <>
-bool TData<int>::setData<int>(const int& pData) {
+bool TData<tint>::setData<tint>(const tint& pData) {
   data = pData;
   return true;
 }
@@ -115,7 +115,7 @@ bool TData<TArray>::setData<TArray>(const TArray& pData) {
 // Pointer specializations (used for address lookup)
 template <>
 template <>
-bool TData<int*>::setData<int*>(int* const& pData) {
+bool TData<tint*>::setData<tint*>(tint* const& pData) {
   data = pData;
   return true;
 }
@@ -163,7 +163,7 @@ bool TData<void*>::setData<void*>(void* const& pData) {
 
 template <>
 template <>
-void TData<void*>::setDeletableType<int>() {
+void TData<void*>::setDeletableType<tint>() {
   pointedTo = DataType(TYPE_INT);
 }
 
@@ -217,7 +217,7 @@ TData<void*>& TData<void*>::operator=(const TData<void*>& other) {
     switch (other.pointedTo.getKind()) {
       case TYPE_INT:
         //delete static_cast<int*>(data);
-        data = new(GC) int(*static_cast<int*>(other.data));
+        data = new(GC) tint(*static_cast<tint*>(other.data));
         break;
       case TYPE_REAL:
         //delete static_cast<double*>(data);

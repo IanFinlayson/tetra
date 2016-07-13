@@ -92,98 +92,116 @@ tstring operator%(tstring a, tstring b) {
 // Other types return stubbed values
 template <typename T>
 T calculateExponential(T a, T b) {
-  return pow(static_cast<double>(a), static_cast<double>(b));
-}
-tstring calculateExponential(tstring a, tstring b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
-  return "";
+  return T();
 }
-TArray calculateExponential(TArray& a, TArray& b) {
-  UNUSED(a)
-  UNUSED(b)
-  // return default TArray
-  TArray x;
-  return x;
+template <>
+tint calculateExponential<tint>(tint a, tint b) {
+  return a.pow(b);
+}
+template <>
+double calculateExponential<double>(double a, double b) {
+  return std::pow(a,b);
 }
 
 // overloaded funcitons for bitwise operators (to make the compiler happy that
 // our templated class might allow for 1.1 << 2.2, etc
 template <typename T>
 T bitLeftShift(T a, T b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
   return T();
 }
-
-int bitLeftShift(int a, int b) {
+template <>
+tint bitLeftShift<tint>(tint a, tint b) {
   return a << b;
 }
 
 template <typename T>
 T bitRightShift(T a, T b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
   return T();
 }
-int bitRightShift(int a, int b) {
+template <>
+tint bitRightShift<tint>(tint a, tint b) {
   return a >> b;
 }
 
 template <typename T>
 T bitwiseOr(T a, T b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
   return T();
 }
-int bitwiseOr(int a, int b) {
+template <>
+tint bitwiseOr<tint>(tint a, tint b) {
   return a | b;
 }
 
 template <typename T>
 T bitwiseAnd(T a, T b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
   return T();
 }
-int bitwiseAnd(int a, int b) {
+template <>
+tint bitwiseAnd<tint>(tint a, tint b) {
   return a & b;
 }
 
 template <typename T>
 T bitwiseXOr(T a, T b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
   return T();
 }
-int bitwiseXOr(int a, int b) {
+template <>
+tint bitwiseXOr<tint>(tint a, tint b) {
   return a ^ b;
 }
 
 template <typename T>
+T bitwiseNot(T a) {
+  assert(false);
+  UNUSED(a)
+  return T();
+}
+template <>
+tint bitwiseNot<tint>(tint a) {
+  return ~a;
+}
+
+template <typename T>
 T remainderDivision(T a, T b) {
+  assert(false);
   UNUSED(a)
   UNUSED(b)
   return T();
 }
-int remainderDivision(int a, int b) {
+template <>
+tint remainderDivision<tint>(tint a, tint b) {
   return a % b;
 }
 
 template <typename T>
-T logicalAnd(Node* a, Node* b, TetraContext& context) {
-  TData<T> op1;
-  evaluateNode<T>(a, op1, context);
-  TData<T> op2;
-  evaluateNode<T>(b, op2, context);
-  return op1.getData() && op2.getData();
+T logicalAnd(T a, Node* b, TetraContext& context) {
+  assert(false);
+  UNUSED(context)
+  UNUSED(a)
+  UNUSED(b)
+  return T();
 }
-
 template <>
-tbool logicalAnd(Node* a, Node* b, TetraContext& context) {
-  TData<tbool> op1;
-  evaluateNode<tbool>(a, op1, context);
-  if (!(op1.getData())) {
+tbool logicalAnd<tbool>(tbool a, Node* b, TetraContext& context) {
+  if (!a) {
     return false;
   } else {
     TData<tbool> op2;
@@ -194,15 +212,14 @@ tbool logicalAnd(Node* a, Node* b, TetraContext& context) {
 
 template <typename T>
 T logicalOr(Node* a, Node* b, TetraContext& context) {
-  TData<T> op1;
-  evaluateNode<T>(a, op1, context);
-  TData<T> op2;
-  evaluateNode<T>(b, op2, context);
-  return op1.getData() || op2.getData();
+  assert(false);
+  UNUSED(context)
+  UNUSED(a)
+  UNUSED(b)
+  return T();
 }
-
 template <>
-tbool logicalOr(Node* a, Node* b, TetraContext& context) {
+tbool logicalOr<tbool>(Node* a, Node* b, TetraContext& context) {
   TData<tbool> op1;
   evaluateNode<tbool>(a, op1, context);
   if (op1.getData()) {
@@ -325,11 +342,11 @@ class OperationList {
 
   T logAnd(Node* a, Node* b, TetraContext& context) {
     // return a + b;
-    /*	TData<T> op1;
+      	TData<T> op1;
         evaluateNode<T>(a,op1,context);
-        TData<T> op2;
-        evaluateNode<T>(b,op2,context);*/
-    return logicalAnd<T>(a, b, context);
+       // TData<T> op2;
+        //evaluateNode<T>(b,op2,context);
+    return logicalAnd<T>(op1.getData(), b, context);
   }
 
   T bitXOr(Node* a, Node* b, TetraContext& context) {
@@ -364,7 +381,7 @@ class OperationList {
     // return a + b;
     TData<T> op1;
     evaluateNode<T>(a, op1, context);
-    return !op1.getData();
+    return bitwiseNot(op1.getData());
   }
 
   T shiftLeft(Node* a, Node* b, TetraContext& context) {

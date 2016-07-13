@@ -30,11 +30,11 @@ TArray::~TArray() {}
 
 // Returns a reference to a TData containing a pointer to the data associated
 // with index. Note that this can be used for reading AND writing
-TData<void*>& TArray::elementAt(unsigned int index) {
+TData<void*>& TArray::elementAt(tint index) {
   // check for out-of-bounds access (note that parameter is unsigned, cannot be
   // < 0
   if (index < elements->size()) {
-    return (*elements)[index];
+    return (*elements)[(unsigned long int) index];
   } else {
     // Print error message and terminate
     tstringstream message;
@@ -46,11 +46,11 @@ TData<void*>& TArray::elementAt(unsigned int index) {
 }
 
 // The const version of elementAt
-const TData<void*>& TArray::elementAt(unsigned int index) const {
+const TData<void*>& TArray::elementAt(tint index) const {
   // check for out-of-bounds access (note that parameter is unsigned, cannot be
   // < 0
   if (index < elements->size()) {
-    return (*elements)[index];
+    return (*elements)[(unsigned long int)index];
   } else {
     std::basic_stringstream<char,char_traits<char>, gc_allocator<char> > message;
     message << "Attempted to access an array out of bounds.\nRequested element "
@@ -79,26 +79,26 @@ TArray::end() const {
   return elements->end();
 }
 
-int TArray::size() const { return elements->size(); }
+tint TArray::size() const { return elements->size(); }
 
 // Friend function, operator for printing
 std::ostream& operator<<(std::ostream& outStream, const TArray obj) {
-  int size = obj.size();
+  tint size = obj.size();
   outStream << "Len = " << size << " Elements: {";
   // Print all elements except the last one
-  for (int x = 0; x < size; x++) {
+  for (unsigned long x = 0; x < (unsigned long int) size; x++) {
     const TData<void*>& element = obj.elementAt(x);
     // as usual, we must typecheck the returned elemntes so we can print them
     // properly
     switch (element.getPointedTo().getKind()) {
       case TYPE_INT:
-        outStream << *static_cast<int*>(element.getData());
+        outStream << *static_cast<tint*>(element.getData());
         break;
       case TYPE_REAL:
         outStream << *static_cast<double*>(element.getData());
         break;
       case TYPE_BOOL:
-        outStream << *static_cast<bool*>(element.getData());
+        outStream << *static_cast<tbool*>(element.getData());
         break;
       case TYPE_STRING:
         outStream << *static_cast<string*>(element.getData());
@@ -111,7 +111,7 @@ std::ostream& operator<<(std::ostream& outStream, const TArray obj) {
     }
 
     // If this was not the last element, print a comma
-    if (x + 1 != size) {
+    if (x + 1 != (unsigned long int) size) {
       outStream << ", ";
     }
   }

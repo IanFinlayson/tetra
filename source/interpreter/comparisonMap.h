@@ -23,6 +23,12 @@ void evaluateNode(const Node*, TData<T>&, TetraContext&);
 // will do
 template <typename T>
 tbool negator(T a) {
+  UNUSED(a); 
+  return tbool();
+}
+
+template <>
+tbool negator<tbool>(tbool a) {
   return !a;
 }
 

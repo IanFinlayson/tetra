@@ -168,7 +168,7 @@ void wrapMultiEvaluation(void* args) {
 
   // possible optimization: if the array willdefinitely not change size during
   // the parForLoop execution, then we can pre-calculate the size once
-  while (*(argList.countVal_ptr) < /*arraySize*/ argList.values_ptr->size()) {
+  while (*(argList.countVal_ptr) < /*arraySize*/ (int) argList.values_ptr->size()) {
     // TODO fix race condition as of 11/10/14
     // This is expected to be a parallel variable
     (*(argList.args_ptr->scope)
@@ -207,7 +207,7 @@ void wrapMultiEvaluation(void* args) {
     // theother threads will stop on the next go-around
     if (contextCopy.queryExecutionStatus() == BREAK) {
       // Now the while condition will be false for all threads
-      *(argList.countVal_ptr) = argList.values_ptr->size();
+      *(argList.countVal_ptr) = (int)argList.values_ptr->size();
     }
   }
 
@@ -295,7 +295,7 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
         collection.setData<TArray*>(collection_ptr);
       }
 
-      const int NUM_THREADS = TetraEnvironment::getMaxThreads();
+      const unsigned long NUM_THREADS = TetraEnvironment::getMaxThreads();
 
       std::vector<pthread_t, gc_allocator<pthread_t> > workers;
 
@@ -325,15 +325,15 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
       // TODO: confirm whther this lock is necessary
       pthread_mutex_lock(&iter_mutex);
 
-      for (int x = 0; x < NUM_THREADS && x < collection.getData()->size();
+      for (unsigned long x = 0; x < NUM_THREADS && x < (unsigned long int) collection.getData()->size();
            x++) {
         pthread_t temp;
         workers.push_back(temp);
         // cout << "worker before: " << workers[x] << endl;
         switch (node->child(0)->type()->getKind()) {
           case TYPE_INT: {
-            TData<int> stub;
-            workers[x] = spawnWorker<int>(
+            TData<tint> stub;
+            workers[x] = spawnWorker<tint>(
                 node->child(2), stub, context, node->child(0)->getString(),
                 collection.getData(), &currentIteration, &iter_mutex);
           } break;
@@ -344,8 +344,8 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
                 collection.getData(), &currentIteration, &iter_mutex);
           } break;
           case TYPE_BOOL: {
-            TData<bool> stub;
-            workers[x] = spawnWorker<bool>(
+            TData<tbool> stub;
+            workers[x] = spawnWorker<tbool>(
                 node->child(2), stub, context, node->child(0)->getString(),
                 collection.getData(), &currentIteration, &iter_mutex);
           } break;
@@ -379,8 +379,8 @@ void evaluateParallel(const Node* node, TData<T>& ret, TetraContext& context) {
       }
 
       // Wait for all the worker threads to terminate
-      for (int index = 0;
-           index < NUM_THREADS && index < collection.getData()->size();
+      for (unsigned long index = 0;
+           index < NUM_THREADS && index < (unsigned long int) collection.getData()->size();
            index++) {
         pthread_join(workers[index], NULL);
       }

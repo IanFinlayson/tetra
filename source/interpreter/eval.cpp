@@ -36,8 +36,8 @@ TArray* evaluateVecVal(const Node* node, TData<T>& ret,
 
   TArray* vec;
   //get the index
-  TData<int> indexNum;
-  evaluateNode<int>(node->child(1), indexNum, context);
+  TData<tint> indexNum;
+  evaluateNode<tint>(node->child(1), indexNum, context);
    
   //if there are more indices below this
   if (node->child(0)->kind() == NODE_INDEX) {
@@ -247,8 +247,8 @@ void evaluateStatement(const Node* node, TData<T>& ret, TetraContext& context) {
         // Must perform type checking
         switch (node->child(0)->type()->getKind()) {
           case TYPE_INT:
-            *(context.lookupVar<int>(node->child(0) /*->getString()*/)) =
-                *static_cast<int*>((*iter).getData());
+            *(context.lookupVar<tint>(node->child(0) /*->getString()*/)) =
+                *static_cast<tint*>((*iter).getData());
             evaluateNode<T>(node->child(2), ret, context);
             break;
           case TYPE_REAL:
@@ -323,7 +323,7 @@ void pasteArgList(const Node* node1, const Node* node2,
     // Paste the value from the source to the destination
     switch (node1->type()->getKind()) {
       case TYPE_INT:
-        paste<int>(node1, node2, destinationScope, sourceContext);
+        paste<tint>(node1, node2, destinationScope, sourceContext);
         break;
       case TYPE_REAL:
         paste<double>(node1, node2, destinationScope, sourceContext);
@@ -449,8 +449,8 @@ TArray* evaluateVecRef(const Node* node, TData<T>& ret,
   TArray* vec;
 
   //get the index
-  TData<int> indexNum;
-  evaluateNode<int>(node->child(1), indexNum, context);
+  TData<tint> indexNum;
+  evaluateNode<tint>(node->child(1), indexNum, context);
    
   //if there are more indices below this
   if (node->child(0)->kind() == NODE_INDEX) {
@@ -489,7 +489,7 @@ void evaluateAddress(const Node* node, TData<T>& ret, TetraContext& context) {
 
     switch (node->type()->getKind()) {
       case TYPE_INT:
-        ret.setData(context.lookupVar<int>(node /*->getString()*/));
+        ret.setData(context.lookupVar<tint>(node /*->getString()*/));
         break;
       case TYPE_REAL:
         ret.setData(context.lookupVar<double>(node /*->getString()*/));
@@ -589,7 +589,7 @@ void performAssignment(const Node* node, TData<T>& ret, TetraContext& context) {
   switch (node->child(0)->type()->getKind()) {
     case TYPE_INT:
       // Performs the assignment and sets up the return
-      ret.setData(paste<int>(node->child(0), node->child(1), context));
+      ret.setData(paste<tint>(node->child(0), node->child(1), context));
       break;
     case TYPE_REAL:
       ret.setData(paste<double>(node->child(0), node->child(1), context));
@@ -615,7 +615,7 @@ template <typename T>
 void evaluateCondition(const Node* node, TData<T>& ret, TetraContext& context) {
   // Static tables containing what type of comparison to perform given which
   // operation node
-  static ComparisonList<int> compInt;
+  static ComparisonList<tint> compInt;
   static ComparisonList<double> compReal;
   static ComparisonList<tbool> compBool;
   static ComparisonList<tstring> compString;
@@ -739,7 +739,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
   else {
     switch (node->kind()) {
       case NODE_INTVAL:
-        ret.setData(node->getInt());
+        ret.setData(tint(node->getInt()));
         break;
       case NODE_REALVAL:
         ret.setData(node->getReal());
@@ -754,23 +754,23 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
         TArray returnArray;
 
         // Evaluate the bounds of the range
-        TData<int> lowerBound;
-        evaluateNode<int>(node->child(0), lowerBound, context);
-        TData<int> upperBound;
-        evaluateNode<int>(node->child(1), upperBound, context);
+        TData<tint> lowerBound;
+        evaluateNode<tint>(node->child(0), lowerBound, context);
+        TData<tint> upperBound;
+        evaluateNode<tint>(node->child(1), upperBound, context);
 
         // Assembles the array
-        for (int num = lowerBound.getData(); num <= upperBound.getData();
+        for (tint num = lowerBound.getData(); num <= upperBound.getData();
              num++) {
           // Sets up the TData to be properly copied into the array, so that it
           // will exist beyond this scope
           TData<void*> inserter;
           inserter.setData<void*>(&num);
-          inserter.setDeletableType<int>();
+          //std::cout << "&num = " << &num << " and num = " << num << endl;
+          inserter.setDeletableType<tint>();
 
           // Now, addElement inserts the element as a deep copy
           returnArray.addElement(inserter);
-
           // because inserter's data was not dynamically allocated, we must
           // prevent it from being freed on destruction
           inserter.setDeletableType<void>();
@@ -786,7 +786,7 @@ void evaluateImmediate(const Node* node, TData<T>& ret, TetraContext& context) {
         if (node->numChildren() > 0) {
           switch (node->child(0)->type()->getKind()) {
             case TYPE_INT:
-              evaluateVectorComponent<int>(node, context, returnArray);
+              evaluateVectorComponent<tint>(node, context, returnArray);
               // returnArray.outputElements<int>();
               break;
             case TYPE_REAL:
@@ -979,7 +979,7 @@ int interpret(Node* tree, int debug, int threads) {
   tContext.initializeGlobalVars(tree);
 
   // will hold value returned to OS. 0 if main does not return an int
-  TData<int> retVal(0);
+  TData<tint> retVal(0);
 
   // Initialize a scope fpr the main method, and run!
   tContext.initializeNewScope(start);
@@ -995,11 +995,11 @@ int interpret(Node* tree, int debug, int threads) {
                                                     tContext);
   }
 
-  evaluateNode<int>(start, retVal, tContext);
+  evaluateNode<tint>(start, retVal, tContext);
   ThreadEnvironment::joinDetachedThreads();
 
   tContext.exitScope();
 
   // Return the value from main
-  return retVal.getData();
+  return 0;//retVal.getData();
 }

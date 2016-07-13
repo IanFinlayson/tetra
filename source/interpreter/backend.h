@@ -169,8 +169,8 @@ class TArray {
   ~TArray();
 
   /* get elements pointed at a certain index */
-  TData<void*>& elementAt(unsigned int);
-  const TData<void*>& elementAt(unsigned int) const;
+  TData<void*>& elementAt(tint);
+  const TData<void*>& elementAt(tint) const;
 
   /* add an element using copy constructor */
   void addElement(const TData<void*>&);
@@ -185,7 +185,7 @@ class TArray {
   end() const;
 
   /* get the size of the array */
-  int size() const;
+  tint size() const;
 
   /* copy assignment operator */
   TArray& operator=(const TArray& other);
@@ -396,7 +396,7 @@ void TData<void*>::setDeletableType<TArray>();
    may occur */
 template <>
 template <>
-bool TData<int>::setData<int>(const int&);
+bool TData<tint>::setData<tint>(const tint&);
 template <>
 template <>
 bool TData<double>::setData<double>(const double&);
@@ -408,7 +408,7 @@ template <>
 bool TData<tstring>::setData<tstring>(const tstring&);
 template <>
 template <>
-bool TData<int*>::setData<int*>(int* const&);
+bool TData<tint*>::setData<tint*>(tint* const&);
 template <>
 template <>
 bool TData<double*>::setData<double*>(double* const&);
@@ -426,7 +426,7 @@ template <>
 bool TData<void*>::setData<void*>(void* const&);
 template <>
 template <>
-void TData<void*>::setDeletableType<int>();
+void TData<void*>::setDeletableType<tint>();
 template <>
 template <>
 void TData<void*>::setDeletableType<double>();
@@ -1339,8 +1339,8 @@ double readReal(int thread);
 bool readBool(int thread);
 tstring readString(int thread);
 // All len functions count as a single function for TSL_FUNCS
-int len(TArray&);
-int len(tstring&);
+tint len(TArray&);
+tint len(tstring&);
 
 /*
  * This class is used in reporting runtime errors

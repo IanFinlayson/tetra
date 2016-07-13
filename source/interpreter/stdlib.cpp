@@ -25,8 +25,8 @@ void print(const Node* args, TetraContext& context) {
         TetraEnvironment::getConsole(context.getThreadID(), false);
     switch (args->type()->getKind()) {
       case TYPE_INT: {
-        TData<int> value;
-        evaluateNode<int>(args, value, context);
+        TData<tint> value;
+        evaluateNode<tint>(args, value, context);
         // Prints the value, flushes the buffer WITHOUT a new line
         // TetraEnvironment::getOutputStream() << value.getData() << std::flush;
         formattedData << value.getData();
@@ -110,9 +110,9 @@ tstring readString(int threadNum) {
   tstring ret =
       TetraEnvironment::getConsole(threadNum, false).receiveStandardInput();
 
-  return ret;
+ return ret;
 }
 
-int len(TArray& arg) { return arg.size(); }
+tint len(TArray& arg) { return arg.size(); }
 
-int len(tstring& arg) { return arg.size(); }
+tint len(tstring& arg) { return arg.size(); }
