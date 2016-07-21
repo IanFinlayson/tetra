@@ -1,20 +1,28 @@
-def main() int:
+def main():
    vec = ["a","b","c","d","e"]
+   print("Just made 'vec' and vec = ", vec, "\n")
    forTest(vec)
+   print("Just returned from forTest() and vec = ", vec, "\n")
    if vec[0] == "a":
-      return 10
+      print("vec[0] = 'a'","\n")
    elif vec[1] == "b":
-      return 20
+      print("vec[1] = 'b'","\n")
    elif vec[2] == "qq" and vec[4] == "qq":
-      return 30
+      print("vec[2] = 'qq' and vec[4] = 'qq'","\n")
    else:
-      return 40
+      print("none of those things ^^", "\n")
 
 def forTest(par [string]):
+   print("Just entered forTest() and par = ", par, "\n")
    for i in [0 ... 4]:
+      print("i = ", i, "\n")
       par[i] = "qq"
+      print("Just set par[i] = 'qq' and par = ", par, "\n")
       if i == 2:
+         print("in the i = 2 block and i = ", i, "\n")
          continue
       if i > 3:
+         print("in the i > 3 block and i = ", i, "\n")
          break
       par[i] = "q"
+      print("Just set par[i] = 'q' and par = ", par, "\n")

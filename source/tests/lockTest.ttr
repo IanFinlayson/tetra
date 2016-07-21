@@ -1,22 +1,23 @@
-def main() int:
+def main():
    a = 0
    b = 0
    c = 0
+   print("Just set a,b,c = 0 and a = ",a, ", b = ", b, "c = ",c,"\n")
    background:
       while a < 100:
-         a += 1
          lock sum:
             c += 1
+            print("In sum lock, just added 1 to c and c = ",c,"\n")
+         a += 1
    background:
       while b < 100:
-         b += 1
          lock sum:
             c += 1
+            print("In sum lock, just added 1 to c and c = ",c,"\n")
+         b += 1
 
    while a != 100 or b != 100:
       pass
    if a + b == c:
-      return c
-   print("a: ",a," b: ", b)
-   print("c:",c,"\n")
-   return c
+      print("a + b = c", "\n")   
+   print("End of main, a = ", a, ", b = ", b," and c = ",c, "\n")

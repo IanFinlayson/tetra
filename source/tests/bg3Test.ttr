@@ -1,10 +1,12 @@
-def main() int:
+def main():
    v = [0]
+   print("Just set v = [0] and v = ", v, "\n")
    doStuff(v)
-   return v[0]
+   print("Just set returned from doStuff(v) and v[0] = ", v[0], "\n")
 
 def doStuff(v [int]):
    x = 2
+   print("In doStuff(), just set x = 2 and x = ", x,  "\n")
    background:
       for z in [1 ... 1000]:
          pass

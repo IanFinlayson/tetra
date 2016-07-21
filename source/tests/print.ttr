@@ -1,6 +1,0 @@
-def main() int:
-   print(2)
-   print(true)
-   print("2354ewrdgfdhraytr")
-   print(1,"\n")
-   return 0

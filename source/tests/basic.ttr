@@ -1,8 +1,0 @@
-def main() int:
-   x = 0
-   if x == 0:
-      do(x)
-   return 0
-
-def do(y int):
-   y = 0

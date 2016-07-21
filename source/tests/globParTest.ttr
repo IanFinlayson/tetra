@@ -1,16 +1,16 @@
 global x = 1
 
-def main() int:
-   print("x = ",x,"\n")
+def main():
+   print("In main and global x = ",x,"\n")
    parallel:
       lock y:
          x += 1
-         print("x = ",x,"\n")
+         print("Locked y, added 1 to x and x = ",x,"\n")
       lock y:
          x += 1
-         print("x = ",x,"\n")
+         print("Locked y, added 1 to x and x = ",x,"\n")
       lock y:
          x += 1
-         print("x = ",x,"\n")
-   print("x = ",x,"\n")
-   return x
+         print("Locked y, added 1 to x and x = ",x,"\n")
+
+   print("Just completed parallel execution and x = ", x, "\n")

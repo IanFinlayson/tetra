@@ -1,10 +1,16 @@
-def main() int:
+def main():
    q = 100 ^ 50
+   print("Just created q and q = ", q, "\n")
    w = 100 & 5
+   print("Just created w and w = ", w, "\n")
    e = 222 | 222
+   print("Just created e and e = ", e, "\n")
    x = not true
+   print("Just created x and x = ", x, "\n")
    y = true
+   print("Just created y and y = ", y, "\n")
    if not x:
+      print("Not x.", "\n") 
       if not x and y:
-         return 10
-   return 20
+         print("Not x and not y.", "\n") 
+   print("End of main.", "\n")

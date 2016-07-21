@@ -1,13 +1,24 @@
-def main() int:
+def main():
    x = [[1,2],[3,4]]
+   print("Just created x and x = ", x, "\n")
    x[1][1] = 9999
+   print("Just set x[1][1] = 9999 and x = ", x, "\n")
    z = 0
+   print("Just created z and z = ", z, "\n")
    for i in x:
+      print("i = ", i, "\n")
       if z == 0:
+         print("z = 0, see: ", z, "\n")
          d = i[0]
+         print("Just set d = i[0] and d = ", d, "\n")
          k = i[1]
+         print("Just set k = i[1] and k = ", k, "\n")
       else:
+         print("z != 0, see: ", z, "\n")
          p = i[0]
+         print("Just set p = i[0] and p = ", p, "\n")
          c = i[1]
+         print("Just set c = i[1] and c = ", c, "\n")
       z = z + 1
-   return x[0][1]
+      print("Just added 1 to z and z = ", z, "\n")
+   print("x[0][1] = ", x[0][1],"\n")

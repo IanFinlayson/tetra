@@ -1,9 +1,0 @@
-def main():
-        sum = 0
-        print("In main(), just set sum = 0 and sum = ", sum, "\n")
-        parallel for t in [1 ... 100]:
-                lock x:
-                        num = t
-                        sum += t
-                        print("Lock is held on x, just set num = t and added t to sum.\n")
-        print("At the end of main and sum%49 = ", sum % 49, "\n")

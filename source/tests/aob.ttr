@@ -1,9 +1,0 @@
-def main() int:
-        causeError(0)
-
-def causeError(x int):
-        if x == 5:
-                z = [1]
-                y = z[17]
-        else:
-                causeError(x + 1)

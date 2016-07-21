@@ -1,14 +1,22 @@
-def main() int:
+def main():
    x = 4
+   print("In main(), just set x = 4 and x = ", x, "\n")
    y = 4
+   print("In main(), just set y = 4 and y = ", y, "\n")
    if x == y:
-      x + y
-      x / y
-      x * y
-      x - y
+      print("x = y\n")
+      print("x + y = ", x+y,"\n")
+      print("x / y = ", x/y,"\n")
+      print("x * y = ", x*y,"\n")
+      print("x - y = ", x-y,"\n")
+      print("Performed unstored operations and x = ", x, " and y = ", y, "\n")
       z = x + x
+      print("Just set z = x + x and z = ", z, "\n")
       x = 2
+      print("Just set x = 2 and x = ", x, "\n")
       y = 3
+      print("Just set y = 3 and y = ", y, "\n")
       x = x + y
+      print("Just set x = x + y and x = ", x, "\n")
       y = y + x
-   return x * y
+      print("Just set y = y + x and y = ", y, "\n")
