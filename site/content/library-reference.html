@@ -10,16 +10,26 @@ will expand the standard library.</p>
 
 <div class="panel panel-default">
   <div class="panel-heading"><h4>base</h4>This library is opened in all
-Tetra programs, and provides the most basic of functions.</div>
+Tetra programs, and provides the most input and output functions.</div>
   <ul class="list-group">
-    <li class="list-group-item"><strong>print</strong></li>
-    <li class="list-group-item"><strong>read_int</strong></li>
-    <li class="list-group-item"><strong>read_real</strong></li>
-    <li class="list-group-item"><strong>read_bool</strong></li>
-    <li class="list-group-item"><strong>read_string</strong></li>
-    <li class="list-group-item"><strong>len</strong></li>
-    <li class="list-group-item"><strong>keys</strong></li>
-    <li class="list-group-item"><strong>array</strong></li>
+    <li class="list-group-item"><strong><tt>print(*)</tt></strong><br />
+    This function takes any number of arguments and prints them to the screen.
+    the arguments are printed one after the other without any white space
+    automatically inserted.
+    </li>
+    <li class="list-group-item"><strong><tt>str(*) string</tt></strong><br />
+    This function takes any number of arguments and returns them as a string.
+    It uses the same format as the <code>print</code> function, except that it
+    returns the result as a string instead of printing to the screen.
+    </li>
+    <li class="list-group-item"><strong><tt>input() string</tt></strong><br />
+    This function reads a string from the user of the program.  It does not
+    return until the user has entered input.
+    </li>
+    <li class="list-group-item"><strong><tt>input(prompt string) string</tt></strong><br />
+    This version of the input function takes a prompt string as an argument.  The
+    prompt will be printed to the screen before waiting for the users input.
+    </li>
   </ul>
 </div>
 
@@ -29,12 +39,82 @@ Tetra programs, and provides the most basic of functions.</div>
   <div class="panel-heading"><h4>math</h4>This library provides
 basic math functions and constants.</div>
   <ul class="list-group">
-    <li class="list-group-item"><strong>pi</strong></li>
-    <li class="list-group-item"><strong>sqrt</strong></li>
-    <li class="list-group-item"><strong>sin</strong></li>
-    <li class="list-group-item"><strong>cos</strong></li>
-    <li class="list-group-item"><strong>tan</strong></li>
-    <li class="list-group-item"><strong>abs</strong></li>
+    <li class="list-group-item"><strong><tt>PI</tt></strong><br />
+    This constant has an approximation of the value of PI.
+    </li>
+    <li class="list-group-item"><strong><tt>sqrt(value real) real)</tt></strong><br />
+    This function returns the square root of its argument.
+    </li>
+    <li class="list-group-item"><strong><tt>sin(value real) real</tt></strong><br />
+    This function returns the sine of its argument, an angle measured in degrees.
+    </li>
+    <li class="list-group-item"><strong><tt>cos(value real) real</tt></strong><br />
+    This function returns the cosine of its argument, an angle measured in degrees.
+    </li>
+    <li class="list-group-item"><strong><tt>tan(value real) real</tt></strong><br />
+    This function returns the tangent of its argument, an angle measured in degrees.
+    </li>
+    <li class="list-group-item"><strong><tt>abs(value real) real</tt></strong><br />
+    This function returns the absolute value of its argument.
+    </li>
+  </ul>
+</div>
+
+
+<div class="panel panel-default">
+  <div class="panel-heading"><h4>string functions</h4>This section lists all
+    of the functions of string variables.</div>
+  <ul class="list-group">
+    <li class="list-group-item"><strong><tt>toInt() int</tt></strong><br />
+    This function returns an integer version of the string.  If the string has
+    non-digits in it, then it will return the value 0.
+    </li>
+    <li class="list-group-item"><strong><tt>toReal() real</tt></strong><br />
+    This function returns a real version of the string.  If the string does not
+    contain a valid real number, then it will return the value 0.0
+    </li>
+    <li class="list-group-item"><strong><tt>toBool() bool</tt></strong><br />
+    This function returns a real version of the string.  If the string does not
+    equal either "true" or "false", then the function will return false.
+    </li>
+    <li class="list-group-item"><strong><tt>length() int</tt></strong><br />
+    This function returns the length of the string as an integer.
+    </li>
+  </ul>
+</div>
+
+
+<div class="panel panel-default">
+  <div class="panel-heading"><h4>list functions</h4>This section lists all
+    of the functions of list variables.</div>
+  <ul class="list-group">
+    <li class="list-group-item"><strong><tt>length() int</tt></strong><br />
+    This function returns the length of the string as an integer.
+    </li>
+    <li class="list-group-item"><strong><tt>resize(newSize int)</tt></strong><br />
+    This function resizes the list to be larger.  If the new size is less than the current
+    size, then elements at the end of the list will be lost.  If the new size is larger,
+    then new elements will be added at the end (with default values).
+    </li>
+  </ul>
+</div>
+
+
+<div class="panel panel-default">
+  <div class="panel-heading"><h4>dictionary functions</h4>This section lists all
+    of the functions of dictionary variables.</div>
+  <ul class="list-group">
+    <li class="list-group-item"><strong><tt>length() int</tt></strong><br />
+    This function returns the length of the string as an integer.
+    </li>
+    <li class="list-group-item"><strong><tt>values() [valtype]</tt></strong><br />
+    This function returns the values of the dictionary in a list.  The return type
+    is a list of the type of values the dictionary is storing.
+    </li>
+    <li class="list-group-item"><strong><tt>keys() [keytype]</tt></strong><br />
+    This function returns the keys of the dictionary in a list.  The return type
+    is a list of the type of keys the dictionary is storing.
+    </li>
   </ul>
 </div>
 

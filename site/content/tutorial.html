@@ -65,6 +65,17 @@ false.
 A string is a piece of text.  Strings are stored as a sequence of Unicode
 characters.
 
+</p></li>
+<li><p><strong>mutex</strong></p><p>
+A mutex is a type which represents a mutually exclusive portion of a program.
+See the "Named Locks" section below for more information.
+
+</p></li>
+<li><p><strong>task</strong></p><p>
+A task is a type which represents some running thread in the program.
+See the "Waiting" section below for more information.
+
+
 </p></li></ul>
 
 
@@ -121,7 +132,7 @@ notice that there is no declaration of the type of the <code>avg</code> variable
 Local variables (those which exist only inside of a function) do not need type
 declarations in Tetra, the compiler will figure out the type of each based on
 how the variable is used.  Only function parameters and return types need to be
-given values.</p>
+given type declarations.</p>
 
 <p>We can declare the type of local variables.  Sometimes this is needed, for
 example if we want to create a variable, but don't want to give it an initial
@@ -180,7 +191,8 @@ constant PI = 3.141592653589
 </code>
 </pre>
 
-<p>Notice that globals and constants also do not need type declarations.</p>
+<p>Notice that globals and constants also do not need type declarations if they
+are assigned a value.</p>
 
 
 
@@ -310,7 +322,7 @@ same time.  This program may print the first two messages in any order.
 Sometimes the first message appears first, and other times the second one will
 appear first.  It is even possible that they will appear inter-leaved, with the
 beginning of one message, followed by the beginning of the other, followed by
-the ends of each of them</p>
+the ends of each of them.</p>
 
 <p>Because the third print call is <i>outside</i> of the parallel block, it
 will not start executing until the other two have both completed.</p>
@@ -370,7 +382,7 @@ and product of the numbers 1-10 in two parallel loops.</p>
 <p>Lists package together multiple variables of the same type, such that they
 can be accessed by an integer index.  Lists are indexed by placing the index
 between square brackets after the name of the list.  The following example
-program counts the number of times a string appears in a list of strings:</p>
+program demonstrates how a list might be created and indexed:</p>
 
 <pre>
 <code>
@@ -466,7 +478,7 @@ and each of its loop iterations can be executed in parallel.</p>
 
 <p>If we make the for loop above into a parallel for loop, then the calls to
 print can be executed all at the same time and so can appear inter-leaved and
-in any order.  Calling the function with the values 1 through 100, as in this
+in any order.  Calling the function with the values 1 through 16, as in this
 program:</p>
 
 <pre>
@@ -477,7 +489,7 @@ def print_all(values [int]):
         print(value, "\n")
 
 def main():
-    print_all([1 ... 100])
+    print_all([1 ... 16])
 </code>
 </pre>
 
@@ -486,7 +498,7 @@ below:</p>
 
 <pre>
 13
-4
+45
 2
 6
 
@@ -828,9 +840,9 @@ def main():
 <p>The last built in data structure in Tetra is the dictionary, which other languages
 call associative arrays, hashes or maps.</p>
 
-<p>Dictionaries in Tetra create a dictionary from one set of values (the keys) to another set
+<p>Dictionaries in Tetra create a mapping from one set of data (the keys) to another set
 (the values).  For example, the following program creates a phone book which
-dictionaries names to phone numbers:</p>
+maps names to phone numbers:</p>
 
 <pre>
 <code>
@@ -899,7 +911,7 @@ class Square:
     size as real
 
     # member function to compute the area
-    def area():
+    def area() real:
         return size ** 2
 </code>
 </pre>

@@ -125,7 +125,7 @@ global total = 0
 def sum_range(numbers [int], a int, b int):
     i = a
     while i &lt;= b:
-        lock total_lock:
+        lock:
         total = total + numbers[i]
         i = i + 1
 
@@ -142,7 +142,7 @@ def main( ):
 <span class='tetra-key'>def</span> sum_range(numbers [<span class='tetra-type'>int</span>], a <span class='tetra-type'>int</span>, b <span class='tetra-type'>int</span>):
     i = a
     <span class='tetra-key'>while</span> i &lt;= b:
-        <b><span class='tetra-key'>lock</span> total_lock:</b>
+        <b><span class='tetra-key'>lock</span>:</b>
             total = total + numbers[i]
             i = i + <span class="tetra-value">1</span>
 
