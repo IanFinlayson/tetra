@@ -369,7 +369,7 @@ void evaluateFunction(const Node* node, TData<T>& ret, TetraContext& context) {
     // Each print does NOT end with a line break
     // std::cout << endl;
   } else if (funcName == "read_int") {
-    ret.setData(readInt(context.getThreadID()));
+    assert(ret.setData(readInt(context.getThreadID())));
   } else if (funcName == "read_real") {
     ret.setData(readReal(context.getThreadID()));
   } else if (funcName == "read_string") {
