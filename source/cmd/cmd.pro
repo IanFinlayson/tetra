@@ -1,3 +1,6 @@
+# cmd.pro
+# qmake project file for the command line interpreter
+
 # set the compiler to clang
 QMAKE_CXX = clang++
 QMAKE_LINK = clang++
@@ -14,11 +17,9 @@ PRE_TARGETDEPS += $$PWD/../lib/libtetra.a
 LIBS += -L$$PWD/../lib/ -ltetra -lgc
 
 TEMPLATE = app
-
 SOURCES = commandConsole.cpp \
 	commandObserver.cpp \
 	main.cpp
-
 LIBS += ../lib/libtetra.a
 TARGET = ../../bin/tetra
 

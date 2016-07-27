@@ -1,3 +1,6 @@
+# lib.pro
+# qmake project file for the interpreter library
+
 # set the compiler to clang
 QMAKE_CXX = clang++
 QMAKE_LINK = clang++
@@ -5,7 +8,7 @@ QMAKE_LINK = clang++
 # set compiler flags
 QMAKE_CXXFLAGS += -std=c++11 -W -Wall -pedantic
 
-
+# build as a static library
 TEMPLATE = lib
 CONFIG += staticlib
 TARGET = tetra
@@ -34,8 +37,7 @@ SOURCES = consoleArray.cpp \
     types.cpp \
     variableContext.cpp
 
-
-
+# all of this is to make bison work correctly
 BISONSOURCES = parser.y
 OTHER_FILES += $$BISONSOURCES
 bisonsource.input = BISONSOURCES

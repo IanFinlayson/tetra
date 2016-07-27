@@ -1,3 +1,6 @@
+# ide.pro
+# qmake project file for the IDE
+
 # set the compiler to clang
 QMAKE_CXX = clang++
 QMAKE_LINK = clang++
@@ -9,8 +12,7 @@ QMAKE_CXXFLAGS += -std=c++11 -W -Wall -pedantic
 CONFIG += qt debug thread
 
 # set the QT modules we need
-QT += core gui
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
+QT += core gui widgets printsupport
 
 # build an application
 TARGET = ../../bin/tetraide
