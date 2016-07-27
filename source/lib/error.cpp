@@ -7,7 +7,7 @@
 #include <string>
 #include "backend.h"
 #include "frontend.h"
-#include "parser.genh"
+#include "parser.h"
 
 /* this function search and replaces a string in place */
 void replace(tstring& str, const tstring& from, const tstring& to) {

@@ -6,7 +6,7 @@ pass=0
 fail=0
 for file in *.ttr
 do 
-  ../interpreter/tetra $file > ./output/tmp.txt
+  ../../bin/tetra $file > ./output/tmp.txt
   diffWords=`diff ./output/tmp.txt ./output/${file}.out | wc -w`
   if [ $diffWords -ne 0 ]
   then

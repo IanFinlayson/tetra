@@ -3,9 +3,9 @@
 *.a
 gmon.out
 
-# lex/yacc generated files
-*.gencpp
-*.genh
+# yacc generated files
+parser.cpp
+parser.h
 parser.output
 
 # Vim swap files
@@ -19,7 +19,7 @@ cscope.out
 moc_*
 ui_*
 qrc_*
-source/ide/Makefile
+Makefile
 
 # executables
 tetra

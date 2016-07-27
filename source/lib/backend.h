@@ -1412,6 +1412,8 @@ class ConsoleArray {
 
 class VirtualObserver {
  public:
+  VirtualObserver() {}
+  virtual ~VirtualObserver() {}
   virtual void notify_E(const Node*, TetraContext& context) = 0;
   virtual void notifyThreadSpecificVariable_E(tstring) = 0;
   virtual void threadCreated_E(int, TetraContext&) = 0;
@@ -1460,11 +1462,31 @@ class TetraEnvironment {
   static pthread_mutex_t next_thread_mutex;
 };
 
-class CommandConsole : public VirtualConsole {
- public:
-  tstring receiveStandardInput();
 
-  void processStandardOutput(const tstring& output);
+
+// structure for breakpoints.
+// May be specified to work for a specific thread
+// May be called to only stop one thread
+struct BreakPoint {
+  int lineNo;
+  long threadLabel;
+  bool stable;
 };
+
+typedef struct BreakPoint Breakpoint;
+
+// Overload == operator for use in std::find. Only care if lineNo is the same
+bool operator==(Breakpoint a, Breakpoint b);
+
+
+
+
+
+
+
+
+
+
+
 
 #endif

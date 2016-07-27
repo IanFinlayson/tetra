@@ -6,7 +6,7 @@
 #include <sstream>
 #include <string>
 #include "frontend.h"
-#include "parser.genh"
+#include "parser.h"
 
 extern int yylineno;
 

@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #define GC_THREADS
 #include "/usr/local/include/gc/gc.h"
 #include "/usr/local/include/gc/gc_cpp.h"

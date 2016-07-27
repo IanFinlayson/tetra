@@ -13,20 +13,16 @@ QT += core gui
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 # build an application
-TARGET = tetraide
+TARGET = ../../bin/tetraide
 TEMPLATE = app
 
-# include the interpreter path
-INCLUDEPATH += $$PWD/../interpreter
-DEPENDPATH += $$PWD/../interpreter
+# include the lib path
+INCLUDEPATH += $$PWD/../lib
+DEPENDPATH += $$PWD/../lib
 
-# link to the tetra interpreter library, and the gc library
-PRE_TARGETDEPS += $$PWD/../interpreter/libtetra.a
-LIBS += -L$$PWD/../interpreter/ -ltetra -lgc
-
-# add target to reformat code
-format.commands = clang-format -i *.cpp *.h
-QMAKE_EXTRA_TARGETS += format
+# link to the tetra library, and the gc library
+PRE_TARGETDEPS += $$PWD/../lib/libtetra.a
+LIBS += -L$$PWD/../lib/ -ltetra -lgc
 
 # specify all the files we need
 SOURCES += main.cpp\
@@ -36,6 +32,7 @@ SOURCES += main.cpp\
     console.cpp \
     settingsdialog.cpp \
     settingsmanager.cpp \
+    ideCommandObserver.cpp \
     searchbox.cpp \
     replacedialog.cpp \
     filerunner.cpp
@@ -47,6 +44,7 @@ HEADERS  += \
     console.h \
     settingsdialog.h \
     settingsmanager.h \
+    ideCommandObserver.h \
     searchbox.h \
     replacedialog.h \
     filerunner.h
@@ -59,7 +57,4 @@ FORMS    += \
 
 RESOURCES += \
     resources.qrc
-
-# add a post compile step to copy the file
-QMAKE_POST_LINK  = "cp tetraide ../../bin && echo 'Finished Building IDE'"
 

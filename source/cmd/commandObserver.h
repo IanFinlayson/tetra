@@ -1,18 +1,20 @@
-//#ifndef OBSERVER_H
-//#define OBSERVER_H
+#ifndef OBSERVER_H
+#define OBSERVER_H
 
+#include <vector>
 #include "backend.h"
-#include "commandObserver.h"
 
-// structure for breakpoints.
-// May be specified to work for a specific thread
-// May be called to only stop one thread
-typedef struct BreakPoint Breakpoint;
 
-// Overload == operator for use in std::find. Only care if lineNo is the same
-bool operator==(Breakpoint a, Breakpoint b);
+class CommandConsole : public VirtualConsole {
+ public:
+  tstring receiveStandardInput();
 
-class IDECommandObserver : public CommandObserver {
+  void processStandardOutput(const tstring& output);
+};
+
+
+tstring statusToString(ThreadStatus status);
+class CommandObserver : public VirtualObserver {
  private:
   std::vector<Breakpoint, gc_allocator<Breakpoint> > breakpoints;
   // Breakpoint lastLine;
@@ -54,7 +56,7 @@ class IDECommandObserver : public CommandObserver {
   pthread_cond_t prompt_condition;
 
  public:
-  IDECommandObserver();
+  CommandObserver();
   void notify_E(const Node*, TetraContext& context);
   void notifyThreadSpecificVariable_E(tstring);
   void threadCreated_E(int, TetraContext&);
@@ -70,3 +72,5 @@ class IDECommandObserver : public CommandObserver {
   // Returns a list of linenumbers of stopped threads
   std::vector<int, gc_allocator<int> > getThreadLocations();
 };
+
+#endif
