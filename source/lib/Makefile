@@ -134,7 +134,6 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		lib.pro backend.h \
 		comparisonMap.h \
 		frontend.h \
-		microStack.h \
 		operationMap.h \
 		parallel.h \
 		tTypes.h \
@@ -320,7 +319,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents parser.y $(DISTDIR)/
 	$(COPY_FILE) --parents parser.y $(DISTDIR)/
-	$(COPY_FILE) --parents backend.h comparisonMap.h frontend.h microStack.h operationMap.h parallel.h tTypes.h parser.h $(DISTDIR)/
+	$(COPY_FILE) --parents backend.h comparisonMap.h frontend.h operationMap.h parallel.h tTypes.h parser.h $(DISTDIR)/
 	$(COPY_FILE) --parents consoleArray.cpp dump-tree.cpp error.cpp eval.cpp functionTable.cpp lexer.cpp node.cpp progContext.cpp stdlib.cpp tArray.cpp tDataSpecializations.cpp tetraEnvironment.cpp threadEnvironment.cpp types.cpp variableContext.cpp $(DISTDIR)/
 
 
@@ -372,8 +371,7 @@ compiler_clean: compiler_bisonsource_clean compiler_bisonheader_clean
 
 consoleArray.o: consoleArray.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o consoleArray.o consoleArray.cpp
 
 dump-tree.o: dump-tree.cpp frontend.h \
@@ -383,14 +381,12 @@ dump-tree.o: dump-tree.cpp frontend.h \
 error.o: error.cpp backend.h \
 		frontend.h \
 		tTypes.h \
-		microStack.h \
 		parser.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o error.o error.cpp
 
 eval.o: eval.cpp backend.h \
 		frontend.h \
 		tTypes.h \
-		microStack.h \
 		comparisonMap.h \
 		operationMap.h \
 		parallel.h
@@ -398,8 +394,7 @@ eval.o: eval.cpp backend.h \
 
 functionTable.o: functionTable.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o functionTable.o functionTable.cpp
 
 lexer.o: lexer.cpp frontend.h \
@@ -412,51 +407,43 @@ node.o: node.cpp frontend.h \
 
 progContext.o: progContext.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o progContext.o progContext.cpp
 
 stdlib.o: stdlib.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o stdlib.o stdlib.cpp
 
 tArray.o: tArray.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tArray.o tArray.cpp
 
 tDataSpecializations.o: tDataSpecializations.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tDataSpecializations.o tDataSpecializations.cpp
 
 tetraEnvironment.o: tetraEnvironment.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tetraEnvironment.o tetraEnvironment.cpp
 
 threadEnvironment.o: threadEnvironment.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o threadEnvironment.o threadEnvironment.cpp
 
 types.o: types.cpp frontend.h \
 		parser.h \
 		backend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o types.o types.cpp
 
 variableContext.o: variableContext.cpp backend.h \
 		frontend.h \
-		tTypes.h \
-		microStack.h
+		tTypes.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o variableContext.o variableContext.cpp
 
 parser.o: parser.cpp 

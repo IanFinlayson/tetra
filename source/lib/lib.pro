@@ -16,7 +16,6 @@ TARGET = tetra
 HEADERS = backend.h \
     comparisonMap.h \
     frontend.h \
-    microStack.h \
     operationMap.h \
     parallel.h \
     tTypes.h 
