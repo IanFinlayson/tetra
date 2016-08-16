@@ -1087,7 +1087,7 @@ void yyerror(const char* str) {
 }
 
 /* parse from a file */
-extern istream* in;
+extern std::istream* in;
 Node* parseFile(const tstring& fname) {
     /* reset all of the lexer stuff */
     reset_lexer( );
@@ -1097,7 +1097,7 @@ Node* parseFile(const tstring& fname) {
     functions.clearAll();
 
     /* open the file */
-    ifstream file(fname.c_str( ));
+    std::ifstream file(fname.c_str( ));
 
     /* if it's not open, we failed */
     if (!file.is_open( )) {
