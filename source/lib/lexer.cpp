@@ -9,10 +9,7 @@
 #include <iostream>
 #include <string>
 
-#include "frontend.h"
-#include "parser.h"
-
-using namespace std;
+#include "tetra.h"
 
 /* whether or not we have seen whitespace so far this line */
 int start_of_line = 1;
@@ -42,7 +39,7 @@ void reset_lexer() {
 extern YYSTYPE yylval;
 
 /* the istream to use for doing all input */
-istream* in;
+std::istream* in;
 
 /* look up a string and return its token code */
 int lookupId(const tstring& id) {
@@ -590,7 +587,9 @@ int yylex() {
   }
 
   /* if we get down here, there must be a lexer error :( */
-  throw Error(tstring(next, 1) + " is not a valid lexeme.", yylineno);
+  char msg[] = "_ is not a valid lexeme.";
+  msg[0] = next;
+  throw Error(msg, yylineno);
   return 0;
 }
 

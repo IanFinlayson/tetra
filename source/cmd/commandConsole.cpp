@@ -1,6 +1,6 @@
 #include <sstream>
 
-#include "commandObserver.h"
+#include "commandConsole.h"
 
 tstring CommandConsole::receiveStandardInput() {
   tstring input;

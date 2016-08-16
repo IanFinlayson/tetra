@@ -5,14 +5,13 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "backend.h"
-#include "frontend.h"
-#include "parser.h"
+
+#include "tetra.h"
 
 /* this function search and replaces a string in place */
-void replace(tstring& str, const tstring& from, const tstring& to) {
+void replace(std::string& str, const std::string& from, const std::string& to) {
   size_t start_pos = str.find(from);
-  if (start_pos != tstring::npos) {
+  if (start_pos != std::string::npos) {
     str.replace(start_pos, from.length(), to);
     replace(str, from, to);
   }
@@ -20,7 +19,7 @@ void replace(tstring& str, const tstring& from, const tstring& to) {
 
 /* this function takes a string and modifies it in place
  * with TOK_ missing and some other pretty printing */
-void prettyPrintMessage(tstring& str) {
+void prettyPrintMessage(std::string& str) {
   replace(str, "PLUS", "'+'");
   replace(str, "MINUS", "'-'");
   replace(str, "TIMES", "'*'");
@@ -59,13 +58,13 @@ void prettyPrintMessage(tstring& str) {
 }
 
 /* Error exception functions */
-Error::Error(const tstring& mesg, int lineno) {
+Error::Error(const std::string& mesg, int lineno) {
   this->mesg = mesg;
   prettyPrintMessage(this->mesg);
   this->lineno = lineno;
 }
 
-tstring Error::getMessage() const { return mesg; }
+std::string Error::getMessage() const { return mesg; }
 
 int Error::getLine() const { return lineno; }
 
@@ -81,23 +80,17 @@ ostream& operator<<(ostream& out, const Error& error) {
 }
 
 /* the runtime error class */
-RuntimeError::RuntimeError(const tstring& pMessage, int pLine,
-                           TetraContext& pContext)
-    : Error(pMessage, pLine), context(pContext) {
-  // nothing else
+RuntimeError::RuntimeError(const std::string& pMessage, int pLine) : Error(pMessage, pLine) {
 }
-
-TetraContext& RuntimeError::getContext() { return context; }
 
 /* the system error class */
-SystemError::SystemError(const tstring& pMessage, int pLine,
-                         const Node* pNode)
-    : Error(pMessage, pLine), node(pNode) {
-  // nothing else
+SystemError::SystemError(const std::string& pMessage, int pLine, const Node* pNode) : Error(pMessage, pLine), node(pNode) {
 }
 
-const Node* SystemError::getNode() { return node; }
+const Node* SystemError::getNode() {
+    return node;
+}
 
-
-InterruptError::InterruptError() : Error("Program Interrupted", -1) {}
+InterruptError::InterruptError() : Error("Program Interrupted", -1) {
+}
 

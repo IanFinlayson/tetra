@@ -1,14 +1,23 @@
-/* This file defines basic tetra data types as
- * wrappers around their c++ counterparts */
+/* data types used in the language */
+
+#ifndef VALUES_H
+#define VALUES_H
 
 #include <cmath>
+#include "types.h"
 
+/* represents any piece of data in a tetra program */
+class tdata {
+    public:
+        tstring toString() const;
+        int toInt() const;
+};
 
-class tbool {
+class tbool : public tdata {
   public:
     /* constructors */
-    tbool() {this->b = false;} 
-    tbool(const bool& b) {this->b = b;} 
+    tbool() {this->b = false;}
+    tbool(const bool& b) {this->b = b;}
     tbool(const tbool& other) {this->b = other.b;}
 
     /*assignment */
@@ -21,16 +30,16 @@ class tbool {
     operator bool const (){return this->b;}
 
     /* logical operators */
-    tbool operator&&(const tbool& other) const {return tbool(this->b && other.b);} 
-    tbool operator||(const tbool& other) const {return tbool(this->b || other.b);} 
+    tbool operator&&(const tbool& other) const {return tbool(this->b && other.b);}
+    tbool operator||(const tbool& other) const {return tbool(this->b || other.b);}
     tbool operator!() const {return tbool(!this->b);}
 
-    /* comparison operators */ 
+    /* comparison operators */
     tbool operator==(const tbool& other) const {return tbool(this->b == other.b);}
     tbool operator!=(const tbool& other) const {return !(this->b == other.b);}
 
     /* tbool output */
-    friend ostream& operator<<(ostream& os, const tbool& tb) {
+    friend std::ostream& operator<<(std::ostream& os, const tbool& tb) {
       tb.b ? os << "true" : os << "false";
       return os;
     }
@@ -40,11 +49,11 @@ class tbool {
 };
 
 
-class tint {
+class tint : public tdata {
   public:
     /* constructors */
-    tint() {this->i = 0;} 
-    tint(const int& i) {this->i = i;} 
+    tint() {this->i = 0;}
+    tint(const int& i) {this->i = i;}
     tint(const tint& other) {this->i = other.i;}
 
     /*assignment */
@@ -81,7 +90,7 @@ class tint {
     tint operator--(int) {return tint((this->i)--);}
     tint operator--() {return tint(--(this->i));}
 
-    /* comparison operators */ 
+    /* comparison operators */
     tbool operator<(const tint& other) const {return tbool(this->i < other.i);}
     tbool operator>=(const tint& other) const {return !(*this < other);}
     tbool operator>(const tint& other) const {return other < *this;}
@@ -90,7 +99,7 @@ class tint {
     tbool operator==(const tint& other) const {return !(*this != other);}
 
     /* tint output */
-    friend ostream& operator<<(ostream& os, const tint& tint) {
+    friend std::ostream& operator<<(std::ostream& os, const tint& tint) {
       os << tint.i;
       return os;
     }
@@ -99,18 +108,41 @@ class tint {
     int i;
 };
 
-class treal {
+class treal : public tdata {
   public:
+      treal(double val) {
+          r = val;
+      }
+  private:
+      double r;
+};
+
+
+class tstring : public tdata, public std::string {
+    public:
+        tstring() {
+            *this = "";
+        }
+        tstring(const char* s) {
+            *this = s;
+        }
+        tstring(const std::string& s) {
+            *this = s;
+        }
+
   private:
 };
-/*
-class tstring {
+
+class tlist : public tdata {
   public:
   private:
 };
 
-*/
-class tnone {
+class tnone : public tdata {
   public:
   private:
 };
+
+#endif
+
+

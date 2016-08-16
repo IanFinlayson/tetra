@@ -13,28 +13,12 @@ TEMPLATE = lib
 CONFIG += staticlib
 TARGET = tetra
 
-HEADERS = backend.h \
-    comparisonMap.h \
-    frontend.h \
-    operationMap.h \
-    parallel.h \
-    tTypes.h 
+# specify the files used
+HEADERS = $$files(*.h)
+HEADERS -= parser.h
 
-SOURCES = consoleArray.cpp \
-    dump-tree.cpp \
-    error.cpp \
-    eval.cpp \
-    functionTable.cpp \
-    lexer.cpp \
-    node.cpp \
-    progContext.cpp \
-    stdlib.cpp \
-    tArray.cpp \
-    tDataSpecializations.cpp \
-    tetraEnvironment.cpp \
-    threadEnvironment.cpp \
-    types.cpp \
-    variableContext.cpp
+SOURCES = $$files(*.cpp)
+SOURCES -= parser.cpp
 
 # all of this is to make bison work correctly
 BISONSOURCES = parser.y

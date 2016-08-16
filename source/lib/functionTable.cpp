@@ -13,10 +13,8 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include "backend.h"
-#include "frontend.h"
 
-using std::string;
+#include "tetra.h"
 
 // Given a function signature, returns the adress of a node containing the
 // function definition for that signature
@@ -77,16 +75,16 @@ void FunctionMap::clearAll() {
     lookup.clear();
 }
 
-std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > > FunctionMap::remove(tstring name) {
+std::map<tstring, Node*> FunctionMap::remove(tstring name) {
 
   //make a map to store the pairs to return
-  std::map<tstring,Node*, less<tstring>, gc_allocator<pair<tstring,Node*> > > pairs;
+  std::map<tstring,Node*> pairs;
 
   //make a vector to store keys to remove
-  std::vector<tstring, gc_allocator<tstring> > keys;
+  std::vector<tstring> keys;
 
   // find the functions
-  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = lookup.begin(); 
+  for (std::map<tstring, Node*>::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
@@ -110,7 +108,7 @@ std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > > Fu
 
 bool FunctionMap::hasFuncNamed(tstring name) {
   //loop through all elements in the map
-  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = lookup.begin(); 
+  for (std::map<tstring, Node*>::iterator it = lookup.begin(); 
       it != lookup.end(); it ++){
 
     //check for a name match
@@ -127,10 +125,10 @@ bool FunctionMap::hasFuncNamed(tstring name) {
 DataType* FunctionMap::getFunctionsNamed(tstring name) {
 
   //create a dataType to return
-  DataType* retType = new(GC) DataType(TYPE_OVERLOAD);  
+  DataType* retType = new DataType(TYPE_OVERLOAD);  
 
   //loop through all elements in the map
-  for (std::map<tstring, Node*, less<tstring>, gc_allocator<pair<tstring, Node*> > >::iterator it = lookup.begin(); 
+  for (std::map<tstring, Node*>::iterator it = lookup.begin(); 
       it != lookup.end(); it ++) {
 
     //check for a name match
@@ -164,15 +162,15 @@ bool FunctionMap::hasFunction(DataType* type, tstring name) {
 // Assembles the function signature for the function
 tstring FunctionMap::getFunctionSignature(const Node* node) {
   if (node->kind() == NODE_FUNCTION) {
-    return node->getString() + typeToString(&((*(node->type()->subtypes))[0]));
+    return node->getValue()->toString() + typeToString(&((*(node->type()->subtypes))[0]));
   } else if (node->kind() == NODE_FUNCALL ) {
     //get the params
-    DataType* params = new(GC) DataType(TYPE_TUPLE); 
+    DataType* params = new DataType(TYPE_TUPLE); 
     if (node->numChildren() > 1) {
       buildParamTupleType(params,node->child(1));
     }
 
-    return node->child(0)->getString() + typeToString(params); 
+    return node->child(0)->getValue()->toString() + typeToString(params); 
   }
   throw Error("Cannot create Function signature.");
 }

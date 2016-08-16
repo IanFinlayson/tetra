@@ -8,19 +8,17 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "frontend.h"
-#include "parser.h"
 
-using namespace std;
+#include "tetra.h"
 
 /* returns a string representation of a node type */
-tstring stringType(Node* node) {
-  tstringstream ss;
+std::string stringType(Node* node) {
+    std::stringstream ss;
 
   switch (node->kind()) {
     /* statements and groups */
     case NODE_FUNCTION:
-      return "FUNC " + node->getString();
+      return "FUNC " + node->getValue()->toString();
     case NODE_TOPLEVEL_LIST:
       return "TOP LEVELS";
     case NODE_STATEMENT:
@@ -68,11 +66,11 @@ tstring stringType(Node* node) {
     case NODE_GLOBAL:
       return "GLOBAL";
     case NODE_DECLARATION:
-      return "DECLARATION: " + node->getString();
+      return "DECLARATION: " + node->getValue()->toString();
     case NODE_LAMBDA:
       return "LAMBDA";
     case NODE_CLASS:
-      return "CLASS " + node->getString();
+      return "CLASS " + node->getValue()->toString();
     case NODE_CLASS_PART:
       return "CLASS PART";
     case NODE_DOT:
@@ -132,7 +130,7 @@ tstring stringType(Node* node) {
 
     /* functions */
     case NODE_FUNCALL:
-      return "CALL: " + node->getString();
+      return "CALL: " + node->getValue()->toString();
     case NODE_ACTUAL_PARAM_LIST:
       return "ARGS";
 
@@ -150,21 +148,15 @@ tstring stringType(Node* node) {
 
     /* leafs */
     case NODE_INTVAL:
-      ss << "INT: " << node->getInt();
-      return ss.str();
+      return "INT:" + node->getValue()->toString();
     case NODE_REALVAL:
-      ss << "REAL: " << node->getReal();
-      return ss.str();
+      return "REAL: " + node->getValue()->toString();
     case NODE_STRINGVAL:
-      return "\\\"" + node->getString() + "\\\"";
+      return "\\\"" + node->getValue()->toString() + "\\\"";
     case NODE_IDENTIFIER:
-      return "ID " + node->getString();
+      return "ID " + node->getValue()->toString();
     case NODE_BOOLVAL:
-      if (node->getBool()) {
-        return "true";
-      } else {
-        return "false";
-      }
+      return "BOOL: " + node->getValue()->toString();
     case NODE_NONEVAL:
       return "NONE";
     default:
@@ -173,16 +165,16 @@ tstring stringType(Node* node) {
 }
 
 /* generate a unique label for a node */
-tstring genId() {
+std::string genId() {
   static int count = 0;
   count++;
-  tstringstream ss;
+  std::stringstream ss;
   ss << "n" << count;
   return ss.str();
 }
 
 /* dump a single node to a graphviz dot file */
-void dumpNodeGraphviz(Node* node, tstring id, ofstream& out) {
+void dumpNodeGraphviz(Node* node, std::string id, std::ofstream& out) {
   if (!node) {
     return;
   }
@@ -195,7 +187,7 @@ void dumpNodeGraphviz(Node* node, tstring id, ofstream& out) {
   /* for each child */
   for (int i = 0; i < node->numChildren(); i++) {
     /* generate a new id */
-    tstring childId = genId();
+      std::string childId = genId();
 
     /* dump the connection */
     out << "  " << id << " -> " << childId << ";\n";
@@ -207,7 +199,7 @@ void dumpNodeGraphviz(Node* node, tstring id, ofstream& out) {
 
 /* dump an entrie tree to a graphviz dot file */
 void dumpTreeGraphviz(Node* node) {
-  ofstream out("tree.gv");
+    std::ofstream out("tree.gv");
   out << "digraph G {\n";
   dumpNodeGraphviz(node, "n0", out);
   out << "}\n";
@@ -228,22 +220,22 @@ void dumpTreeStdout(Node* node, int level = 0) {
 
   /* dump leading spaces */
   for (int i = 0; i < level; i++) {
-    cout << "    ";
+      std::cout << "    ";
   }
 
   /* dump this type of node */
-  cout << stringType(node);
+  std::cout << stringType(node);
 
   /* dump the type and line if relevant */
   if (node->type()) {
-    cout << " (TYPE:" << typeToString(node->type()) << ")";
+      std::cout << " (TYPE:" << typeToString(node->type()) << ")";
   }
 
   if (node->getLine()) {
-    cout << " (LINE:" << node->getLine() << ")";
+      std::cout << " (LINE:" << node->getLine() << ")";
   }
 
-  cout << endl;
+  std::cout << endl;
 
   /* dump children */
   for (int i = 0; i < node->numChildren(); i++) {

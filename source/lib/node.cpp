@@ -5,8 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "frontend.h"
-#include "parser.h"
+
+#include "tetra.h"
 
 extern int yylineno;
 
@@ -14,10 +14,6 @@ extern int yylineno;
 Node::Node(NodeKind node_type) {
   this->node_type = node_type;
   this->data_type = NULL;
-  stringval = "";
-  intval = 0;
-  realval = 0.0;
-  boolval = false;
   parent = NULL; 
   symtable = NULL;
   lineno = yylineno; /* this is often inaccurate! */
@@ -27,14 +23,10 @@ Node::Node(NodeKind node_type) {
 Node::Node(Node* other) {
   this->node_type = other->node_type;
   if (other->data_type) {
-    this->data_type = new(GC) DataType(*other->data_type);
+    this->data_type = new DataType(*other->data_type);
   } else {
     this->data_type = NULL;
   }
-  stringval = other->stringval;
-  intval = other->intval;
-  realval = other->realval;
-  boolval = other->boolval;
   parent = NULL; 
   symtable = NULL;
   lineno = other->lineno; /* this is often inaccurate! */
@@ -51,32 +43,23 @@ void Node::addChild(Node* child) {
 
 void Node::setDataType(DataType* data_type) { this->data_type = data_type; }
 
-void Node::setStringval(const tstring& stringval) {
-  this->stringval = stringval;
+void Node::setLine(int lineno) {
+    this->lineno = lineno;
 }
 
-void Node::setIntval(int intval) { this->intval = intval; }
-
-void Node::setBoolval(bool boolval) { this->boolval = boolval; }
-
-void Node::setRealval(double realval) { this->realval = realval; }
-
-void Node::setLine(int lineno) { this->lineno = lineno; }
-
 int Node::getLine() const { return lineno; }
-tstring Node::getString() const { return stringval; }
-int Node::getInt() const { return intval; }
-double Node::getReal() const { return realval; }
+void Node::setValue(tdata* val) {value = val;}
+tdata* Node::getValue() const { return value; }
 Node* Node::getParent() const {return parent;}
-bool Node::getBool() const { return boolval; }
 NodeKind Node::kind() const { return node_type; }
 DataType* Node::type() const { return data_type; }
 int Node::numChildren() const { return num_children; }
+
 /* insert a symbol into the symtable */
 void Node::insertSymbol(Symbol sym) {
   /* create symtable if needed */
   if (!symtable) {
-    symtable = new(GC) std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > >();
+    symtable = new std::map<tstring, Symbol>();
   }
 
   /* check if it's there first */
@@ -96,7 +79,7 @@ Symbol Node::lookupSymbol(tstring name, int lineno) const {
     throw Error("Symbol '" + name + "' not found!", lineno);
   }
 
-  std::map<tstring, Symbol, less<tstring>, gc_allocator<pair<tstring, Symbol> > >::iterator it = symtable->find(name);
+  std::map<tstring, Symbol>::iterator it = symtable->find(name);
 
   if (it == symtable->end()) {
     throw Error("Symbol '" + name + "' not found!", lineno);
@@ -140,7 +123,7 @@ Node* cloneTree(Node* foot) {
     return NULL; 
 
   /* make this node */
-  Node* newRoot = new(GC) Node(foot);
+  Node* newRoot = new Node(foot);
 
   /* make and attach its children */
   for (int i = 0; i < foot->numChildren(); i++) {

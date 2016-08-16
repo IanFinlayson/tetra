@@ -1,6 +1,7 @@
 #include <pthread.h>
 #include <iostream>
-#include "backend.h"
+
+#include "tetra.h"
 
 /*
  * This class stores the constants relevant to the Tetra Environment including:
@@ -10,39 +11,23 @@
 
 void TetraEnvironment::initialize() {
   maxThreads = 8;
-  consoleArray_ptr = NULL;
-  outputStream = &std::cout;
+  console = NULL;
 }
 
-void TetraEnvironment::initialize(ConsoleArray& console) {
-  maxThreads = 8;
-  consoleArray_ptr = &console;
-  outputStream = &std::cout;
-}
-void TetraEnvironment::setMaxThreads(int pNum) { maxThreads = pNum; }
-
-void TetraEnvironment::setOutputStream(ostream& pOut) { outputStream = &pOut; }
-
-ostream& TetraEnvironment::getOutputStream() { return *outputStream; }
-
-int TetraEnvironment::getMaxThreads() { return maxThreads; }
-
-void TetraEnvironment::setConsoleArray(ConsoleArray& pConsole) {
-  consoleArray_ptr = &pConsole;
+void TetraEnvironment::setMaxThreads(int pNum) {
+    maxThreads = pNum;
 }
 
-ConsoleArray& TetraEnvironment::getConsoleArray() {
-  return *consoleArray_ptr;
+int TetraEnvironment::getMaxThreads() {
+    return maxThreads;
 }
 
-VirtualConsole& TetraEnvironment::getConsole(int thread, bool debug) {
-  return consoleArray_ptr->getSpecifiedConsole(thread, debug);
+VirtualConsole* TetraEnvironment::getConsole() {
+  return console;
 }
 
-VirtualObserver& TetraEnvironment::getObserver() { return *observer; }
-
-void TetraEnvironment::setObserver(VirtualObserver& pObserver) {
-  observer = &pObserver;
+void TetraEnvironment::setConsole(VirtualConsole* vc) {
+    console = vc;
 }
 
 // halt the given program ASAP - used so the user can halt buggy programs
@@ -59,24 +44,18 @@ void TetraEnvironment::setRunning() {
 }
 
 // Determines whether the interpreter should be executing in debug mode or not
-void TetraEnvironment::setDebug(bool toggle) { debugMode = toggle; }
-
-bool TetraEnvironment::isDebugMode() { return debugMode; }
-
-int TetraEnvironment::obtainNewThreadID() {
-  int ret = -1;
-  pthread_mutex_lock(&next_thread_mutex);
-  ret = nextThreadID;
-  nextThreadID++;
-  pthread_mutex_unlock(&next_thread_mutex);
-  return ret;
+void TetraEnvironment::setDebug(bool toggle) {
+    debugMode = toggle;
 }
 
-pthread_mutex_t TetraEnvironment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
-long TetraEnvironment::nextThreadID = 0;
-ConsoleArray* TetraEnvironment::consoleArray_ptr = NULL;
+bool TetraEnvironment::isDebugMode() {
+    return debugMode;
+}
+
+
 int TetraEnvironment::maxThreads = 8;
 bool TetraEnvironment::debugMode = false;
-ostream* TetraEnvironment::outputStream = &std::cout;
-VirtualObserver* TetraEnvironment::observer = NULL;
 bool TetraEnvironment::running = true;
+VirtualConsole* TetraEnvironment::console = NULL;
+
+

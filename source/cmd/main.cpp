@@ -4,11 +4,12 @@
  * access to a method which will build and run the program
  */
 
-#include "backend.h"
 #include <argp.h>
 #include <cstdlib>
 #include <iostream>
-#include "commandObserver.h"
+
+#include "tetra.h"
+#include "commandConsole.h"
 
 
 /* the info for the command line parameters */
@@ -80,9 +81,6 @@ struct argp info = {options, parse_opt, args_doc, doc, 0, 0, 0};
 
 /* the main function */
 int main(int argc, char** argv) {
-  /* initiate the garbage collector */
-  GC_INIT();
-
   /* set up the arguments structure */
   struct arguments args;
 
@@ -101,14 +99,10 @@ int main(int argc, char** argv) {
             args.input_file_name);
   }
 
-  ConsoleArray console;
   CommandConsole mainConsole = CommandConsole();
-  console.registerConsole(mainConsole);
-  CommandObserver observer;
 
-  TetraEnvironment::initialize(console);
-  TetraEnvironment::setObserver(observer);
-
+  TetraEnvironment::initialize();
+  TetraEnvironment::setConsole(&mainConsole);
 
   Node* tree;
 
@@ -116,7 +110,7 @@ int main(int argc, char** argv) {
   // was found
   try {
     // File is last parameter
-    tree = parseFile(args.input_file_name);
+    tree = parseFile(tstring(args.input_file_name));
 
   } catch (Error e) {
     std::cout << "The following error was detected in your program:\n"
@@ -134,7 +128,6 @@ int main(int argc, char** argv) {
     cout << "The following error was detected while running your program: "
          << endl;
     cout << e << endl;
-    e.getContext().printStackTrace();
     exit(EXIT_FAILURE);
   } catch (Error e) {
     cout << "The following error was detected in your program: " << endl;
