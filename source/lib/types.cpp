@@ -684,8 +684,6 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       lhs = inferExpression(expr->child(0), func);
                       rhs = inferExpression(expr->child(1), func);
                       if (*lhs != *rhs) {
-                        cout << "A = " << typeToString(lhs) << endl;
-                        cout << "B = " << typeToString(rhs) << endl;
                         throw Error("Only matching types can be compared", expr->getLine());
                       }
 
@@ -705,8 +703,6 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       lhs = inferExpression(expr->child(0), func);
                       rhs = inferExpression(expr->child(1), func);
                       if (*lhs != *rhs) {
-                        cout << "A = " << typeToString(lhs) << endl;
-                        cout << "B = " << typeToString(rhs) << endl;
                         throw Error("Only matching types can be compared", expr->getLine());
                       }
 
@@ -1172,7 +1168,6 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                            } 
 
     default:
-                           cout << expr->kind() << endl;
                            throw Error("inferExpression: unknown node type");
                            break;
   }
@@ -1498,7 +1493,7 @@ void inferGlobal(Node* node, bool isConst = false) {
     node->child(0)->setDataType(rhs);
   }
   /* add it in */
-  globals.insert(pair<tstring, Symbol>(
+  globals.insert(std::pair<tstring, Symbol>(
         node->child(0)->getValue()->toString(),
         Symbol(node->child(0)->getValue()->toString(), node->type(), node->getLine())));
 }
@@ -1529,7 +1524,7 @@ void addStls() {
     /* add them to the globals */
     DataType type(TYPE_FUNCTION);
 
-    globals.insert(pair<tstring, Symbol>( "len",
+    globals.insert(std::pair<tstring, Symbol>( "len",
           Symbol(stls[i], &type, 0, true)));
   }
 }

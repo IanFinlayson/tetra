@@ -7,7 +7,6 @@
 
 #include "console.h"
 #include "filerunner.h"
-#include "ideCommandObserver.h"
 
 /* this function is defined in the Tetra interpreter code, linked as libtetra.a */
 int interpret(Node* tree, int debug, int threads);
@@ -29,9 +28,6 @@ FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
 
 /* run or debugs file */
 void FileRunner::runFile(bool debug) {
-    ConsoleArray consoleArray;
-    consoleArray.registerConsole(*this);
-
     /* start timer */
     programTimer.start();
 
@@ -39,9 +35,7 @@ void FileRunner::runFile(bool debug) {
     bool interrupted = false;
 
     Node* program_root;
-    IDECommandObserver debugger = IDECommandObserver();
-    TetraEnvironment::setObserver(debugger);
-    TetraEnvironment::initialize(consoleArray);
+    TetraEnvironment::initialize();
 
     try {
         program_root = parseFile(mainWindow->getOpenFile().toStdString().c_str());

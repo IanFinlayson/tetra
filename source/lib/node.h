@@ -6,7 +6,6 @@
 #include <map>
 #include <string>
 #include <vector>
-using namespace std;
 
 /* forward declarations */
 class DataType;

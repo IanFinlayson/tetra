@@ -41,7 +41,7 @@ class SystemError : public Error {
 };
 
 /* print an error */
-ostream& operator<<(ostream& out, const Error& error);
+std::ostream& operator<<(std::ostream& out, const Error& error);
 
 #endif
 

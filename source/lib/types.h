@@ -52,6 +52,8 @@ bool operator!=(const DataType& lhs, const DataType& rhs);
 tstring typeToString(DataType* t);
 void inferParams(Node* node, Node* func = NULL);
 void buildParamTupleType(DataType* type, const Node* node);
+void initTypes(Node* node);
+void inferTypes(Node* node);
 
 #endif
 

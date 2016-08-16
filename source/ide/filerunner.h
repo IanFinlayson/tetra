@@ -8,7 +8,9 @@
 #include <QElapsedTimer>
 #include <QObject>
 #include <QWaitCondition>
-#include "backend.h"
+
+#include "tetra.h"
+
 #include "mainwindow.h"
 
 class MainWindow;

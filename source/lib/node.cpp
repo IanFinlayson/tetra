@@ -69,7 +69,7 @@ void Node::insertSymbol(Symbol sym) {
   }
 
   /* add it in */
-  symtable->insert(pair<tstring, Symbol>(sym.getName(), sym));
+  symtable->insert(std::pair<tstring, Symbol>(sym.getName(), sym));
 }
 
 /* lookup a symbol from a symbol table */

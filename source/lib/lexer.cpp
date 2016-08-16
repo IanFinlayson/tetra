@@ -370,8 +370,8 @@ int yylex() {
 
     /* If the level is EVEN greater than that, error */
     if (level > indent_level) {
-      cerr << "Level = " << level << endl;
-      cerr << "Indent level = " << indent_level << endl;
+        std::cerr << "Level = " << level << std::endl;
+        std::cerr << "Indent level = " << indent_level << std::endl;
       throw Error("Too much indentation.", yylineno);
     }
 

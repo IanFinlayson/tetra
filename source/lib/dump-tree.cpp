@@ -235,7 +235,7 @@ void dumpTreeStdout(Node* node, int level = 0) {
       std::cout << " (LINE:" << node->getLine() << ")";
   }
 
-  std::cout << endl;
+  std::cout << std::endl;
 
   /* dump children */
   for (int i = 0; i < node->numChildren(); i++) {

@@ -14,8 +14,8 @@
 #include <QSignalMapper>
 #include <QThread>
 
-#include "backend.h"
-#include "frontend.h"
+#include "tetra.h"
+
 #include "filerunner.h"
 #include "syntaxhighlighter.h"
 #include "replacedialog.h"

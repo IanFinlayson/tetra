@@ -10,8 +10,6 @@
 #include "types.h"
 #include "values.h"
 
-using namespace std;
-
 /* an entry in the symbol table */
 class Symbol {
  public:

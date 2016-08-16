@@ -10,8 +10,6 @@
 
 #define YYDEBUG 1
 
-using namespace std;
-
 #include "node.h"
 #include "types.h"
 #include "error.h"

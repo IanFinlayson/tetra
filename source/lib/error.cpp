@@ -69,13 +69,13 @@ std::string Error::getMessage() const { return mesg; }
 int Error::getLine() const { return lineno; }
 
 /* print an error */
-ostream& operator<<(ostream& out, const Error& error) {
+std::ostream& operator<<(std::ostream& out, const Error& error) {
   out << "Error: ";
   if (error.getLine()) {
     out << "(line " << error.getLine() << ") ";
   }
 
-  out << error.getMessage() << endl;
+  out << error.getMessage() << std::endl;
   return out;
 }
 
