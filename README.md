@@ -35,20 +35,10 @@ Tetra thus far only works on Linux systems.  To install:
 
 2 Install dependencies
 ```
-sudo apt-get install build-essential clang bison qt5-default libatomic-ops-dev
+sudo apt-get install build-essential clang bison qt5-default
 ```
 
-3 Install the Hans Boehm GC library:
-```
-wget http://www.hboehm.info/gc/gc_source/gc-7.4.4.tar.gz
-tar -xzvf gc-7.4.4.tar.gz
-cd gc-7.4.4
-./configure --enable-threads=posix --enable-thread-local-alloc --enable-parallel-mark --enable-cplusplus
-make
-sudo make install
-```
-
-4 Compile Tetra:
+3 Compile Tetra:
 ```
 cd tetra
 ./build
