@@ -54,7 +54,7 @@ tstring typeToString(DataType* t) {
                       /* if the tuple has more than one element ... */
                       if(t->subtypes->size() > 1)
                         /* then get rid of the trailing comma */
-                        typeString = typeString.substr(0,typeString.size()-2);
+                        typeString = typeString.substring(0,typeString.length()-2);
 
                       return typeString + ")";
                     }
@@ -120,7 +120,7 @@ void ClassContext::addMethods(Node* root){
 void ClassContext::addMembers(Node* node) {
   /* add this part */
   if (node->kind() == NODE_IDENTIFIER) {
-    this->addMember(Symbol(node->getValue()->toString(), node->type(), 
+    this->addMember(Symbol(node->getStrval(), node->type(), 
           node->getLine())); 
   } else if (node->kind() == NODE_CLASS_PART) {
     /* recursively add other parts */
@@ -358,15 +358,15 @@ DataType* inferLen(Node* funcall, Node* func) {
 DataType* inferRead(Node* funcall) {
   /* make sure there are no parameters */
   if (funcall->numChildren() > 1) {
-    throw Error(funcall->getValue()->toString() + " should not have any parameters",
+    throw Error(funcall->getStrval() + " should not have any parameters",
         funcall->getLine());
   }
 
   /* get the return type right */
-  if (funcall->child(0)->getValue()->toString() == "read_string") return new DataType(TYPE_STRING);
-  if (funcall->child(0)->getValue()->toString() == "read_int") return new DataType(TYPE_INT);
-  if (funcall->child(0)->getValue()->toString() == "read_real") return new DataType(TYPE_REAL);
-  if (funcall->child(0)->getValue()->toString() == "read_bool") return new DataType(TYPE_BOOL);
+  if (funcall->child(0)->getStrval() == "read_string") return new DataType(TYPE_STRING);
+  if (funcall->child(0)->getStrval() == "read_int") return new DataType(TYPE_INT);
+  if (funcall->child(0)->getStrval() == "read_real") return new DataType(TYPE_REAL);
+  if (funcall->child(0)->getStrval() == "read_bool") return new DataType(TYPE_BOOL);
 
   throw Error("This should not happen!", funcall->getLine());
 }
@@ -375,18 +375,18 @@ DataType* inferRead(Node* funcall) {
  * infers it */
 DataType* inferStdlib(Node* funcall, Node* func, bool& is_stdlib) {
   is_stdlib = true;
-  if (funcall->child(0)->getValue()->toString() == "print") {
+  if (funcall->child(0)->getStrval() == "print") {
     return inferPrint(funcall, func);
   }
 
-  if (funcall->child(0)->getValue()->toString() == "len") {
+  if (funcall->child(0)->getStrval() == "len") {
     return inferLen(funcall, func);
   }
 
-  if ((funcall->child(0)->getValue()->toString() == "read_string") ||
-      (funcall->child(0)->getValue()->toString() == "read_int") ||
-      (funcall->child(0)->getValue()->toString() == "read_real") ||
-      (funcall->child(0)->getValue()->toString() == "read_bool")) {
+  if ((funcall->child(0)->getStrval() == "read_string") ||
+      (funcall->child(0)->getStrval() == "read_int") ||
+      (funcall->child(0)->getStrval() == "read_real") ||
+      (funcall->child(0)->getStrval() == "read_bool")) {
     return inferRead(funcall);
   }
 
@@ -543,9 +543,9 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
   bool found = false;
   while (lambda && !found) {
     /* if we found the identifier, get its symbol*/
-    if(lambda->hasSymbol(expr->getValue()->toString())) {
+    if(lambda->hasSymbol(expr->getStrval())) {
       *sym = lambda->lookupSymbol(
-          expr->getValue()->toString(), lambda->getLine());     
+          expr->getStrval(), lambda->getLine());     
 
       found = true;
     }
@@ -555,42 +555,42 @@ Symbol* findIdSym(Node* expr, Node* func = NULL) {
   } 
 
   /* if not a lambda, see if it's local to the function */
-  if (func && func->hasSymbol(expr->getValue()->toString())){
+  if (func && func->hasSymbol(expr->getStrval())){
 
     /* look it up */
-    *sym = func->lookupSymbol(expr->getValue()->toString(), expr->getLine());
+    *sym = func->lookupSymbol(expr->getStrval(), expr->getLine());
 
   /* if it is in a class, check there for a member var*/
   } else if (getClassNode(expr) 
-      && classes[getClassNode(expr)->getValue()->toString()].hasMember(expr->getValue()->toString())) {
+      && classes[getClassNode(expr)->getStrval()].hasMember(expr->getStrval())) {
 
-    *sym = classes[getClassNode(expr)->getValue()->toString()].getMember(expr->getValue()->toString()); 
+    *sym = classes[getClassNode(expr)->getStrval()].getMember(expr->getStrval()); 
 
   /* if it is in a class, check there for a method */
   } else if (getClassNode(expr) 
-      && classes[getClassNode(expr)->getValue()->toString()].hasMethodNamed(expr->getValue()->toString())) {
+      && classes[getClassNode(expr)->getStrval()].hasMethodNamed(expr->getStrval())) {
 
     /* get all the methods */
-    *sym = Symbol(expr->getValue()->toString(), 
-        classes[getClassNode(expr)->getValue()->toString()].getMethods(expr->getValue()->toString()),
+    *sym = Symbol(expr->getStrval(), 
+        classes[getClassNode(expr)->getStrval()].getMethods(expr->getStrval()),
         expr->getLine(), true); 
 
   /* next check for globals/constants */
-  } else if (globals.count(expr->getValue()->toString()) > 0) {
+  } else if (globals.count(expr->getStrval()) > 0) {
       
     /* look it up */
-    *sym = globals[expr->getValue()->toString()];
+    *sym = globals[expr->getStrval()];
 
   /* next check if it's the name of a free function */
-  } else if (functions.hasFuncNamed(expr->getValue()->toString())) {
+  } else if (functions.hasFuncNamed(expr->getStrval())) {
 
     /* look it up */
-    *sym = Symbol(expr->getValue()->toString(), 
-        functions.getFunctionsNamed(expr->getValue()->toString()),
+    *sym = Symbol(expr->getStrval(), 
+        functions.getFunctionsNamed(expr->getStrval()),
         expr->getLine(), true); 
   }
   /* return the thing we found (or NULL) */
-  if(sym->getName() != "") {
+  if(!sym->getName().empty()) {
     return sym;
   } else {
     return NULL;
@@ -619,7 +619,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           if (!sym && !rhs->isEmptyContainerType()) {
                               /* infer it! */ 
                               lhs = rhs;
-                              func->insertSymbol(*new Symbol(expr->child(0)->getValue()->toString(),
+                              func->insertSymbol(*new Symbol(expr->child(0)->getStrval(),
                                     lhs,expr->child(0)->getLine()));
                             
                           /* if it doesn't exist and it IS NOT inferable... */
@@ -868,9 +868,9 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           throw Error("Tuple index must be an integer.", expr->getLine());
                          }
                          /* make sure the index is in range */  
-                         if ((unsigned long) expr->child(1)->getValue()->toInt() < lhs->subtypes->size()){
+                         if ((unsigned long) expr->child(1)->getIntval().toInt() < lhs->subtypes->size()){
                            /* get return the type of the index */
-                           return &(*(lhs->subtypes))[expr->child(1)->getValue()->toInt()]; 
+                           return &(*(lhs->subtypes))[expr->child(1)->getIntval().toInt()]; 
                          /* if it isn't in range */
                          } else {
                            /* complain! */
@@ -960,7 +960,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                          /* if we get here, then we either haven't found any matches,
                           * or the ones that we have found don't accept the correct arguments */
                          throw Error("No matching function for: '" 
-                             + expr->child(0)->getValue()->toString() + typeToString(rhsParams)
+                             + expr->child(0)->getStrval() + typeToString(rhsParams)
                              + "'.", expr->getLine()); 
                        }
 
@@ -978,15 +978,15 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                               }
 
                               /* if the identifier already exists in this function... */
-                              if (func->hasSymbol(expr->getValue()->toString())) {
+                              if (func->hasSymbol(expr->getStrval())) {
                                 /* complain! */
-                                throw Error("The identifier '" + expr->getValue()->toString() 
+                                throw Error("The identifier '" + expr->getStrval() 
                                     + "' already exists.",expr->getLine());
                               }
 
                               /* if we make it here, we need to add this declaration to this
                                * function's sym table */
-                              func->insertSymbol(*new Symbol(expr->getValue()->toString(),
+                              func->insertSymbol(*new Symbol(expr->getStrval(),
                                     expr->type(), expr->getLine())); 
                               /* then just return the type it already has */
                               return expr->type();
@@ -999,7 +999,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                             if (!sym) {
                               /* complain! */
                               throw Error("Reference to non-existent identifier '" 
-                                  + expr->getValue()->toString() + "'.", expr->getLine());
+                                  + expr->getStrval() + "'.", expr->getLine());
                             } 
 
                             /* otherwise, return the type */
@@ -1107,13 +1107,13 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                       throw Error("Class does not exist.", expr->getLine());
                       /* check that class has member var */
                     } else if (!classes[*lhs->className]
-                        .hasMember(expr->child(1)->getValue()->toString())) {
+                        .hasMember(expr->child(1)->getStrval())) {
                       throw Error("Class does not contain specified member variable."
                           , expr->getLine());
                     }
 
                     /* return the type of the member variable */
-                    return classes[*lhs->className].getMember(expr->child(1)->getValue()->toString()).getType();
+                    return classes[*lhs->className].getMember(expr->child(1)->getStrval()).getType();
                    }
 
     case NODE_SELF: {
@@ -1127,7 +1127,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                       /* return the class' type */
                       DataType* type = new DataType(TYPE_CLASS);
-                      *(type->className) = classNode->getValue()->toString();
+                      *(type->className) = classNode->getStrval();
                       return type;
 
                     }
@@ -1151,16 +1151,16 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
 
                                /* check that class has method */
                              } else if (!classes[*lhs->className]
-                                 .hasMethod(rhsParams, expr->child(1)->child(0)->getValue()->toString())){
+                                 .hasMethod(rhsParams, expr->child(1)->child(0)->getStrval())){
 
                                throw Error("Class '" + *(lhs->className) + "' does not contain method '" 
-                                   + expr->child(1)->child(0)->getValue()->toString() + "'. " 
-                                   + expr->child(1)->getValue()->toString()+ typeToString(rhsParams), expr->getLine());
+                                   + expr->child(1)->child(0)->getStrval() + "'. " 
+                                   + expr->child(1)->getStrval()+ typeToString(rhsParams), expr->getLine());
                              }
 
                              /* return the return type of the method */
                              return classes[*lhs->className]
-                               .getMethod(rhsParams, expr->child(1)->child(0)->getValue()->toString())->type();
+                               .getMethod(rhsParams, expr->child(1)->child(0)->getStrval())->type();
                            }
 
     case NODE_DECLARATION: {
@@ -1217,7 +1217,7 @@ void checkMuTasks(Node* block, Node* func) {
      * and it's not a wait node*/ 
     if (!sym && block->kind() != NODE_WAIT){
       /* make a symbol for it */
-      sym = new Symbol(block->child(0)->getValue()->toString(), 
+      sym = new Symbol(block->child(0)->getStrval(), 
             new DataType(kind), block->child(0)->getLine());
       /* add to this function's symtable */
       func->insertSymbol(*sym);  
@@ -1361,13 +1361,13 @@ void inferBlock(Node* block, Node* func) {
                      /* if it does, make sure it is the right type */
                      if (idxSym && (*(idxSym->getType())) 
                          != (*(expr_type->subtypes))[0]) {
-                       throw Error("Type of index variable '" + block->child(0)->getValue()->toString()
+                       throw Error("Type of index variable '" + block->child(0)->getStrval()
                            + "' is incompatible with container elements.", block->getLine()); 
 
                      /*otherwise, if it doesn't exist, add it */
                      } else if (!idxSym) {
 
-                       func->insertSymbol(Symbol(block->child(0)->getValue()->toString(),
+                       func->insertSymbol(Symbol(block->child(0)->getStrval(),
                              &(*(expr_type->subtypes))[0], block->getLine()));
                      }
 
@@ -1447,7 +1447,7 @@ void inferParams(Node* node, Node* func) {
   else if (node->kind() == NODE_DECLARATION) {
     /* add the param to the symbol table */
     func->insertSymbol(
-        Symbol(node->getValue()->toString(), node->type(), node->getLine()));
+        Symbol(node->getStrval(), node->type(), node->getLine()));
     /* add the param to the datatype */
     (*(func->type()->subtypes))[0].subtypes->push_back(*node->type());
   }
@@ -1462,11 +1462,11 @@ void inferGlobal(Node* node, bool isConst = false) {
   isConst ? varType = "Constant" : varType = "Global";
 
   /* check if this symbol exists already, (it shouldn't)*/
-  if (globals.count(node->child(0)->getValue()->toString()) > 0
-      || functions.hasFuncNamed(node->child(0)->getValue()->toString())
-      || classes.count(node->child(0)->getValue()->toString()) > 0) {
+  if (globals.count(node->child(0)->getStrval()) > 0
+      || functions.hasFuncNamed(node->child(0)->getStrval())
+      || classes.count(node->child(0)->getStrval()) > 0) {
 
-    throw Error(varType + " '" + node->child(0)->getValue()->toString() +
+    throw Error(varType + " '" + node->child(0)->getStrval() +
         "' has been defined.");
   }
 
@@ -1494,8 +1494,8 @@ void inferGlobal(Node* node, bool isConst = false) {
   }
   /* add it in */
   globals.insert(std::pair<tstring, Symbol>(
-        node->child(0)->getValue()->toString(),
-        Symbol(node->child(0)->getValue()->toString(), node->type(), node->getLine())));
+        node->child(0)->getStrval(),
+        Symbol(node->child(0)->getStrval(), node->type(), node->getLine())));
 }
 
 void inferGlobals(Node* node){
@@ -1537,7 +1537,7 @@ void addMembers(ClassContext* context, Node* node) {
   /* if this node is for a member var... */
   if (node->kind() == NODE_IDENTIFIER) {
     /* add it */
-    context->addMember(Symbol(node->getValue()->toString(), node->type(), 
+    context->addMember(Symbol(node->getStrval(), node->type(), 
           node->getLine())); 
   } else if (node->kind() == NODE_CLASS_PART) {
     /* recursively add other parts */
@@ -1571,14 +1571,14 @@ void initSquared(ClassContext context) {
     
     /* rename the functions and insert them */
     functions.insert(std::pair<tstring,Node*>(context.getName() 
-          + it->first.substr((it->first).find_first_of("(")), it->second));
+          + it->first.substring((it->first).indexOf("(")), it->second));
   }
 
   /* if there were no inits... */
   if (!inits.size()) {
     /* make a default one and add it! */
     Node* node = new Node(NODE_FUNCTION);
-    node->setValue(new tstring(context.getName()));
+    node->setStrval(tstring(context.getName()));
     node->setDataType(new DataType(TYPE_FUNCTION));
     /* add the empty param type */
     node->type()->subtypes->push_back(*(new DataType(TYPE_TUPLE)));
@@ -1597,18 +1597,18 @@ void initClass(Node* node) {
   if (node && (node->kind() == NODE_TOPLEVEL_LIST)) {
     if (node->child(0)->kind() == NODE_CLASS) { 
       /* check for duplicate class name */
-      if (classes.count(node->child(0)->getValue()->toString())) {
+      if (classes.count(node->child(0)->getStrval())) {
         throw Error("Duplicate class.", 
             node->child(0)->getLine());
       }
       /* check for stl names*/
-      if (globals.count(node->child(0)->getValue()->toString())) {
+      if (globals.count(node->child(0)->getStrval())) {
         throw Error("Cannot use stl function name for class name.", 
             node->child(0)->getLine());
       }
 
       /* create new ClassContext */
-      ClassContext context(node->child(0)->getValue()->toString());
+      ClassContext context(node->child(0)->getStrval());
 
       /* add any class parts */
       context.addMethods(node->child(0)->child(0));
@@ -1664,8 +1664,8 @@ void checkClassTypes(Node* node) {
 void inferFunction(Node* node){
   /* make sure that this function does not share a name
    * with a global or a class */
-  if (globals.count(node->getValue()->toString())
-      || classes.count(node->getValue()->toString())) {
+  if (globals.count(node->getStrval())
+      || classes.count(node->getStrval())) {
 
     throw Error("Free function cannot share name with global, constant, or class.", 
         node->getLine());
@@ -1675,7 +1675,7 @@ void inferFunction(Node* node){
   if ((*(node->type()->subtypes))[1].getKind() != TYPE_NONE 
       && !checkReturns(node)) {
     /* complain */
-    throw Error("Function '" + node->getValue()->toString() + 
+    throw Error("Function '" + node->getStrval() + 
         "' has declared return type, but all paths do not return.",
         node->getLine());
   }
@@ -1703,10 +1703,10 @@ void inferClass(Node* node) {
   } else if (node->kind() == NODE_IDENTIFIER) {
     checkClassTypes(node);
     /* make sure that the identifier doesn't already exist */
-    if (globals.count(node->getValue()->toString()) 
-        || classes.count(node->getValue()->toString())
-        || functions.hasFuncNamed(node->getValue()->toString())) {
-      throw Error("Member identifier '" +  node->getValue()->toString() 
+    if (globals.count(node->getStrval()) 
+        || classes.count(node->getStrval())
+        || functions.hasFuncNamed(node->getStrval())) {
+      throw Error("Member identifier '" +  node->getStrval() 
           + "' already exists in current scope.", node->getLine());
     }
   } else if (node->kind() == NODE_FUNCTION) {
@@ -1715,9 +1715,9 @@ void inferClass(Node* node) {
 
     /* if there is a return (not none) and all paths don't return */
     if ((*(node->type()->subtypes))[1].getKind() != TYPE_NONE 
-        && node->getValue()->toString() != "init" && !checkReturns(node)) {
+        && node->getStrval() != tstring("init") && !checkReturns(node)) {
       /* complain */
-      throw Error("Function '" + node->getValue()->toString() + 
+      throw Error("Function '" + node->getStrval() + 
           "' has declared return type, but all paths do not return.",
           node->getLine());
     }

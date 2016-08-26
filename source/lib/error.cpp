@@ -9,17 +9,22 @@
 #include "tetra.h"
 
 /* this function search and replaces a string in place */
-void replace(std::string& str, const std::string& from, const std::string& to) {
+void replace(tstring& str, const tstring& from, const tstring& to) {
+    UNUSED(str);
+    UNUSED(from);
+    UNUSED(to);
+    /* FIXME 
   size_t start_pos = str.find(from);
-  if (start_pos != std::string::npos) {
+  if (start_pos != tstring::npos) {
     str.replace(start_pos, from.length(), to);
     replace(str, from, to);
   }
+  */
 }
 
 /* this function takes a string and modifies it in place
  * with TOK_ missing and some other pretty printing */
-void prettyPrintMessage(std::string& str) {
+void prettyPrintMessage(tstring& str) {
   replace(str, "PLUS", "'+'");
   replace(str, "MINUS", "'-'");
   replace(str, "TIMES", "'*'");
@@ -58,13 +63,13 @@ void prettyPrintMessage(std::string& str) {
 }
 
 /* Error exception functions */
-Error::Error(const std::string& mesg, int lineno) {
+Error::Error(const tstring& mesg, int lineno) {
   this->mesg = mesg;
   prettyPrintMessage(this->mesg);
   this->lineno = lineno;
 }
 
-std::string Error::getMessage() const { return mesg; }
+tstring Error::getMessage() const { return mesg; }
 
 int Error::getLine() const { return lineno; }
 
@@ -80,11 +85,11 @@ std::ostream& operator<<(std::ostream& out, const Error& error) {
 }
 
 /* the runtime error class */
-RuntimeError::RuntimeError(const std::string& pMessage, int pLine) : Error(pMessage, pLine) {
+RuntimeError::RuntimeError(const tstring& pMessage, int pLine) : Error(pMessage, pLine) {
 }
 
 /* the system error class */
-SystemError::SystemError(const std::string& pMessage, int pLine, const Node* pNode) : Error(pMessage, pLine), node(pNode) {
+SystemError::SystemError(const tstring& pMessage, int pLine, const Node* pNode) : Error(pMessage, pLine), node(pNode) {
 }
 
 const Node* SystemError::getNode() {

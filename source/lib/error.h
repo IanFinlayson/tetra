@@ -8,22 +8,23 @@
 #include <vector>
 
 #include "types.h"
+#include "values.h"
 
 /* any type of error is handled with this exception */
 class Error {
  public:
-  Error(const std::string& mesg, int lineno = 0);
-  std::string getMessage() const;
+  Error(const tstring& mesg, int lineno = 0);
+  tstring getMessage() const;
   int getLine() const;
 
  private:
-  std::string mesg;
+  tstring mesg;
   int lineno;
 };
 
 class RuntimeError : public Error {
  public:
-  RuntimeError(const std::string& pMessage, int pLine);
+  RuntimeError(const tstring& pMessage, int pLine);
 };
 
 class InterruptError : public Error {
@@ -33,7 +34,7 @@ class InterruptError : public Error {
 
 class SystemError : public Error {
  public:
-  SystemError(const std::string& pMessage, int pLine, const Node* pNode);
+  SystemError(const tstring& pMessage, int pLine, const Node* pNode);
   const Node* getNode();
 
  private:

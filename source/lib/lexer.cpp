@@ -9,6 +9,9 @@
 #include <iostream>
 #include <string>
 
+#include <QTextStream>
+#include <QFile>
+
 #include "tetra.h"
 
 /* whether or not we have seen whitespace so far this line */
@@ -38,8 +41,56 @@ void reset_lexer() {
 /* the symbol used to comunicate with bison */
 extern YYSTYPE yylval;
 
-/* the istream to use for doing all input */
-std::istream* in;
+/* the input stream to use for doing all input */
+QTextStream* in;
+
+/* a queue of characters which are buffered */
+std::deque<QChar> buffer;
+
+/* set the file we are reading from */
+void setLexFile(QFile& file) {
+    in = new QTextStream(&file);
+    buffer.clear();
+}
+
+/* peek at the next thing from the stream */
+QChar peek() {
+    /* if the buffer is empty, read one in first */
+    if (buffer.size() == 0) {
+        QChar next;
+        (*in) >> next;
+        buffer.push_front(next);
+    }
+
+    /* return the next thing from the buffer (keeping it) */
+    return buffer.front();
+}
+
+/* get the next thing from the stream */
+QChar get() {
+    /* if there is a buffered thing, remove and return it */
+    if (buffer.size() != 0) {
+        QChar next = buffer.front();
+        buffer.pop_front();
+        return next;
+    } else {
+        /* just read one */
+        QChar next;
+        (*in) >> next;
+        return next;
+    }
+}
+
+/* put something back in the stream */
+void putback(QChar c) {
+    buffer.push_front(c);
+}
+
+/* check if we are out of characters */
+bool eof() {
+    return buffer.empty() && in->atEnd();
+}
+
 
 /* look up a string and return its token code */
 int lookupId(const tstring& id) {
@@ -147,25 +198,28 @@ int lookupId(const tstring& id) {
     return TOK_TASK;
   }
   if (id == "true") {
-    yylval.boolval = true;
+    yylval.boolval = new tbool;
+    *(yylval.boolval) = tbool(true);
     return TOK_BOOLVAL;
   } else if (id == "false") {
-    yylval.boolval = false;
+    yylval.boolval = new tbool;
+    *(yylval.boolval) = tbool(false);
     return TOK_BOOLVAL;
   }
 
   /* save the identifier */
-  strcpy(yylval.stringval, id.c_str());
+  yylval.stringval = new tstring;
+  *(yylval.stringval) = id;
   return TOK_IDENTIFIER;
 }
 
 /* lex an identifier (or reserved word) given a start */
-int lexIdent(int start) {
+int lexIdent(QChar start) {
   tstring id;
-  id.push_back((char)start);
+  id.push_back(start);
 
-  while (isalnum(in->peek()) || in->peek() == '_') {
-    id.push_back(in->get());
+  while (peek().isLetterOrNumber() || peek() == '_') {
+    id.push_back(get());
   }
 
   return lookupId(id);
@@ -173,20 +227,20 @@ int lexIdent(int start) {
 
 /* lex a number
  * TODO handle more bases, scientific notation etc. */
-int lexNumber(int start) {
+int lexNumber(QChar start) {
   tstring number;
-  number.push_back((char)start);
+  number.push_back(start);
 
   /* have we seen a decimal point yet? */
   bool seendot = (start == '.');
 
   /* scan forward */
   while (true) {
-    char next = in->peek();
+    QChar next = peek();
 
-    if (isdigit(next)) {
+    if (next.isDigit()) {
       number.push_back(next);
-      in->get();
+      get();
       continue;
     }
 
@@ -196,12 +250,12 @@ int lexNumber(int start) {
 
     if (next == '.') {
       /* hesitantly read the . */
-      next = in->get();
+      next = get();
 
       /* check if next is dot too */
-      if (in->peek() == '.') {
+      if (peek() == '.') {
         /* put the . back and bail */
-        in->putback(next);
+        putback(next);
         break;
       } else {
         number.push_back(next);
@@ -215,11 +269,13 @@ int lexNumber(int start) {
   }
 
   /* if there's no decimal its an int */
-  if (number.find('.') == tstring::npos) {
-    yylval.intval = atoi(number.c_str());
+  if (number.find('.') == -1) {
+    yylval.intval = new tint;
+    *(yylval.intval) = number.toInt();
     return TOK_INTVAL;
   } else {
-    yylval.realval = atof(number.c_str());
+    yylval.realval = new treal;
+    *(yylval.realval) = number.toReal();
     return TOK_REALVAL;
   }
 }
@@ -228,34 +284,32 @@ int lexNumber(int start) {
 int lexString() {
   tstring str;
   while (true) {
-    char next = in->get();
+    QChar next = get();
     if (next == '\\') {
       /* get the thing after this */
-      next = in->get();
-      switch (next) {
-        case 'n':
+      next = get();
+      if (next == 'n') {
           str.push_back('\n');
-          break;
-        case 't':
+      } else if (next == 't') {
           str.push_back('\t');
-          break;
-        case '"':
+      } else if (next == '"') {
           str.push_back('"');
-        case '\\':
+      } else if (next == '\\') {
           str.push_back('\\');
-          break;
-        default:
+      } else {
           str.push_back(next);
       }
+
     } else if (next == '"') {
-      break;
+        break;
     } else {
-      str.push_back(next);
+        str.push_back(next);
     }
   }
 
   /* save the string */
-  strcpy(yylval.stringval, str.c_str());
+  yylval.stringval = new tstring;
+  *(yylval.stringval) = str;
   return TOK_STRINGVAL;
 }
 
@@ -265,332 +319,333 @@ int lexString() {
  * do
  * whitespace based blocking a la Python */
 int yylex() {
-  /* if there are dedents left to return, do it */
-  if (dedents_left > 0) {
-    dedents_left--;
-    indent_level--;
-    return TOK_DEDENT;
-  }
-
-  /* read in the next character in the stream */
-  int next = in->get();
-
-  /* handle comments */
-  if (next == '#') {
-    /* eat it all */
-    while (in->peek() != '\n') {
-      in->get();
-    }
-    /* get the new line */
-    in->get();
-    start_of_line = 1;
-    yylineno++;
-
-    /* skip it */
-    return yylex();
-  }
-
-
-  /* check for EOF */
-  if (in->eof()) {
-    if (indent_level != 0) {
-      dedents_left = indent_level;
-      return yylex();
-    } else {
-      return 0;
-    }
-  }
-
-  /* we do NOT allow tabs */
-  if (next == '\t') {
-    throw Error("Tab characters are not allowed in Tetra!", yylineno);
-  }
-
-  /* if it's a new line, set to beginning of line and return next */
-  if (next == '\n') {
-    start_of_line = 1;
-    yylineno++;
-    return TOK_NEWLINE;
-  }
-
-  /* if it's whitespace, NOT at the start of a line, ignore it */
-  if (!start_of_line && next == ' ') {
-    /* recurse to skip it */
-    return yylex();
-  }
-
-  /* if it's whitespace and IS at the start of the line */
-  if (start_of_line && next == ' ') {
-    /* count the spaces */
-    int spaces = 1;
-    while (in->peek() == ' ') {
-      in->get();
-      spaces++;
+    /* if there are dedents left to return, do it */
+    if (dedents_left > 0) {
+        dedents_left--;
+        indent_level--;
+        return TOK_DEDENT;
     }
 
-    start_of_line = 0;
+    /* read in the next character in the stream */
+    QChar next = get();
 
-    /* handle the case where there is nothing but spaces */
-    if(in->peek() == '\n'){
-      in->get();
-      start_of_line = 1;
-      yylineno++;
-      return TOK_NEWLINE;
-    } 
-    
-    /* handle the case where it is just a comment */
-    if(in->peek() == '#'){
-      in->get();
-      while(in->peek() != '\n'){
-        in->get();
-      }
-      in->get();
-      yylineno++;
-      start_of_line = 1;
-      return yylex();
-    }
-    
+    /* handle comments */
+    if (next == '#') {
+        /* eat it all */
+        while (peek() != '\n') {
+            get();
+        }
+        /* get the new line */
+        get();
+        start_of_line = 1;
+        yylineno++;
 
-    /* if this is the first one, treat it as the level */
-    if (spaces_per_indent == 0) {
-      spaces_per_indent = spaces;
+        /* skip it */
+        return yylex();
     }
 
-    /* level is spaces / spaces_per_indent */
-    int level = spaces / spaces_per_indent;
-    if ((spaces % spaces_per_indent) != 0) {
-      throw Error("Indentation level inconsistent.", yylineno);
-    }
 
-    /* if the level is greater than the current one (by one) indent */
-    if (level == (indent_level + 1)) {
-      indent_level++;
-      return TOK_INDENT;
-    }
-
-    /* If the level is EVEN greater than that, error */
-    if (level > indent_level) {
-        std::cerr << "Level = " << level << std::endl;
-        std::cerr << "Indent level = " << indent_level << std::endl;
-      throw Error("Too much indentation.", yylineno);
-    }
-
-    /* if the level is less than the current one */
-    if (level < indent_level) {
-      /* set dedents_left to the difference */
-      dedents_left = indent_level - level;
-
-      /* recurse */
-      return yylex();
-    }
-
-    /* if it's the same, just move on */
-    if (level == indent_level) {
-      return yylex();
-    }
-
-    /* else it's the start of line, but NOT whitespace */
-  } else if (start_of_line) {
-    start_of_line = 0;
-    /* if there is indentation, set the dedents to return to that - 1, and
-     * return 1 */
-    if (indent_level > 0) {
-      /* put the thing we read back! */
-      in->putback(next);
-      dedents_left = indent_level - 1;
-      indent_level--;
-      return TOK_DEDENT;
-    }
-  }
-
-  /* it's not start of line any more */
-  start_of_line = 0;
-
-  /* if it's a letter or underscore, we have an identifier (or reserved word) */
-  if (isalpha(next)) {
-    return lexIdent(next);
-  }
-
-  /* if it's three decimal points, it's an elipsis */
-  if (next == '.' && in->peek() == '.') {
-    in->get();
-
-    if (in->get() != '.') {
-      throw Error("Lexical error: '..' not correct", yylineno);
-    }
-
-    return TOK_ELLIPSIS;
-  }
-
-  /* if it's a number or decimal point, we have a number of some kind */
-  if (isdigit(next) || (next == '.' && isdigit(in->peek()))) {
-    return lexNumber(next);
-  }
-
-  /* check for the dot operator */
-  if (next == '.') {
-    return TOK_DOT; 
-  }
-
-  /* handle string constants */
-  if (next == '"') {
-    return lexString();
-  }
-
-  /* character operators and punctuation */
-  yylval.lineno = yylineno;
-  switch (next) {
-    /* single character ones */
-    case '~':
-      return TOK_BITNOT;
-    case '(':
-      return TOK_LEFTPARENS;
-    case ')':
-      return TOK_RIGHTPARENS;
-    case ',':
-      return TOK_COMMA;
-    case ';':
-      return TOK_SEMICOLON;
-    case ':':
-      return TOK_COLON;
-    case '[':
-      return TOK_LEFTBRACKET;
-    case ']':
-      return TOK_RIGHTBRACKET;
-    case '{':
-      return TOK_LEFTBRACE;
-    case '}':
-      return TOK_RIGHTBRACE;
-
-    /* ones that have some single and double ones */
-    case '=':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_EQ;
-      } else {
-        return TOK_ASSIGN;
-      }
-    case '+':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_PLUSEQ;
-      } else {
-        return TOK_PLUS;
-      }
-    case '-':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_MINUSEQ;
-      } else if (in->peek() == '>') {
-        in->get();
-        return TOK_RIGHTARROW;
-      } else {
-        return TOK_MINUS;
-      }
-    case '*':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_TIMESEQ;
-      } else if (in->peek() == '*') {
-        in->get();
-        if (in->peek() == '=') {
-          in->get();
-          return TOK_EXPEQ;
+    /* check for EOF */
+    if (eof()) {
+        if (indent_level != 0) {
+            dedents_left = indent_level;
+            return yylex();
         } else {
-          return TOK_EXP;
+            return 0;
         }
-      } else {
-        return TOK_TIMES;
-      }
-    case '/':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_DIVIDEEQ;
-      } else {
-        return TOK_DIVIDE;
-      }
-    case '%':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_MODULUSEQ;
-      } else {
-        return TOK_MODULUS;
-      }
-    case '^':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_XOREQ;
-      } else {
-        return TOK_BITXOR;
-      }
-    case '|':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_OREQ;
-      } else {
-        return TOK_BITOR;
-      }
-    case '&':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_ANDEQ;
-      } else {
-        return TOK_BITAND;
-      }
-    case '!':
-      if (in->peek() != '=') {
-        throw Error("Error, invalid lexeme '!'", yylineno);
-      } else {
-        in->get();
-        return TOK_NEQ;
-      }
-    case '<':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_LTE;
-      } else if (in->peek() == '<') {
-        in->get();
-        if (in->peek() == '=') {
-          in->get();
-          return TOK_LSHIFTEQ;
-        } else {
-          return TOK_LSHIFT;
-        }
-      } else {
-        return TOK_LT;
-      }
-    case '>':
-      if (in->peek() == '=') {
-        in->get();
-        return TOK_GTE;
-      } else if (in->peek() == '>') {
-        in->get();
-        if (in->peek() == '=') {
-          in->get();
-          return TOK_RSHIFTEQ;
-        } else {
-          return TOK_RSHIFT;
-        }
-      } else {
-        return TOK_GT;
-      }
-    case '\\':
-      if (in->peek() == '\n'){
-        in->get();
-        while(in->peek() == ' '){
-          in->get();
-        }
-        
+    }
+
+    /* we do NOT allow tabs */
+    if (next == '\t') {
+        throw Error("Tab characters are not allowed in Tetra!", yylineno);
+    }
+
+    /* if it's a new line, set to beginning of line and return next */
+    if (next == '\n') {
+        start_of_line = 1;
+        yylineno++;
+        return TOK_NEWLINE;
+    }
+
+    /* if it's whitespace, NOT at the start of a line, ignore it */
+    if (!start_of_line && next == ' ') {
         /* recurse to skip it */
         return yylex();
-      }
-  }
+    }
 
-  /* if we get down here, there must be a lexer error :( */
-  char msg[] = "_ is not a valid lexeme.";
-  msg[0] = next;
-  throw Error(msg, yylineno);
-  return 0;
+    /* if it's whitespace and IS at the start of the line */
+    if (start_of_line && next == ' ') {
+        /* count the spaces */
+        int spaces = 1;
+        while (peek() == ' ') {
+            get();
+            spaces++;
+        }
+
+        start_of_line = 0;
+
+        /* handle the case where there is nothing but spaces */
+        if(peek() == '\n'){
+            get();
+            start_of_line = 1;
+            yylineno++;
+            return TOK_NEWLINE;
+        } 
+
+        /* handle the case where it is just a comment */
+        if(peek() == '#'){
+            get();
+            while(peek() != '\n'){
+                get();
+            }
+            get();
+            yylineno++;
+            start_of_line = 1;
+            return yylex();
+        }
+
+
+        /* if this is the first one, treat it as the level */
+        if (spaces_per_indent == 0) {
+            spaces_per_indent = spaces;
+        }
+
+        /* level is spaces / spaces_per_indent */
+        int level = spaces / spaces_per_indent;
+        if ((spaces % spaces_per_indent) != 0) {
+            throw Error("Indentation level inconsistent.", yylineno);
+        }
+
+        /* if the level is greater than the current one (by one) indent */
+        if (level == (indent_level + 1)) {
+            indent_level++;
+            return TOK_INDENT;
+        }
+
+        /* If the level is EVEN greater than that, error */
+        if (level > indent_level) {
+            std::cerr << "Level = " << level << std::endl;
+            std::cerr << "Indent level = " << indent_level << std::endl;
+            throw Error("Too much indentation.", yylineno);
+        }
+
+        /* if the level is less than the current one */
+        if (level < indent_level) {
+            /* set dedents_left to the difference */
+            dedents_left = indent_level - level;
+
+            /* recurse */
+            return yylex();
+        }
+
+        /* if it's the same, just move on */
+        if (level == indent_level) {
+            return yylex();
+        }
+
+        /* else it's the start of line, but NOT whitespace */
+    } else if (start_of_line) {
+        start_of_line = 0;
+        /* if there is indentation, set the dedents to return to that - 1, and
+         * return 1 */
+        if (indent_level > 0) {
+            /* put the thing we read back! */
+            putback(next);
+            dedents_left = indent_level - 1;
+            indent_level--;
+            return TOK_DEDENT;
+        }
+    }
+
+    /* it's not start of line any more */
+    start_of_line = 0;
+
+    /* if it's a letter or underscore, we have an identifier (or reserved word) */
+    if (next.isLetter() || next == '_') {
+        return lexIdent(next);
+    }
+
+    /* if it's three decimal points, it's an elipsis */
+    if (next == '.' && peek() == '.') {
+        get();
+
+        if (get() != '.') {
+            throw Error("Lexical error: '..' not correct", yylineno);
+        }
+
+        return TOK_ELLIPSIS;
+    }
+
+    /* if it's a number or decimal point, we have a number of some kind */
+    if (next.isDigit() || (next == '.' && peek().isDigit())) {
+        return lexNumber(next);
+    }
+
+    /* check for the dot operator */
+    if (next == '.') {
+        return TOK_DOT; 
+    }
+
+    /* handle string constants */
+    if (next == '"') {
+        return lexString();
+    }
+
+    /* character operators and punctuation */
+    yylval.lineno = yylineno;
+
+    switch (next.unicode()) {
+        /* single character ones */
+        case '~':
+            return TOK_BITNOT;
+        case '(':
+            return TOK_LEFTPARENS;
+        case ')':
+            return TOK_RIGHTPARENS;
+        case ',':
+            return TOK_COMMA;
+        case ';':
+            return TOK_SEMICOLON;
+        case ':':
+            return TOK_COLON;
+        case '[':
+            return TOK_LEFTBRACKET;
+        case ']':
+            return TOK_RIGHTBRACKET;
+        case '{':
+            return TOK_LEFTBRACE;
+        case '}':
+            return TOK_RIGHTBRACE;
+
+            /* ones that have some single and double ones */
+        case '=':
+            if (peek() == '=') {
+                get();
+                return TOK_EQ;
+            } else {
+                return TOK_ASSIGN;
+            }
+        case '+':
+            if (peek() == '=') {
+                get();
+                return TOK_PLUSEQ;
+            } else {
+                return TOK_PLUS;
+            }
+        case '-':
+            if (peek() == '=') {
+                get();
+                return TOK_MINUSEQ;
+            } else if (peek() == '>') {
+                get();
+                return TOK_RIGHTARROW;
+            } else {
+                return TOK_MINUS;
+            }
+        case '*':
+            if (peek() == '=') {
+                get();
+                return TOK_TIMESEQ;
+            } else if (peek() == '*') {
+                get();
+                if (peek() == '=') {
+                    get();
+                    return TOK_EXPEQ;
+                } else {
+                    return TOK_EXP;
+                }
+            } else {
+                return TOK_TIMES;
+            }
+        case '/':
+            if (peek() == '=') {
+                get();
+                return TOK_DIVIDEEQ;
+            } else {
+                return TOK_DIVIDE;
+            }
+        case '%':
+            if (peek() == '=') {
+                get();
+                return TOK_MODULUSEQ;
+            } else {
+                return TOK_MODULUS;
+            }
+        case '^':
+            if (peek() == '=') {
+                get();
+                return TOK_XOREQ;
+            } else {
+                return TOK_BITXOR;
+            }
+        case '|':
+            if (peek() == '=') {
+                get();
+                return TOK_OREQ;
+            } else {
+                return TOK_BITOR;
+            }
+        case '&':
+            if (peek() == '=') {
+                get();
+                return TOK_ANDEQ;
+            } else {
+                return TOK_BITAND;
+            }
+        case '!':
+            if (peek() != '=') {
+                throw Error("Error, invalid lexeme '!'", yylineno);
+            } else {
+                get();
+                return TOK_NEQ;
+            }
+        case '<':
+            if (peek() == '=') {
+                get();
+                return TOK_LTE;
+            } else if (peek() == '<') {
+                get();
+                if (peek() == '=') {
+                    get();
+                    return TOK_LSHIFTEQ;
+                } else {
+                    return TOK_LSHIFT;
+                }
+            } else {
+                return TOK_LT;
+            }
+        case '>':
+            if (peek() == '=') {
+                get();
+                return TOK_GTE;
+            } else if (peek() == '>') {
+                get();
+                if (peek() == '=') {
+                    get();
+                    return TOK_RSHIFTEQ;
+                } else {
+                    return TOK_RSHIFT;
+                }
+            } else {
+                return TOK_GT;
+            }
+        case '\\':
+            if (peek() == '\n'){
+                get();
+                while(peek() == ' '){
+                    get();
+                }
+
+                /* recurse to skip it */
+                return yylex();
+            }
+    }
+
+    /* if we get down here, there must be a lexer error :( */
+    char msg [] = "Invalid lexeme ' '";
+    msg[16] = next.unicode();;
+    throw Error(msg, yylineno);
+    return 0;
 }
 
 

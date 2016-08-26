@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "values.h"
+
 /* forward declarations */
 class DataType;
 class tdata;
@@ -109,7 +111,6 @@ class Node {
 
   /* accessors */
   int getLine() const;
-  tdata* getValue() const;
   NodeKind kind() const;
   DataType* type() const;
   Node* getParent() const;
@@ -118,7 +119,7 @@ class Node {
   void addChild(Node* child);
   int numChildren() const;
 
-  /* inlined for performance */
+  /* get the child of a node */
   Node* child(int which) const {
     if (which < 0 || which >= num_children) {
       return NULL;
@@ -135,6 +136,16 @@ class Node {
   /* the symbol table used for this Node - currently only function nodes have one */
   std::map<tstring, Symbol>* symtable;
 
+  tstring getStrval() const;
+  tint getIntval() const;
+  treal getRealval() const;
+  tbool getBoolval() const;
+
+  void setStrval(const tstring& val);
+  void setIntval(const tint& val);
+  void setRealval(const treal& val);
+  void setBoolval(const tbool& val);
+
  private:
   /* the children nodes of this node */
   static const int MAX_CHILDREN = 3;
@@ -147,14 +158,18 @@ class Node {
   /* the data type of the node (NULL if not applicable) */
   DataType* data_type;
 
-  /* the values associated with the node (many will be blank) */
-  tdata* value;
-
   /* the line number most closely associated with this node */
   int lineno;
   
   /* pointer to parent node */
   Node* parent;
+
+  /* the values which can be present in some nodes */
+  tstring strval;
+  tint intval;
+  treal realval;
+  tbool boolval;
+
 };
 
 /* clone a tree */

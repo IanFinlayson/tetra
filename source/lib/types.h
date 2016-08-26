@@ -5,10 +5,9 @@
 
 #include <cmath>
 
-#include "node.h"
-
 /* forward declare this since it's used for lots of things */
 class tstring;
+class Node;
 
 /* the different possibilities a data type can be */
 enum DataTypeKind {

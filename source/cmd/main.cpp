@@ -9,7 +9,7 @@
 #include <iostream>
 
 #include "tetra.h"
-#include "commandConsole.h"
+#include "console.h"
 
 
 /* the info for the command line parameters */

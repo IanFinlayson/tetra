@@ -48,8 +48,6 @@ void Node::setLine(int lineno) {
 }
 
 int Node::getLine() const { return lineno; }
-void Node::setValue(tdata* val) {value = val;}
-tdata* Node::getValue() const { return value; }
 Node* Node::getParent() const {return parent;}
 NodeKind Node::kind() const { return node_type; }
 DataType* Node::type() const { return data_type; }
@@ -135,3 +133,36 @@ Node* cloneTree(Node* foot) {
 
   return newRoot;
 }
+
+tstring Node::getStrval() const {
+    return strval;
+}
+
+tint Node::getIntval() const {
+    return intval;
+}
+
+treal Node::getRealval() const {
+    return realval;
+}
+
+tbool Node::getBoolval() const {
+    return boolval;
+}
+
+void Node::setStrval(const tstring& val) {
+    strval = val;
+}
+
+void Node::setIntval(const tint& val) {
+    intval = val;
+}
+
+void Node::setRealval(const treal& val) {
+    realval = val;
+}
+
+void Node::setBoolval(const tbool& val) {
+    boolval = val;
+}
+

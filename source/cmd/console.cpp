@@ -1,12 +1,12 @@
 #include <sstream>
 
-#include "commandConsole.h"
+#include "console.h"
 
 tstring CommandConsole::receiveStandardInput() {
-  tstring input;
+    char input[1024];
   std::cin >> input;
 
-  return input;
+  return tstring(input);
 }
 
 void CommandConsole::processStandardOutput(const tstring& output) {

@@ -50,7 +50,7 @@ void FileRunner::runFile(bool debug) {
         interrupted = true;
     }
     catch (Error e) {
-        emit errorSeen(e.getMessage().c_str(), e.getLine());
+        emit errorSeen(e.getMessage().toQ(), e.getLine());
     }
     QThread::currentThread()->quit();
 
@@ -91,7 +91,7 @@ tstring FileRunner::receiveStandardInput() {
 
 void FileRunner::processStandardOutput(const tstring& text) {
     /* send this string to the main window for display */
-    QString qtext = QString(text.c_str());
+    QString qtext = text.toQ();
     emit output(qtext);
 }
 

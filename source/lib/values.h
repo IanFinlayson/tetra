@@ -3,6 +3,7 @@
 #ifndef VALUES_H
 #define VALUES_H
 
+#include <QString>
 #include <cmath>
 #include "types.h"
 
@@ -63,8 +64,7 @@ class tint : public tdata {
     }
 
     /* conversion */
-    explicit operator int const (){return this->i;}
-    explicit operator unsigned long int const (){return this->i;}
+    int toInt() const {return i;}
 
     /* bitwise operators */
     tint operator~() {return tint(~(this->i));}
@@ -113,24 +113,82 @@ class treal : public tdata {
       treal(double val) {
           r = val;
       }
+      treal() {
+          r = 0.0;
+      }
+
+      double toDouble() const {
+          return r;
+      }
   private:
       double r;
 };
 
 
-class tstring : public tdata, public std::string {
+class tstring : public tdata {
     public:
         tstring() {
-            *this = "";
+            str = QString("");
         }
         tstring(const char* s) {
-            *this = s;
+            str = QString(s);
         }
-        tstring(const std::string& s) {
-            *this = s;
+
+        tstring(tint val) {
+            str = QString::number(val.toInt());
+        }
+
+        tstring(treal val) {
+            str = QString::number(val.toDouble());
+        }
+
+        void push_back(QChar c) {
+            str.push_back(c);
+        }
+
+        int find(char c) {
+            return str.indexOf(QString(c));
+        }
+
+        tint toInt() {
+            return tint(str.toInt());
+        }
+
+        treal toReal() {
+            return treal(str.toDouble());
+        }
+
+        QString toQ() const {
+            return str;
+        }
+
+        friend tstring operator+(const tstring& lhs, const tstring& rhs);
+        friend tstring operator+(const char* lhs, const tstring& rhs);
+        friend tstring operator+(const tstring& lhs, const char* rhs);
+
+        tstring substring(int start, int len = -1) const;
+        int length() const;
+        bool empty() const;
+
+        int indexOf(const tstring& s) const;
+
+        tstring operator+=(const char* rhs);
+        tstring operator+=(const tstring& rhs);
+
+        friend bool operator<(const tstring& lhs, const tstring& rhs);
+        friend bool operator==(const tstring& lhs, const tstring& rhs);
+        friend bool operator<=(const tstring& lhs, const tstring& rhs);
+        friend bool operator>(const tstring& lhs, const tstring& rhs);
+        friend bool operator>=(const tstring& lhs, const tstring& rhs);
+        friend bool operator!=(const tstring& lhs, const tstring& rhs);
+
+        friend std::ostream& operator<<(std::ostream& os, const tstring& o) {
+            os << o.str.toStdString();
+            return os;
         }
 
   private:
+        QString str;
 };
 
 class tlist : public tdata {

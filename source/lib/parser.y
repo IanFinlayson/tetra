@@ -7,6 +7,8 @@
 #include <fstream>
 #include <string>
 #include <stack>
+#include <QDebug>
+#include <QFile>
 
 #define YYDEBUG 1
 
@@ -29,10 +31,13 @@ Node* root;
 /* each non-terminal is represented with a node literlas are doubles */
 %union {
   Node* node;
-  int intval;
-  double realval;
-  bool boolval;
-  char stringval[256]; /* PODS only in union! */
+
+  /* PODS only in union! */
+  tint* intval;
+  treal* realval;
+  tbool* boolval;
+  tstring* stringval;
+
   DataType* data_type;
   int lineno;
 }
@@ -208,8 +213,8 @@ module: TOK_OPEN identifiers {
 
 /* class */
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
-     $$ = new Node(NODE_CLASS);
-  $$->setValue(new tstring($2));
+  $$ = new Node(NODE_CLASS);
+  $$->setStrval(tstring(*$2));
   $$->addChild($5);
 }
 
@@ -238,7 +243,7 @@ class_part: function
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
              $$ = new Node(NODE_FUNCTION);
   $$->setDataType(new DataType(TYPE_CLASS));
-  $$->setValue(new tstring("init"));
+  $$->setStrval(tstring("init"));
   $$->addChild($3);
   $$->addChild($5);
   $$->setLine($1);
@@ -283,7 +288,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
         $$ = new Node(NODE_FUNCTION);
-  $$->setValue(new tstring($2));
+  $$->setStrval(tstring(*$2));
   $$->setDataType($4);
   $$->addChild($3);
   $$->addChild($6);
@@ -313,7 +318,7 @@ formal_params: declaration TOK_COMMA formal_params {
 declaration: TOK_IDENTIFIER type {
            $$ = new Node(NODE_DECLARATION);
   $$->setLine(yylineno);
-  $$->setValue(new tstring($1));
+  $$->setStrval(tstring(*$1));
   $$->setDataType($2);
 } 
 
@@ -365,7 +370,7 @@ type: TOK_INT {
   $$ = $1;
 } | TOK_IDENTIFIER {
   $$ = new DataType(TYPE_CLASS);
-  *($$->className) = $1;
+  $$->className = new tstring(*$1);
 }
 
 /* function_type */
@@ -877,7 +882,7 @@ timesterm: TOK_PLUS timesterm {
   /* subtract from zero */
   $$ = new Node(NODE_MINUS);
   Node* zero = new Node(NODE_INTVAL);
-  zero->setValue(new tint(0));
+  zero->setIntval(tint(0));
   $$->addChild(zero);
   $$->addChild($2);
 } | TOK_BITNOT timesterm {
@@ -925,16 +930,16 @@ rvalue: funcall {
   $$ = $2;
 } | TOK_INTVAL {
   $$ = new Node(NODE_INTVAL);
-  $$->setValue(new tint($1));
+  $$->setIntval(tint(*$1));
 } | TOK_REALVAL {
   $$ = new Node(NODE_REALVAL);
-  $$->setValue(new treal(($1)));
+  $$->setRealval(treal((*$1)));
 } | TOK_BOOLVAL {
   $$ = new Node(NODE_BOOLVAL);
-  $$->setValue(new tbool(($1)));
+  $$->setBoolval(tbool((*$1)));
 } | TOK_STRINGVAL {
   $$ = new Node(NODE_STRINGVAL);
-  $$->setValue(new tstring($1));
+  $$->setStrval(tstring(*$1));
 } | TOK_NONE {
   $$ = new Node(NODE_NONEVAL);
 } | vector_value {
@@ -1047,7 +1052,7 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
   $$ = new Node(NODE_IDENTIFIER);
-  $$->setValue(new tstring($1));
+  $$->setStrval(tstring(*$1));
   $$->setLine(yylineno);
 }  
 
@@ -1097,17 +1102,17 @@ Node* parseFile(const tstring& fname) {
     functions.clearAll();
 
     /* open the file */
-    std::ifstream file(fname.c_str( ));
+    QFile file(fname.toQ());
 
     /* if it's not open, we failed */
-    if (!file.is_open( )) {
+    if (!file.open(QIODevice::ReadOnly)) {
         throw Error("Could not open file '" + fname + "'");
     }
 
     /* set the in stream (defined in lexer.cpp) */
-    in = &file;
+    setLexFile(file);
 
-    /* Check parsing only */
+    /* check lexing only */
     /*int token;
     while ((token = yylex())) {
       printf("%d\n", token); 
@@ -1122,6 +1127,7 @@ Node* parseFile(const tstring& fname) {
     /* check and infer the types in the tree */
     initTypes(root);
     inferTypes(root);
+
     /* return the root of the parse tree */
     return root;
 }
