@@ -11,14 +11,6 @@
 #include "values.h"
 
 
-tstring tdata::toString() const {
-    return "hi";
-}
-
-int tdata::toInt() const {
-    return 32;
-}
-
 tstring operator+(const tstring& lhs, const tstring& rhs) {
     tstring t;
     t.str = lhs.str + rhs.str;

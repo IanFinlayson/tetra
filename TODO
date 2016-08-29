@@ -1,0 +1,18 @@
+TODO List
+=========
+
+- standardize naming conventions
+- standardize comment style
+- standardize indentation style
+- make sure all allocations are matched with de-allocation (tdata will use GC later)
+- write function to delete parse tree recursively (memory leak currently)
+- add eval code to evaluate statements and expressions back in
+- add support for new types:
+  + dicts
+  + tuples
+  + function
+  + objects
+- add support for new features:
+  + wait statement
+  + lambdas
+

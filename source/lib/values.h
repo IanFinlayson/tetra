@@ -9,9 +9,6 @@
 
 /* represents any piece of data in a tetra program */
 class tdata {
-    public:
-        tstring toString() const;
-        int toInt() const;
 };
 
 class tbool : public tdata {

@@ -6,7 +6,7 @@ QMAKE_CXX = clang++
 QMAKE_LINK = clang++
 
 # set compiler flags
-QMAKE_CXXFLAGS += -std=c++11 -W -Wall -pedantic
+QMAKE_CXXFLAGS += -std=c++11 -W -Wall -pedantic -ggdb3
 
 # build as a static library
 TEMPLATE = lib
