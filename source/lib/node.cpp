@@ -123,6 +123,12 @@ Node* cloneTree(Node* foot) {
   /* make this node */
   Node* newRoot = new Node(foot);
 
+  /* copy members */
+  newRoot->setIntval(foot->getIntval());
+  newRoot->setStrval(foot->getStrval());
+  newRoot->setRealval(foot->getRealval());
+  newRoot->setBoolval(foot->getBoolval());
+
   /* make and attach its children */
   for (int i = 0; i < foot->numChildren(); i++) {
     /* make the child */
@@ -133,6 +139,7 @@ Node* cloneTree(Node* foot) {
 
   return newRoot;
 }
+
 
 tstring Node::getStrval() const {
     return strval;

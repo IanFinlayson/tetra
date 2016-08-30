@@ -198,15 +198,15 @@ void dumpNodeGraphviz(Node* node, tstring id, std::ofstream& out) {
 /* dump an entrie tree to a graphviz dot file */
 void dumpTreeGraphviz(Node* node) {
     std::ofstream out("tree.gv");
-  out << "digraph G {\n";
-  dumpNodeGraphviz(node, "n0", out);
-  out << "}\n";
-  out.close();
+    out << "digraph G {\n";
+    dumpNodeGraphviz(node, "n0", out);
+    out << "}\n";
+    out.close();
 
-  system("rm tree.png");
-  system("dot -Tpng tree.gv -o tree.png");
-  // system("rm tree.gv");
-  system("xdg-open tree.png");
+    system("rm tree.png");
+    system("dot -Tpng tree.gv -o tree.png");
+    // system("rm tree.gv");
+    system("xdg-open tree.png");
 }
 
 /* dump a tree to stdout */
@@ -240,3 +240,6 @@ void dumpTreeStdout(Node* node, int level = 0) {
     dumpTreeStdout(node->child(i), level + 1);
   }
 }
+
+
+

@@ -1112,17 +1112,18 @@ Node* parseFile(const tstring& fname) {
     /* set the in stream (defined in lexer.cpp) */
     setLexFile(file);
 
-    /* check lexing only */
-    /*int token;
+    /* check lexing only
+    int token;
     while ((token = yylex())) {
       printf("%d\n", token); 
     }
     */
+    
 
     /* call yyparse */
     yyparse();
 
-//    dumpTreeGraphviz(root);
+    dumpTreeGraphviz(root);
 
     /* check and infer the types in the tree */
     initTypes(root);
