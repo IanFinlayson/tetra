@@ -117,7 +117,7 @@ class MainWindow : public QMainWindow {
     FileRunner* fileRunner;
     QThread* tetraThread;
 
-    ReplaceDialog repl;
+    ReplaceDialog replaceDialog;
     QLabel* coords;
 
     void showSearch();

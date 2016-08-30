@@ -12,13 +12,13 @@
 #include "tetra.h"
 
 /* returns a string representation of a node type */
-tstring stringType(Node* node) {
-    tstring ss;
+Tstring stringType(Node* node) {
+    Tstring ss;
 
     switch (node->kind()) {
         /* statements and groups */
         case NODE_FUNCTION:
-            return "FUNC " + node->getStrval();
+            return "FUNC " + node->getStringvalue();
         case NODE_TOPLEVEL_LIST:
             return "TOP LEVELS";
         case NODE_STATEMENT:
@@ -66,11 +66,11 @@ tstring stringType(Node* node) {
         case NODE_GLOBAL:
             return "GLOBAL";
         case NODE_DECLARATION:
-            return "DECLARATION: " + node->getStrval();
+            return "DECLARATION: " + node->getStringvalue();
         case NODE_LAMBDA:
             return "LAMBDA";
         case NODE_CLASS:
-            return "CLASS " + node->getStrval();
+            return "CLASS " + node->getStringvalue();
         case NODE_CLASS_PART:
             return "CLASS PART";
         case NODE_DOT:
@@ -130,7 +130,7 @@ tstring stringType(Node* node) {
 
         /* functions */
         case NODE_FUNCALL:
-            return "CALL: " + node->getStrval();
+            return "CALL: " + node->getStringvalue();
         case NODE_ACTUAL_PARAM_LIST:
             return "ARGS";
 
@@ -148,15 +148,15 @@ tstring stringType(Node* node) {
 
         /* leafs */
         case NODE_INTVAL:
-            return "INT:" + node->getStrval();
+            return "INT:" + node->getStringvalue();
         case NODE_REALVAL:
-            return "REAL: " + node->getStrval();
+            return "REAL: " + node->getStringvalue();
         case NODE_STRINGVAL:
-            return "\\\"" + node->getStrval() + "\\\"";
+            return "\\\"" + node->getStringvalue() + "\\\"";
         case NODE_IDENTIFIER:
-            return "ID " + node->getStrval();
+            return "ID " + node->getStringvalue();
         case NODE_BOOLVAL:
-            return "BOOL: " + node->getStrval();
+            return "BOOL: " + node->getStringvalue();
         case NODE_NONEVAL:
             return "NONE";
         default:
@@ -165,14 +165,14 @@ tstring stringType(Node* node) {
 }
 
 /* generate a unique label for a node */
-tstring genId() {
-    static tint count = 0;
+Tstring genId() {
+    static Tint count = 0;
     count++;
-    return tstring("n") + tstring(count);
+    return Tstring("n") + Tstring(count);
 }
 
 /* dump a single node to a graphviz dot file */
-void dumpNodeGraphviz(Node* node, tstring id, std::ofstream& out) {
+void dumpNodeGraphviz(Node* node, Tstring id, std::ofstream& out) {
     if (!node) {
         return;
     }
@@ -183,9 +183,9 @@ void dumpNodeGraphviz(Node* node, tstring id, std::ofstream& out) {
     out << "\", fontname=\"courier\"];\n";
 
     /* for each child */
-    for (int i = 0; i < node->numChildren(); i++) {
+    for (int i = 0; i < node->getNumChildren(); i++) {
         /* generate a new id */
-        tstring childId = genId();
+        Tstring childId = genId();
 
         /* dump the connection */
         out << "  " << id << " -> " << childId << ";\n";
@@ -235,7 +235,7 @@ void dumpTreeStdout(Node* node, int level = 0) {
     std::cout << std::endl;
 
     /* dump children */
-    for (int i = 0; i < node->numChildren(); i++) {
+    for (int i = 0; i < node->getNumChildren(); i++) {
         dumpTreeStdout(node->child(i), level + 1);
     }
 }

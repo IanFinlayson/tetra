@@ -54,7 +54,7 @@ class SettingsManager {
     static void setError(QColor);
 
   private:
-    static QSettings* qset;
+    static QSettings* settingsManager;
 };
 
 #endif

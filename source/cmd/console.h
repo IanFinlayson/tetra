@@ -7,9 +7,8 @@
 
 class CommandConsole : public VirtualConsole {
    public:
-    tstring receiveStandardInput();
-
-    void processStandardOutput(const tstring& output);
+    Tstring receiveStandardInput();
+    void processStandardOutput(const Tstring& output);
 };
 
 #endif

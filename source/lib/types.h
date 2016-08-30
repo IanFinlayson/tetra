@@ -6,7 +6,7 @@
 #include <cmath>
 
 /* forward declare this since it's used for lots of things */
-class tstring;
+class Tstring;
 class Node;
 
 /* the different possibilities a data type can be */
@@ -35,7 +35,7 @@ class DataType {
     ~DataType();
     DataTypeKind getKind() const;
     std::vector<DataType>* subtypes;
-    tstring* className;
+    Tstring* className;
     DataType operator=(const DataType& other);
     bool isEmptyContainerType() const;
 
@@ -48,8 +48,8 @@ bool operator==(const DataType& lhs, const DataType& rhs);
 bool operator!=(const DataType& lhs, const DataType& rhs);
 
 /* function which returns a string representation of a data type */
-tstring typeToString(DataType* t);
-void inferParams(Node* node, Node* func = NULL);
+Tstring typeToString(DataType* t);
+void inferParams(Node* node, Node* function = NULL);
 void buildParamTupleType(DataType* type, const Node* node);
 void initTypes(Node* node);
 void inferTypes(Node* node);

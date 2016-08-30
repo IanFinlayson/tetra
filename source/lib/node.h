@@ -11,10 +11,10 @@
 
 /* forward declarations */
 class DataType;
-class tdata;
+class Tdata;
 class Symbol;
 
-class tstring;
+class Tstring;
 
 /* types of nodes */
 enum NodeKind {
@@ -103,9 +103,9 @@ class Node {
     /* constructor and modifiers */
     Node(NodeKind type);
     Node(Node* other);
-    void setDataType(DataType* data_type);
-    void setValue(tdata* val);
-    void setLine(int lineno);
+    void setDataType(DataType* dataType);
+    void setValue(Tdata* value);
+    void setLine(int lineNumber);
 
     /* accessors */
     int getLine() const;
@@ -115,11 +115,11 @@ class Node {
 
     /* children functions */
     void addChild(Node* child);
-    int numChildren() const;
+    int getNumChildren() const;
 
     /* get the child of a node */
     Node* child(int which) const {
-        if (which < 0 || which >= num_children) {
+        if (which < 0 || which >= numChildren) {
             return NULL;
         } else {
             return children[which];
@@ -128,46 +128,46 @@ class Node {
 
     /* symbol functions */
     void insertSymbol(Symbol sym);
-    Symbol lookupSymbol(tstring name, int lineno) const;
-    bool hasSymbol(const tstring& name) const;
+    Symbol lookupSymbol(Tstring name, int lineNumber) const;
+    bool hasSymbol(const Tstring& name) const;
 
     /* the symbol table used for this Node - currently only function nodes have
      * one */
-    std::map<tstring, Symbol>* symtable;
+    std::map<Tstring, Symbol>* symtable;
 
-    tstring getStrval() const;
-    tint getIntval() const;
-    treal getRealval() const;
-    tbool getBoolval() const;
+    Tstring getStringvalue() const;
+    Tint getIntvalue() const;
+    Treal getRealvalue() const;
+    Tbool getBoolvalue() const;
 
-    void setStrval(const tstring& val);
-    void setIntval(const tint& val);
-    void setRealval(const treal& val);
-    void setBoolval(const tbool& val);
+    void setStringvalue(const Tstring& value);
+    void setIntvalue(const Tint& value);
+    void setRealvalue(const Treal& value);
+    void setBoolvalue(const Tbool& value);
 
    private:
     /* the children nodes of this node */
     static const int MAX_CHILDREN = 3;
     Node* children[MAX_CHILDREN];
-    int num_children;
+    int numChildren;
 
-    /* the type of node it is (eg plus vs stmt vs intval etc.) */
-    NodeKind node_type;
+    /* the type of node it is (eg plus vs stmt vs intValue etc.) */
+    NodeKind nodeType;
 
     /* the data type of the node (NULL if not applicable) */
-    DataType* data_type;
+    DataType* dataType;
 
     /* the line number most closely associated with this node */
-    int lineno;
+    int lineNumber;
 
     /* pointer to parent node */
     Node* parent;
 
     /* the values which can be present in some nodes */
-    tstring strval;
-    tint intval;
-    treal realval;
-    tbool boolval;
+    Tstring stringValue;
+    Tint intValue;
+    Treal realValue;
+    Tbool boolValue;
 };
 
 /* clone a tree */

@@ -27,7 +27,7 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow), repl(this) {
+    : QMainWindow(parent), ui(new Ui::MainWindow), replaceDialog(this) {
     /* set the menu bar to work natively for systems with global bars */
     menuBar()->setNativeMenuBar(true);
 
@@ -191,15 +191,15 @@ void MainWindow::on_actionNew_triggered() {
 
 void MainWindow::on_actionClose_triggered() {
     if (currentEditor()->document()->isModified()) {
-        QMessageBox msgBox;
-        msgBox.setText("The file has been modified.");
-        msgBox.setInformativeText("Do you want to save your changes?");
-        msgBox.setIconPixmap(
+        QMessageBox messageBox;
+        messageBox.setText("The file has been modified.");
+        messageBox.setInformativeText("Do you want to save your changes?");
+        messageBox.setIconPixmap(
             QPixmap(":/icons/resources/icons/dialog-question.svg"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
-                                  QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        switch (msgBox.exec()) {
+        messageBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
+                                      QMessageBox::Cancel);
+        messageBox.setDefaultButton(QMessageBox::Save);
+        switch (messageBox.exec()) {
             case QMessageBox::Save:
                 /* try to save, if something goes wrong, bail */
                 if (!currentEditor()->save()) {
@@ -322,15 +322,15 @@ void MainWindow::on_actionQuit_triggered() {
     }
 
     if (mod_count == 1) {
-        QMessageBox msgBox;
-        msgBox.setText("The file has been modified.");
-        msgBox.setInformativeText("Do you want to save your changes?");
-        msgBox.setIconPixmap(
+        QMessageBox messageBox;
+        messageBox.setText("The file has been modified.");
+        messageBox.setInformativeText("Do you want to save your changes?");
+        messageBox.setIconPixmap(
             QPixmap(":/icons/resources/icons/dialog-question.svg"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
-                                  QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        switch (msgBox.exec()) {
+        messageBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
+                                      QMessageBox::Cancel);
+        messageBox.setDefaultButton(QMessageBox::Save);
+        switch (messageBox.exec()) {
             case QMessageBox::Save:
                 /* try to save, if something goes wrong, bail */
                 if (!unsaved->save()) {
@@ -345,15 +345,15 @@ void MainWindow::on_actionQuit_triggered() {
                 return;
         }
     } else if (mod_count > 1) {
-        QMessageBox msgBox;
-        msgBox.setText("Files have been modified.");
-        msgBox.setInformativeText("Do you want to save all changes?");
-        msgBox.setIconPixmap(
+        QMessageBox messageBox;
+        messageBox.setText("Files have been modified.");
+        messageBox.setInformativeText("Do you want to save all changes?");
+        messageBox.setIconPixmap(
             QPixmap(":/icons/resources/icons/dialog-question.svg"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
-                                  QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Save);
-        switch (msgBox.exec()) {
+        messageBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
+                                      QMessageBox::Cancel);
+        messageBox.setDefaultButton(QMessageBox::Save);
+        switch (messageBox.exec()) {
             case QMessageBox::Save:
                 for (int i = 0; i < ui->tabBar->count(); i++) {
                     Editor* ed = (Editor*)ui->tabBar->widget(i);
@@ -587,8 +587,8 @@ void MainWindow::clearSearchColor(QString) {
 
 /* launch the replace dialog */
 void MainWindow::on_actionReplace_triggered() {
-    repl.updateSettings();
-    repl.show();
+    replaceDialog.updateSettings();
+    replaceDialog.show();
 }
 
 /* TODO debugger functions */

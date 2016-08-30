@@ -24,7 +24,7 @@ const struct argp_option options[] = {{"debug", 'd', 0, 0, "Start in debugging m
 
 /* used by main to communicate with parse_opt */
 struct arguments {
-    char* input_file_name;
+    char* inputFileName;
     int debug;
     int threads;
 };
@@ -55,7 +55,7 @@ error_t parse_opt(int key, char* arg, struct argp_state* state) {
             }
 
             /* save it as an argument */
-            arguments->input_file_name = arg;
+            arguments->inputFileName = arg;
             break;
 
         /* we hit the end of the arguments */
@@ -85,15 +85,15 @@ int main(int argc, char** argv) {
     /* the default values */
     args.debug = 0;
     args.threads = 8;
-    args.input_file_name = NULL;
+    args.inputFileName = NULL;
 
     /* parse command line */
     argp_parse(&info, argc, argv, 0, 0, &args);
 
     /* set input file to what was passed in */
-    FILE* input = fopen(args.input_file_name, "r");
+    FILE* input = fopen(args.inputFileName, "r");
     if (!input) {
-        fprintf(stderr, "Error, can not open %s for reading!\n", args.input_file_name);
+        fprintf(stderr, "Error, can not open %s for reading!\n", args.inputFileName);
     }
 
     CommandConsole mainConsole = CommandConsole();
@@ -107,7 +107,7 @@ int main(int argc, char** argv) {
      */
     try {
         /* file is last parameter */
-        tree = parseFile(tstring(args.input_file_name));
+        tree = parseFile(Tstring(args.inputFileName));
     } catch (Error e) {
         std::cout << "The following error was detected in your program:\n"
                   << e << "\nExecution aborted" << std::endl;

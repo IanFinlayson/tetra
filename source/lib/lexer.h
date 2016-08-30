@@ -16,6 +16,6 @@ void setLexFile(QFile& file);
 int yylex();
 
 /* this function calls yyparse on a file and returns the parse tree node */
-Node* parseFile(const tstring& fname);
+Node* parseFile(const Tstring& fname);
 
 #endif

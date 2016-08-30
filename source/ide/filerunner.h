@@ -20,8 +20,8 @@ class FileRunner : public QObject, public VirtualConsole {
     FileRunner(MainWindow* mainWindow);
 
     /* functions for communicating with tetra I/O */
-    tstring receiveStandardInput();
-    void processStandardOutput(const tstring& text);
+    Tstring receiveStandardInput();
+    void processStandardOutput(const Tstring& text);
     void receiveInput(QString input);
 
     /* halt the running program in its tracks */

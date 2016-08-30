@@ -75,9 +75,9 @@ class Editor : public QPlainTextEdit {
     void updateLineNumberArea(const QRect&, int);
     void unhighlightLine();
 
-    void setCopyAvail(bool);
-    void setRedoAvail(bool);
-    void setUndoAvail(bool);
+    void setCopyAvailable(bool);
+    void setRedoAvailable(bool);
+    void setUndoAvailable(bool);
 
   protected:
     virtual void keyPressEvent(QKeyEvent* e);
@@ -94,7 +94,7 @@ class Editor : public QPlainTextEdit {
     int tabWidth;
     Highlighter* highlighter;
     MainWindow* parent;
-    bool copyAvail, redoAvail, undoAvail;
+    bool copyAvailable, redoAvailable, undoAvailable;
 };
 
 class LineNumberArea : public QWidget {

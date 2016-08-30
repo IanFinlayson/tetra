@@ -27,7 +27,7 @@ int indent_level = 0;
 int dedents_left = 0;
 
 /* line number we are at - used for error messages */
-int yylineno = 1;
+int yylineNumber = 1;
 
 /* reset the lexer state */
 void reset_lexer() {
@@ -35,7 +35,7 @@ void reset_lexer() {
     spaces_per_indent = 0;
     indent_level = 0;
     dedents_left = 0;
-    yylineno = 1;
+    yylineNumber = 1;
 }
 
 /* the symbol used to comunicate with bison */
@@ -92,8 +92,8 @@ bool eof() {
 }
 
 /* look up a string and return its token code */
-int lookupId(const tstring& id) {
-    yylval.lineno = yylineno;
+int lookupId(const Tstring& id) {
+    yylval.lineNumber = yylineNumber;
     if (id == "if") {
         return TOK_IF;
     }
@@ -197,24 +197,24 @@ int lookupId(const tstring& id) {
         return TOK_TASK;
     }
     if (id == "true") {
-        yylval.boolval = new tbool;
-        *(yylval.boolval) = tbool(true);
+        yylval.boolValue = new Tbool;
+        *(yylval.boolValue) = Tbool(true);
         return TOK_BOOLVAL;
     } else if (id == "false") {
-        yylval.boolval = new tbool;
-        *(yylval.boolval) = tbool(false);
+        yylval.boolValue = new Tbool;
+        *(yylval.boolValue) = Tbool(false);
         return TOK_BOOLVAL;
     }
 
     /* save the identifier */
-    yylval.stringval = new tstring;
+    yylval.stringval = new Tstring;
     *(yylval.stringval) = id;
     return TOK_IDENTIFIER;
 }
 
 /* lex an identifier (or reserved word) given a start */
 int lexIdent(QChar start) {
-    tstring id;
+    Tstring id;
     id.push_back(start);
 
     while (peek().isLetterOrNumber() || peek() == '_') {
@@ -227,7 +227,7 @@ int lexIdent(QChar start) {
 /* lex a number
  * TODO handle more bases, scientific notation etc. */
 int lexNumber(QChar start) {
-    tstring number;
+    Tstring number;
     number.push_back(start);
 
     /* have we seen a decimal point yet? */
@@ -269,19 +269,19 @@ int lexNumber(QChar start) {
 
     /* if there's no decimal its an int */
     if (number.find('.') == -1) {
-        yylval.intval = new tint;
-        *(yylval.intval) = number.toInt();
+        yylval.intValue = new Tint;
+        *(yylval.intValue) = number.toInt();
         return TOK_INTVAL;
     } else {
-        yylval.realval = new treal;
-        *(yylval.realval) = number.toReal();
+        yylval.realValue = new Treal;
+        *(yylval.realValue) = number.toReal();
         return TOK_REALVAL;
     }
 }
 
 /* lex a string constant */
 int lexString() {
-    tstring str;
+    Tstring str;
     while (true) {
         QChar next = get();
         if (next == '\\') {
@@ -306,7 +306,7 @@ int lexString() {
     }
 
     /* save the string */
-    yylval.stringval = new tstring;
+    yylval.stringval = new Tstring;
     *(yylval.stringval) = str;
     return TOK_STRINGVAL;
 }
@@ -336,7 +336,7 @@ int yylex() {
         /* get the new line */
         get();
         start_of_line = 1;
-        yylineno++;
+        yylineNumber++;
 
         /* skip it */
         return yylex();
@@ -354,13 +354,13 @@ int yylex() {
 
     /* we do NOT allow tabs */
     if (next == '\t') {
-        throw Error("Tab characters are not allowed in Tetra!", yylineno);
+        throw Error("Tab characters are not allowed in Tetra!", yylineNumber);
     }
 
     /* if it's a new line, set to beginning of line and return next */
     if (next == '\n') {
         start_of_line = 1;
-        yylineno++;
+        yylineNumber++;
         return TOK_NEWLINE;
     }
 
@@ -385,7 +385,7 @@ int yylex() {
         if (peek() == '\n') {
             get();
             start_of_line = 1;
-            yylineno++;
+            yylineNumber++;
             return TOK_NEWLINE;
         }
 
@@ -396,7 +396,7 @@ int yylex() {
                 get();
             }
             get();
-            yylineno++;
+            yylineNumber++;
             start_of_line = 1;
             return yylex();
         }
@@ -409,7 +409,7 @@ int yylex() {
         /* level is spaces / spaces_per_indent */
         int level = spaces / spaces_per_indent;
         if ((spaces % spaces_per_indent) != 0) {
-            throw Error("Indentation level inconsistent.", yylineno);
+            throw Error("Indentation level inconsistent.", yylineNumber);
         }
 
         /* if the level is greater than the current one (by one) indent */
@@ -422,7 +422,7 @@ int yylex() {
         if (level > indent_level) {
             std::cerr << "Level = " << level << std::endl;
             std::cerr << "Indent level = " << indent_level << std::endl;
-            throw Error("Too much indentation.", yylineno);
+            throw Error("Too much indentation.", yylineNumber);
         }
 
         /* if the level is less than the current one */
@@ -467,7 +467,7 @@ int yylex() {
         get();
 
         if (get() != '.') {
-            throw Error("Lexical error: '..' not correct", yylineno);
+            throw Error("Lexical error: '..' not correct", yylineNumber);
         }
 
         return TOK_ELLIPSIS;
@@ -489,7 +489,7 @@ int yylex() {
     }
 
     /* character operators and punctuation */
-    yylval.lineno = yylineno;
+    yylval.lineNumber = yylineNumber;
 
     switch (next.unicode()) {
         /* single character ones */
@@ -591,7 +591,7 @@ int yylex() {
             }
         case '!':
             if (peek() != '=') {
-                throw Error("Error, invalid lexeme '!'", yylineno);
+                throw Error("Error, invalid lexeme '!'", yylineNumber);
             } else {
                 get();
                 return TOK_NEQ;
@@ -639,8 +639,8 @@ int yylex() {
     }
 
     /* if we get down here, there must be a lexer error :( */
-    char msg[] = "Invalid lexeme ' '";
-    msg[16] = next.unicode();
-    throw Error(msg, yylineno);
+    char message[] = "Invalid lexeme ' '";
+    message[16] = next.unicode();
+    throw Error(message, yylineNumber);
     return 0;
 }

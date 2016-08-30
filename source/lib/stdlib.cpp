@@ -23,15 +23,15 @@ bool readBool(int threadNum) {
     UNUSED(threadNum);
 }
 
-tstring readString(int threadNum) {
+Tstring readString(int threadNum) {
     UNUSED(threadNum);
 }
 
-tint len(tlist& arg) {
+Tint len(Tlist& arg) {
     UNUSED(arg);
 }
 
-tint len(tstring& arg) {
+Tint len(Tstring& arg) {
     UNUSED(arg);
 }
 */

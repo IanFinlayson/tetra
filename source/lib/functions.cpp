@@ -18,16 +18,16 @@
 
 /* given a function signature, returns the adress of a node containing the
    function definition for that signature */
-const Node* FunctionMap::getFunctionNode(const tstring functionSignature) {
+const Node* FunctionMap::getFunctionNode(const Tstring functionSignature) {
     /* if function is not there, will return default Node* (i.e. NULL) */
     return lookup[functionSignature];
 }
 
-const Node* FunctionMap::getFunctionNode(DataType* params, tstring name) {
+const Node* FunctionMap::getFunctionNode(DataType* params, Tstring name) {
     return lookup[name + typeToString(params)];
 }
 
-/* lookup function node from funcall node */
+/* lookup function node from functionCall node */
 const Node* FunctionMap::getFunctionNode(const Node* callNode) {
     return lookup[getFunctionSignature(callNode)];
 }
@@ -62,7 +62,7 @@ void FunctionMap::build(Node* tree) {
 }
 
 /* wrapper around std::map's insert function */
-void FunctionMap::insert(std::pair<tstring, Node*> pair) {
+void FunctionMap::insert(std::pair<Tstring, Node*> pair) {
     lookup.insert(pair);
 }
 
@@ -71,16 +71,16 @@ void FunctionMap::clearAll() {
     lookup.clear();
 }
 
-std::map<tstring, Node*> FunctionMap::remove(tstring name) {
+std::map<Tstring, Node*> FunctionMap::remove(Tstring name) {
     /* make a map to store the pairs to return */
-    std::map<tstring, Node*> pairs;
+    std::map<Tstring, Node*> pairs;
     UNUSED(name);
 
     /* make a vector to store keys to remove */
-    std::vector<tstring> keys;
+    std::vector<Tstring> keys;
 
     /* find the functions */
-    for (std::map<tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
+    for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             /* add it to the return list */
@@ -99,10 +99,10 @@ std::map<tstring, Node*> FunctionMap::remove(tstring name) {
     return pairs;
 }
 
-bool FunctionMap::hasFuncNamed(tstring name) {
+bool FunctionMap::hasFuncNamed(Tstring name) {
     /* loop through all elements in the map */
     UNUSED(name);
-    for (std::map<tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
+    for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             return true;
@@ -112,14 +112,14 @@ bool FunctionMap::hasFuncNamed(tstring name) {
     return false;
 }
 
-DataType* FunctionMap::getFunctionsNamed(tstring name) {
+DataType* FunctionMap::getFunctionsNamed(Tstring name) {
     UNUSED(name);
 
     /* create a dataType to return */
     DataType* retType = new DataType(TYPE_OVERLOAD);
 
     /* loop through all elements in the map */
-    for (std::map<tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
+    for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             /* if one was found, add it to the subtypes */
@@ -140,23 +140,23 @@ bool FunctionMap::hasFunction(Node* node) {
     return lookup.count(getFunctionSignature(node));
 }
 
-bool FunctionMap::hasFunction(DataType* type, tstring name) {
+bool FunctionMap::hasFunction(DataType* type, Tstring name) {
     return lookup.count(name + typeToString(type));
 }
 
 /* Given a NODE_FUNCTION (seen by the build method) or NODE_FUNCALL (seen at
  * runtime) Assembles the function signature for the function */
-tstring FunctionMap::getFunctionSignature(const Node* node) {
+Tstring FunctionMap::getFunctionSignature(const Node* node) {
     if (node->kind() == NODE_FUNCTION) {
-        return node->getStrval() + typeToString(&((*(node->type()->subtypes))[0]));
+        return node->getStringvalue() + typeToString(&((*(node->type()->subtypes))[0]));
     } else if (node->kind() == NODE_FUNCALL) {
         /* get the params */
         DataType* params = new DataType(TYPE_TUPLE);
-        if (node->numChildren() > 1) {
+        if (node->getNumChildren() > 1) {
             buildParamTupleType(params, node->child(1));
         }
 
-        return node->child(0)->getStrval() + typeToString(params);
+        return node->child(0)->getStringvalue() + typeToString(params);
     }
     throw Error("Cannot create Function signature.");
 }

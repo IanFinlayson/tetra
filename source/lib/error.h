@@ -13,18 +13,18 @@
 /* any type of error is handled with this exception */
 class Error {
    public:
-    Error(const tstring& mesg, int lineno = 0);
-    tstring getMessage() const;
+    Error(const Tstring& mesg, int lineNumber = 0);
+    Tstring getMessage() const;
     int getLine() const;
 
    private:
-    tstring mesg;
-    int lineno;
+    Tstring mesg;
+    int lineNumber;
 };
 
 class RuntimeError : public Error {
    public:
-    RuntimeError(const tstring& pMessage, int pLine);
+    RuntimeError(const Tstring& message, int lineNumber);
 };
 
 class InterruptError : public Error {
@@ -34,7 +34,7 @@ class InterruptError : public Error {
 
 class SystemError : public Error {
    public:
-    SystemError(const tstring& pMessage, int pLine, const Node* pNode);
+    SystemError(const Tstring& message, int lineNumber, const Node* nodeArg);
     const Node* getNode();
 
    private:

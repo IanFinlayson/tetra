@@ -27,10 +27,10 @@ Editor::Editor(QWidget* parent)
 
     updateSettings();
 
-    copyAvail = redoAvail = undoAvail = false;
-    connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvail(bool)));
-    connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvail(bool)));
-    connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvail(bool)));
+    copyAvailable = redoAvailable = undoAvailable = false;
+    connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(setCopyAvailable(bool)));
+    connect(this, SIGNAL(redoAvailable(bool)), this, SLOT(setRedoAvailable(bool)));
+    connect(this, SIGNAL(undoAvailable(bool)), this, SLOT(setUndoAvailable(bool)));
 
     /* remove search and error highlights when text is changed */
     connect(this, SIGNAL(textChanged()), SLOT(unhighlightLine()));
@@ -100,28 +100,28 @@ void Editor::setUpConnections(MainWindow* parent) {
             SLOT(updateCoordinates()));
 }
 
-void Editor::setCopyAvail(bool is) {
-    copyAvail = is;
+void Editor::setCopyAvailable(bool is) {
+    copyAvailable = is;
 }
 
-void Editor::setRedoAvail(bool is) {
-    redoAvail = is;
+void Editor::setRedoAvailable(bool is) {
+    redoAvailable = is;
 }
 
-void Editor::setUndoAvail(bool is) {
-    undoAvail = is;
+void Editor::setUndoAvailable(bool is) {
+    undoAvailable = is;
 }
 
 bool Editor::canCopy() {
-    return copyAvail;
+    return copyAvailable;
 }
 
 bool Editor::canUndo() {
-    return undoAvail;
+    return undoAvailable;
 }
 
 bool Editor::canRedo() {
-    return redoAvail;
+    return redoAvailable;
 }
 
 /* save as - ask the user for a file name, save the file, and return
@@ -581,7 +581,7 @@ void Editor::replaceAll(QString before, QString after, bool matchCase) {
                  matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
     /* set the text back
-   * this is done using the cursor so as not to erase all history! */
+     * this is done using the cursor so as not to erase all history! */
     QTextCursor cursor(document());
     cursor.select(QTextCursor::Document);
     cursor.insertText(text);

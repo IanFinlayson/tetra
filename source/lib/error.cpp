@@ -9,13 +9,13 @@
 #include "tetra.h"
 
 /* this function search and replaces a string in place */
-void replace(tstring& str, const tstring& from, const tstring& to) {
+void replace(Tstring& str, const Tstring& from, const Tstring& to) {
     UNUSED(str);
     UNUSED(from);
     UNUSED(to);
     /* FIXME
    size_t start_pos = str.find(from);
-   if (start_pos != tstring::npos) {
+   if (start_pos != Tstring::npos) {
     str.replace(start_pos, from.length(), to);
     replace(str, from, to);
    }
@@ -24,7 +24,7 @@ void replace(tstring& str, const tstring& from, const tstring& to) {
 
 /* this function takes a string and modifies it in place
  * with TOK_ missing and some other pretty printing */
-void prettyPrintMessage(tstring& str) {
+void prettyPrintMessage(Tstring& str) {
     replace(str, "PLUS", "'+'");
     replace(str, "MINUS", "'-'");
     replace(str, "TIMES", "'*'");
@@ -63,18 +63,18 @@ void prettyPrintMessage(tstring& str) {
 }
 
 /* Error exception functions */
-Error::Error(const tstring& mesg, int lineno) {
+Error::Error(const Tstring& mesg, int lineNumber) {
     this->mesg = mesg;
     prettyPrintMessage(this->mesg);
-    this->lineno = lineno;
+    this->lineNumber = lineNumber;
 }
 
-tstring Error::getMessage() const {
+Tstring Error::getMessage() const {
     return mesg;
 }
 
 int Error::getLine() const {
-    return lineno;
+    return lineNumber;
 }
 
 /* print an error */
@@ -89,11 +89,11 @@ std::ostream& operator<<(std::ostream& out, const Error& error) {
 }
 
 /* the runtime error class */
-RuntimeError::RuntimeError(const tstring& pMessage, int pLine) : Error(pMessage, pLine) {}
+RuntimeError::RuntimeError(const Tstring& message, int line) : Error(message, line) {}
 
 /* the system error class */
-SystemError::SystemError(const tstring& pMessage, int pLine, const Node* pNode)
-    : Error(pMessage, pLine), node(pNode) {}
+SystemError::SystemError(const Tstring& message, int line, const Node* nodeArg)
+    : Error(message, line), node(nodeArg) {}
 
 const Node* SystemError::getNode() {
     return node;

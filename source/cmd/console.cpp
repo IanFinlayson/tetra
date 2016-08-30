@@ -2,13 +2,13 @@
 
 #include "console.h"
 
-tstring CommandConsole::receiveStandardInput() {
+Tstring CommandConsole::receiveStandardInput() {
     char input[1024];
     std::cin >> input;
 
-    return tstring(input);
+    return Tstring(input);
 }
 
-void CommandConsole::processStandardOutput(const tstring& output) {
+void CommandConsole::processStandardOutput(const Tstring& output) {
     std::cout << output;
 }

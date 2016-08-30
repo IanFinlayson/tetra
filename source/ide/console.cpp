@@ -14,7 +14,6 @@ Console::Console(MainWindow* parent)
 
     ensureCursorVisible();
     setCenterOnScroll(false);
-    ;
     setReadOnly(true);
     this->parent = parent;
 

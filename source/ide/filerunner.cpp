@@ -73,7 +73,7 @@ void FileRunner::runFile(bool debug) {
 
 /* this function is called from the interpreter when it needs string input from
  * the user */
-tstring FileRunner::receiveStandardInput() {
+Tstring FileRunner::receiveStandardInput() {
     /* tell the main window we need input */
     emit needInput();
 
@@ -95,7 +95,7 @@ tstring FileRunner::receiveStandardInput() {
     return myInput.toStdString().c_str();
 }
 
-void FileRunner::processStandardOutput(const tstring& text) {
+void FileRunner::processStandardOutput(const Tstring& text) {
     /* send this string to the main window for display */
     QString qtext = text.toQ();
     emit output(qtext);

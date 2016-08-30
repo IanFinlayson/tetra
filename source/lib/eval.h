@@ -28,9 +28,9 @@ int interpret(Node* tree, int debug, int threads);
 class VirtualConsole {
    public:
     /* read a string from the user and return it */
-    virtual tstring receiveStandardInput() = 0;
+    virtual Tstring receiveStandardInput() = 0;
     /* print a string for the user */
-    virtual void processStandardOutput(const tstring&) = 0;
+    virtual void processStandardOutput(const Tstring&) = 0;
 };
 
 /* stores constants related to the environment where the program is running */

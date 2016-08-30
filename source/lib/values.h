@@ -8,23 +8,23 @@
 #include "types.h"
 
 /* represents any piece of data in a tetra program */
-class tdata {};
+class Tdata {};
 
-class tbool : public tdata {
+class Tbool : public Tdata {
    public:
     /* constructors */
-    tbool() {
+    Tbool() {
         this->b = false;
     }
-    tbool(const bool& b) {
+    Tbool(const bool& b) {
         this->b = b;
     }
-    tbool(const tbool& other) {
+    Tbool(const Tbool& other) {
         this->b = other.b;
     }
 
     /* assignment */
-    tbool operator=(const tbool& other) {
+    Tbool operator=(const Tbool& other) {
         this->b = other.b;
         return *this;
     }
@@ -35,26 +35,26 @@ class tbool : public tdata {
     }
 
     /* logical operators */
-    tbool operator&&(const tbool& other) const {
-        return tbool(this->b && other.b);
+    Tbool operator&&(const Tbool& other) const {
+        return Tbool(this->b && other.b);
     }
-    tbool operator||(const tbool& other) const {
-        return tbool(this->b || other.b);
+    Tbool operator||(const Tbool& other) const {
+        return Tbool(this->b || other.b);
     }
-    tbool operator!() const {
-        return tbool(!this->b);
+    Tbool operator!() const {
+        return Tbool(!this->b);
     }
 
     /* comparison operators */
-    tbool operator==(const tbool& other) const {
-        return tbool(this->b == other.b);
+    Tbool operator==(const Tbool& other) const {
+        return Tbool(this->b == other.b);
     }
-    tbool operator!=(const tbool& other) const {
+    Tbool operator!=(const Tbool& other) const {
         return !(this->b == other.b);
     }
 
-    /* tbool output */
-    friend std::ostream& operator<<(std::ostream& os, const tbool& tb) {
+    /* Tbool output */
+    friend std::ostream& operator<<(std::ostream& os, const Tbool& tb) {
         tb.b ? os << "true" : os << "false";
         return os;
     }
@@ -63,21 +63,21 @@ class tbool : public tdata {
     bool b;
 };
 
-class tint : public tdata {
+class Tint : public Tdata {
    public:
     /* constructors */
-    tint() {
+    Tint() {
         this->i = 0;
     }
-    tint(const int& i) {
+    Tint(const int& i) {
         this->i = i;
     }
-    tint(const tint& other) {
+    Tint(const Tint& other) {
         this->i = other.i;
     }
 
     /* assignment */
-    tint operator=(const tint& other) {
+    Tint operator=(const Tint& other) {
         this->i = other.i;
         return *this;
     }
@@ -88,88 +88,88 @@ class tint : public tdata {
     }
 
     /* bitwise operators */
-    tint operator~() {
-        return tint(~(this->i));
+    Tint operator~() {
+        return Tint(~(this->i));
     }
-    tint operator<<(const tint& other) {
-        return tint(this->i << other.i);
+    Tint operator<<(const Tint& other) {
+        return Tint(this->i << other.i);
     }
-    tint operator>>(const tint& other) {
-        return tint(this->i >> other.i);
+    Tint operator>>(const Tint& other) {
+        return Tint(this->i >> other.i);
     }
-    tint operator&(const tint& other) {
-        return tint(this->i & other.i);
+    Tint operator&(const Tint& other) {
+        return Tint(this->i & other.i);
     }
-    tint operator|(const tint& other) {
-        return tint(this->i | other.i);
+    Tint operator|(const Tint& other) {
+        return Tint(this->i | other.i);
     }
-    tint operator^(const tint& other) {
-        return tint(this->i ^ other.i);
+    Tint operator^(const Tint& other) {
+        return Tint(this->i ^ other.i);
     }
 
     /* arithmetic operators */
-    tint operator+(const tint& other) {
-        return tint(this->i + other.i);
+    Tint operator+(const Tint& other) {
+        return Tint(this->i + other.i);
     }
-    tint operator-(const tint& other) {
-        return tint(this->i - other.i);
+    Tint operator-(const Tint& other) {
+        return Tint(this->i - other.i);
     }
-    tint operator*(const tint& other) {
-        return tint(this->i * other.i);
+    Tint operator*(const Tint& other) {
+        return Tint(this->i * other.i);
     }
-    tint operator/(const tint& other) {
-        return tint(this->i / other.i);
+    Tint operator/(const Tint& other) {
+        return Tint(this->i / other.i);
     }
-    tint operator%(const tint& other) {
-        return tint(this->i % other.i);
+    Tint operator%(const Tint& other) {
+        return Tint(this->i % other.i);
     }
-    tint pow(const tint& other) {
-        return tint(std::pow(this->i, other.i));
+    Tint pow(const Tint& other) {
+        return Tint(std::pow(this->i, other.i));
     }
 
     /* unary operators */
-    tint operator+() {
-        return tint(+(this->i));
+    Tint operator+() {
+        return Tint(+(this->i));
     }
-    tint operator-() {
-        return tint(-(this->i));
+    Tint operator-() {
+        return Tint(-(this->i));
     }
-    tint operator++(int) {
-        return tint((this->i)++);
+    Tint operator++(int) {
+        return Tint((this->i)++);
     }
-    tint operator++() {
-        return tint(++(this->i));
+    Tint operator++() {
+        return Tint(++(this->i));
     }
-    tint operator--(int) {
-        return tint((this->i)--);
+    Tint operator--(int) {
+        return Tint((this->i)--);
     }
-    tint operator--() {
-        return tint(--(this->i));
+    Tint operator--() {
+        return Tint(--(this->i));
     }
 
     /* comparison operators */
-    tbool operator<(const tint& other) const {
-        return tbool(this->i < other.i);
+    Tbool operator<(const Tint& other) const {
+        return Tbool(this->i < other.i);
     }
-    tbool operator>=(const tint& other) const {
+    Tbool operator>=(const Tint& other) const {
         return !(*this < other);
     }
-    tbool operator>(const tint& other) const {
+    Tbool operator>(const Tint& other) const {
         return other < *this;
     }
-    tbool operator<=(const tint& other) const {
+    Tbool operator<=(const Tint& other) const {
         return !(other < *this);
     }
-    tbool operator!=(const tint& other) const {
+    Tbool operator!=(const Tint& other) const {
         return ((*this < other) || (other < *this));
     }
-    tbool operator==(const tint& other) const {
+    Tbool operator==(const Tint& other) const {
         return !(*this != other);
     }
 
-    /* tint output */
-    friend std::ostream& operator<<(std::ostream& os, const tint& tint) {
-        os << tint.i;
+    /* Tint output */
+    friend std::ostream& operator<<(std::ostream& os, const Tint& Tint) {
+        os << Tint.i;
         return os;
     }
 
@@ -177,12 +177,12 @@ class tint : public tdata {
     int i;
 };
 
-class treal : public tdata {
+class Treal : public Tdata {
    public:
-    treal(double val) {
-        r = val;
+    Treal(double value) {
+        r = value;
     }
-    treal() {
+    Treal() {
         r = 0.0;
     }
 
@@ -194,21 +194,21 @@ class treal : public tdata {
     double r;
 };
 
-class tstring : public tdata {
+class Tstring : public Tdata {
    public:
-    tstring() {
+    Tstring() {
         str = QString("");
     }
-    tstring(const char* s) {
+    Tstring(const char* s) {
         str = QString(s);
     }
 
-    tstring(tint val) {
-        str = QString::number(val.toInt());
+    Tstring(Tint value) {
+        str = QString::number(value.toInt());
     }
 
-    tstring(treal val) {
-        str = QString::number(val.toDouble());
+    Tstring(Treal value) {
+        str = QString::number(value.toDouble());
     }
 
     void push_back(QChar c) {
@@ -219,39 +219,39 @@ class tstring : public tdata {
         return str.indexOf(QString(c));
     }
 
-    tint toInt() {
-        return tint(str.toInt());
+    Tint toInt() {
+        return Tint(str.toInt());
     }
 
-    treal toReal() {
-        return treal(str.toDouble());
+    Treal toReal() {
+        return Treal(str.toDouble());
     }
 
     QString toQ() const {
         return str;
     }
 
-    friend tstring operator+(const tstring& lhs, const tstring& rhs);
-    friend tstring operator+(const char* lhs, const tstring& rhs);
-    friend tstring operator+(const tstring& lhs, const char* rhs);
+    friend Tstring operator+(const Tstring& lhs, const Tstring& rhs);
+    friend Tstring operator+(const char* lhs, const Tstring& rhs);
+    friend Tstring operator+(const Tstring& lhs, const char* rhs);
 
-    tstring substring(int start, int len = -1) const;
+    Tstring substring(int start, int len = -1) const;
     int length() const;
     bool empty() const;
 
-    int indexOf(const tstring& s) const;
+    int indexOf(const Tstring& s) const;
 
-    tstring operator+=(const char* rhs);
-    tstring operator+=(const tstring& rhs);
+    Tstring operator+=(const char* rhs);
+    Tstring operator+=(const Tstring& rhs);
 
-    friend bool operator<(const tstring& lhs, const tstring& rhs);
-    friend bool operator==(const tstring& lhs, const tstring& rhs);
-    friend bool operator<=(const tstring& lhs, const tstring& rhs);
-    friend bool operator>(const tstring& lhs, const tstring& rhs);
-    friend bool operator>=(const tstring& lhs, const tstring& rhs);
-    friend bool operator!=(const tstring& lhs, const tstring& rhs);
+    friend bool operator<(const Tstring& lhs, const Tstring& rhs);
+    friend bool operator==(const Tstring& lhs, const Tstring& rhs);
+    friend bool operator<=(const Tstring& lhs, const Tstring& rhs);
+    friend bool operator>(const Tstring& lhs, const Tstring& rhs);
+    friend bool operator>=(const Tstring& lhs, const Tstring& rhs);
+    friend bool operator!=(const Tstring& lhs, const Tstring& rhs);
 
-    friend std::ostream& operator<<(std::ostream& os, const tstring& o) {
+    friend std::ostream& operator<<(std::ostream& os, const Tstring& o) {
         os << o.str.toStdString();
         return os;
     }
@@ -260,12 +260,12 @@ class tstring : public tdata {
     QString str;
 };
 
-class tlist : public tdata {
+class Tlist : public Tdata {
    public:
    private:
 };
 
-class tnone : public tdata {
+class Tnone : public Tdata {
    public:
    private:
 };

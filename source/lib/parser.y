@@ -18,7 +18,7 @@
 #include "lexer.h"
 #include "symbol.h"
 
-extern int yylineno;
+extern int yylineNumber;
 int yylex( );
 int yywrap( );
 void yyerror(const char* str);
@@ -33,97 +33,97 @@ Node* root;
     Node* node;
 
     /* PODS only in union! */
-    tint* intval;
-    treal* realval;
-    tbool* boolval;
-    tstring* stringval;
+    Tint* intValue;
+    Treal* realValue;
+    Tbool* boolValue;
+    Tstring* stringval;
 
-    DataType* data_type;
-    int lineno;
+    DataType* dataType;
+    int lineNumber;
 }
 
 /* typless tokens */
-%token <lineno> TOK_IF 100
-%token <lineno> TOK_ELIF 101
-%token <lineno> TOK_ELSE 102
-%token <lineno> TOK_FOR 103
-%token <lineno> TOK_IN 104
-%token <lineno> TOK_PARALLEL 105
-%token <lineno> TOK_WHILE 106
-%token <lineno> TOK_CONTINUE 107
-%token <lineno> TOK_BREAK 108
-%token <lineno> TOK_DEF 109
-%token <lineno> TOK_OR 110
-%token <lineno> TOK_AND 111
-%token <lineno> TOK_NOT 112
-%token <lineno> TOK_PASS 113
-%token <lineno> TOK_RETURN 114
-%token <lineno> TOK_INT 115
-%token <lineno> TOK_REAL 116
-%token <lineno> TOK_BOOL 117
-%token <lineno> TOK_STRING 118
-%token <lineno> TOK_ASSIGN 119
-%token <lineno> TOK_PLUS 120
-%token <lineno> TOK_MINUS 121
-%token <lineno> TOK_TIMES 122
-%token <lineno> TOK_DIVIDE 123
-%token <lineno> TOK_MODULUS 124
-%token <lineno> TOK_BITXOR 125
-%token <lineno> TOK_BITAND 126
-%token <lineno> TOK_BITOR 127
-%token <lineno> TOK_BITNOT 128
-%token <lineno> TOK_LEFTPARENS 129
-%token <lineno> TOK_RIGHTPARENS 130
-%token <lineno> TOK_LEFTBRACKET 131
-%token <lineno> TOK_RIGHTBRACKET 132
-%token <lineno> TOK_COMMA 133
-%token <lineno> TOK_SEMICOLON 134
-%token <lineno> TOK_COLON 135
-%token <lineno> TOK_LSHIFT 136
-%token <lineno> TOK_RSHIFT 137
-%token <lineno> TOK_EXP 138
-%token <lineno> TOK_LTE 139
-%token <lineno> TOK_GTE 140
-%token <lineno> TOK_EQ 141
-%token <lineno> TOK_NEQ 142
-%token <lineno> TOK_LT 143
-%token <lineno> TOK_GT 144
-%token <lineno> TOK_PLUSEQ 145
-%token <lineno> TOK_MINUSEQ 146
-%token <lineno> TOK_TIMESEQ 147
-%token <lineno> TOK_DIVIDEEQ 148
-%token <lineno> TOK_MODULUSEQ 149
-%token <lineno> TOK_EXPEQ 150
-%token <lineno> TOK_RSHIFTEQ 151
-%token <lineno> TOK_LSHIFTEQ 152
-%token <lineno> TOK_ANDEQ 153
-%token <lineno> TOK_XOREQ 154
-%token <lineno> TOK_OREQ 155
-%token <lineno> TOK_ELLIPSIS 156
-%token <lineno> TOK_BACKGROUND 157
-%token <lineno> TOK_LOCK 158
-%token <lineno> TOK_CONST 159
-%token <lineno> TOK_GLOBAL 160
-%token <lineno> TOK_RIGHTBRACE 169
-%token <lineno> TOK_LEFTBRACE 170
-%token <lineno> TOK_INIT 171
-%token <lineno> TOK_LAMBDA 172
-%token <lineno> TOK_WAIT 173
-%token <lineno> TOK_SELF 174
-%token <lineno> TOK_CLASS 175
-%token <lineno> TOK_OPEN 176
-%token <lineno> TOK_IMPORT 177
-%token <lineno> TOK_MUTEX 178
-%token <lineno> TOK_TASK 179
-%token <lineno> TOK_NONE 180
-%token <lineno> TOK_RIGHTARROW 181
-%token <lineno> TOK_DOT 182
-%token <lineno> TOK_AS 183
+%token <lineNumber> TOK_IF 100
+%token <lineNumber> TOK_ELIF 101
+%token <lineNumber> TOK_ELSE 102
+%token <lineNumber> TOK_FOR 103
+%token <lineNumber> TOK_IN 104
+%token <lineNumber> TOK_PARALLEL 105
+%token <lineNumber> TOK_WHILE 106
+%token <lineNumber> TOK_CONTINUE 107
+%token <lineNumber> TOK_BREAK 108
+%token <lineNumber> TOK_DEF 109
+%token <lineNumber> TOK_OR 110
+%token <lineNumber> TOK_AND 111
+%token <lineNumber> TOK_NOT 112
+%token <lineNumber> TOK_PASS 113
+%token <lineNumber> TOK_RETURN 114
+%token <lineNumber> TOK_INT 115
+%token <lineNumber> TOK_REAL 116
+%token <lineNumber> TOK_BOOL 117
+%token <lineNumber> TOK_STRING 118
+%token <lineNumber> TOK_ASSIGN 119
+%token <lineNumber> TOK_PLUS 120
+%token <lineNumber> TOK_MINUS 121
+%token <lineNumber> TOK_TIMES 122
+%token <lineNumber> TOK_DIVIDE 123
+%token <lineNumber> TOK_MODULUS 124
+%token <lineNumber> TOK_BITXOR 125
+%token <lineNumber> TOK_BITAND 126
+%token <lineNumber> TOK_BITOR 127
+%token <lineNumber> TOK_BITNOT 128
+%token <lineNumber> TOK_LEFTPARENS 129
+%token <lineNumber> TOK_RIGHTPARENS 130
+%token <lineNumber> TOK_LEFTBRACKET 131
+%token <lineNumber> TOK_RIGHTBRACKET 132
+%token <lineNumber> TOK_COMMA 133
+%token <lineNumber> TOK_SEMICOLON 134
+%token <lineNumber> TOK_COLON 135
+%token <lineNumber> TOK_LSHIFT 136
+%token <lineNumber> TOK_RSHIFT 137
+%token <lineNumber> TOK_EXP 138
+%token <lineNumber> TOK_LTE 139
+%token <lineNumber> TOK_GTE 140
+%token <lineNumber> TOK_EQ 141
+%token <lineNumber> TOK_NEQ 142
+%token <lineNumber> TOK_LT 143
+%token <lineNumber> TOK_GT 144
+%token <lineNumber> TOK_PLUSEQ 145
+%token <lineNumber> TOK_MINUSEQ 146
+%token <lineNumber> TOK_TIMESEQ 147
+%token <lineNumber> TOK_DIVIDEEQ 148
+%token <lineNumber> TOK_MODULUSEQ 149
+%token <lineNumber> TOK_EXPEQ 150
+%token <lineNumber> TOK_RSHIFTEQ 151
+%token <lineNumber> TOK_LSHIFTEQ 152
+%token <lineNumber> TOK_ANDEQ 153
+%token <lineNumber> TOK_XOREQ 154
+%token <lineNumber> TOK_OREQ 155
+%token <lineNumber> TOK_ELLIPSIS 156
+%token <lineNumber> TOK_BACKGROUND 157
+%token <lineNumber> TOK_LOCK 158
+%token <lineNumber> TOK_CONST 159
+%token <lineNumber> TOK_GLOBAL 160
+%token <lineNumber> TOK_RIGHTBRACE 169
+%token <lineNumber> TOK_LEFTBRACE 170
+%token <lineNumber> TOK_INIT 171
+%token <lineNumber> TOK_LAMBDA 172
+%token <lineNumber> TOK_WAIT 173
+%token <lineNumber> TOK_SELF 174
+%token <lineNumber> TOK_CLASS 175
+%token <lineNumber> TOK_OPEN 176
+%token <lineNumber> TOK_IMPORT 177
+%token <lineNumber> TOK_MUTEX 178
+%token <lineNumber> TOK_TASK 179
+%token <lineNumber> TOK_NONE 180
+%token <lineNumber> TOK_RIGHTARROW 181
+%token <lineNumber> TOK_DOT 182
+%token <lineNumber> TOK_AS 183
 
 /* typed tokens */
-%token <intval> TOK_INTVAL 161
-%token <realval> TOK_REALVAL 162
-%token <boolval> TOK_BOOLVAL 163
+%token <intValue> TOK_INTVAL 161
+%token <realValue> TOK_REALVAL 162
+%token <boolValue> TOK_BOOLVAL 163
 %token <stringval> TOK_STRINGVAL 164
 %token <stringval> TOK_IDENTIFIER 165
 
@@ -137,14 +137,14 @@ Node* root;
              compound_statement simple_statement pass_statement return_statement break_statement
              continue_statement expression if_statement while_statement else_option orterm andterm
              notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
-             expterm funcall simple_statements actual_param_list rvalue assignterm
+             expterm functionCall simple_statements actual_param_list rvalue assignterm
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
              background lock_statement index vector_value vector_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
              init_function lvalue type_decs lambdaterm interm
 
-%type <data_type> return_type type type_dec_tuple function_type dict_type
+%type <dataType> return_type type type_dec_tuple function_type dict_type
 
 %error-verbose
 
@@ -190,23 +190,23 @@ toplevels: newl_star function toplevels {
 /* modules */
 identifiers: identifier TOK_COMMA identifiers {
     $$ = new Node(NODE_IDENTIFIERS);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $$->addChild($1);
     $$->addChild($3);
 } | identifier {
     $$ = new Node(NODE_IDENTIFIERS);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $$->addChild($1);
 }
 
 module: TOK_OPEN identifiers {
     $$ = new Node(NODE_OPEN); 
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $$->addChild($2);
 
 } | TOK_IMPORT identifiers {
     $$ = new Node(NODE_IMPORT); 
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $$->addChild($2);
 }
 
@@ -214,7 +214,7 @@ module: TOK_OPEN identifiers {
 /* class */
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
     $$ = new Node(NODE_CLASS);
-    $$->setStrval(tstring(*$2));
+    $$->setStringvalue(Tstring(*$2));
     $$->addChild($5);
 }
 
@@ -243,7 +243,7 @@ class_part: function
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
     $$->setDataType(new DataType(TYPE_CLASS));
-    $$->setStrval(tstring("init"));
+    $$->setStringvalue(Tstring("init"));
     $$->addChild($3);
     $$->addChild($5);
     $$->setLine($1);
@@ -288,7 +288,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
-    $$->setStrval(tstring(*$2));
+    $$->setStringvalue(Tstring(*$2));
     $$->setDataType($4);
     $$->addChild($3);
     $$->addChild($6);
@@ -298,7 +298,7 @@ function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
 /* a parameter list (with bananas) */
 formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
     $$ = $2;
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
     $$ = NULL;
 }
@@ -306,7 +306,7 @@ formal_param_list: TOK_LEFTPARENS formal_params TOK_RIGHTPARENS {
 /* a list of at least one parameter */
 formal_params: declaration TOK_COMMA formal_params {
     $$ = new Node(NODE_FORMAL_PARAM_LIST);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $$->addChild($1);
     $$->addChild($3);
 } | declaration{
@@ -317,8 +317,8 @@ formal_params: declaration TOK_COMMA formal_params {
 /* a single parameter */
 declaration: TOK_IDENTIFIER type {
     $$ = new Node(NODE_DECLARATION);
-    $$->setLine(yylineno);
-    $$->setStrval(tstring(*$1));
+    $$->setLine(yylineNumber);
+    $$->setStringvalue(Tstring(*$1));
     $$->setDataType($2);
 } 
 
@@ -370,7 +370,7 @@ type: TOK_INT {
     $$ = $1;
 } | TOK_IDENTIFIER {
     $$ = new DataType(TYPE_CLASS);
-    $$->className = new tstring(*$1);
+    $$->className = new Tstring(*$1);
 }
 
 /* function_type */
@@ -420,7 +420,7 @@ statement: simple_statements
 /* simple statements are a list of simple statements separated by semi-conlons on one line */
 simple_statements: simple_statement TOK_SEMICOLON simple_statements {
     $$ = new Node(NODE_STATEMENT);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $$->addChild($1);
     $$->addChild($3);
 } | simple_statement newl_plus {
@@ -435,7 +435,7 @@ simple_statement: pass_statement
                 | wait_statement
                 | expression {
     $$ = $1;
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 } | typed_identifier {
     $$ = $1;
 } | typed_identifier TOK_ASSIGN assignterm {
@@ -447,7 +447,7 @@ simple_statement: pass_statement
 
 typed_identifier: identifier TOK_AS type {
     $$ = $1;
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
     $1->setDataType($3);
 }
 
@@ -466,11 +466,11 @@ compound_statement: if_statement
 /* simple statements */
 pass_statement: TOK_PASS {
     $$ = new Node(NODE_PASS);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 }
 return_statement: TOK_RETURN {
     $$ = new Node(NODE_RETURN);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 
 } | TOK_RETURN expression {
     $$ = new Node(NODE_RETURN);
@@ -479,16 +479,16 @@ return_statement: TOK_RETURN {
 }
 break_statement: TOK_BREAK {
     $$ = new Node(NODE_BREAK);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 }
 continue_statement: TOK_CONTINUE {
     $$ = new Node(NODE_CONTINUE);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 }
 wait_statement: TOK_WAIT identifier{
     $$ = new Node(NODE_WAIT);
     $$->addChild($2);
-    $$->setLine(yylineno);
+    $$->setLine(yylineNumber);
 }
 
 /* if statement with or without else */
@@ -882,7 +882,7 @@ timesterm: TOK_PLUS timesterm {
     /* subtract from zero */
     $$ = new Node(NODE_MINUS);
     Node* zero = new Node(NODE_INTVAL);
-    zero->setIntval(tint(0));
+    zero->setIntvalue(Tint(0));
     $$->addChild(zero);
     $$->addChild($2);
 } | TOK_BITNOT timesterm {
@@ -913,7 +913,7 @@ interm: interm TOK_IN expterm {
 }
 
 /* expterm */
-expterm: expterm TOK_DOT funcall {
+expterm: expterm TOK_DOT functionCall {
     $$ = new Node(NODE_METHOD_CALL);
     $$->addChild($1);
     $$->addChild($3);
@@ -924,22 +924,22 @@ expterm: expterm TOK_DOT funcall {
 
 
 /* indivisible thing */
-rvalue: funcall {
+rvalue: functionCall {
     $$ = $1;
 } | TOK_LEFTPARENS expression TOK_RIGHTPARENS {
     $$ = $2;
 } | TOK_INTVAL {
     $$ = new Node(NODE_INTVAL);
-    $$->setIntval(tint(*$1));
+    $$->setIntvalue(Tint(*$1));
 } | TOK_REALVAL {
     $$ = new Node(NODE_REALVAL);
-    $$->setRealval(treal((*$1)));
+    $$->setRealvalue(Treal((*$1)));
 } | TOK_BOOLVAL {
     $$ = new Node(NODE_BOOLVAL);
-    $$->setBoolval(tbool((*$1)));
+    $$->setBoolvalue(Tbool((*$1)));
 } | TOK_STRINGVAL {
     $$ = new Node(NODE_STRINGVAL);
-    $$->setStrval(tstring(*$1));
+    $$->setStringvalue(Tstring(*$1));
 } | TOK_NONE {
     $$ = new Node(NODE_NONEVAL);
 } | vector_value {
@@ -1024,7 +1024,7 @@ dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
     /* an empty dictionary */
     $$ = new Node(NODE_DICTVAL);
 } | TOK_LEFTBRACE dict_values TOK_RIGHTBRACE {
-    /* a literal dictionary with one or more key-val pairs */
+    /* a literal dictionary with one or more key-value pairs */
     $$ = $2;
 }
 
@@ -1048,12 +1048,12 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
     $$ = new Node(NODE_IDENTIFIER);
-    $$->setStrval(tstring(*$1));
-    $$->setLine(yylineno);
+    $$->setStringvalue(Tstring(*$1));
+    $$->setLine(yylineNumber);
 }  
 
 /* a function call */
-funcall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
+functionCall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
     $$ = new Node(NODE_FUNCALL);
     $$->addChild($1);
     $$->setLine($2);
@@ -1083,12 +1083,12 @@ int yywrap( ) {
 }
 
 void yyerror(const char* str) {
-    throw Error(str, yylineno);
+    throw Error(str, yylineNumber);
 }
 
 /* parse from a file */
 extern std::istream* in;
-Node* parseFile(const tstring& fname) {
+Node* parseFile(const Tstring& fname) {
     /* reset all of the lexer stuff */
     reset_lexer( );
 

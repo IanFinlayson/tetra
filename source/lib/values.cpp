@@ -10,66 +10,66 @@
 
 #include "values.h"
 
-tstring operator+(const tstring& lhs, const tstring& rhs) {
-    tstring t;
+Tstring operator+(const Tstring& lhs, const Tstring& rhs) {
+    Tstring t;
     t.str = lhs.str + rhs.str;
     return t;
 }
 
-tstring operator+(const char* lhs, const tstring& rhs) {
-    return tstring(lhs) + rhs;
+Tstring operator+(const char* lhs, const Tstring& rhs) {
+    return Tstring(lhs) + rhs;
 }
 
-tstring operator+(const tstring& lhs, const char* rhs) {
-    return lhs + tstring(rhs);
+Tstring operator+(const Tstring& lhs, const char* rhs) {
+    return lhs + Tstring(rhs);
 }
 
-tstring tstring::operator+=(const char* rhs) {
+Tstring Tstring::operator+=(const char* rhs) {
     str = str + QString(rhs);
     return *this;
 }
 
-tstring tstring::substring(int start, int len) const {
-    tstring t;
+Tstring Tstring::substring(int start, int len) const {
+    Tstring t;
     t.str = str.mid(start, len);
     return t;
 }
 
-int tstring::length() const {
+int Tstring::length() const {
     return str.length();
 }
 
-bool tstring::empty() const {
+bool Tstring::empty() const {
     return str.length() == 0;
 }
 
-int tstring::indexOf(const tstring& s) const {
+int Tstring::indexOf(const Tstring& s) const {
     return str.indexOf(s.str);
 }
 
-tstring tstring::operator+=(const tstring& rhs) {
+Tstring Tstring::operator+=(const Tstring& rhs) {
     str = str + rhs.str;
     return *this;
 }
 
-bool operator<(const tstring& lhs, const tstring& rhs) {
+bool operator<(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str < rhs.str;
 }
-bool operator==(const tstring& lhs, const tstring& rhs) {
+bool operator==(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str == rhs.str;
 }
 
-bool operator>(const tstring& lhs, const tstring& rhs) {
+bool operator>(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str > rhs.str;
 }
 
-bool operator>=(const tstring& lhs, const tstring& rhs) {
+bool operator>=(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str >= rhs.str;
 }
-bool operator<=(const tstring& lhs, const tstring& rhs) {
+bool operator<=(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str <= rhs.str;
 }
 
-bool operator!=(const tstring& lhs, const tstring& rhs) {
+bool operator!=(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str != rhs.str;
 }
