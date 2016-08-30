@@ -125,7 +125,7 @@ QString MainWindow::getOpenFile() {
     return currentEditor()->getOpenFile();
 }
 
-// gives stripped name of file (removes file path)
+/* gives stripped name of file (removes file path) */
 QString MainWindow::strippedName(const QString& fullFileName) {
     return QFileInfo(fullFileName).fileName();
 }

@@ -106,10 +106,9 @@ int main(int argc, char** argv) {
 
   Node* tree;
 
-  // Parse file, and check for initial errors. Print out and exit if an error
-  // was found
+  /* parse file, and check for initial errors. Print out and exit if an error */
   try {
-    // File is last parameter
+    /* file is last parameter */
     tree = parseFile(tstring(args.input_file_name));
 
   } catch (Error e) {

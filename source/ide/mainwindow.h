@@ -130,4 +130,4 @@ class MainWindow : public QMainWindow {
     void closeEvent(QCloseEvent*);
 };
 
-#endif  // MAINWINDOW_H
+#endif

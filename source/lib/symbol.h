@@ -41,37 +41,37 @@ class FunctionMap {
 
  public:
   FunctionMap();
-  // Returns the address of a node containing the function body of the function
-  // denoted by functionSignature
+  /* Returns the address of a node containing the function body of the function
+     denoted by functionSignature */
   const Node* getFunctionNode(const tstring functionSignature);
   const Node* getFunctionNode(DataType*, tstring);
 
   const Node* getFunctionNode(const Node* callNode);
 
-  // Generates a unique function signature based on the name AND the arguments
+  /* Generates a unique function signature based on the name AND the arguments */
   static tstring getFunctionSignature(const Node* node);
 
-  // Fills the function map given the specified base node
+  /* Fills the function map given the specified base node */
   void build(Node* tree);
 
-  // returns true if the map contains a function with the
-  // provided name, regardless of params and return types
+  /* returns true if the map contains a function with the */
+  /* provided name, regardless of params and return types */
   bool hasFuncNamed(tstring name);
 
-  //returns true if the map contains the function
+  /* returns true if the map contains the function */
   bool hasFunction(Node* node);
   bool hasFunction(DataType*, tstring);
 
   DataType* getFunctionsNamed(tstring) ;
 
-  //renames functions with the name provided and returns them as a
-  //vector of pairs
+  /* renames functions with the name provided and returns them as a */
+  /* vector of pairs */
   std::map<tstring, Node*> remove(tstring);
 
-  //wrapper around std::map.insert
+  /* wrapper around std::map.insert */
   void insert(std::pair<tstring, Node*>);
 
-  // clear everything out of the function map, e.g. to reuse it
+  /* clear everything out of the function map, e.g. to reuse it */
   void clearAll();
 };
 

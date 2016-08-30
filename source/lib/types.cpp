@@ -169,8 +169,8 @@ DataType::DataType(const DataType& other) {
 }
 
 DataType::~DataType() {
-  //delete(className);
-  //delete(subtypes);
+  delete className;
+  delete subtypes;
 }
 
 /* return true if the type represents an empty
@@ -884,7 +884,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           throw Error("Vector index must be an integer.", expr->getLine());
                          }
                          DataType* dt = new DataType(((*(lhs->subtypes))[0])); 
-                         return dt;//new DataType(((*(lhs->subtypes))[0])); 
+                         return dt;/* new DataType(((*(lhs->subtypes))[0]));  */
 
                        /* strings */
                        } else if (kind == TYPE_STRING) {
@@ -905,7 +905,7 @@ DataType* inferExpressionPrime(Node* expr, Node* func) {
                           lhs = inferExpression(expr->child(0), func); 
                           rhs = inferExpression(expr->child(1), func); 
 
-                          /*make sure the types are both ints */
+                          /* make sure the types are both ints */
                           if (lhs->getKind() != TYPE_INT || lhs->getKind() != TYPE_INT) {
                             throw Error("Cannot create range with types other than INT."
                                 , expr->getLine());
@@ -1364,7 +1364,7 @@ void inferBlock(Node* block, Node* func) {
                        throw Error("Type of index variable '" + block->child(0)->getStrval()
                            + "' is incompatible with container elements.", block->getLine()); 
 
-                     /*otherwise, if it doesn't exist, add it */
+                     /* otherwise, if it doesn't exist, add it */
                      } else if (!idxSym) {
 
                        func->insertSymbol(Symbol(block->child(0)->getStrval(),
@@ -1745,7 +1745,7 @@ void verifyMain() {
     throw Error("Program must contain a function called 'main' which takes no arguments and returns 'none'.");
   } 
 
-  /* Otherwise, if it returns something...*/
+  /* otherwise, if it returns something...*/
   if ((*(mainNode->type()->subtypes))[1] != TYPE_NONE) {
     /* complain about that */
     throw Error("Function 'main()' cannot have a return type other than 'none'.",
@@ -1782,7 +1782,7 @@ void inferTypes(Node* node) {
     } else if (node->child(0)->kind() == NODE_CLASS) { 
       inferClass(node->child(0));
     }
-    /*TODO: open, import */
+    /* TODO: open, import */
 
     /* recursively infer any other functions */
     inferTypes(node->child(1));

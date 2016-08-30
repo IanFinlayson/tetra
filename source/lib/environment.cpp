@@ -30,7 +30,7 @@ void TetraEnvironment::setConsole(VirtualConsole* vc) {
     console = vc;
 }
 
-// halt the given program ASAP - used so the user can halt buggy programs
+/* halt the given program ASAP - used so the user can halt buggy programs */
 void TetraEnvironment::halt() {
     TetraEnvironment::running = false;
 }
@@ -43,7 +43,7 @@ void TetraEnvironment::setRunning() {
     running = true;
 }
 
-// Determines whether the interpreter should be executing in debug mode or not
+/* determines whether the interpreter should be executing in debug mode or not */
 void TetraEnvironment::setDebug(bool toggle) {
     debugMode = toggle;
 }

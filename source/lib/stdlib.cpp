@@ -1,11 +1,11 @@
-// This class defines Tetra Standard Library functions
+/* this file defines Tetra Standard Library functions */
 
 #include <string.h>
 #include <iostream>
 
 #include "tetra.h"
 
-// Prints (recursively) the expression(s) denoted by args
+/* Prints (recursively) the expression(s) denoted by args */
 /*
 void print(const Node* args) {
     UNUSED(args);

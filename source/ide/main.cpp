@@ -18,15 +18,6 @@ int main(int argc, char* argv[]) {
     app.setOrganizationName("UMW Computer Science");
     app.setApplicationName("Tetra");
 
-    /* list all available styles */
-    //QStringList styles = QStyleFactory::keys();
-    //for (int i = 0; i < styles.size(); i++) {
-        //qDebug() << styles.at(i);
-    //}
-
-    /* set the style */
-    //app.setStyle(QStyleFactory::create("Fusion"));
-
     /* initialize the settings and the main window */
     SettingsManager::init();
     MainWindow w;

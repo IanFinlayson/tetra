@@ -546,7 +546,6 @@ void Editor::replaceNext(QString before, QString after, bool matchCase) {
     /* select the text given */
     QTextCursor cursor = textCursor();
     cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, before.size());
-    //setTextCursor(cursor);
     cursor.insertText(after);
 }
 

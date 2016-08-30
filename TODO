@@ -2,7 +2,6 @@ TODO List
 =========
 
 - standardize naming conventions
-- standardize comment style
 - standardize indentation style
 - make sure all allocations are matched with de-allocation (tdata will use GC later)
 - write function to delete parse tree recursively (memory leak currently)

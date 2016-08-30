@@ -1,11 +1,11 @@
 #include "syntaxhighlighter.h"
 #include "settingsmanager.h"
 
-// set up the highlighting
+/* set up the highlighting */
 Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
     HighlightingRule rule;
 
-    // types
+    /* types */
     typeFormat.setForeground(SettingsManager::types());
     QStringList typePatterns;
     typePatterns << "\\bint\\b"
@@ -20,7 +20,7 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
         highlightingRules.append(rule);
     }
 
-    // keywords
+    /* keywords */
     keywordFormat.setForeground(SettingsManager::keywords());
     QStringList keywordPatterns;
     keywordPatterns << "\\bif\\b"
@@ -53,7 +53,7 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
         highlightingRules.append(rule);
     }
 
-    // builtin stuff
+    /* builtin stuff */
     builtinFormat.setForeground(SettingsManager::functions());
     QStringList builtinPatterns;
     builtinPatterns << "\\bprint\\b"
@@ -70,7 +70,7 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
         highlightingRules.append(rule);
     }
 
-    // values
+    /* values */
     valueFormat.setForeground(SettingsManager::values());
     QStringList valuePatterns;
     valuePatterns << "\\btrue\\b"
@@ -83,13 +83,13 @@ Highlighter::Highlighter(QTextDocument* parent) : QSyntaxHighlighter(parent) {
         highlightingRules.append(rule);
     }
 
-    // strings
+    /* strings */
     quotationFormat.setForeground(SettingsManager::values());
     rule.pattern = QRegExp("\".*\"");
     rule.format = quotationFormat;
     highlightingRules.append(rule);
 
-    // comments
+    /* comments */
     singleLineCommentFormat.setForeground(SettingsManager::comments());
     rule.pattern = QRegExp("#[^\n]*");
     rule.format = singleLineCommentFormat;
