@@ -28,11 +28,10 @@ tstring readString(int threadNum) {
 }
 
 tint len(tlist& arg) {
-    UNUSED(arg); 
+    UNUSED(arg);
 }
 
 tint len(tstring& arg) {
-    UNUSED(arg); 
+    UNUSED(arg);
 }
 */
-

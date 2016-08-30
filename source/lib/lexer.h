@@ -13,11 +13,9 @@ void reset_lexer();
 void setLexFile(QFile& file);
 
 /* the lexer function */
-int yylex( );
+int yylex();
 
 /* this function calls yyparse on a file and returns the parse tree node */
 Node* parseFile(const tstring& fname);
 
-
 #endif
-

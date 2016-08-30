@@ -10,7 +10,6 @@
 
 #include "values.h"
 
-
 tstring operator+(const tstring& lhs, const tstring& rhs) {
     tstring t;
     t.str = lhs.str + rhs.str;
@@ -74,4 +73,3 @@ bool operator<=(const tstring& lhs, const tstring& rhs) {
 bool operator!=(const tstring& lhs, const tstring& rhs) {
     return lhs.str != rhs.str;
 }
-

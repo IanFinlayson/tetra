@@ -1,26 +1,30 @@
 /* filerunner.cpp
  * code to run or debug a program */
 
-#include <QInputDialog> 
 #include <QDebug>
+#include <QInputDialog>
 #include <QMutex>
 
 #include "console.h"
 #include "filerunner.h"
 
-/* this function is defined in the Tetra interpreter code, linked as libtetra.a */
+/* this function is defined in the Tetra interpreter code, linked as libtetra.a
+ */
 int interpret(Node* tree, int debug, int threads);
 
 /* create the FileRunner and save the window it's associated with */
-FileRunner::FileRunner(MainWindow* mainWindow) : VirtualConsole() {
+FileRunner::FileRunner(MainWindow* mainWindow)
+    : VirtualConsole() {
     /* output */
-    connect(this, SIGNAL(output(QString)), mainWindow, SLOT(receiveOutput(QString)));
+    connect(this, SIGNAL(output(QString)), mainWindow,
+            SLOT(receiveOutput(QString)));
 
     /* input */
     connect(this, SIGNAL(needInput()), mainWindow, SLOT(getInput()));
 
     /* errors */
-    connect(this, SIGNAL(errorSeen(QString, int)), mainWindow, SLOT(reportError(QString, int)));
+    connect(this, SIGNAL(errorSeen(QString, int)), mainWindow,
+            SLOT(reportError(QString, int)));
 
     /* save main window ref */
     this->mainWindow = mainWindow;
@@ -48,8 +52,7 @@ void FileRunner::runFile(bool debug) {
 
     } catch (InterruptError e) {
         interrupted = true;
-    }
-    catch (Error e) {
+    } catch (Error e) {
         emit errorSeen(e.getMessage().toQ(), e.getLine());
     }
     QThread::currentThread()->quit();
@@ -58,15 +61,18 @@ void FileRunner::runFile(bool debug) {
     double seconds = programTimer.elapsed() / 1000.0;
 
     if (!interrupted) {
-        emit output("\nProgram finished in " + QString::number(seconds, 'f', 2) + " seconds");
+        emit output("\nProgram finished in " + QString::number(seconds, 'f', 2) +
+                    " seconds");
     } else {
-        emit output("\nProgram interupted after " + QString::number(seconds, 'f', 2) + " seconds");
+        emit output("\nProgram interupted after " +
+                    QString::number(seconds, 'f', 2) + " seconds");
     }
 
     emit finished();
 }
 
-/* this function is called from the interpreter when it needs string input from the user */
+/* this function is called from the interpreter when it needs string input from
+ * the user */
 tstring FileRunner::receiveStandardInput() {
     /* tell the main window we need input */
     emit needInput();
@@ -83,7 +89,7 @@ tstring FileRunner::receiveStandardInput() {
     /* if input was interrupted, don't return back */
     if (inputInterrupted) {
         throw InterruptError();
-    } 
+    }
 
     /* and now give it back to the interpreter */
     return myInput.toStdString().c_str();
@@ -114,4 +120,3 @@ void FileRunner::halt() {
     inputInterrupted = true;
     inputReady.wakeAll();
 }
-

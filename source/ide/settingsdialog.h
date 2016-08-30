@@ -2,7 +2,6 @@
 #include <QSettings>
 #include "ui_settings.h"
 
-
 /* a simple struct for storing the color schemes */
 const int NUM_SCHEMES = 12;
 struct ColorScheme {
@@ -25,17 +24,16 @@ struct ColorScheme {
 class SettingsDialog : public QDialog, public Ui::Settings {
     Q_OBJECT
 
-    private:
-        QSettings* settings_manager;
-        QFont font_choice;
+  private:
+    QSettings* settings_manager;
+    QFont font_choice;
 
-    private slots:
-        void on_buttonBox_clicked(QAbstractButton* button);
-        void askFont();
-        void askColor();
-        void selectTheme(int index);
+  private slots:
+    void on_buttonBox_clicked(QAbstractButton* button);
+    void askFont();
+    void askColor();
+    void selectTheme(int index);
 
-    public:
-        SettingsDialog(QWidget* parent);
+  public:
+    SettingsDialog(QWidget* parent);
 };
-

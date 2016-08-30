@@ -7,11 +7,10 @@
 #include "eval.h"
 #include "lexer.h"
 #include "node.h"
+#include "parser.h"
 #include "symbol.h"
 #include "tetra.h"
 #include "types.h"
-#include "parser.h"
 #include "values.h"
 
 #endif
-

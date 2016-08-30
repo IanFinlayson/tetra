@@ -4,12 +4,11 @@
 
 tstring CommandConsole::receiveStandardInput() {
     char input[1024];
-  std::cin >> input;
+    std::cin >> input;
 
-  return tstring(input);
+    return tstring(input);
 }
 
 void CommandConsole::processStandardOutput(const tstring& output) {
-  std::cout << output;
+    std::cout << output;
 }
-

@@ -2,15 +2,15 @@
  * contains the application entry point */
 
 #include <QApplication>
+#include <QDebug>
 #include <QLabel>
 #include <QObject>
-#include <QDebug>
 #include <QStringList>
 #include <QStyleFactory>
 
-#include "settingsmanager.h"
 #include "editor.h"
 #include "mainwindow.h"
+#include "settingsmanager.h"
 
 int main(int argc, char* argv[]) {
     /* set up the application */

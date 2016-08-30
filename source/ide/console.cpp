@@ -5,14 +5,16 @@
 #include <QtWidgets>
 
 #include "console.h"
-#include "ui_mainwindow.h"
 #include "settingsmanager.h"
+#include "ui_mainwindow.h"
 
-Console::Console(MainWindow* parent) : QPlainTextEdit(parent) {
+Console::Console(MainWindow* parent)
+    : QPlainTextEdit(parent) {
     setContentsMargins(50, 50, 50, 50);
 
     ensureCursorVisible();
-    setCenterOnScroll(false);;
+    setCenterOnScroll(false);
+    ;
     setReadOnly(true);
     this->parent = parent;
 
@@ -24,15 +26,21 @@ void Console::setUpConnections(MainWindow* parent) {
     this->parent = parent;
 
     /* set it up so that console can pass input to main window */
-    connect(this, SIGNAL(enterPressed(QString)), parent, SLOT(receiveInput(QString)));
+    connect(this, SIGNAL(enterPressed(QString)), parent,
+            SLOT(receiveInput(QString)));
 }
 
 void Console::updateSettings() {
     /* set colors */
-    setStyleSheet("QPlainTextEdit {"
-            "background-color: " + SettingsManager::termBackground().name() + ";"
-            "color: " + SettingsManager::termForeground().name() + ";"
-            "}");
+    setStyleSheet(
+        "QPlainTextEdit {"
+        "background-color: " +
+        SettingsManager::termBackground().name() +
+        ";"
+        "color: " +
+        SettingsManager::termForeground().name() +
+        ";"
+        "}");
 
     /* set font */
     QFont font = SettingsManager::font();
@@ -40,7 +48,7 @@ void Console::updateSettings() {
 
     /* set the cursor to be a block */
     QFontMetrics fm(font);
-    setCursorWidth( fm.averageCharWidth() );
+    setCursorWidth(fm.averageCharWidth());
 }
 
 /* remember the position in the console so that we can't change it */
@@ -50,7 +58,6 @@ void Console::beginInput() {
 
 /* when keys are pressed in the widget */
 void Console::keyPressEvent(QKeyEvent* e) {
-
     /* if we push left or backspace, we can only handle it if there is room */
     if (e->key() == Qt::Key_Left || e->key() == Qt::Key_Backspace) {
         if (textCursor().positionInBlock() > inputStart) {
@@ -62,11 +69,13 @@ void Console::keyPressEvent(QKeyEvent* e) {
     else if (e->key() == Qt::Key_Home) {
         QTextCursor cursor = textCursor();
         cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor, 1);
-        cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor, inputStart);
+        cursor.movePosition(QTextCursor::Right, QTextCursor::MoveAnchor,
+                            inputStart);
         setTextCursor(cursor);
     }
 
-    /* enter returns the input back to the main window which passes to the program */
+    /* enter returns the input back to the main window which passes to the program
+     */
     else if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
         /* get the last line of text */
         QString text = textCursor().block().text();
@@ -82,8 +91,9 @@ void Console::keyPressEvent(QKeyEvent* e) {
     }
 
     /* we ignore all of these keys altogether */
-    else if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down || e->key() == Qt::Key_Insert
-            || e->key() == Qt::Key_PageUp || e->key() == Qt::Key_PageDown) {
+    else if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Down ||
+             e->key() == Qt::Key_Insert || e->key() == Qt::Key_PageUp ||
+             e->key() == Qt::Key_PageDown) {
     }
 
     /* else, just pass it */
@@ -94,14 +104,11 @@ void Console::keyPressEvent(QKeyEvent* e) {
 
 /* we must ignore these so the user does not click to a new position */
 void Console::mousePressEvent(QMouseEvent*) {
-
 }
-
 
 void Console::resizeEvent(QResizeEvent* e) {
     QPlainTextEdit::resizeEvent(e);
 }
-
 
 void Console::write(QString text) {
     QTextCursor* cursor = new QTextCursor(document());
@@ -110,5 +117,3 @@ void Console::write(QString text) {
 
     ensureCursorVisible();
 }
-
-

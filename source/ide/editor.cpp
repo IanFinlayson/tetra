@@ -4,14 +4,18 @@
 
 #include <QtWidgets>
 
-#include "settingsmanager.h"
 #include "editor.h"
+#include "settingsmanager.h"
 #include "ui_mainwindow.h"
 
-Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursorCoordinates()));
-    connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-    connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
+Editor::Editor(QWidget* parent)
+    : QPlainTextEdit(parent) {
+    connect(this, SIGNAL(cursorPositionChanged()), this,
+            SLOT(updateCursorCoordinates()));
+    connect(this, SIGNAL(blockCountChanged(int)), this,
+            SLOT(updateLineNumberAreaWidth(int)));
+    connect(this, SIGNAL(updateRequest(QRect, int)), this,
+            SLOT(updateLineNumberArea(QRect, int)));
 
     lineNumberArea = NULL;
     setPlainText("");
@@ -32,7 +36,6 @@ Editor::Editor(QWidget* parent) : QPlainTextEdit(parent) {
     connect(this, SIGNAL(textChanged()), SLOT(unhighlightLine()));
 }
 
-
 void Editor::updateSettings() {
     /* if line numbers are on */
     if (SettingsManager::lineNo()) {
@@ -45,9 +48,11 @@ void Editor::updateSettings() {
         lineNumberArea->show();
         lineNumberArea->setFont(SettingsManager::font());
         updateLineNumberAreaWidth(0);
-        lineNumberArea->setStyleSheet(
-                "background-color: " + SettingsManager::background().name() + ";"
-                "color: " + SettingsManager::foreground().name() + ";");
+        lineNumberArea->setStyleSheet("background-color: " +
+                                      SettingsManager::background().name() +
+                                      ";"
+                                      "color: " +
+                                      SettingsManager::foreground().name() + ";");
     } else {
         /* delete them if needed */
         if (lineNumberArea) {
@@ -62,11 +67,15 @@ void Editor::updateSettings() {
 
     /* set the font and colors */
     setFont(SettingsManager::font());
-    setStyleSheet("QPlainTextEdit {"
-            "background-color: " + SettingsManager::background().name() + ";"
-            "color: " + SettingsManager::foreground().name() + ";"
-            "}");
-
+    setStyleSheet(
+        "QPlainTextEdit {"
+        "background-color: " +
+        SettingsManager::background().name() +
+        ";"
+        "color: " +
+        SettingsManager::foreground().name() +
+        ";"
+        "}");
 
     /* update syntax highlighting */
     delete highlighter;
@@ -75,13 +84,20 @@ void Editor::updateSettings() {
 
 void Editor::setUpConnections(MainWindow* parent) {
     this->parent = parent;
-    connect(this, SIGNAL(copyAvailable(bool)), parent->ui->actionCopy, SLOT(setEnabled(bool)));
-    connect(this, SIGNAL(copyAvailable(bool)), parent->ui->actionCut, SLOT(setEnabled(bool)));
-    connect(this, SIGNAL(redoAvailable(bool)), parent->ui->actionRedo, SLOT(setEnabled(bool)));
-    connect(this, SIGNAL(undoAvailable(bool)), parent->ui->actionUndo, SLOT(setEnabled(bool)));
-    connect(this->document(), SIGNAL(contentsChanged()), parent, SLOT(documentWasModified()));
-    connect(this, SIGNAL(cursorPositionChanged()), parent, SLOT(updateCoordinates()));
-    connect(this, SIGNAL(cursorPositionChanged()), parent, SLOT(updateCoordinates()));
+    connect(this, SIGNAL(copyAvailable(bool)), parent->ui->actionCopy,
+            SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(copyAvailable(bool)), parent->ui->actionCut,
+            SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(redoAvailable(bool)), parent->ui->actionRedo,
+            SLOT(setEnabled(bool)));
+    connect(this, SIGNAL(undoAvailable(bool)), parent->ui->actionUndo,
+            SLOT(setEnabled(bool)));
+    connect(this->document(), SIGNAL(contentsChanged()), parent,
+            SLOT(documentWasModified()));
+    connect(this, SIGNAL(cursorPositionChanged()), parent,
+            SLOT(updateCoordinates()));
+    connect(this, SIGNAL(cursorPositionChanged()), parent,
+            SLOT(updateCoordinates()));
 }
 
 void Editor::setCopyAvail(bool is) {
@@ -108,9 +124,11 @@ bool Editor::canRedo() {
     return redoAvail;
 }
 
-/* save as - ask the user for a file name, save the file, and return success/failure */
+/* save as - ask the user for a file name, save the file, and return
+ * success/failure */
 bool Editor::saveas() {
-    fileName = QFileDialog::getSaveFileName(this, tr("Save File"), "", "Tetra (*.ttr)");
+    fileName =
+        QFileDialog::getSaveFileName(this, tr("Save File"), "", "Tetra (*.ttr)");
     if (fileName == "") {
         return false;
     } else {
@@ -118,7 +136,8 @@ bool Editor::saveas() {
     }
 }
 
-/* save - if we have a name, update it, else ask the user and then save, return success/failure */
+/* save - if we have a name, update it, else ask the user and then save, return
+ * success/failure */
 bool Editor::save() {
     if (fileName == "") {
         return saveas();
@@ -128,7 +147,7 @@ bool Editor::save() {
             return false;
         }
 
-        QTextStream out(&ttrFile); 
+        QTextStream out(&ttrFile);
         out << toPlainText();
         ttrFile.flush();
         ttrFile.close();
@@ -152,7 +171,7 @@ void Editor::inferTabWidth(QString fileText) {
             while (spaces < line.size() && line.at(spaces) == ' ') {
                 spaces++;
             }
-            
+
             /* set it and return, we are done */
             setTabWidth(spaces);
             return;
@@ -181,7 +200,7 @@ bool Editor::open(QString fname) {
         inferTabWidth(fileText);
 
         return true;
-    } 
+    }
 
     return false;
 }
@@ -195,7 +214,6 @@ bool Editor::isEmpty() {
     }
 }
 
-
 /* return the open file name (will be "" if none set) */
 QString Editor::getOpenFile() {
     return fileName;
@@ -203,7 +221,6 @@ QString Editor::getOpenFile() {
 
 /* overrides default navigation for smart editing */
 void Editor::keyPressEvent(QKeyEvent* e) {
-
     /* if we're not doing smart editing, just pass it up */
     if (!SettingsManager::smartEdit()) {
         QPlainTextEdit::keyPressEvent(e);
@@ -371,7 +388,8 @@ void Editor::resizeEvent(QResizeEvent* e) {
 
     if (lineNumberArea) {
         QRect cr = contentsRect();
-        lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+        lineNumberArea->setGeometry(
+            QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
     }
 }
 
@@ -386,15 +404,15 @@ void Editor::lineNumberAreaPaintEvent(QPaintEvent* event) {
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
-    int top =
-        (int)blockBoundingGeometry(block).translated(contentOffset()).top();
+    int top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
     int bottom = top + (int)blockBoundingRect(block).height();
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(SettingsManager::linesForeground());
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
+            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
+                             Qt::AlignRight, number);
         }
 
         block = block.next();
@@ -447,7 +465,6 @@ int Editor::getTabWidth() {
     return this->tabWidth;
 }
 
-
 /* highlight a search term */
 void Editor::highlightAll(QString term, bool matchCase) {
     Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
@@ -474,7 +491,8 @@ void Editor::highlightAll(QString term, bool matchCase) {
 
             QTextEdit::ExtraSelection currentWord;
             QTextCursor cursor = textCursor();
-            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, term.size());
+            cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor,
+                                term.size());
 
             currentWord.format.setBackground(SettingsManager::search());
             currentWord.cursor = cursor;
@@ -490,7 +508,10 @@ void Editor::highlightAll(QString term, bool matchCase) {
 }
 
 /* perform a search with jumps and highlights */
-bool Editor::searchDir(QString term, bool forward, bool matchCase, bool highlight) {
+bool Editor::searchDir(QString term,
+                       bool forward,
+                       bool matchCase,
+                       bool highlight) {
     Qt::CaseSensitivity cs = matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
     bool found = false;
@@ -545,7 +566,8 @@ void Editor::replaceNext(QString before, QString after, bool matchCase) {
 
     /* select the text given */
     QTextCursor cursor = textCursor();
-    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, before.size());
+    cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor,
+                        before.size());
     cursor.insertText(after);
 }
 
@@ -555,10 +577,11 @@ void Editor::replaceAll(QString before, QString after, bool matchCase) {
     QString text = toPlainText();
 
     /* do the actual replacement */
-    text.replace(before, after, matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    text.replace(before, after,
+                 matchCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
 
     /* set the text back
-     * this is done using the cursor so as not to erase all history! */
+   * this is done using the cursor so as not to erase all history! */
     QTextCursor cursor(document());
     cursor.select(QTextCursor::Document);
     cursor.insertText(text);

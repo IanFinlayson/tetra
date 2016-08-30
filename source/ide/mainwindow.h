@@ -6,19 +6,19 @@
 
 #include <QGridLayout>
 #include <QLabel>
-#include <QSettings>
 #include <QLayout>
 #include <QMainWindow>
 #include <QMap>
 #include <QPlainTextEdit>
+#include <QSettings>
 #include <QSignalMapper>
 #include <QThread>
 
 #include "tetra.h"
 
 #include "filerunner.h"
-#include "syntaxhighlighter.h"
 #include "replacedialog.h"
+#include "syntaxhighlighter.h"
 
 class Editor;
 class FileRunner;
@@ -105,9 +105,7 @@ class MainWindow : public QMainWindow {
     void saveMatchCase(int);
 
   private:
-
     void setupShortcuts();
-
 
     QSignalMapper* windowMapper;
     QString strippedName(const QString& fullFileName);

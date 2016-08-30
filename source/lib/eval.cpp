@@ -22,16 +22,14 @@ void evaluateExpression(const Node* node) {
     UNUSED(node);
 }
 
-
 /* Equivilant of main for the interpreter module */
 int interpret(Node* tree, int debug, int threads) {
-  /* set environment settings */
-  TetraEnvironment::setDebug(debug);
-  TetraEnvironment::setMaxThreads(threads);
-  TetraEnvironment::setRunning();
+    /* set environment settings */
+    TetraEnvironment::setDebug(debug);
+    TetraEnvironment::setMaxThreads(threads);
+    TetraEnvironment::setRunning();
 
-  UNUSED(tree);
+    UNUSED(tree);
 
-  return 0;
+    return 0;
 }
-

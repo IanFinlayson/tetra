@@ -3,18 +3,19 @@
 
 #include <QDebug>
 
-#include "mainwindow.h"
 #include "editor.h"
-#include "settingsmanager.h"
+#include "mainwindow.h"
 #include "replacedialog.h"
+#include "settingsmanager.h"
 
-ReplaceDialog::ReplaceDialog(QWidget* parent) : QDialog(parent) {
+ReplaceDialog::ReplaceDialog(QWidget* parent)
+    : QDialog(parent) {
     /* setup the GUI */
     ui = new Ui::Replace;
     ui->setupUi(this);
 
     /* save the main window */
-    mainWindow = (MainWindow*) parent;
+    mainWindow = (MainWindow*)parent;
 
     /* connect up the buttons */
     connect(ui->cancel, SIGNAL(released()), this, SLOT(cancel()));
@@ -26,13 +27,16 @@ ReplaceDialog::ReplaceDialog(QWidget* parent) : QDialog(parent) {
     ui->replaceAll->setDefault(true);
 
     /* set the initial checked ness from settings */
-    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked : Qt::Unchecked);
-    connect(ui->matchCase, SIGNAL(stateChanged(int)), this, SLOT(saveMatchCase(int)));
+    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked
+                                                              : Qt::Unchecked);
+    connect(ui->matchCase, SIGNAL(stateChanged(int)), this,
+            SLOT(saveMatchCase(int)));
 }
 
 void ReplaceDialog::updateSettings() {
     /* set the checked ness of this based on settings */
-    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked : Qt::Unchecked);
+    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked
+                                                              : Qt::Unchecked);
 }
 
 void ReplaceDialog::saveMatchCase(int) {
@@ -48,23 +52,26 @@ void ReplaceDialog::cancel() {
 /* replace the next instance */
 void ReplaceDialog::replace() {
     if (ui->find->text().size() > 0) {
-        mainWindow->currentEditor()->replaceNext(ui->find->text(), ui->replace->text(),
-                ui->matchCase->checkState() == Qt::Checked);
+        mainWindow->currentEditor()->replaceNext(
+            ui->find->text(), ui->replace->text(),
+            ui->matchCase->checkState() == Qt::Checked);
     }
 }
 
 /* replace all instances */
 void ReplaceDialog::replaceAll() {
     if (ui->find->text().size() > 0) {
-        mainWindow->currentEditor()->replaceAll(ui->find->text(), ui->replace->text(),
-                ui->matchCase->checkState() == Qt::Checked);
+        mainWindow->currentEditor()->replaceAll(
+            ui->find->text(), ui->replace->text(),
+            ui->matchCase->checkState() == Qt::Checked);
     }
 }
 
 /* called when it's time to do a search */
 void ReplaceDialog::next() {
     if (ui->find->text().size() > 0) {
-        mainWindow->currentEditor()->searchDir(ui->find->text(), true, ui->matchCase->checkState() == Qt::Checked, true);
+        mainWindow->currentEditor()->searchDir(
+            ui->find->text(), true, ui->matchCase->checkState() == Qt::Checked,
+            true);
     }
 }
-

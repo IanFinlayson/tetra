@@ -10,8 +10,8 @@
  */
 
 void TetraEnvironment::initialize() {
-  maxThreads = 8;
-  console = NULL;
+    maxThreads = 8;
+    console = NULL;
 }
 
 void TetraEnvironment::setMaxThreads(int pNum) {
@@ -23,7 +23,7 @@ int TetraEnvironment::getMaxThreads() {
 }
 
 VirtualConsole* TetraEnvironment::getConsole() {
-  return console;
+    return console;
 }
 
 void TetraEnvironment::setConsole(VirtualConsole* vc) {
@@ -43,7 +43,8 @@ void TetraEnvironment::setRunning() {
     running = true;
 }
 
-/* determines whether the interpreter should be executing in debug mode or not */
+/* determines whether the interpreter should be executing in debug mode or not
+ */
 void TetraEnvironment::setDebug(bool toggle) {
     debugMode = toggle;
 }
@@ -52,10 +53,7 @@ bool TetraEnvironment::isDebugMode() {
     return debugMode;
 }
 
-
 int TetraEnvironment::maxThreads = 8;
 bool TetraEnvironment::debugMode = false;
 bool TetraEnvironment::running = true;
 VirtualConsole* TetraEnvironment::console = NULL;
-
-

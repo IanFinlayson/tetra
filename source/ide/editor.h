@@ -50,7 +50,7 @@ class Editor : public QPlainTextEdit {
     bool isEmpty();
 
     /* returns the open file name of this editor, or "" if none set yet */
-    QString getOpenFile(); 
+    QString getOpenFile();
 
     /* move the cursors and get the coordinates of it */
     void moveCursor(int line, int col = 0);
@@ -68,7 +68,6 @@ class Editor : public QPlainTextEdit {
     /* implement replacing */
     void replaceNext(QString before, QString after, bool matchCase);
     void replaceAll(QString before, QString after, bool matchCase);
-
 
   public slots:
     void updateCursorCoordinates();

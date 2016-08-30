@@ -15,7 +15,6 @@ class QSize;
 class QWidget;
 QT_END_NAMESPACE
 
-
 class Console : public QPlainTextEdit {
     Q_OBJECT
   public:
@@ -39,7 +38,7 @@ class Console : public QPlainTextEdit {
   protected:
     virtual void keyPressEvent(QKeyEvent* e);
     void resizeEvent(QResizeEvent* event);
-    void mousePressEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent* event);
 
   private:
     MainWindow* parent;
@@ -48,4 +47,3 @@ class Console : public QPlainTextEdit {
     int inputStart;
 };
 #endif
-

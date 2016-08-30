@@ -18,15 +18,16 @@
 #include <QThread>
 #include <QtCore>
 
-#include "mainwindow.h"
-#include "settingsdialog.h"
-#include "replacedialog.h"
-#include "settingsmanager.h"
 #include "editor.h"
-#include "ui_mainwindow.h"
+#include "mainwindow.h"
+#include "replacedialog.h"
+#include "settingsdialog.h"
+#include "settingsmanager.h"
 #include "ui_about.h"
+#include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow), repl(this) {
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent), ui(new Ui::MainWindow), repl(this) {
     /* set the menu bar to work natively for systems with global bars */
     menuBar()->setNativeMenuBar(true);
 
@@ -38,7 +39,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     setWindowIcon(QIcon(":/icons/resources/icons/logo.svg"));
 
     /* set up the key shortcuts for the program */
-    setupShortcuts(); 
+    setupShortcuts();
 
     /* set up the thread and file runner for running programs */
     tetraThread = NULL;
@@ -65,7 +66,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     currentEditor()->setUpConnections(this);
 
     /* connect tab changes so we can update buttons */
-    connect(ui->tabBar, SIGNAL(currentChanged(int)), this, SLOT(onTabChange(int)));
+    connect(ui->tabBar, SIGNAL(currentChanged(int)), this,
+            SLOT(onTabChange(int)));
 
     /* set up connections with the console */
     ui->console->setUpConnections(this);
@@ -81,9 +83,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(ui->findNext, SIGNAL(pressed()), this, SLOT(searchNext()));
     connect(ui->findPrev, SIGNAL(pressed()), this, SLOT(searchPrev()));
     connect(ui->searchBox, SIGNAL(returnPressed()), this, SLOT(searchNext()));
-    connect(ui->searchBox, SIGNAL(textChanged(QString)), this, SLOT(clearSearchColor(QString)));
+    connect(ui->searchBox, SIGNAL(textChanged(QString)), this,
+            SLOT(clearSearchColor(QString)));
     connect(ui->searchBox, SIGNAL(closeSearch()), this, SLOT(hideSearch()));
-    connect(ui->matchCase, SIGNAL(stateChanged(int)), this, SLOT(saveMatchCase(int)));
+    connect(ui->matchCase, SIGNAL(stateChanged(int)), this,
+            SLOT(saveMatchCase(int)));
 
     /* TODO enable debugging when it is working */
     ui->actionDebug->setVisible(false);
@@ -148,9 +152,8 @@ void MainWindow::doOpen(QString fname) {
         /* if there is one tab which is empty and not modified, close it first */
         if (ui->tabBar->count() == 1 && currentEditor()->isEmpty()) {
             currentEditor()->close();
-            ui->tabBar->removeTab(ui->tabBar->currentIndex()); 
+            ui->tabBar->removeTab(ui->tabBar->currentIndex());
         }
-
 
         QFileInfo info(fname);
         ui->tabBar->addTab(newEditor, info.fileName());
@@ -159,7 +162,8 @@ void MainWindow::doOpen(QString fname) {
     } else {
         QMessageBox warning;
         warning.setText("Could not open file '" + fname + "'");
-        warning.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-warning.svg"));
+        warning.setIconPixmap(
+            QPixmap(":/icons/resources/icons/dialog-warning.svg"));
         warning.exec();
     }
 }
@@ -190,8 +194,10 @@ void MainWindow::on_actionClose_triggered() {
         QMessageBox msgBox;
         msgBox.setText("The file has been modified.");
         msgBox.setInformativeText("Do you want to save your changes?");
-        msgBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.svg"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setIconPixmap(
+            QPixmap(":/icons/resources/icons/dialog-question.svg"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
+                                  QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
         switch (msgBox.exec()) {
             case QMessageBox::Save:
@@ -242,7 +248,7 @@ void MainWindow::updateTitle() {
         setWindowModified(currentEditor()->document()->isModified());
     } else {
         setWindowTitle("Tetra [*]");
-    } 
+    }
 }
 
 void MainWindow::on_actionSave_triggered() {
@@ -258,7 +264,8 @@ void MainWindow::on_actionSave_As_triggered() {
 }
 
 void MainWindow::on_actionOpen_triggered() {
-    QString fname = QFileDialog::getOpenFileName(this, tr("Open File"), "", "Tetra (*.ttr)");
+    QString fname =
+        QFileDialog::getOpenFileName(this, tr("Open File"), "", "Tetra (*.ttr)");
     if (fname == "") {
         return;
     }
@@ -280,7 +287,8 @@ int MainWindow::on_actionPrint_triggered() {
     painter.begin(&printer);
     QFont f = SettingsManager::font();
     painter.setFont(f);
-    painter.drawText(100, 100, 500, 500, Qt::AlignLeft | Qt::AlignTop, currentEditor()->toPlainText());
+    painter.drawText(100, 100, 500, 500, Qt::AlignLeft | Qt::AlignTop,
+                     currentEditor()->toPlainText());
 
     painter.end();
     return 0;
@@ -306,7 +314,7 @@ void MainWindow::on_actionQuit_triggered() {
     int mod_count = 0;
     Editor* unsaved = NULL;
     for (int i = 0; i < ui->tabBar->count(); i++) {
-        Editor* ed = (Editor*) ui->tabBar->widget(i);
+        Editor* ed = (Editor*)ui->tabBar->widget(i);
         if (ed->document()->isModified()) {
             unsaved = ed;
             mod_count++;
@@ -317,8 +325,10 @@ void MainWindow::on_actionQuit_triggered() {
         QMessageBox msgBox;
         msgBox.setText("The file has been modified.");
         msgBox.setInformativeText("Do you want to save your changes?");
-        msgBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.svg"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setIconPixmap(
+            QPixmap(":/icons/resources/icons/dialog-question.svg"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
+                                  QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
         switch (msgBox.exec()) {
             case QMessageBox::Save:
@@ -338,13 +348,15 @@ void MainWindow::on_actionQuit_triggered() {
         QMessageBox msgBox;
         msgBox.setText("Files have been modified.");
         msgBox.setInformativeText("Do you want to save all changes?");
-        msgBox.setIconPixmap(QPixmap(":/icons/resources/icons/dialog-question.svg"));
-        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msgBox.setIconPixmap(
+            QPixmap(":/icons/resources/icons/dialog-question.svg"));
+        msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard |
+                                  QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
         switch (msgBox.exec()) {
             case QMessageBox::Save:
                 for (int i = 0; i < ui->tabBar->count(); i++) {
-                    Editor* ed = (Editor*) ui->tabBar->widget(i);
+                    Editor* ed = (Editor*)ui->tabBar->widget(i);
                     if (!ed->save()) {
                         return;
                     }
@@ -390,14 +402,13 @@ void MainWindow::on_actionSettings_triggered() {
 
     /* update the settings of all open editors */
     for (int i = 0; i < ui->tabBar->count(); i++) {
-        Editor* ed = (Editor*) ui->tabBar->widget(i);
+        Editor* ed = (Editor*)ui->tabBar->widget(i);
         ed->updateSettings();
     }
 
     /* update the settings for the console */
     ui->console->updateSettings();
 }
-
 
 void MainWindow::on_actionDocumentation_triggered() {
     QDesktopServices::openUrl(QUrl("http://tetra-lang.org/ide-reference"));
@@ -435,14 +446,16 @@ void MainWindow::on_actionRun_triggered() {
     /* start the worker thread which runs the programs */
     fileRunner->moveToThread(tetraThread);
     tetraThread->start();
-    QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection, Q_ARG(bool,false));
+    QMetaObject::invokeMethod(fileRunner, "runFile", Qt::QueuedConnection,
+                              Q_ARG(bool, false));
 }
 
 /* we were requested to get input from the running program */
 void MainWindow::getInput() {
     /* set the console to be editable */
     ui->console->setReadOnly(false);
-    ui->console->beginInput();;
+    ui->console->beginInput();
+    ;
 
     /* focus it */
     ui->console->setFocus(Qt::OtherFocusReason);
@@ -451,10 +464,11 @@ void MainWindow::getInput() {
     statusBar()->showMessage("Waiting for input.");
 
     /* make it un-closable */
-    ui->dock->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    ui->dock->setFeatures(QDockWidget::DockWidgetMovable |
+                          QDockWidget::DockWidgetFloatable);
 
     /* now we do nothing until the user hits enter in the console which will
-     * cause it to call receiveInput below */
+   * cause it to call receiveInput below */
 }
 
 /* when the console has input for us to pass to program */
@@ -485,7 +499,7 @@ void MainWindow::reportError(QString mesg, int line) {
 }
 
 /* finish running this */
-void MainWindow::exitRunMode(){
+void MainWindow::exitRunMode() {
     /* get rid of the running thread */
     delete tetraThread;
     delete fileRunner;
@@ -503,7 +517,6 @@ void MainWindow::exitRunMode(){
     ui->console->setReadOnly(true);
     ui->dock->setFeatures(QDockWidget::AllDockWidgetFeatures);
     currentEditor()->setFocus(Qt::OtherFocusReason);
-
 }
 
 void MainWindow::on_actionStop_triggered() {
@@ -523,7 +536,8 @@ void MainWindow::hideSearch() {
 }
 void MainWindow::showSearch() {
     /* set the checked ness of this based on settings */
-    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked : Qt::Unchecked);
+    ui->matchCase->setCheckState(SettingsManager::matchCase() ? Qt::Checked
+                                                              : Qt::Unchecked);
 
     ui->matchCase->setVisible(true);
     ui->findClose->setVisible(true);
@@ -549,17 +563,18 @@ void MainWindow::doSearch(bool next) {
 
     /* search and check if found */
     if (currentEditor()->searchDir(ui->searchBox->text(), next,
-                ui->matchCase->checkState() == Qt::Checked, true)) {
+                                   ui->matchCase->checkState() == Qt::Checked,
+                                   true)) {
         ui->searchBox->setStyleSheet("");
         currentEditor()->setFocus(Qt::OtherFocusReason);
     } else {
-        ui->searchBox->setStyleSheet("background-color: " + SettingsManager::error().name() + ";");
+        ui->searchBox->setStyleSheet("background-color: " +
+                                     SettingsManager::error().name() + ";");
     }
 }
 
 void MainWindow::searchNext() {
     doSearch(true);
-
 }
 void MainWindow::searchPrev() {
     doSearch(false);
@@ -567,7 +582,7 @@ void MainWindow::searchPrev() {
 
 /* called also when the text is changed */
 void MainWindow::clearSearchColor(QString) {
-        ui->searchBox->setStyleSheet("");
+    ui->searchBox->setStyleSheet("");
 }
 
 /* launch the replace dialog */
@@ -575,13 +590,6 @@ void MainWindow::on_actionReplace_triggered() {
     repl.updateSettings();
     repl.show();
 }
-
-
-
-
-
-
-
 
 /* TODO debugger functions */
 void MainWindow::on_actionDebug_triggered() {
@@ -595,4 +603,3 @@ void MainWindow::on_actionContinue_triggered() {
 
 void MainWindow::on_actionNext_triggered() {
 }
-

@@ -13,89 +13,90 @@ void replace(tstring& str, const tstring& from, const tstring& to) {
     UNUSED(str);
     UNUSED(from);
     UNUSED(to);
-    /* FIXME 
-  size_t start_pos = str.find(from);
-  if (start_pos != tstring::npos) {
+    /* FIXME
+   size_t start_pos = str.find(from);
+   if (start_pos != tstring::npos) {
     str.replace(start_pos, from.length(), to);
     replace(str, from, to);
-  }
-  */
+   }
+   */
 }
 
 /* this function takes a string and modifies it in place
  * with TOK_ missing and some other pretty printing */
 void prettyPrintMessage(tstring& str) {
-  replace(str, "PLUS", "'+'");
-  replace(str, "MINUS", "'-'");
-  replace(str, "TIMES", "'*'");
-  replace(str, "DIVIDE", "'/'");
-  replace(str, "MODULUS", "'%'");
-  replace(str, "BITXOR", "'^'");
-  replace(str, "BITAND", "'&'");
-  replace(str, "BITOR", "'|'");
-  replace(str, "BITNOT", "'~'");
-  replace(str, "LEFTPARENS", "'('");
-  replace(str, "RIGHTPARENS", "')'");
-  replace(str, "COMMA", "','");
-  replace(str, "SEMICOLON", "';'");
-  replace(str, "COLON", "':'");
-  replace(str, "LSHIFT", "'<<'");
-  replace(str, "RSHIFT", "'>>'");
-  replace(str, "EXP", "'**'");
-  replace(str, "LTE", "'<='");
-  replace(str, "GTE", "'>='");
-  replace(str, "EQ", "'=='");
-  replace(str, "NEQ", "'!='");
-  replace(str, "LT", "'<'");
-  replace(str, "GT", "'>'");
-  replace(str, "MINUSEQ", "'-='");
-  replace(str, "PLUSEQ", "'+='");
-  replace(str, "TIMESEQ", "'*='");
-  replace(str, "DIVIDEEQ", "'/='");
-  replace(str, "MODULUSEQ", "'%='");
-  replace(str, "EXPEQ", "'**='");
-  replace(str, "RSHIFTEQ", "'>>='");
-  replace(str, "LSHIFTEQ", "'<<='");
-  replace(str, "ANDEQ", "'&='");
-  replace(str, "XOREQ", "'^='");
-  replace(str, "OREQ", "'|='");
-  replace(str, "TOK_", "");
+    replace(str, "PLUS", "'+'");
+    replace(str, "MINUS", "'-'");
+    replace(str, "TIMES", "'*'");
+    replace(str, "DIVIDE", "'/'");
+    replace(str, "MODULUS", "'%'");
+    replace(str, "BITXOR", "'^'");
+    replace(str, "BITAND", "'&'");
+    replace(str, "BITOR", "'|'");
+    replace(str, "BITNOT", "'~'");
+    replace(str, "LEFTPARENS", "'('");
+    replace(str, "RIGHTPARENS", "')'");
+    replace(str, "COMMA", "','");
+    replace(str, "SEMICOLON", "';'");
+    replace(str, "COLON", "':'");
+    replace(str, "LSHIFT", "'<<'");
+    replace(str, "RSHIFT", "'>>'");
+    replace(str, "EXP", "'**'");
+    replace(str, "LTE", "'<='");
+    replace(str, "GTE", "'>='");
+    replace(str, "EQ", "'=='");
+    replace(str, "NEQ", "'!='");
+    replace(str, "LT", "'<'");
+    replace(str, "GT", "'>'");
+    replace(str, "MINUSEQ", "'-='");
+    replace(str, "PLUSEQ", "'+='");
+    replace(str, "TIMESEQ", "'*='");
+    replace(str, "DIVIDEEQ", "'/='");
+    replace(str, "MODULUSEQ", "'%='");
+    replace(str, "EXPEQ", "'**='");
+    replace(str, "RSHIFTEQ", "'>>='");
+    replace(str, "LSHIFTEQ", "'<<='");
+    replace(str, "ANDEQ", "'&='");
+    replace(str, "XOREQ", "'^='");
+    replace(str, "OREQ", "'|='");
+    replace(str, "TOK_", "");
 }
 
 /* Error exception functions */
 Error::Error(const tstring& mesg, int lineno) {
-  this->mesg = mesg;
-  prettyPrintMessage(this->mesg);
-  this->lineno = lineno;
+    this->mesg = mesg;
+    prettyPrintMessage(this->mesg);
+    this->lineno = lineno;
 }
 
-tstring Error::getMessage() const { return mesg; }
+tstring Error::getMessage() const {
+    return mesg;
+}
 
-int Error::getLine() const { return lineno; }
+int Error::getLine() const {
+    return lineno;
+}
 
 /* print an error */
 std::ostream& operator<<(std::ostream& out, const Error& error) {
-  out << "Error: ";
-  if (error.getLine()) {
-    out << "(line " << error.getLine() << ") ";
-  }
+    out << "Error: ";
+    if (error.getLine()) {
+        out << "(line " << error.getLine() << ") ";
+    }
 
-  out << error.getMessage() << std::endl;
-  return out;
+    out << error.getMessage() << std::endl;
+    return out;
 }
 
 /* the runtime error class */
-RuntimeError::RuntimeError(const tstring& pMessage, int pLine) : Error(pMessage, pLine) {
-}
+RuntimeError::RuntimeError(const tstring& pMessage, int pLine) : Error(pMessage, pLine) {}
 
 /* the system error class */
-SystemError::SystemError(const tstring& pMessage, int pLine, const Node* pNode) : Error(pMessage, pLine), node(pNode) {
-}
+SystemError::SystemError(const tstring& pMessage, int pLine, const Node* pNode)
+    : Error(pMessage, pLine), node(pNode) {}
 
 const Node* SystemError::getNode() {
     return node;
 }
 
-InterruptError::InterruptError() : Error("Program Interrupted", -1) {
-}
-
+InterruptError::InterruptError() : Error("Program Interrupted", -1) {}

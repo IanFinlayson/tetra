@@ -4,8 +4,8 @@
 #ifndef SEARCHBOX_H
 #define SEARCHBOX_H
 
-#include <QObject>
 #include <QLineEdit>
+#include <QObject>
 #include "mainwindow.h"
 
 QT_BEGIN_NAMESPACE
@@ -14,7 +14,6 @@ class QResizeEvent;
 class QSize;
 class QWidget;
 QT_END_NAMESPACE
-
 
 class SearchBox : public QLineEdit {
     Q_OBJECT
@@ -28,4 +27,3 @@ class SearchBox : public QLineEdit {
     virtual void keyPressEvent(QKeyEvent* e);
 };
 #endif
-

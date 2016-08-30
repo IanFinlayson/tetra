@@ -5,13 +5,11 @@
 
 #include "tetra.h"
 
-
 class CommandConsole : public VirtualConsole {
- public:
-  tstring receiveStandardInput();
+   public:
+    tstring receiveStandardInput();
 
-  void processStandardOutput(const tstring& output);
+    void processStandardOutput(const tstring& output);
 };
 
 #endif
-

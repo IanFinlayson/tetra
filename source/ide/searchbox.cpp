@@ -3,7 +3,6 @@
 
 #include "searchbox.h"
 
-
 SearchBox::SearchBox(QWidget*) {
 }
 
@@ -15,4 +14,3 @@ void SearchBox::keyPressEvent(QKeyEvent* e) {
         QLineEdit::keyPressEvent(e);
     }
 }
-

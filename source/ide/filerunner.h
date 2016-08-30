@@ -54,4 +54,3 @@ class FileRunner : public QObject, public VirtualConsole {
 };
 
 #endif
-
