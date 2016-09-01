@@ -1,9 +1,4 @@
 #!/bin/bash
 
-# build the library
-cd source
-qmake tetra.pro
-make clean
-make distclean
-echo "Finished Cleaning Tetra!"
+cd source && qmake tetra.pro && make clean && make distclean && echo "Finished Cleaning Tetra!"
 
