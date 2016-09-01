@@ -16,7 +16,7 @@ enum DataTypeKind {
     TYPE_STRING,
     TYPE_BOOL,
     TYPE_NONE,
-    TYPE_VECTOR,
+    TYPE_LIST,
     TYPE_TUPLE,
     TYPE_DICT,
     TYPE_FUNCTION,
@@ -26,8 +26,7 @@ enum DataTypeKind {
     TYPE_OVERLOAD
 };
 
-/* a data type contains the above enum, along with a pointer to the "sub" type
- * currently this is only used for vectors */
+/* a data type contains the above enum, along with a pointer to the "sub" type */
 class DataType {
    public:
     DataType(DataTypeKind kind);

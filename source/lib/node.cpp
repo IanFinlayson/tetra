@@ -34,12 +34,12 @@ Node::Node(Node* other) {
 }
 
 Node::~Node() {
-    for (int i = 0; i < this->numChildren; i ++) {
+    for (int i = 0; i < this->numChildren; i++) {
         delete this->child(i);
     }
 
-    //delete this->dataType;
-    //delete this->symtable;
+    // delete this->dataType;
+    // delete this->symtable;
 }
 
 void Node::addChild(Node* child) {

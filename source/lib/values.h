@@ -12,51 +12,50 @@ class Tvalue;
 
 /* represents any piece of data in a tetra program */
 class Tdata {
-    public:
-        /* all of the operators */
-        Tdata opDot(const Tdata& other);
-        Tdata opAssign(const Tdata& other);
-        Tdata opOr(const Tdata& other);
-        Tdata opAnd(const Tdata& other);
-        Tdata opLt(const Tdata& other);
-        Tdata opLte(const Tdata& other);
-        Tdata opGt(const Tdata& other);
-        Tdata opGte(const Tdata& other);
-        Tdata opEq(const Tdata& other);
-        Tdata opNeq(const Tdata& other);
-        Tdata opNot(const Tdata& other);
-        Tdata opBitxor(const Tdata& other);
-        Tdata opBitand(const Tdata& other);
-        Tdata opBitor(const Tdata& other);
-        Tdata opBitnot(const Tdata& other);
-        Tdata opShiftl(const Tdata& other);
-        Tdata opShiftr(const Tdata& other);
-        Tdata opPlus(const Tdata& other);
-        Tdata opMinus(const Tdata& other);
-        Tdata opTimes(const Tdata& other);
-        Tdata opDivide(const Tdata& other);
-        Tdata opModulus(const Tdata& other);
-        Tdata opExp(const Tdata& other);
+   public:
+    /* all of the operators */
+    Tdata opDot(const Tdata& other);
+    Tdata opAssign(const Tdata& other);
+    Tdata opOr(const Tdata& other);
+    Tdata opAnd(const Tdata& other);
+    Tdata opLt(const Tdata& other);
+    Tdata opLte(const Tdata& other);
+    Tdata opGt(const Tdata& other);
+    Tdata opGte(const Tdata& other);
+    Tdata opEq(const Tdata& other);
+    Tdata opNeq(const Tdata& other);
+    Tdata opNot(const Tdata& other);
+    Tdata opBitxor(const Tdata& other);
+    Tdata opBitand(const Tdata& other);
+    Tdata opBitor(const Tdata& other);
+    Tdata opBitnot(const Tdata& other);
+    Tdata opShiftl(const Tdata& other);
+    Tdata opShiftr(const Tdata& other);
+    Tdata opPlus(const Tdata& other);
+    Tdata opMinus(const Tdata& other);
+    Tdata opTimes(const Tdata& other);
+    Tdata opDivide(const Tdata& other);
+    Tdata opModulus(const Tdata& other);
+    Tdata opExp(const Tdata& other);
 
-        /* create a Tdata of a given type */
-        Tdata create(DataType* type);
+    /* create a Tdata of a given type */
+    Tdata create(DataType* type);
 
-    private:
-        /* Tdata are garbage collected, so we can't create them directly
-         * only by calling the create methods above */
-        Tdata();
+   private:
+    /* Tdata are garbage collected, so we can't create them directly
+     * only by calling the create methods above */
+    Tdata();
 
-        /* a pointer to the data type and the actual value */
-        DataType* type;
-        Tvalue* value;
+    /* a pointer to the data type and the actual value */
+    DataType* type;
+    Tvalue* value;
 };
 
 /* represents one Tetra value, e.g. a number, string, list, anything */
 class Tvalue {
-    public: 
-        virtual ~Tvalue() {}
+   public:
+    virtual ~Tvalue() {}
 };
-
 
 class Tbool : public Tvalue {
    public:

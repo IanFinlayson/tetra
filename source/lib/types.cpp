@@ -41,7 +41,7 @@ Tstring typeToString(DataType* t) {
             return "mutex";
         case TYPE_TASK:
             return "task";
-        case TYPE_VECTOR:
+        case TYPE_LIST:
             return "[" + typeToString(&((*(t->subtypes))[0])) + "]";
         case TYPE_DICT:
             return "{" + typeToString(&((*(t->subtypes))[0])) + ":" +
@@ -170,10 +170,10 @@ DataType::~DataType() {
 }
 
 /* return true if the type represents an empty
- * container (i.e. is a dict/vector with no
+ * container (i.e. is a dict/list with no
  * subtype. */
 bool DataType::isEmptyContainerType() const {
-    return ((this->getKind() == TYPE_VECTOR || this->getKind() == TYPE_DICT) &&
+    return ((this->getKind() == TYPE_LIST || this->getKind() == TYPE_DICT) &&
             this->subtypes->size() == 0);
 }
 
@@ -212,14 +212,13 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
         return false;
     }
 
-    /* if they're vectors or dicts and either is empty.. */
-    if (lhs.getKind() == TYPE_VECTOR &&
-        (lhs.isEmptyContainerType() || rhs.isEmptyContainerType())) {
+    /* if they're lists or dicts and either is empty.. */
+    if (lhs.getKind() == TYPE_LIST && (lhs.isEmptyContainerType() || rhs.isEmptyContainerType())) {
         /* then they match! */
         return true;
     }
 
-    if (lhs.getKind() == TYPE_VECTOR) {
+    if (lhs.getKind() == TYPE_LIST) {
         /* recursively ensure the subtypes match */
         return (*(lhs.subtypes))[0] == (*(rhs.subtypes))[0];
     }
@@ -337,10 +336,10 @@ DataType* inferLen(Node* functionCall, Node* function) {
     /* infer the argument and capture its type */
     DataType* t = inferExpression(functionCall->child(1)->child(0), function);
 
-    /* check that it is a vector or a string */
-    if ((t->getKind() != TYPE_VECTOR) && (t->getKind() != TYPE_STRING) &&
+    /* check that it is a list or a string */
+    if ((t->getKind() != TYPE_LIST) && (t->getKind() != TYPE_STRING) &&
         (t->getKind() != TYPE_TUPLE) && (t->getKind() != TYPE_DICT)) {
-        throw Error("len function must be called on string, vector, tuple, or dictionary",
+        throw Error("len function must be called on string, list, tuple, or dictionary",
                     functionCall->getLine());
     }
 
@@ -701,9 +700,9 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
 
-            /* if the container on the right is a dictionary or a vector... */
-            if (rhs->getKind() == TYPE_VECTOR || rhs->getKind() == TYPE_DICT) {
-                /* make sure that the vector subtype/ dictionary key type
+            /* if the container on the right is a dictionary or a list... */
+            if (rhs->getKind() == TYPE_LIST || rhs->getKind() == TYPE_DICT) {
+                /* make sure that the list subtype/ dictionary key type
                  * matches the
                  * type of the left operand */
                 if (*lhs != ((*(rhs->subtypes))[0])) {
@@ -744,7 +743,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 Error(
                     "Invalid operand to 'in' operator. Right operand must be "
                     "of type "
-                    "vector, dictionary, tuple, or string.",
+                    "list, dictionary, tuple, or string.",
                     expr->getLine());
             }
         }
@@ -790,22 +789,22 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             if ((lhs->getKind() != TYPE_INT) && (rhs->getKind() != TYPE_REAL)) {
-                /* special case: adding strings and vectors is OK */
+                /* special case: adding strings and list is OK */
                 if ((expr->kind() == NODE_PLUS) &&
-                    ((lhs->getKind() == TYPE_STRING) || (lhs->getKind() == TYPE_VECTOR))) {
+                    ((lhs->getKind() == TYPE_STRING) || (lhs->getKind() == TYPE_LIST))) {
                     /* s'alright */
                 } else {
                     throw Error("Numeric type required", expr->getLine());
                 }
             }
 
-            /* if it's a vector, we need to copy the type! */
-            if (lhs->getKind() == TYPE_VECTOR) {
-                DataType* vec = new DataType(TYPE_VECTOR);
+            /* if it's a list, we need to copy the type! */
+            if (lhs->getKind() == TYPE_LIST) {
+                DataType* list = new DataType(TYPE_LIST);
 
                 /* copy subs all the way */
                 DataType* sub = &(*(lhs->subtypes))[0];
-                DataType* ptr = vec;
+                DataType* ptr = list;
                 while (sub) {
                     /* set current one */
                     ptr->subtypes->push_back(*sub);
@@ -815,7 +814,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     ptr = &(*(ptr->subtypes))[0];
                 }
 
-                return vec;
+                return list;
             }
 
             /* return the same type back */
@@ -854,11 +853,11 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     throw Error("Tuple index out of range.", expr->getLine());
                 }
 
-                /* vectors */
-            } else if (kind == TYPE_VECTOR) {
+                /* lists */
+            } else if (kind == TYPE_LIST) {
                 /* check the index type */
                 if (rhs->getKind() != TYPE_INT) {
-                    throw Error("Vector index must be an integer.", expr->getLine());
+                    throw Error("List index must be an integer.", expr->getLine());
                 }
                 DataType* dt = new DataType(((*(lhs->subtypes))[0]));
                 return dt; /* new DataType(((*(lhs->subtypes))[0]));  */
@@ -877,7 +876,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
         }
 
-        case NODE_VECRANGE: {
+        case NODE_LISTRANGE: {
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
 
@@ -886,8 +885,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 throw Error("Cannot create range with types other than INT.", expr->getLine());
             }
 
-            /* a vecrange can only possibly be a vector of ints */
-            DataType* t = new DataType(TYPE_VECTOR);
+            /* a listrange can only possibly be a list of ints */
+            DataType* t = new DataType(TYPE_LIST);
             t->subtypes->push_back(*new DataType(TYPE_INT));
             return t;
         }
@@ -995,10 +994,10 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             return new DataType(TYPE_STRING);
         case NODE_NONEVAL:
             return new DataType(TYPE_NONE);
-        case NODE_VECVAL: {
-            DataType* dt = new DataType(TYPE_VECTOR);
+        case NODE_LISTVAL: {
+            DataType* dt = new DataType(TYPE_LIST);
             Node* currNode = expr;
-            /* traverse the subtree of vecvals */
+            /* traverse the subtree of list values */
             while (currNode && currNode->getNumChildren() > 0) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
                 /* if this is the first element, add the subtype */
@@ -1006,7 +1005,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     (dt->subtypes)->push_back(*elemType);
                     /* if there is a previous subtype, make sure they match */
                 } else if (dt->subtypes->size() == 1 && ((*(dt->subtypes))[0]) != *elemType) {
-                    throw Error("Mismatched vector types", expr->getLine());
+                    throw Error("Mismatched list types", expr->getLine());
                 }
                 /* set current node to the next one */
                 currNode = currNode->child(1);
@@ -1040,7 +1039,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
         case NODE_TUPVAL: {
             DataType* dt = new DataType(TYPE_TUPLE);
             Node* currNode = expr;
-            /* traverse the subtree of vecvals */
+            /* traverse the subtree of tuple values */
             while (currNode && currNode->getNumChildren() > 0) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
 
@@ -1313,11 +1312,11 @@ void inferBlock(Node* block, Node* function) {
             /* infer the type of the expression */
             DataType* expr_type = inferExpression(block->child(1), function);
 
-            /* make sure it is some type of vector */
-            if (expr_type->getKind() != TYPE_VECTOR && expr_type->getKind() != TYPE_DICT &&
+            /* make sure it is some type of list */
+            if (expr_type->getKind() != TYPE_LIST && expr_type->getKind() != TYPE_DICT &&
                 expr_type->getKind() != TYPE_STRING) {
                 throw Error(
-                    "for expression must be of type vector, "
+                    "for expression must be of type list, "
                     "dictionary, or string",
                     block->getLine());
             }
