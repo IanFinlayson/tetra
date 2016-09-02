@@ -29,6 +29,15 @@ int interpret(Node* tree, int debug, int threads) {
     TetraEnvironment::setMaxThreads(threads);
     TetraEnvironment::setRunning();
 
+    /* attempt to find the main function */
+    const Node* main = functions.getFunctionNode("main()");
+    if (main == NULL) {
+        throw Error("No main function found", 0);
+    }
+
+    /* evaluate the main function */
+    evaluateFunction(main);
+
     UNUSED(tree);
 
     return 0;
