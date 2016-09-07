@@ -241,6 +241,8 @@ class Tstring : public Tdata {
 
     int indexOf(const Tstring& s) const;
 
+    Tstring operator=(const char* rhs);
+    Tstring operator=(const Tstring& rhs);
     Tstring operator+=(const char* rhs);
     Tstring operator+=(const Tstring& rhs);
 

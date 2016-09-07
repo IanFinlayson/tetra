@@ -264,9 +264,13 @@ bool operator!=(const DataType& lhs, const DataType& rhs) {
 }
 
 DataType DataType::operator=(const DataType& other) {
-    kind = other.kind;
-    *subtypes = *other.subtypes;
-    *className = *other.className;
+    if (this != &other) {
+        delete subtypes;
+        delete className;
+        kind = other.kind;
+        *subtypes = *other.subtypes;
+        *className = *other.className;
+    }
     return *this;
 }
 
@@ -454,8 +458,8 @@ bool inLoop(Node* node) {
     Node* current = node;
     /* loop until we get to the containing function */
     while (current->kind() != NODE_FUNCTION) {
-        /* check to see if we have found a containing parallel
-         * block of any kind */
+        /* check to see if we have found a containing loop
+         * of any kind */
         if (current->kind() == NODE_PARFOR || current->kind() == NODE_FOR ||
             current->kind() == NODE_WHILE) {
             return true;
@@ -533,10 +537,12 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
             *sym = lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine());
 
             found = true;
-        }
+        } else {
 
-        /* otherwise, go to the next lambda up */
-        lambda = nextLambda(lambda);
+            /* otherwise, go to the next lambda up */
+            delete lambda;
+            lambda = nextLambda(lambda);
+        }
     }
 
     /* if not a lambda, see if it's local to the function */
@@ -590,7 +596,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
     switch (expr->kind()) {
         case NODE_ASSIGN: {
             /* get the type of the right hand side */
-            rhs = inferExpression(expr->child(1), function);
+            rhs = new DataType(*(inferExpression(expr->child(1), function)));
 
             /* if the left hand side is an identifier... */
             if (expr->child(0)->kind() == NODE_IDENTIFIER) {
@@ -599,7 +605,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* if it doesn't exist  and it IS inferable...*/
                 if (!sym && !rhs->isEmptyContainerType()) {
                     /* infer it! */
-                    lhs = rhs;
+                    *lhs = *rhs;
                     function->insertSymbol(*new Symbol(expr->child(0)->getStringvalue(), lhs,
                                                        expr->child(0)->getLine()));
 
@@ -616,7 +622,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                         expr->getLine());
                 } else {
                     /* if we end up here, all is well - update lhs */
-                    lhs = sym->getType();
+                    *lhs = new DataType(sym->getType());
                 }
                 /* if it's not directly and identifier.. */
             } else {
@@ -1250,6 +1256,7 @@ void inferBlock(Node* block, Node* function) {
                                 typeToString(&function->type()->subtypes->back()) + "'.",
                             block->getLine());
             }
+            delete ret;
             break;
         }
         case NODE_IF: {

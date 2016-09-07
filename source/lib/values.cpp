@@ -24,6 +24,11 @@ Tstring operator+(const Tstring& lhs, const char* rhs) {
     return lhs + Tstring(rhs);
 }
 
+Tstring Tstring::operator=(const char* rhs) {
+    str = QString(rhs);
+    return *this;
+}
+
 Tstring Tstring::operator+=(const char* rhs) {
     str = str + QString(rhs);
     return *this;
@@ -45,6 +50,11 @@ bool Tstring::empty() const {
 
 int Tstring::indexOf(const Tstring& s) const {
     return str.indexOf(s.str);
+}
+
+Tstring Tstring::operator=(const Tstring& rhs) {
+    str = rhs.str;
+    return *this;
 }
 
 Tstring Tstring::operator+=(const Tstring& rhs) {

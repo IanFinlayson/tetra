@@ -38,8 +38,8 @@ Node::~Node() {
         delete this->child(i);
     }
 
-    //delete this->dataType;
-    //delete this->symtable;
+//    delete dataType;
+    delete symtable;
 }
 
 void Node::addChild(Node* child) {
