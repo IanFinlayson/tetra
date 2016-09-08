@@ -160,7 +160,9 @@ DataType::DataType(const DataType& other) {
     this->kind = other.kind;
     this->subtypes = new std::vector<DataType>;
     this->className = new Tstring;
-    *this->subtypes = *other.subtypes;
+    for (unsigned long i = 0; i < other.subtypes->size(); i++) {
+        this->subtypes->push_back(*new DataType((*(other.subtypes))[i]));
+    }
     *this->className = *other.className;
 }
 
@@ -291,7 +293,7 @@ void buildParamTupleType(DataType* type, const Node* node) {
         buildParamTupleType(type, node->child(0));
         buildParamTupleType(type, node->child(1));
     } else if (node) {
-        type->subtypes->push_back(*node->type());
+        type->subtypes->push_back(*new DataType(*node->type()));
     } else {
         return;
     }
@@ -596,7 +598,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
     switch (expr->kind()) {
         case NODE_ASSIGN: {
             /* get the type of the right hand side */
-            rhs = new DataType(*(inferExpression(expr->child(1), function)));
+            rhs = inferExpression(expr->child(1), function);
 
             /* if the left hand side is an identifier... */
             if (expr->child(0)->kind() == NODE_IDENTIFIER) {
@@ -605,7 +607,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* if it doesn't exist  and it IS inferable...*/
                 if (!sym && !rhs->isEmptyContainerType()) {
                     /* infer it! */
-                    *lhs = *rhs;
+                    lhs = rhs;
                     function->insertSymbol(*new Symbol(expr->child(0)->getStringvalue(), lhs,
                                                        expr->child(0)->getLine()));
 
@@ -622,7 +624,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                         expr->getLine());
                 } else {
                     /* if we end up here, all is well - update lhs */
-                    *lhs = new DataType(sym->getType());
+                    lhs = sym->getType();
                 }
                 /* if it's not directly and identifier.. */
             } else {
@@ -647,7 +649,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* return the type of the rhs */
             expr->child(0)->setDataType(lhs);
-            return rhs;
+            return new DataType(*rhs);
         }
 
         case NODE_OR:
@@ -814,7 +816,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* ptr = vec;
                 while (sub) {
                     /* set current one */
-                    ptr->subtypes->push_back(*sub);
+                    ptr->subtypes->push_back(*new DataType(*sub));
 
                     /* move to next */
                     sub = &(*(sub->subtypes))[0];
@@ -875,7 +877,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 if (rhs->getKind() != TYPE_INT) {
                     throw Error("String index must be an integer.", expr->getLine());
                 }
-                return lhs;
+                return new DataType(*lhs);
 
                 /* otherwise it isn't an indexable type */
             } else {
@@ -903,7 +905,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             bool is_stdlib;
             lhs = inferStdlib(expr, function, is_stdlib);
             if (is_stdlib) {
-                return lhs;
+                return new DataType(*lhs);
             }
 
             /* if it's not an stl function */
@@ -925,7 +927,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* if it has the right params... */
                 if ((*(lhs->subtypes))[0] == *rhsParams) {
                     /* return the return type */
-                    return &(*(lhs->subtypes))[1];
+                    return new DataType((*(lhs->subtypes))[1]);
                 }
                 /* if we have multiple possibilities */
             } else if (lhs->getKind() == TYPE_OVERLOAD) {
@@ -934,7 +936,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     /* if one has the right params... */
                     if ((*((*(lhs->subtypes))[i].subtypes))[0] == *rhsParams) {
                         /* return its return type */
-                        return &(*((*(lhs->subtypes))[i].subtypes))[1];
+                        return new DataType((*((*(lhs->subtypes))[i].subtypes))[1]);
                     }
                 }
             }
@@ -987,7 +989,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* otherwise, return the type */
-            return sym->getType();
+            return new DataType(*sym->getType());
         }
 
         /* return these types */
@@ -1009,7 +1011,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
                 /* if this is the first element, add the subtype */
                 if (dt->subtypes->size() == 0) {
-                    (dt->subtypes)->push_back(*elemType);
+                    (dt->subtypes)->push_back(*new DataType(*elemType));
                     /* if there is a previous subtype, make sure they match */
                 } else if (dt->subtypes->size() == 1 && ((*(dt->subtypes))[0]) != *elemType) {
                     throw Error("Mismatched vector types", expr->getLine());
@@ -1029,8 +1031,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* valType = inferExpression(currNode->child(1), function);
                 /* if this is the first element, add the subtypes */
                 if (dt->subtypes->size() == 0) {
-                    dt->subtypes->push_back(*keyType);
-                    dt->subtypes->push_back(*valType);
+                    dt->subtypes->push_back(*new DataType(*keyType));
+                    dt->subtypes->push_back(*new DataType(*valType));
                     /* if there are previous subtypes, make sure they match */
                 } else if (dt->subtypes->size() == 2 && (((*(dt->subtypes))[0] != *keyType) ||
                                                          ((*(dt->subtypes))[1] != *valType))) {
@@ -1051,7 +1053,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
 
                 /* add the subtype */
-                dt->subtypes->push_back(*elemType);
+                dt->subtypes->push_back(*new DataType(*elemType));
 
                 /* set current node to the next one */
                 currNode = currNode->child(1);
@@ -1069,9 +1071,9 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* infer the the return type */
             if (expr->getNumChildren() > 1) {
-                expr->type()->subtypes->push_back(*inferExpression(expr->child(1), function));
+                expr->type()->subtypes->push_back(*new DataType(*inferExpression(expr->child(1), function)));
             } else {
-                expr->type()->subtypes->push_back(*inferExpression(expr->child(0), function));
+                expr->type()->subtypes->push_back(*new DataType(*inferExpression(expr->child(0), function)));
             }
 
             return expr->type();
@@ -1088,7 +1090,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the type of the member variable */
-            return classes[*lhs->className].getMember(expr->child(1)->getStringvalue()).getType();
+            return new DataType(*classes[*lhs->className].getMember(expr->child(1)->getStringvalue()).getType());
         }
 
         case NODE_SELF: {
@@ -1132,9 +1134,9 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the return type of the method */
-            return classes[*lhs->className]
+            return new DataType(*classes[*lhs->className]
                 .getMethod(rhsParams, expr->child(1)->child(0)->getStringvalue())
-                ->type();
+                ->type());
         }
 
         case NODE_DECLARATION: {
@@ -1244,7 +1246,7 @@ void inferBlock(Node* block, Node* function) {
             /* infer the expression */
             DataType* ret;
             if (block->child(0)) {
-                ret = inferExpression(block->child(0), function);
+                ret = new DataType(*inferExpression(block->child(0), function));
             } else {
                 ret = new DataType(TYPE_NONE);
             }
@@ -1390,10 +1392,10 @@ void inferParams(Node* node, Node* function) {
         /* make a new function datatype */
         DataType* type = new DataType(TYPE_FUNCTION);
         /* add an empty param tuple */
-        type->subtypes->push_back(DataType(TYPE_TUPLE));
+        type->subtypes->push_back(*new DataType(TYPE_TUPLE));
         /* add the return type (if it has one)*/
         if (node->kind() == NODE_FUNCTION) {
-            type->subtypes->push_back(*(node->type()));
+            type->subtypes->push_back(*new DataType(*(node->type())));
         }
         /* replace the existing datatype */
         node->setDataType(type);
@@ -1419,7 +1421,7 @@ void inferParams(Node* node, Node* function) {
         /* add the param to the symbol table */
         function->insertSymbol(Symbol(node->getStringvalue(), node->type(), node->getLine()));
         /* add the param to the datatype */
-        (*(function->type()->subtypes))[0].subtypes->push_back(*node->type());
+        (*(function->type()->subtypes))[0].subtypes->push_back(*new DataType(*node->type()));
     }
 }
 
@@ -1538,7 +1540,7 @@ void initSquared(ClassContext context) {
         /* add the empty param type */
         node->type()->subtypes->push_back(*(new DataType(TYPE_TUPLE)));
         /* add the return type */
-        node->type()->subtypes->push_back(*type);
+        node->type()->subtypes->push_back(*new DataType(*type));
         Tstring key = context.getName() + "()";
         functions.insert(std::pair<Tstring, Node*>(key, node));
     }
