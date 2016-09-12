@@ -41,6 +41,11 @@ class Tdata {
     /* create a Tdata of a given type */
     Tdata create(DataType* type);
 
+    /* return the value of this */
+    Tvalue* getValue() {
+        return value;
+    }
+
    private:
     /* Tdata are garbage collected, so we can't create them directly
      * only by calling the create methods above */
@@ -278,12 +283,17 @@ class Tstring : public Tvalue {
         return str;
     }
 
+    /* returns the unicode point for a character */
+    unsigned short at(int index) const {
+        return str.at(index).unicode();
+    }
+
     friend Tstring operator+(const Tstring& lhs, const Tstring& rhs);
     friend Tstring operator+(const char* lhs, const Tstring& rhs);
     friend Tstring operator+(const Tstring& lhs, const char* rhs);
 
     Tstring substring(int start, int len = -1) const;
-    int length() const;
+    unsigned int length() const;
     bool empty() const;
 
     int indexOf(const Tstring& s) const;

@@ -23,8 +23,9 @@ class Context {
 
     void initializeGlobalVars(const Node*);
 
-    /* wraps a call to lookupVar of the current scope after checking that there */
-    /* are no globals */
+/* wraps a call to lookupVar of the current scope after checking that there */
+/* are no globals */
+#if 0
     Tdata* lookupVar(const Node* varNode) {
         if (getGlobalScopeRef().containsVar(varNode)) {
             return (getGlobalScopeRef().lookupVar(varNode));
@@ -32,6 +33,7 @@ class Context {
             return programStack.top().lookupVar(varNode);
         }
     }
+#endif
 
     Tdata* lookupVar(Tstring name) {
         if (getGlobalScopeRef().containsVar(name)) {
@@ -175,4 +177,3 @@ class Context {
 };
 
 #endif
-

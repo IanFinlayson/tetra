@@ -35,7 +35,7 @@ Tstring Tstring::substring(int start, int len) const {
     return t;
 }
 
-int Tstring::length() const {
+unsigned int Tstring::length() const {
     return str.length();
 }
 

@@ -14,5 +14,6 @@
 #include "tetra.h"
 #include "types.h"
 #include "values.h"
+#include "vartable.h"
 
 #endif
