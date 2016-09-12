@@ -5,6 +5,7 @@
 
 #include "context.h"
 #include "error.h"
+#include "environment.h"
 #include "eval.h"
 #include "lexer.h"
 #include "node.h"

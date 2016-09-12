@@ -5,6 +5,8 @@
 
 #include <QString>
 #include <cmath>
+#include <iostream>
+
 #include "types.h"
 
 /* forward declare Tvalue - any Tetra value object */
