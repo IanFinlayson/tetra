@@ -5,12 +5,66 @@
 
 #include <QString>
 #include <cmath>
+#include <iostream>
+
 #include "types.h"
 
-/* represents any piece of data in a tetra program */
-class Tdata {};
+/* forward declare Tvalue - any Tetra value object */
+class Tvalue;
 
-class Tbool : public Tdata {
+/* represents any piece of data in a tetra program */
+class Tdata {
+   public:
+    /* all of the operators */
+    Tdata opDot(const Tdata& other);
+    Tdata opAssign(const Tdata& other);
+    Tdata opOr(const Tdata& other);
+    Tdata opAnd(const Tdata& other);
+    Tdata opLt(const Tdata& other);
+    Tdata opLte(const Tdata& other);
+    Tdata opGt(const Tdata& other);
+    Tdata opGte(const Tdata& other);
+    Tdata opEq(const Tdata& other);
+    Tdata opNeq(const Tdata& other);
+    Tdata opNot(const Tdata& other);
+    Tdata opBitxor(const Tdata& other);
+    Tdata opBitand(const Tdata& other);
+    Tdata opBitor(const Tdata& other);
+    Tdata opBitnot(const Tdata& other);
+    Tdata opShiftl(const Tdata& other);
+    Tdata opShiftr(const Tdata& other);
+    Tdata opPlus(const Tdata& other);
+    Tdata opMinus(const Tdata& other);
+    Tdata opTimes(const Tdata& other);
+    Tdata opDivide(const Tdata& other);
+    Tdata opModulus(const Tdata& other);
+    Tdata opExp(const Tdata& other);
+
+    /* create a Tdata of a given type */
+    Tdata create(DataType* type);
+
+    /* return the value of this */
+    Tvalue* getValue() {
+        return value;
+    }
+
+   private:
+    /* Tdata are garbage collected, so we can't create them directly
+     * only by calling the create methods above */
+    Tdata();
+
+    /* a pointer to the data type and the actual value */
+    DataType* type;
+    Tvalue* value;
+};
+
+/* represents one Tetra value, e.g. a number, string, list, anything */
+class Tvalue {
+   public:
+    virtual ~Tvalue() {}
+};
+
+class Tbool : public Tvalue {
    public:
     /* constructors */
     Tbool() {
@@ -63,7 +117,7 @@ class Tbool : public Tdata {
     bool b;
 };
 
-class Tint : public Tdata {
+class Tint : public Tvalue {
    public:
     /* constructors */
     Tint() {
@@ -177,7 +231,7 @@ class Tint : public Tdata {
     int i;
 };
 
-class Treal : public Tdata {
+class Treal : public Tvalue {
    public:
     Treal(double value) {
         r = value;
@@ -194,7 +248,7 @@ class Treal : public Tdata {
     double r;
 };
 
-class Tstring : public Tdata {
+class Tstring : public Tvalue {
    public:
     Tstring() {
         str = QString("");
@@ -231,12 +285,17 @@ class Tstring : public Tdata {
         return str;
     }
 
+    /* returns the unicode point for a character */
+    unsigned short at(int index) const {
+        return str.at(index).unicode();
+    }
+
     friend Tstring operator+(const Tstring& lhs, const Tstring& rhs);
     friend Tstring operator+(const char* lhs, const Tstring& rhs);
     friend Tstring operator+(const Tstring& lhs, const char* rhs);
 
     Tstring substring(int start, int len = -1) const;
-    int length() const;
+    unsigned int length() const;
     bool empty() const;
 
     int indexOf(const Tstring& s) const;
@@ -262,12 +321,12 @@ class Tstring : public Tdata {
     QString str;
 };
 
-class Tlist : public Tdata {
+class Tlist : public Tvalue {
    public:
    private:
 };
 
-class Tnone : public Tdata {
+class Tnone : public Tvalue {
    public:
    private:
 };

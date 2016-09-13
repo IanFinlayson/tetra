@@ -75,7 +75,7 @@ enum NodeKind {
     NODE_DIVIDE,
     NODE_MODULUS,
     NODE_EXP,
-    NODE_VECRANGE,
+    NODE_LISTRANGE,
     NODE_INDEX,
     NODE_IN,
 
@@ -83,8 +83,8 @@ enum NodeKind {
     NODE_FUNCALL,
     NODE_ACTUAL_PARAM_LIST,
 
-    /* vector constants */
-    NODE_VECVAL,
+    /* complex type literals */
+    NODE_LISTVAL,
     NODE_TUPVAL,
     NODE_DICTVAL,
 

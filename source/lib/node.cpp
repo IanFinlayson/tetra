@@ -34,7 +34,7 @@ Node::Node(Node* other) {
 }
 
 Node::~Node() {
-    for (int i = 0; i < this->numChildren; i ++) {
+    for (int i = 0; i < this->numChildren; i++) {
         delete this->child(i);
     }
 

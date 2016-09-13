@@ -139,7 +139,7 @@ Node* root;
              notterm relterm bitorterm xorterm bitandterm shiftterm plusterm timesterm unaryterm
              expterm functionCall simple_statements actual_param_list rvalue assignterm
              elif_clause elif_clauses elif_statement for_statement identifier parblock parfor
-             background lock_statement index vector_value vector_values datadecl 
+             background lock_statement index list_value list_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
              init_function lvalue type_decs lambdaterm interm
@@ -346,7 +346,7 @@ type_decs: type TOK_COMMA type_decs {
     $$->setDataType($1);
 }
 
-/* types just primitives and vectors for now */
+/* types just primitives and lists for now */
 type: TOK_INT {
     $$ = new DataType(TYPE_INT);
 } | TOK_REAL {
@@ -360,7 +360,7 @@ type: TOK_INT {
 } | TOK_TASK {
     $$ = new DataType(TYPE_TASK);
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
-    $$ = new DataType(TYPE_VECTOR);
+    $$ = new DataType(TYPE_LIST);
     $$->subtypes->push_back(*$2);
 } | type_dec_tuple {
     $$ = $1;
@@ -942,7 +942,7 @@ rvalue: functionCall {
     $$->setStringvalue(Tstring(*$1));
 } | TOK_NONE {
     $$ = new Node(NODE_NONEVAL);
-} | vector_value {
+} | list_value {
     $$ = $1;
 } | tuple_value {
     $$ = $1;
@@ -966,37 +966,37 @@ lvalue: expterm index {
 } | identifier {
     $$ = $1;
 } 
-/* a vector literal */
-vector_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
-    /* an empty vector definition */
-    $$ = new Node(NODE_VECVAL);
+/* a list literal */
+list_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
+    /* an empty list definition */
+    $$ = new Node(NODE_LISTVAL);
 
 } | TOK_LEFTBRACKET expression TOK_ELLIPSIS expression TOK_RIGHTBRACKET {
-    /* a vector with elipsis eg [1 .. 5] */
-    $$ = new Node(NODE_VECRANGE);
+    /* a list with elipsis eg [1 .. 5] */
+    $$ = new Node(NODE_LISTRANGE);
 
     /* check that the values are legit */
     $$->addChild($2);
     $$->addChild($4);
 
-} | TOK_LEFTBRACKET vector_values TOK_RIGHTBRACKET {
-    /* a set of one or more vector initializers */
+} | TOK_LEFTBRACKET list_values TOK_RIGHTBRACKET {
+    /* a set of one or more list initializers */
     $$ = $2;
 }
 
-/* one or more expressions to be made into a vector */
-vector_values: expression TOK_COMMA vector_values {
-    $$ = new Node(NODE_VECVAL);
+/* one or more expressions to be made into a list */
+list_values: expression TOK_COMMA list_values {
+    $$ = new Node(NODE_LISTVAL);
     $$->addChild($1);
     $$->addChild($3);
 } | expression {
-    $$ = new Node(NODE_VECVAL);
+    $$ = new Node(NODE_LISTVAL);
     $$->addChild($1);
 }
 
 /* a tuple literal */
 tuple_value: TOK_LEFTPARENS TOK_RIGHTPARENS {
-    /* an empty vector definition */
+    /* an empty list definition */
     $$ = new Node(NODE_TUPVAL);
 } | TOK_LEFTPARENS expression TOK_COMMA TOK_RIGHTPARENS {
     /* one tuple initializer */
@@ -1028,7 +1028,7 @@ dict_value: TOK_LEFTBRACE TOK_RIGHTBRACE {
     $$ = $2;
 }
 
-/* one or more expressions to be made into a vector */
+/* one or more expressions to be made into a list */
 dict_values: expression TOK_COLON expression TOK_COMMA dict_values {
     $$ = new Node(NODE_DICTVAL);
     $$->addChild($1);

@@ -134,17 +134,17 @@ Tstring stringType(Node* node) {
         case NODE_ACTUAL_PARAM_LIST:
             return "ARGS";
 
-        /* vectors */
+        /* lists */
         case NODE_INDEX:
             return "INDEX";
-        case NODE_VECVAL:
-            return "VECVAL";
+        case NODE_LISTVAL:
+            return "LISTVAL";
         case NODE_TUPVAL:
             return "TUPVAL";
         case NODE_DICTVAL:
             return "DICTVAL";
-        case NODE_VECRANGE:
-            return "VECRANGE";
+        case NODE_LISTRANGE:
+            return "LISTRANGE";
 
         /* leafs */
         case NODE_INTVAL:

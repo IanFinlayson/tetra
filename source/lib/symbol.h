@@ -50,7 +50,7 @@ class FunctionMap {
     const Node* getFunctionNode(const Node* callNode);
 
     /* Generates a unique function signature based on the name AND the arguments
-     */
+    */
     static Tstring getFunctionSignature(const Node* node);
 
     /* Fills the function map given the specified base node */
