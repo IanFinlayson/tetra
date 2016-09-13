@@ -331,7 +331,7 @@ DataType* inferPrint(Node* pcall, Node* function) {
         }
     }
 
-    return NULL;
+    return new DataType(TYPE_NONE);
 }
 
 DataType* inferLen(Node* functionCall, Node* function) {
@@ -378,7 +378,10 @@ DataType* inferRead(Node* functionCall) {
  * infers it */
 DataType* inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
     is_stdlib = true;
+    std::cout << "numchildren = " + std::to_string(functionCall->getNumChildren()) + '\n';
+    std::cout << "stl function is : (" + functionCall->child(0)->getStringvalue() << ")"<< std::endl;
     if (functionCall->child(0)->getStringvalue() == "print") {
+        std::cout << "hellooooo\n";
         return inferPrint(functionCall, function);
     }
 
@@ -394,6 +397,7 @@ DataType* inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
     }
 
     is_stdlib = false;
+    std::cout << "just set is_stdlib to false and is_stdlib = " + std::to_string(is_stdlib) + '\n';
     return NULL;
 }
 
@@ -905,6 +909,9 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             bool is_stdlib;
             lhs = inferStdlib(expr, function, is_stdlib);
             if (is_stdlib) {
+                std::cout << "is_stdlib : " + std::to_string(is_stdlib) + '\n';
+                std::cout << "stl func is : " + expr->child(0)->getStringvalue();
+                std::cout << "\n";
                 return new DataType(*lhs);
             }
 
