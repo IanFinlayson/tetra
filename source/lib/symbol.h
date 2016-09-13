@@ -44,10 +44,10 @@ class FunctionMap {
     /* Returns the address of a node containing the function body of the
        function
        denoted by functionSignature */
-    const Node* getFunctionNode(const Tstring functionSignature);
-    const Node* getFunctionNode(DataType*, Tstring);
+    Node* getFunctionNode(const Tstring functionSignature);
+    Node* getFunctionNode(DataType*, Tstring);
 
-    const Node* getFunctionNode(const Node* callNode);
+    Node* getFunctionNode(const Node* callNode);
 
     /* Generates a unique function signature based on the name AND the arguments
     */

@@ -152,7 +152,7 @@ Tstring stringType(Node* node) {
         case NODE_REALVAL:
             return "REAL: " + node->getStringvalue();
         case NODE_STRINGVAL:
-            return "\\\"" + node->getStringvalue() + "\\\"";
+            return "\"" + node->getStringvalue() + "\"";
         case NODE_IDENTIFIER:
             return "ID " + node->getStringvalue();
         case NODE_BOOLVAL:
@@ -209,7 +209,7 @@ void dumpTreeGraphviz(Node* node) {
 }
 
 /* dump a tree to stdout */
-void dumpTreeStdout(Node* node, int level = 0) {
+void dumpTreeStdout(Node* node, int level) {
     /* base case */
     if (!node) {
         return;

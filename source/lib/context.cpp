@@ -44,7 +44,7 @@ void Context::initializeGlobalVars(const Node* tree) {
             }
 
             /* perform assignment at this global scope */
-            evaluateStatement(candidate);
+            evaluateStatement(candidate, this);
         }
 
         if (tree->child(1) != NULL) {

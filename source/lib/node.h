@@ -176,5 +176,6 @@ Node* cloneTree(Node*);
 
 /* dump-tree prototype */
 void dumpTreeGraphviz(Node*);
+void dumpTreeStdout(Node*, int level = 0);
 
 #endif

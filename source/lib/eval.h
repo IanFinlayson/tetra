@@ -18,14 +18,16 @@
 #include <string>
 #include <vector>
 
+#include "context.h"
+
 /* macro to squelch unused variable warnings */
 #define UNUSED(x) (void)x;
 
 /* evaluate a statement node */
-void evaluateStatement(const Node* node);
+void evaluateStatement(Node* node, Context* context);
 
 /* evaluate an expression node */
-Tdata* evaluateExpression(const Node* node);
+Tdata* evaluateExpression(Node* node, Context* context);
 
 /* interpret a tetra program parsed into a Node tree */
 int interpret(Node* tree, int debug, int threads);

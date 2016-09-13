@@ -18,17 +18,17 @@
 
 /* given a function signature, returns the adress of a node containing the
    function definition for that signature */
-const Node* FunctionMap::getFunctionNode(const Tstring functionSignature) {
+Node* FunctionMap::getFunctionNode(const Tstring functionSignature) {
     /* if function is not there, will return default Node* (i.e. NULL) */
     return lookup[functionSignature];
 }
 
-const Node* FunctionMap::getFunctionNode(DataType* params, Tstring name) {
+Node* FunctionMap::getFunctionNode(DataType* params, Tstring name) {
     return lookup[name + typeToString(params)];
 }
 
 /* lookup function node from functionCall node */
-const Node* FunctionMap::getFunctionNode(const Node* callNode) {
+Node* FunctionMap::getFunctionNode(const Node* callNode) {
     return lookup[getFunctionSignature(callNode)];
 }
 
