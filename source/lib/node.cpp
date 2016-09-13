@@ -38,7 +38,7 @@ Node::~Node() {
         delete this->child(i);
     }
 
-    delete dataType;
+    //delete dataType;
     delete symtable;
 }
 
