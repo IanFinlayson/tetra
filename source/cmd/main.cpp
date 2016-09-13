@@ -32,7 +32,7 @@ struct arguments {
 /* the function which parses command line options */
 error_t parse_opt(int key, char* arg, struct argp_state* state) {
     /* get the input argument from argp_parse */
-    struct arguments* arguments = (struct arguments*)state->input;
+    struct arguments* arguments = (struct arguments*) state->input;
 
     /* switch on the command line option that was passed in */
     switch (key) {

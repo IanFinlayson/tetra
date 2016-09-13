@@ -8,7 +8,7 @@
 enum ThreadStatus { RUNNING, STOPPED, DESTROYED, WAITING };
 
 /* macro to squelch unused variable warnings */
-#define UNUSED(x) (void)x;
+#define UNUSED(x) (void) x;
 
 /* each context will have a flag as to what action should be taken when control reaches a structure
  * Node
@@ -35,9 +35,7 @@ enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN, PARALLEL };
 /* a scope contains local variables of a function */
 class Scope {
    public:
-    Scope() {
-
-    }
+    Scope() {}
 
     Scope(const Node* node) {
         UNUSED(node);

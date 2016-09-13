@@ -21,7 +21,7 @@
 #include "context.h"
 
 /* macro to squelch unused variable warnings */
-#define UNUSED(x) (void)x;
+#define UNUSED(x) (void) x;
 
 /* evaluate a statement node */
 void evaluateStatement(Node* node, Context* context);

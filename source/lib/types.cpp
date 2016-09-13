@@ -540,7 +540,6 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
 
             found = true;
         } else {
-
             /* otherwise, go to the next lambda up */
             delete lambda;
             lambda = nextLambda(lambda);
@@ -853,7 +852,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     throw Error("Tuple index must be an integer.", expr->getLine());
                 }
                 /* make sure the index is in range */
-                if ((unsigned long)expr->child(1)->getIntvalue().toInt() < lhs->subtypes->size()) {
+                if ((unsigned long) expr->child(1)->getIntvalue().toInt() < lhs->subtypes->size()) {
                     /* get return the type of the index */
                     return &(*(lhs->subtypes))[expr->child(1)->getIntvalue().toInt()];
                     /* if it isn't in range */
@@ -1071,9 +1070,11 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* infer the the return type */
             if (expr->getNumChildren() > 1) {
-                expr->type()->subtypes->push_back(*new DataType(*inferExpression(expr->child(1), function)));
+                expr->type()->subtypes->push_back(
+                    *new DataType(*inferExpression(expr->child(1), function)));
             } else {
-                expr->type()->subtypes->push_back(*new DataType(*inferExpression(expr->child(0), function)));
+                expr->type()->subtypes->push_back(
+                    *new DataType(*inferExpression(expr->child(0), function)));
             }
 
             return expr->type();
@@ -1090,7 +1091,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the type of the member variable */
-            return new DataType(*classes[*lhs->className].getMember(expr->child(1)->getStringvalue()).getType());
+            return new DataType(
+                *classes[*lhs->className].getMember(expr->child(1)->getStringvalue()).getType());
         }
 
         case NODE_SELF: {
@@ -1134,9 +1136,10 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the return type of the method */
-            return new DataType(*classes[*lhs->className]
-                .getMethod(rhsParams, expr->child(1)->child(0)->getStringvalue())
-                ->type());
+            return new DataType(
+                *classes[*lhs->className]
+                     .getMethod(rhsParams, expr->child(1)->child(0)->getStringvalue())
+                     ->type());
         }
 
         case NODE_DECLARATION: {

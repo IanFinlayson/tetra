@@ -67,10 +67,10 @@ void Context::initializeNewScope(Scope& newScope) {
 }
 
 /* destroys the current scope, returning to the previously initialized scope */
-void Context::exitScope() { programStack.pop(); }
+void Context::exitScope() {
+    programStack.pop();
+}
 
 /* If, for some reason the tetra program crashes inadvertantly, we may as well */
 /* clean up the Context stack */
-Context::~Context() {
-}
-
+Context::~Context() {}
