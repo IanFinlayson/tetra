@@ -21,6 +21,12 @@
 /* macro to squelch unused variable warnings */
 #define UNUSED(x) (void)x;
 
+/* evaluate a statement node */
+void evaluateStatement(const Node* node);
+
+/* evaluate an expression node */
+Tdata* evaluateExpression(const Node* node);
+
 /* interpret a tetra program parsed into a Node tree */
 int interpret(Node* tree, int debug, int threads);
 

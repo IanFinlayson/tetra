@@ -22,7 +22,7 @@ Context::Context(long tID) {
         parForVars = new std::vector<Tstring>();
         scopes = new std::stack<const Node*>();
         globalReferenceTable = new std::map<Tstring, int>();
-        referenceTables = new std::stack<std::map<std::string, int> >();
+        referenceTables = new std::stack<std::map<Tstring, int> >();
     } else {
         parForVars = NULL;
         scopes = NULL;
@@ -40,11 +40,11 @@ void Context::initializeGlobalVars(const Node* tree) {
             /* reference lookup table */
             if (TetraEnvironment::isDebugMode()) {
                 Node* id = candidate->child(0);
-                (*globalReferenceTable)[id->getString()] = id->getInt();
+                (*globalReferenceTable)[id->getStringvalue()] = id->getIntvalue().toInt();
             }
 
             /* perform assignment at this global scope */
-            evaluateNode(candidate);
+            evaluateStatement(candidate);
         }
 
         if (tree->child(1) != NULL) {

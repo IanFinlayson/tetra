@@ -12,14 +12,19 @@
 
 #include "tetra.h"
 
-/* calls a function, returns the return value */
-void evaluateFunction(const Node* node) {
+/* evaluates operations on data types and returns the value */
+Tdata* evaluateExpression(const Node* node) {
+    UNUSED(node);
+    return NULL;
+}
+
+/* evaluate a statement node */
+void evaluateStatement(const Node* node) {
     UNUSED(node);
 }
 
-/* evaluates operations on data types */
-void evaluateExpression(const Node* node) {
-    UNUSED(node);
+void evaluateMain(const Node* main) {
+    UNUSED(main);
 }
 
 /* Equivilant of main for the interpreter module */
@@ -45,7 +50,7 @@ int interpret(Node* tree, int debug, int threads) {
 	context.initializeNewScope(main);
 
 	/* evaluate the main function */
-	evaluateFunction(main);
+	evaluateMain(main);
 
     /* wait for any unfinished business */
 	ThreadEnvironment::joinDetachedThreads();

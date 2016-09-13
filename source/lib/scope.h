@@ -35,8 +35,13 @@ enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN, PARALLEL };
 /* a scope contains local variables of a function */
 class Scope {
    public:
-    Scope();
-    Scope(const Node*);
+    Scope() {
+
+    }
+
+    Scope(const Node* node) {
+        UNUSED(node);
+    }
 
     /* look a variable up in this scope by name */
     Tdata* lookupVar(Tstring name) {
