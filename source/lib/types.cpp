@@ -269,7 +269,10 @@ DataType DataType::operator=(const DataType& other) {
         delete subtypes;
         delete className;
         kind = other.kind;
-        *subtypes = *other.subtypes;
+        subtypes = new std::vector<DataType>;
+        for (unsigned long i = 0; i < subtypes->size(); i++) {
+            subtypes->push_back((*(other.subtypes))[i]);
+        }
         *className = *other.className;
     }
     return *this;
@@ -843,7 +846,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 if ((*(lhs->subtypes))[0] != *rhs) {
                     throw Error("Key has incompatible type.", expr->getLine());
                 }
-                return &(*(lhs->subtypes))[1];
+                return new DataType((*(lhs->subtypes))[1]);
 
                 /* tuples */
             } else if (kind == TYPE_TUPLE) {
@@ -854,7 +857,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* make sure the index is in range */
                 if ((unsigned long) expr->child(1)->getIntvalue().toInt() < lhs->subtypes->size()) {
                     /* get return the type of the index */
-                    return &(*(lhs->subtypes))[expr->child(1)->getIntvalue().toInt()];
+                    return new DataType((*(lhs->subtypes))[expr->child(1)->getIntvalue().toInt()]);
                     /* if it isn't in range */
                 } else {
                     /* complain! */
