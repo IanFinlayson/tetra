@@ -153,7 +153,7 @@ std::map<Tstring, Node*> ClassContext::removeInits() {
 DataType::DataType(DataTypeKind kind) {
     this->kind = kind;
     this->subtypes = new std::vector<DataType>;
-    this->className = new Tstring;
+    this->className = new Tstring("");
 }
 
 DataType::DataType(const DataType& other) {
@@ -167,8 +167,8 @@ DataType::DataType(const DataType& other) {
 }
 
 DataType::~DataType() {
-    delete className;
-    delete subtypes;
+  delete className;
+  delete subtypes;
 }
 
 /* return true if the type represents an empty
@@ -273,7 +273,9 @@ DataType DataType::operator=(const DataType& other) {
         for (unsigned long i = 0; i < subtypes->size(); i++) {
             subtypes->push_back((*(other.subtypes))[i]);
         }
-        *className = *other.className;
+        if (other.className) {
+            className = new Tstring(*other.className);
+        }
     }
     return *this;
 }
