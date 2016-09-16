@@ -39,7 +39,6 @@ class DataType {
     bool isEmptyContainerType() const;
 
    private:
-    int typeNum;
     DataTypeKind kind;
 };
 

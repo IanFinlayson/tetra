@@ -151,7 +151,6 @@ class Node {
     static const int MAX_CHILDREN = 3;
     Node* children[MAX_CHILDREN];
     int numChildren;
-    int nodeNum;
 
     /* the type of node it is (eg plus vs stmt vs intValue etc.) */
     NodeKind nodeType;

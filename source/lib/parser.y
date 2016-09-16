@@ -22,8 +22,6 @@ extern int yylineNumber;
 int yylex( );
 int yywrap( );
 void yyerror(const char* str);
-int numTypes = 0;
-int numNodes = 0;
 
 /* the root of the parse tree - this is set as a result of calling yyparse */
 Node* root;

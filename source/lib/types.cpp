@@ -9,7 +9,6 @@
 #include "tetra.h"
 
 extern Node* root;
-extern int numTypes;
 
 /* the symbol table for storing constants and globals */
 std::map<Tstring, Symbol> globals;
@@ -43,9 +42,9 @@ Tstring typeToString(DataType* t) {
         case TYPE_TASK:
             return "task";
         case TYPE_LIST:
-            return "[" + ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])):"") + "]";
+            return "[" + typeToString(&((*(t->subtypes))[0])) + "]";
         case TYPE_DICT:
-            return "{" + ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])) : "")+ ":" +
+            return "{" + typeToString(&((*(t->subtypes))[0])) + ":" +
                    typeToString(&((*(t->subtypes))[1])) + "}";
         case TYPE_TUPLE: {
             Tstring typeString = "(";
@@ -61,12 +60,11 @@ Tstring typeToString(DataType* t) {
         case TYPE_CLASS:
             return *(t->className);
         case TYPE_FUNCTION: {
-            return ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])):"") + "->" +
-                   ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])):"") ;
+            return typeToString(&((*(t->subtypes))[0])) + "->" +
+                   typeToString(&((*(t->subtypes))[0]));
         }
         default:
-                         return "something else " + t->getKind();
-            //throw Error("typeToString: Unknown data type");
+            throw Error("typeToString: Unknown data type");
     }
 }
 
@@ -156,10 +154,6 @@ DataType::DataType(DataTypeKind kind) {
     this->kind = kind;
     this->subtypes = new std::vector<DataType>;
     this->className = new Tstring("");
-    numTypes++;
-    this->typeNum = numTypes;
-    std::cout << "creating dt# " << this->typeNum << std::endl;
-    std::cout << "type string = " << typeToString(this) << std::endl; 
 }
 
 DataType::DataType(const DataType& other) {
@@ -169,15 +163,9 @@ DataType::DataType(const DataType& other) {
         this->subtypes->push_back(*new DataType((*(other.subtypes))[i]));
     }
     this->className = new Tstring(*other.className);
-    numTypes++;
-    this->typeNum = numTypes;
-    std::cout << "creating dt# " << this->typeNum << std::endl;
-    std::cout << "type string = " << typeToString(this) << std::endl; 
 }
 
 DataType::~DataType() {
-  std::cout << "deleting dt# " << this->typeNum << std::endl;
-  std::cout << "classname = " << *this->className << std::endl; 
   delete className;
   delete subtypes;
 }
