@@ -9,6 +9,7 @@
 #include "tetra.h"
 
 extern Node* root;
+extern int numTypes;
 
 /* the symbol table for storing constants and globals */
 std::map<Tstring, Symbol> globals;
@@ -42,9 +43,9 @@ Tstring typeToString(DataType* t) {
         case TYPE_TASK:
             return "task";
         case TYPE_LIST:
-            return "[" + typeToString(&((*(t->subtypes))[0])) + "]";
+            return "[" + ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])):"") + "]";
         case TYPE_DICT:
-            return "{" + typeToString(&((*(t->subtypes))[0])) + ":" +
+            return "{" + ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])) : "")+ ":" +
                    typeToString(&((*(t->subtypes))[1])) + "}";
         case TYPE_TUPLE: {
             Tstring typeString = "(";
@@ -60,11 +61,12 @@ Tstring typeToString(DataType* t) {
         case TYPE_CLASS:
             return *(t->className);
         case TYPE_FUNCTION: {
-            return typeToString(&((*(t->subtypes))[0])) + "->" +
-                   typeToString(&((*(t->subtypes))[1]));
+            return ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])):"") + "->" +
+                   ((t->subtypes->size()) ? typeToString(&((*(t->subtypes))[0])):"") ;
         }
         default:
-            throw Error("typeToString: Unknown data type");
+                         return "something else " + t->getKind();
+            //throw Error("typeToString: Unknown data type");
     }
 }
 
@@ -154,19 +156,28 @@ DataType::DataType(DataTypeKind kind) {
     this->kind = kind;
     this->subtypes = new std::vector<DataType>;
     this->className = new Tstring("");
+    numTypes++;
+    this->typeNum = numTypes;
+    std::cout << "creating dt# " << this->typeNum << std::endl;
+    std::cout << "type string = " << typeToString(this) << std::endl; 
 }
 
 DataType::DataType(const DataType& other) {
     this->kind = other.kind;
     this->subtypes = new std::vector<DataType>;
-    this->className = new Tstring;
     for (unsigned long i = 0; i < other.subtypes->size(); i++) {
         this->subtypes->push_back(*new DataType((*(other.subtypes))[i]));
     }
-    *this->className = *other.className;
+    this->className = new Tstring(*other.className);
+    numTypes++;
+    this->typeNum = numTypes;
+    std::cout << "creating dt# " << this->typeNum << std::endl;
+    std::cout << "type string = " << typeToString(this) << std::endl; 
 }
 
 DataType::~DataType() {
+  std::cout << "deleting dt# " << this->typeNum << std::endl;
+  std::cout << "classname = " << *this->className << std::endl; 
   delete className;
   delete subtypes;
 }
@@ -273,9 +284,7 @@ DataType DataType::operator=(const DataType& other) {
         for (unsigned long i = 0; i < subtypes->size(); i++) {
             subtypes->push_back((*(other.subtypes))[i]);
         }
-        if (other.className) {
-            className = new Tstring(*other.className);
-        }
+        className = new Tstring(*other.className);
     }
     return *this;
 }
@@ -652,7 +661,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the type of the rhs */
-            expr->child(0)->setDataType(lhs);
+            expr->child(0)->setDataType(new DataType(*lhs));
             return new DataType(*rhs);
         }
 
@@ -1355,7 +1364,7 @@ void inferBlock(Node* block, Node* function) {
             }
 
             /* set the type of the node too */
-            block->child(0)->setDataType(&(*(expr_type->subtypes))[0]);
+            block->child(0)->setDataType(new DataType((*(expr_type->subtypes))[0]));
 
             /* check the block under this */
             inferBlock(block->child(2), function);

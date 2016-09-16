@@ -9,7 +9,160 @@
 #include "tetra.h"
 
 extern int yylineNumber;
+extern int numNodes;
 
+/* returns a string representation of a node type */
+Tstring stringType(Node* node) {
+    Tstring ss;
+
+    switch (node->kind()) {
+        /* statements and groups */
+        case NODE_FUNCTION:
+            return "FUNC " + node->getStringvalue();
+        case NODE_TOPLEVEL_LIST:
+            return "TOP LEVELS";
+        case NODE_STATEMENT:
+            return "STMTS";
+        case NODE_FORMAL_PARAM_LIST:
+            return "PARAMS";
+        case NODE_IDENTIFIERS:
+            return "IDENTIFIERS";
+        case NODE_OPEN:
+            return "OPEN";
+        case NODE_IMPORT:
+            return "IMPORT";
+        case NODE_PASS:
+            return "PASS";
+        case NODE_WAIT:
+            return "WAIT";
+        case NODE_RETURN:
+            return "RETURN";
+        case NODE_BREAK:
+            return "BREAK";
+        case NODE_CONTINUE:
+            return "CONTINUE";
+        case NODE_IF:
+            return "IF";
+        case NODE_WHILE:
+            return "WHILE";
+        case NODE_FOR:
+            return "FOR";
+        case NODE_ELIF:
+            return "ELIF";
+        case NODE_ELIF_CHAIN:
+            return "ELIF CHAIN";
+        case NODE_ELIF_CLAUSE:
+            return "ELIF CLAUSE";
+        case NODE_PARALLEL:
+            return "PARALLEL";
+        case NODE_PARFOR:
+            return "PARFOR";
+        case NODE_BACKGROUND:
+            return "BACKGROUND";
+        case NODE_LOCK:
+            return "LOCK";
+        case NODE_CONST:
+            return "CONST";
+        case NODE_GLOBAL:
+            return "GLOBAL";
+        case NODE_DECLARATION:
+            return "DECLARATION: " + node->getStringvalue();
+        case NODE_LAMBDA:
+            return "LAMBDA";
+        case NODE_CLASS:
+            return "CLASS " + node->getStringvalue();
+        case NODE_CLASS_PART:
+            return "CLASS PART";
+        case NODE_DOT:
+            return "DOT";
+        case NODE_METHOD_CALL:
+            return "METHOD CALL";
+        case NODE_SELF:
+            return "SELF";
+
+        /* operators */
+        case NODE_ASSIGN:
+            return "=";
+        case NODE_OR:
+            return "or";
+        case NODE_AND:
+            return "and";
+        case NODE_LT:
+            return "<";
+        case NODE_LTE:
+            return "<=";
+        case NODE_GT:
+            return ">";
+        case NODE_GTE:
+            return ">=";
+        case NODE_EQ:
+            return "==";
+        case NODE_NEQ:
+            return "!=";
+        case NODE_NOT:
+            return "not";
+        case NODE_BITXOR:
+            return "^";
+        case NODE_BITAND:
+            return "&";
+        case NODE_BITOR:
+            return "|";
+        case NODE_BITNOT:
+            return "~";
+        case NODE_SHIFTL:
+            return "<<";
+        case NODE_SHIFTR:
+            return ">>";
+        case NODE_PLUS:
+            return "+";
+        case NODE_MINUS:
+            return "-";
+        case NODE_TIMES:
+            return "*";
+        case NODE_DIVIDE:
+            return "/";
+        case NODE_MODULUS:
+            return "%";
+        case NODE_EXP:
+            return "EXP";
+        case NODE_IN:
+            return "in";
+
+        /* functions */
+        case NODE_FUNCALL:
+            return "CALL: " + node->getStringvalue();
+        case NODE_ACTUAL_PARAM_LIST:
+            return "ARGS";
+
+        /* lists */
+        case NODE_INDEX:
+            return "INDEX";
+        case NODE_LISTVAL:
+            return "LISTVAL";
+        case NODE_TUPVAL:
+            return "TUPVAL";
+        case NODE_DICTVAL:
+            return "DICTVAL";
+        case NODE_LISTRANGE:
+            return "LISTRANGE";
+
+        /* leafs */
+        case NODE_INTVAL:
+            return "INT:" + node->getStringvalue();
+        case NODE_REALVAL:
+            return "REAL: " + node->getStringvalue();
+        case NODE_STRINGVAL:
+            return "\"" + node->getStringvalue() + "\"";
+        case NODE_IDENTIFIER:
+            return "ID " + node->getStringvalue();
+        case NODE_BOOLVAL:
+            return "BOOL: " + node->getStringvalue();
+        case NODE_NONEVAL:
+            return "NONE";
+        default:
+            throw Error("Unsupported node type!");
+    }
+}
 /* node member functions */
 Node::Node(NodeKind nodeType) {
     this->nodeType = nodeType;
@@ -18,6 +171,8 @@ Node::Node(NodeKind nodeType) {
     symtable = NULL;
     lineNumber = yylineNumber; /* this is often inaccurate! */
     numChildren = 0;
+    numNodes++;
+    nodeNum = numNodes; 
 }
 
 Node::Node(Node* other) {
@@ -31,6 +186,8 @@ Node::Node(Node* other) {
     symtable = NULL;
     lineNumber = other->lineNumber; /* this is often inaccurate! */
     numChildren = 0;
+    numNodes++;
+    nodeNum = numNodes; 
 }
 
 Node::~Node() {
@@ -38,7 +195,9 @@ Node::~Node() {
         delete this->child(i);
     }
 
-    //delete dataType;
+    std::cout << "deleting node #" << nodeNum<< std::endl;
+    std::cout << "stringtype = " << stringType(this) << std::endl;
+    delete dataType;
 }
 
 void Node::addChild(Node* child) {
