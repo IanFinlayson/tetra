@@ -38,7 +38,7 @@ Node::~Node() {
         delete this->child(i);
     }
 
-    //delete dataType;
+    delete dataType;
 }
 
 void Node::addChild(Node* child) {
@@ -142,24 +142,24 @@ Symbol::Symbol() {
 }
 
 /* copy a subtree of nodes */
-Node* cloneTree(Node* foot) {
+Node* cloneTree(Node* root) {
     /* base case */
-    if (!foot)
+    if (!root)
         return NULL;
 
     /* make this node */
-    Node* newRoot = new Node(foot);
+    Node* newRoot = new Node(root);
 
     /* copy members */
-    newRoot->setIntvalue(foot->getIntvalue());
-    newRoot->setStringvalue(foot->getStringvalue());
-    newRoot->setRealvalue(foot->getRealvalue());
-    newRoot->setBoolvalue(foot->getBoolvalue());
+    newRoot->setIntvalue(root->getIntvalue());
+    newRoot->setStringvalue(root->getStringvalue());
+    newRoot->setRealvalue(root->getRealvalue());
+    newRoot->setBoolvalue(root->getBoolvalue());
 
     /* make and attach its children */
-    for (int i = 0; i < foot->getNumChildren(); i++) {
+    for (int i = 0; i < root->getNumChildren(); i++) {
         /* make the child */
-        Node* newChild = cloneTree(foot->child(i));
+        Node* newChild = cloneTree(root->child(i));
         /* add it */
         newRoot->addChild(newChild);
     }

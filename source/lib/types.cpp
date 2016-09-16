@@ -61,7 +61,7 @@ Tstring typeToString(DataType* t) {
             return *(t->className);
         case TYPE_FUNCTION: {
             return typeToString(&((*(t->subtypes))[0])) + "->" +
-                   typeToString(&((*(t->subtypes))[1]));
+                   typeToString(&((*(t->subtypes))[0]));
         }
         default:
             throw Error("typeToString: Unknown data type");
@@ -159,11 +159,10 @@ DataType::DataType(DataTypeKind kind) {
 DataType::DataType(const DataType& other) {
     this->kind = other.kind;
     this->subtypes = new std::vector<DataType>;
-    this->className = new Tstring;
     for (unsigned long i = 0; i < other.subtypes->size(); i++) {
         this->subtypes->push_back(*new DataType((*(other.subtypes))[i]));
     }
-    *this->className = *other.className;
+    this->className = new Tstring(*other.className);
 }
 
 DataType::~DataType() {
@@ -273,9 +272,7 @@ DataType DataType::operator=(const DataType& other) {
         for (unsigned long i = 0; i < subtypes->size(); i++) {
             subtypes->push_back((*(other.subtypes))[i]);
         }
-        if (other.className) {
-            className = new Tstring(*other.className);
-        }
+        className = new Tstring(*other.className);
     }
     return *this;
 }
@@ -652,7 +649,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the type of the rhs */
-            expr->child(0)->setDataType(lhs);
+            expr->child(0)->setDataType(new DataType(*lhs));
             return new DataType(*rhs);
         }
 
@@ -1355,7 +1352,7 @@ void inferBlock(Node* block, Node* function) {
             }
 
             /* set the type of the node too */
-            block->child(0)->setDataType(&(*(expr_type->subtypes))[0]);
+            block->child(0)->setDataType(new DataType((*(expr_type->subtypes))[0]));
 
             /* check the block under this */
             inferBlock(block->child(2), function);

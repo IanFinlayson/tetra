@@ -1,9 +1,4 @@
-Just created q and q = 86
-Just created w and w = 4
-Just created e and e = 222
-Just created x and x = false
-Just created y and y = true
-Not x.
-Not x and not y.
-End of main.
+The following error was detected in your program:
+Error: (line 16) syntax error, unexpected TOK_DEDENT, expecting TOK_SEMICOLON or TOK_NEWLINE
 
+Execution aborted
