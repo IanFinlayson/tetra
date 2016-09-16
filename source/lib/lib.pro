@@ -14,7 +14,7 @@ QMAKE_CXXFLAGS -= -O3
 
 # build as a static library
 TEMPLATE = lib
-CONFIG += staticlib
+CONFIG += staticlib debug
 TARGET = tetra
 
 # specify the files used

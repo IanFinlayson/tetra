@@ -21,6 +21,7 @@ PRE_TARGETDEPS += $$PWD/../lib/libtetra.a
 LIBS += -L$$PWD/../lib/ -ltetra
 
 TEMPLATE = app
+CONFIG += debug
 SOURCES = $$files(*.cpp)
 
 LIBS += ../lib/libtetra.a
