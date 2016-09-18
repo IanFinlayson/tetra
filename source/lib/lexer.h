@@ -12,6 +12,9 @@ void reset_lexer();
 /* set the file to lex from */
 void setLexFile(QFile& file);
 
+/* clean up*/
+void deleteLexFile();
+
 /* the lexer function */
 int yylex();
 

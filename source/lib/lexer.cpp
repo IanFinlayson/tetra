@@ -53,6 +53,11 @@ void setLexFile(QFile& file) {
     buffer.clear();
 }
 
+/* delete the file stream */
+void deleteLexFile() {
+  delete in;
+}
+
 /* peek at the next thing from the stream */
 QChar peek() {
     /* if the buffer is empty, read one in first */

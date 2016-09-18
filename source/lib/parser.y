@@ -1110,6 +1110,9 @@ Node* parseFile(const Tstring& fname) {
     /* call yyparse */
     yyparse();
 
+    /* clean up */
+    deleteLexFile();
+
     /* check and infer the types in the tree */
     initTypes(root);
     inferTypes(root);
