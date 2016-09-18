@@ -215,6 +215,7 @@ module: TOK_OPEN identifiers {
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
     $$ = new Node(NODE_CLASS);
     $$->setStringvalue(Tstring(*$2));
+    delete $2;
     $$->addChild($5);
 }
 
@@ -289,6 +290,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
     $$->setStringvalue(Tstring(*$2));
+    delete $2;
     $$->setDataType($4);
     $$->addChild($3);
     $$->addChild($6);
@@ -319,6 +321,7 @@ declaration: TOK_IDENTIFIER type {
     $$ = new Node(NODE_DECLARATION);
     $$->setLine(yylineNumber);
     $$->setStringvalue(Tstring(*$1));
+    delete $1;
     $$->setDataType($2);
 } 
 
@@ -333,6 +336,7 @@ type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
 } | TOK_LEFTPARENS type TOK_COMMA TOK_RIGHTPARENS {
     $$ = new DataType(TYPE_TUPLE);
     $$->subtypes->push_back(*new DataType(*$2));
+    delete $2;
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
     $$ = new DataType(TYPE_TUPLE);
 }
@@ -362,6 +366,7 @@ type: TOK_INT {
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
     $$ = new DataType(TYPE_LIST);
     $$->subtypes->push_back(*new DataType(*$2));
+    delete $2;
 } | type_dec_tuple {
     $$ = $1;
 } | function_type {
@@ -371,6 +376,7 @@ type: TOK_INT {
 } | TOK_IDENTIFIER {
     $$ = new DataType(TYPE_CLASS);
     $$->className = new Tstring(*$1);
+    delete $1;
 }
 
 /* function_type */
@@ -378,6 +384,8 @@ function_type: type_dec_tuple TOK_RIGHTARROW return_type{
     $$ = new DataType(TYPE_FUNCTION);
     $$->subtypes->push_back(*new DataType(*$1));
     $$->subtypes->push_back(*new DataType(*$3));
+    delete $1;
+    delete $3;
 }
 
 /* dict_type */
@@ -385,6 +393,8 @@ dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
     $$ = new DataType(TYPE_DICT);
     $$->subtypes->push_back(*new DataType(*$2));
     $$->subtypes->push_back(*new DataType(*$4));
+    delete $2;
+    delete $4;
 }
 
 /* a return type is either a simple type or none which means void */
@@ -931,15 +941,19 @@ rvalue: functionCall {
 } | TOK_INTVAL {
     $$ = new Node(NODE_INTVAL);
     $$->setIntvalue(Tint(*$1));
+    delete $1;
 } | TOK_REALVAL {
     $$ = new Node(NODE_REALVAL);
     $$->setRealvalue(Treal((*$1)));
+    delete $1;
 } | TOK_BOOLVAL {
     $$ = new Node(NODE_BOOLVAL);
     $$->setBoolvalue(Tbool((*$1)));
+    delete $1;
 } | TOK_STRINGVAL {
     $$ = new Node(NODE_STRINGVAL);
     $$->setStringvalue(Tstring(*$1));
+    delete $1;
 } | TOK_NONE {
     $$ = new Node(NODE_NONEVAL);
 } | list_value {
@@ -1049,6 +1063,7 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 identifier: TOK_IDENTIFIER {
     $$ = new Node(NODE_IDENTIFIER);
     $$->setStringvalue(Tstring(*$1));
+    delete $1;
     $$->setLine(yylineNumber);
 }  
 
