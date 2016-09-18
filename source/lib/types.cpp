@@ -160,7 +160,7 @@ DataType::DataType(const DataType& other) {
     this->kind = other.kind;
     this->subtypes = new std::vector<DataType>;
     for (unsigned long i = 0; i < other.subtypes->size(); i++) {
-        this->subtypes->push_back(*new DataType((*(other.subtypes))[i]));
+        this->subtypes->push_back(DataType((*(other.subtypes))[i]));
     }
     this->className = new Tstring(*other.className);
 }
@@ -294,7 +294,7 @@ void buildParamTupleType(DataType* type, const Node* node) {
         buildParamTupleType(type, node->child(0));
         buildParamTupleType(type, node->child(1));
     } else if (node) {
-        type->subtypes->push_back(*new DataType(*node->type()));
+        type->subtypes->push_back(DataType(*node->type()));
     } else {
         return;
     }
@@ -604,7 +604,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 if (!sym && !rhs->isEmptyContainerType()) {
                     /* infer it! */
                     lhs = rhs;
-                    function->insertSymbol(*new Symbol(expr->child(0)->getStringvalue(), lhs,
+                    function->insertSymbol(Symbol(expr->child(0)->getStringvalue(), lhs,
                                                        expr->child(0)->getLine()));
 
                     /* if it doesn't exist and it IS NOT inferable... */
@@ -813,7 +813,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* ptr = list;
                 while (sub) {
                     /* set current one */
-                    ptr->subtypes->push_back(*new DataType(*sub));
+                    ptr->subtypes->push_back(DataType(*sub));
 
                     /* move to next */
                     sub = &(*(sub->subtypes))[0];
@@ -893,7 +893,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* a listrange can only possibly be a list of ints */
             DataType* t = new DataType(TYPE_LIST);
-            t->subtypes->push_back(*new DataType(TYPE_INT));
+            t->subtypes->push_back(DataType(TYPE_INT));
             return t;
         }
 
@@ -987,7 +987,6 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* otherwise, return the type */
             DataType* dt = new DataType(*sym->getType());
-            delete sym;
             return dt; 
         }
 
@@ -1010,7 +1009,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
                 /* if this is the first element, add the subtype */
                 if (dt->subtypes->size() == 0) {
-                    (dt->subtypes)->push_back(*new DataType(*elemType));
+                    (dt->subtypes)->push_back(DataType(*elemType));
                     /* if there is a previous subtype, make sure they match */
                 } else if (dt->subtypes->size() == 1 && ((*(dt->subtypes))[0]) != *elemType) {
                     throw Error("Mismatched list types", expr->getLine());
@@ -1030,8 +1029,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* valType = inferExpression(currNode->child(1), function);
                 /* if this is the first element, add the subtypes */
                 if (dt->subtypes->size() == 0) {
-                    dt->subtypes->push_back(*new DataType(*keyType));
-                    dt->subtypes->push_back(*new DataType(*valType));
+                    dt->subtypes->push_back(DataType(*keyType));
+                    dt->subtypes->push_back(DataType(*valType));
                     /* if there are previous subtypes, make sure they match */
                 } else if (dt->subtypes->size() == 2 && (((*(dt->subtypes))[0] != *keyType) ||
                                                          ((*(dt->subtypes))[1] != *valType))) {
@@ -1052,7 +1051,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
 
                 /* add the subtype */
-                dt->subtypes->push_back(*new DataType(*elemType));
+                dt->subtypes->push_back(DataType(*elemType));
 
                 /* set current node to the next one */
                 currNode = currNode->child(1);
@@ -1071,10 +1070,10 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             /* infer the the return type */
             if (expr->getNumChildren() > 1) {
                 expr->type()->subtypes->push_back(
-                    *new DataType(*inferExpression(expr->child(1), function)));
+                    DataType(*inferExpression(expr->child(1), function)));
             } else {
                 expr->type()->subtypes->push_back(
-                    *new DataType(*inferExpression(expr->child(0), function)));
+                    DataType(*inferExpression(expr->child(0), function)));
             }
 
             return expr->type();
@@ -1213,7 +1212,6 @@ void checkMuTasks(Node* block, Node* function) {
 
         /* set the type */
         block->child(0)->setDataType(sym->getType());
-        delete sym;
 
         /* if there is a block ... */
         if (block->child(1)) {
@@ -1397,10 +1395,10 @@ void inferParams(Node* node, Node* function) {
         /* make a new function datatype */
         DataType* type = new DataType(TYPE_FUNCTION);
         /* add an empty param tuple */
-        type->subtypes->push_back(*new DataType(TYPE_TUPLE));
+        type->subtypes->push_back(DataType(TYPE_TUPLE));
         /* add the return type (if it has one)*/
         if (node->kind() == NODE_FUNCTION) {
-            type->subtypes->push_back(*new DataType(*(node->type())));
+            type->subtypes->push_back(DataType(*(node->type())));
         }
         /* replace the existing datatype */
         node->setDataType(type);
@@ -1426,7 +1424,7 @@ void inferParams(Node* node, Node* function) {
         /* add the param to the symbol table */
         function->insertSymbol(Symbol(node->getStringvalue(), node->type(), node->getLine()));
         /* add the param to the datatype */
-        (*(function->type()->subtypes))[0].subtypes->push_back(*new DataType(*node->type()));
+        (*(function->type()->subtypes))[0].subtypes->push_back(DataType(*node->type()));
     }
 }
 
@@ -1543,9 +1541,9 @@ void initSquared(ClassContext context) {
         node->setStringvalue(Tstring(context.getName()));
         node->setDataType(new DataType(TYPE_FUNCTION));
         /* add the empty param type */
-        node->type()->subtypes->push_back(*(new DataType(TYPE_TUPLE)));
+        node->type()->subtypes->push_back(DataType(TYPE_TUPLE));
         /* add the return type */
-        node->type()->subtypes->push_back(*new DataType(*type));
+        node->type()->subtypes->push_back(DataType(*type));
         Tstring key = context.getName() + "()";
         functions.insert(std::pair<Tstring, Node*>(key, node));
     }
