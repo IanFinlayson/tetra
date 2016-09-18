@@ -330,12 +330,12 @@ type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
     $$ = new DataType(TYPE_TUPLE);
     Node* decs = $2;
   while(decs){
-    $$->subtypes->push_back(*new DataType (*decs->type()));
+    $$->subtypes->push_back(*decs->type());
     decs = decs->child(0);
   }
 } | TOK_LEFTPARENS type TOK_COMMA TOK_RIGHTPARENS {
     $$ = new DataType(TYPE_TUPLE);
-    $$->subtypes->push_back(*new DataType(*$2));
+    $$->subtypes->push_back(*$2);
     delete $2;
 } | TOK_LEFTPARENS TOK_RIGHTPARENS {
     $$ = new DataType(TYPE_TUPLE);
@@ -365,7 +365,7 @@ type: TOK_INT {
     $$ = new DataType(TYPE_TASK);
 } | TOK_LEFTBRACKET type TOK_RIGHTBRACKET {
     $$ = new DataType(TYPE_LIST);
-    $$->subtypes->push_back(*new DataType(*$2));
+    $$->subtypes->push_back(*$2);
     delete $2;
 } | type_dec_tuple {
     $$ = $1;
@@ -382,8 +382,8 @@ type: TOK_INT {
 /* function_type */
 function_type: type_dec_tuple TOK_RIGHTARROW return_type{
     $$ = new DataType(TYPE_FUNCTION);
-    $$->subtypes->push_back(*new DataType(*$1));
-    $$->subtypes->push_back(*new DataType(*$3));
+    $$->subtypes->push_back(*$1);
+    $$->subtypes->push_back(*$3);
     delete $1;
     delete $3;
 }
@@ -391,8 +391,8 @@ function_type: type_dec_tuple TOK_RIGHTARROW return_type{
 /* dict_type */
 dict_type: TOK_LEFTBRACE type TOK_COLON type TOK_RIGHTBRACE {
     $$ = new DataType(TYPE_DICT);
-    $$->subtypes->push_back(*new DataType(*$2));
-    $$->subtypes->push_back(*new DataType(*$4));
+    $$->subtypes->push_back(*$2);
+    $$->subtypes->push_back(*$4);
     delete $2;
     delete $4;
 }
