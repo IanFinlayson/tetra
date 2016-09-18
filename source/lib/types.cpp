@@ -924,6 +924,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* if it has the right params... */
                 if ((*(lhs->subtypes))[0] == *rhsParams) {
                     /* return the return type */
+                    delete rhsParams;
                     return new DataType((*(lhs->subtypes))[1]);
                 }
                 /* if we have multiple possibilities */
@@ -933,6 +934,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     /* if one has the right params... */
                     if ((*((*(lhs->subtypes))[i].subtypes))[0] == *rhsParams) {
                         /* return its return type */
+                        delete rhsParams;
                         return new DataType((*((*(lhs->subtypes))[i].subtypes))[1]);
                     }
                 }
