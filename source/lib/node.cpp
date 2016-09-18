@@ -39,6 +39,7 @@ Node::~Node() {
     }
 
     delete dataType;
+    delete symtable;
 }
 
 void Node::addChild(Node* child) {

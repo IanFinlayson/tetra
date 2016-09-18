@@ -583,6 +583,7 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
     if (!sym->getName().empty()) {
         return sym;
     } else {
+        delete sym;
         return NULL;
     }
 }
@@ -990,7 +991,9 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* otherwise, return the type */
-            return new DataType(*sym->getType());
+            DataType* dt = new DataType(*sym->getType());
+            delete sym;
+            return dt; 
         }
 
         /* return these types */

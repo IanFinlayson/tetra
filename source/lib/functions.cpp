@@ -128,10 +128,13 @@ DataType* FunctionMap::getFunctionsNamed(Tstring name) {
     }
     /* If there are no subtypes, return null */
     if (retType->subtypes->size() == 0) {
+        delete retType;
         retType = NULL;
         /* If there is one, just return that one */
     } else if (retType->subtypes->size() == 1) {
-        retType = &((*(retType->subtypes))[0]);
+        DataType* temp = retType;
+        retType  =  new DataType((*(temp->subtypes))[0]);
+        delete temp;
     }
     return retType;
 }
@@ -155,8 +158,10 @@ Tstring FunctionMap::getFunctionSignature(const Node* node) {
         if (node->getNumChildren() > 1) {
             buildParamTupleType(params, node->child(1));
         }
-
-        return node->child(0)->getStringvalue() + typeToString(params);
+        
+        Ttring paramStr = typeToString(params);
+        delete params;
+        return node->child(0)->getStringvalue() + paramStr;
     }
     throw Error("Cannot create Function signature.");
 }
