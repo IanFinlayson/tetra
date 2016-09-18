@@ -127,7 +127,7 @@ void ClassContext::addMembers(Node* node) {
     }
 }
 
-Symbol ClassContext::getMember(Tstring name) {
+Symbol& ClassContext::getMember(Tstring name) {
     return members[name];
 }
 
@@ -533,17 +533,16 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
     /* check if it's a lambda param first */
     /* look for lambdas first */
     Node* lambda = nextLambda(expr);
-    Symbol* sym = new Symbol();
+    Symbol* sym = NULL;
     bool found = false;
     while (lambda && !found) {
         /* if we found the identifier, get its symbol*/
         if (lambda->hasSymbol(expr->getStringvalue())) {
-            *sym = lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine());
+            sym = new Symbol(lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine()));
 
             found = true;
         } else {
             /* otherwise, go to the next lambda up */
-            delete lambda;
             lambda = nextLambda(lambda);
         }
     }
@@ -551,41 +550,36 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
     /* if not a lambda, see if it's local to the function */
     if (function && function->hasSymbol(expr->getStringvalue())) {
         /* look it up */
-        *sym = function->lookupSymbol(expr->getStringvalue(), expr->getLine());
+        sym = new Symbol(function->lookupSymbol(expr->getStringvalue(), expr->getLine()));
 
         /* if it is in a class, check there for a member var*/
     } else if (getClassNode(expr) &&
                classes[getClassNode(expr)->getStringvalue()].hasMember(expr->getStringvalue())) {
-        *sym = classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue());
+        sym = new Symbol(classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue()));
 
         /* if it is in a class, check there for a method */
     } else if (getClassNode(expr) &&
                classes[getClassNode(expr)->getStringvalue()].hasMethodNamed(
                    expr->getStringvalue())) {
         /* get all the methods */
-        *sym =
-            Symbol(expr->getStringvalue(),
+        sym =
+            new Symbol(expr->getStringvalue(),
                    classes[getClassNode(expr)->getStringvalue()].getMethods(expr->getStringvalue()),
                    expr->getLine(), true);
 
         /* next check for globals/constants */
     } else if (globals.count(expr->getStringvalue()) > 0) {
         /* look it up */
-        *sym = globals[expr->getStringvalue()];
+        sym = new Symbol(globals[expr->getStringvalue()]);
 
         /* next check if it's the name of a free function */
     } else if (functions.hasFuncNamed(expr->getStringvalue())) {
         /* look it up */
-        *sym = Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
+        sym = new Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
                       expr->getLine(), true);
     }
     /* return the thing we found (or NULL) */
-    if (!sym->getName().empty()) {
-        return sym;
-    } else {
-        delete sym;
-        return NULL;
-    }
+    return sym;
 }
 
 /* infer the types of an expression, and also return the type */
@@ -628,6 +622,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                     /* if we end up here, all is well - update lhs */
                     lhs = sym->getType();
                 }
+                delete sym;
                 /* if it's not directly and identifier.. */
             } else {
                 /* get the type of the left hand side */
@@ -1218,6 +1213,7 @@ void checkMuTasks(Node* block, Node* function) {
 
         /* set the type */
         block->child(0)->setDataType(sym->getType());
+        delete sym;
 
         /* if there is a block ... */
         if (block->child(1)) {
@@ -1353,7 +1349,8 @@ void inferBlock(Node* block, Node* function) {
                 function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
                                               &(*(expr_type->subtypes))[0], block->getLine()));
             }
-
+            
+            delete idxSym;
             /* set the type of the node too */
             block->child(0)->setDataType(new DataType((*(expr_type->subtypes))[0]));
 

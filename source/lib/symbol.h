@@ -90,7 +90,7 @@ class ClassContext {
     void addMembers(Node* node);
     void addMethod(Node*);
     void addMethods(Node*);
-    Symbol getMember(Tstring);
+    Symbol& getMember(Tstring);
     DataType* getMethods(Tstring);
     const Node* getMethod(DataType*, Tstring);
     std::map<Tstring, Node*> removeInits();

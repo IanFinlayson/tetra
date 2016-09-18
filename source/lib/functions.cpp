@@ -159,7 +159,7 @@ Tstring FunctionMap::getFunctionSignature(const Node* node) {
             buildParamTupleType(params, node->child(1));
         }
         
-        Ttring paramStr = typeToString(params);
+        Tstring paramStr = typeToString(params);
         delete params;
         return node->child(0)->getStringvalue() + paramStr;
     }

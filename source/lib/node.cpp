@@ -91,20 +91,14 @@ void Node::insertSymbol(Symbol sym) {
 }
 
 /* lookup a symbol from a symbol table */
-Symbol Node::lookupSymbol(Tstring name, int lineNumber) const {
-    /* if there is no symbol table, it's not found! */
-    if (!symtable) {
-        throw Error("Symbol '" + name + "' not found!", lineNumber);
-    }
-
-    std::map<Tstring, Symbol>::iterator it = symtable->find(name);
-
-    if (it == symtable->end()) {
+Symbol& Node::lookupSymbol(Tstring name, int lineNumber) const {
+    /* if there is no symbol table or the name is not a key, it's not found! */
+    if (!symtable || !symtable->count(name)) {
         throw Error("Symbol '" + name + "' not found!", lineNumber);
     }
 
     /* return the record */
-    return it->second;
+    return (*symtable)[name];
 }
 
 bool Node::hasSymbol(const Tstring& name) const {

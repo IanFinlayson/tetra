@@ -129,7 +129,7 @@ class Node {
 
     /* symbol functions */
     void insertSymbol(Symbol sym);
-    Symbol lookupSymbol(Tstring name, int lineNumber) const;
+    Symbol& lookupSymbol(Tstring name, int lineNumber) const;
     bool hasSymbol(const Tstring& name) const;
 
     /* the symbol table used for this Node - currently only function nodes have
