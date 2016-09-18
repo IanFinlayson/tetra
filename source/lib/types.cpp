@@ -902,7 +902,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             bool is_stdlib;
             lhs = inferStdlib(expr, function, is_stdlib);
             if (is_stdlib) {
-                return new DataType(*lhs);
+                return lhs;
             }
 
             /* if it's not an stl function */
