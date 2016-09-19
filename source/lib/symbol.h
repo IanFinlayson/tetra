@@ -15,6 +15,7 @@ class Symbol {
    public:
     Symbol();
     Symbol(Tstring name, DataType* type, int lineNumber, bool constant = false);
+    Symbol(const Symbol&);
     int getLine() const;
     Tstring getName() const;
     DataType* getType() const;

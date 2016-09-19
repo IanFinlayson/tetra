@@ -160,7 +160,7 @@ DataType::DataType(const DataType& other) {
     this->kind = other.kind;
     this->subtypes = new std::vector<DataType>;
     for (unsigned long i = 0; i < other.subtypes->size(); i++) {
-        this->subtypes->push_back(DataType((*(other.subtypes))[i]));
+        this->subtypes->push_back((*(other.subtypes))[i]);
     }
     this->className = new Tstring(*other.className);
 }
@@ -971,7 +971,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* if we make it here, we need to add this declaration to this
                  * function's sym table */
                 function->insertSymbol(
-                    *new Symbol(expr->getStringvalue(), expr->type(), expr->getLine()));
+                    Symbol(expr->getStringvalue(), expr->type(), expr->getLine()));
                 /* then just return the type it already has */
                 return expr->type();
             }
@@ -989,6 +989,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* otherwise, return the type */
             DataType* dt = new DataType(*sym->getType());
+            delete sym;
             return dt; 
         }
 
