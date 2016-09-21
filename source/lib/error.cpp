@@ -92,10 +92,10 @@ std::ostream& operator<<(std::ostream& out, const Error& error) {
 RuntimeError::RuntimeError(const Tstring& message, int line) : Error(message, line) {}
 
 /* the system error class */
-SystemError::SystemError(const Tstring& message, int line, const Node* nodeArg)
+SystemError::SystemError(const Tstring& message, int line, Node* nodeArg)
     : Error(message, line), node(nodeArg) {}
 
-const Node* SystemError::getNode() {
+Node* SystemError::getNode() {
     return node;
 }
 

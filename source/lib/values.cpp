@@ -92,15 +92,9 @@ Tstring::Tstring(const Treal& value) {
     str = QString::number(value.toDouble());
 }
 
-
-
-
-
-
 Tstring Tbool::toString() const {
     return b ? Tstring("true") : Tstring("false");
 }
-
 
 Tstring Tint::toString() const {
     return Tstring(*this);
@@ -108,5 +102,3 @@ Tstring Tint::toString() const {
 Tstring Treal::toString() const {
     return Tstring(*this);
 }
-
-

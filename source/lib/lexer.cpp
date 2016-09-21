@@ -55,7 +55,7 @@ void setLexFile(QFile& file) {
 
 /* delete the file stream */
 void deleteLexFile() {
-  delete in;
+    delete in;
 }
 
 /* peek at the next thing from the stream */

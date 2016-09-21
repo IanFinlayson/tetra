@@ -133,7 +133,7 @@ DataType* FunctionMap::getFunctionsNamed(Tstring name) {
         /* If there is one, just return that one */
     } else if (retType->subtypes->size() == 1) {
         DataType* temp = retType;
-        retType  =  new DataType((*(temp->subtypes))[0]);
+        retType = new DataType((*(temp->subtypes))[0]);
         delete temp;
     }
     return retType;
@@ -158,7 +158,7 @@ Tstring FunctionMap::getFunctionSignature(const Node* node) {
         if (node->getNumChildren() > 1) {
             buildParamTupleType(params, node->child(1));
         }
-        
+
         Tstring paramStr = typeToString(params);
         delete params;
         return node->child(0)->getStringvalue() + paramStr;

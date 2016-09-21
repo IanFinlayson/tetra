@@ -39,13 +39,15 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
     }
 }
 
-
 Tdata* evaluateFunctionCall(Node* node, Context* context) {
     /* check to see if this is a standard library function */
     Tstring funcName = node->child(0)->getStringvalue();
     if (funcName == "print") {
         if (node->child(1) != NULL) {
-            tslPrint(node->child(1), context);
+            return tslPrint(node->child(1), context);
+        } else {
+            /* print with no arguments */
+            return tslPrint(NULL, context);
         }
     }
 
@@ -74,19 +76,16 @@ Tdata* evaluateFunctionCall(Node* node, Context* context) {
          * trace */
         context->getCurrentScope().setCallNode(node);
 
-        /* transfer control to the function */
-        evaluateStatement(funcNode, context);
+        /* transfer control to the function capturing the return value */
+        Tdata* returnValue = evaluateStatement(funcNode, context);
 
         /* returns to the old scope once the function has finished evaluating */
         context->exitScope();
+
+        /* return the functions return value back */
+        return returnValue;
     }
-
-    /* FIXME how to return the value back out? */
-    return NULL;
 }
-
-
-
 
 /* evaluates operations on data types and returns the value */
 Tdata* evaluateExpression(Node* node, Context* context) {
@@ -95,14 +94,18 @@ Tdata* evaluateExpression(Node* node, Context* context) {
         case NODE_FUNCALL:
             return evaluateFunctionCall(node, context);
 
+        case NODE_STRINGVAL:
+            /* TODO make a Tdata for this thingy */
+            return Tdata::create(node->type(), node->getStringvalue());
+
         default:
             throw SystemError("Unhandled node type in eval", 0, node);
             break;
     }
 }
 
-/* evaluate a statement node */
-void evaluateStatement(Node* node, Context* context) {
+/* evaluate a statement node - only returns a value for return statements */
+Tdata* evaluateStatement(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
     switch (node->kind()) {
         case NODE_FUNCTION: {
@@ -116,12 +119,16 @@ void evaluateStatement(Node* node, Context* context) {
 
         case NODE_STATEMENT: {
             /* evaluate the first child */
-            evaluateStatement(node->child(0), context);
+            Tdata* value = evaluateStatement(node->child(0), context);
 
             /* if it didn't result in a break of some kind, do the second one */
             ExecutionStatus status = context->queryExecutionStatus();
             if (status != RETURN && status != BREAK && status != CONTINUE) {
                 evaluateStatement(node->child(1), context);
+
+                /* if it is a return, we return that value back */
+            } else if (status == RETURN) {
+                return value;
             }
         } break;
 
@@ -139,18 +146,14 @@ void evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
-
-
-
-
-
-
-
         default:
             /* if it's none of these things, it must be an expression used as a
              * statement */
-            evaluateExpression(node, context);
+            return evaluateExpression(node, context);
     }
+
+    /* if we got down here, it was not a return or an expression so just NULL */
+    return NULL;
 }
 
 /* Equivilant of main for the interpreter module */

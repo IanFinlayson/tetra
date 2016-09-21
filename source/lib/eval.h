@@ -20,9 +20,8 @@
 
 #include "context.h"
 
-
 /* evaluate a statement node */
-void evaluateStatement(Node* node, Context* context);
+Tdata* evaluateStatement(Node* node, Context* context);
 
 /* evaluate an expression node */
 Tdata* evaluateExpression(Node* node, Context* context);

@@ -166,8 +166,8 @@ DataType::DataType(const DataType& other) {
 }
 
 DataType::~DataType() {
-  delete className;
-  delete subtypes;
+    delete className;
+    delete subtypes;
 }
 
 /* return true if the type represents an empty
@@ -555,17 +555,18 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
         /* if it is in a class, check there for a member var*/
     } else if (getClassNode(expr) &&
                classes[getClassNode(expr)->getStringvalue()].hasMember(expr->getStringvalue())) {
-        sym = new Symbol(classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue()));
+        sym = new Symbol(
+            classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue()));
 
         /* if it is in a class, check there for a method */
     } else if (getClassNode(expr) &&
                classes[getClassNode(expr)->getStringvalue()].hasMethodNamed(
                    expr->getStringvalue())) {
         /* get all the methods */
-        sym =
-            new Symbol(expr->getStringvalue(),
-                   classes[getClassNode(expr)->getStringvalue()].getMethods(expr->getStringvalue()),
-                   expr->getLine(), true);
+        sym = new Symbol(
+            expr->getStringvalue(),
+            classes[getClassNode(expr)->getStringvalue()].getMethods(expr->getStringvalue()),
+            expr->getLine(), true);
 
         /* next check for globals/constants */
     } else if (globals.count(expr->getStringvalue()) > 0) {
@@ -575,8 +576,9 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
         /* next check if it's the name of a free function */
     } else if (functions.hasFuncNamed(expr->getStringvalue())) {
         /* look it up */
-        sym = new Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
-                      expr->getLine(), true);
+        sym =
+            new Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
+                       expr->getLine(), true);
     }
     /* return the thing we found (or NULL) */
     return sym;
@@ -604,8 +606,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 if (!sym && !rhs->isEmptyContainerType()) {
                     /* infer it! */
                     lhs = rhs;
-                    function->insertSymbol(Symbol(expr->child(0)->getStringvalue(), lhs,
-                                                       expr->child(0)->getLine()));
+                    function->insertSymbol(
+                        Symbol(expr->child(0)->getStringvalue(), lhs, expr->child(0)->getLine()));
 
                     /* if it doesn't exist and it IS NOT inferable... */
                 } else if (!sym) {
@@ -990,7 +992,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             /* otherwise, return the type */
             DataType* dt = new DataType(*sym->getType());
             delete sym;
-            return dt; 
+            return dt;
         }
 
         /* return these types */
@@ -1350,7 +1352,7 @@ void inferBlock(Node* block, Node* function) {
                 function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
                                               &(*(expr_type->subtypes))[0], block->getLine()));
             }
-            
+
             delete idxSym;
             /* set the type of the node too */
             block->child(0)->setDataType(new DataType((*(expr_type->subtypes))[0]));

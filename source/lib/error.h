@@ -34,11 +34,11 @@ class InterruptError : public Error {
 
 class SystemError : public Error {
    public:
-    SystemError(const Tstring& message, int lineNumber, const Node* nodeArg);
-    const Node* getNode();
+    SystemError(const Tstring& message, int lineNumber, Node* nodeArg);
+    Node* getNode();
 
    private:
-    const Node* node;
+    Node* node;
 };
 
 /* print an error */

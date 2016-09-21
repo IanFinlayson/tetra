@@ -115,18 +115,16 @@ int main(int argc, char** argv) {
     }
     int ret = 0;
     try {
-        //  ret = interpret(tree, args.debug, args.threads);
+        ret = interpret(tree, args.debug, args.threads);
     } catch (SystemError e) {
-        std::cout << "The interpreter has entered an undefined state: " << std::endl;
-        std::cout << e << std::endl;
+        std::cout << "System Error: " << e << "Node giving error:\n";
+        dumpTreeStdout(e.getNode(), 0);
         exit(EXIT_FAILURE);
     } catch (RuntimeError e) {
-        std::cout << "The following error was detected while running your program: " << std::endl;
-        std::cout << e << std::endl;
+        std::cout << "Runtime Error: " << e << std::endl;
         exit(EXIT_FAILURE);
     } catch (Error e) {
-        std::cout << "The following error was detected in your program: " << std::endl;
-        std::cout << e << std::endl;
+        std::cout << "Error: " << e << std::endl;
         exit(EXIT_FAILURE);
     }
 

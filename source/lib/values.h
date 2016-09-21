@@ -10,69 +10,20 @@
 #include "types.h"
 
 /* forward declare classes so they cen reference each other */
-class Tvalue;
+class Tdata;
 class Tstring;
 class Tint;
 class Treal;
 class Tbool;
-
-/* represents any piece of data in a tetra program */
-class Tdata {
-   public:
-    /* all of the operators */
-    Tdata* opDot(const Tdata* other);
-    Tdata* opAssign(const Tdata* other) {
-        /* FIXME */
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opOr(const Tdata* other);
-    Tdata* opAnd(const Tdata* other);
-    Tdata* opLt(const Tdata* other);
-    Tdata* opLte(const Tdata* other);
-    Tdata* opGt(const Tdata* other);
-    Tdata* opGte(const Tdata* other);
-    Tdata* opEq(const Tdata* other);
-    Tdata* opNeq(const Tdata* other);
-    Tdata* opNot(const Tdata* other);
-    Tdata* opBitxor(const Tdata* other);
-    Tdata* opBitand(const Tdata* other);
-    Tdata* opBitor(const Tdata* other);
-    Tdata* opBitnot(const Tdata* other);
-    Tdata* opShiftl(const Tdata* other);
-    Tdata* opShiftr(const Tdata* other);
-    Tdata* opPlus(const Tdata* other);
-    Tdata* opMinus(const Tdata* other);
-    Tdata* opTimes(const Tdata* other);
-    Tdata* opDivide(const Tdata* other);
-    Tdata* opModulus(const Tdata* other);
-    Tdata* opExp(const Tdata* other);
-
-    /* create a Tdata of a given type */
-    static Tdata* create(DataType* type);
-
-    /* return the value of this */
-    Tvalue* getValue() {
-        return value;
-    }
-
-   private:
-    /* Tdata are garbage collected, so we can't create them directly
-     * only by calling the create methods above */
-    Tdata();
-
-    /* a pointer to the data type and the actual value */
-    DataType* type;
-    Tvalue* value;
-};
 
 /* represents one Tetra value, e.g. a number, string, list, anything */
 class Tvalue {
    public:
     virtual ~Tvalue() {}
     virtual Tstring toString() const = 0;
-};
 
+    virtual void copyValue(const Tvalue& other) = 0;
+};
 
 class Tbool : public Tvalue {
    public:
@@ -96,6 +47,10 @@ class Tbool : public Tvalue {
     /* conversion */
     bool toBool() {
         return this->b;
+    }
+
+    void copyValue(const Tvalue& other) {
+        b = ((Tbool&) other).b;
     }
 
     /* logical operators */
@@ -151,6 +106,10 @@ class Tint : public Tvalue {
     /* conversion */
     int toInt() const {
         return i;
+    }
+
+    void copyValue(const Tvalue& other) {
+        i = ((Tint&) other).i;
     }
 
     /* bitwise operators */
@@ -254,8 +213,17 @@ class Treal : public Tvalue {
         r = 0.0;
     }
 
+    Treal operator=(const Treal& other) {
+        this->r = other.r;
+        return *this;
+    }
+
     double toDouble() const {
         return r;
+    }
+
+    void copyValue(const Tvalue& other) {
+        r = ((Treal&) other).r;
     }
 
     Tstring toString() const;
@@ -307,6 +275,10 @@ class Tstring : public Tvalue {
         return str;
     }
 
+    void copyValue(const Tvalue& other) {
+        str = ((Tstring&) other).str;
+    }
+
     /* returns the unicode point for a character */
     unsigned short at(int index) const {
         return str.at(index).unicode();
@@ -347,4 +319,76 @@ class Tstring : public Tvalue {
     QString str;
 };
 
+/* represents any piece of data in a tetra program */
+class Tdata {
+   public:
+    /* all of the operators */
+    Tdata* opDot(const Tdata* other);
+    Tdata* opAssign(const Tdata* other) {
+        /* copy our data type and also value */
+        this->type = other->type;
+        this->value = other->value;
+
+        /* return a pointer to this Tdata */
+        return this;
+    }
+    Tdata* opOr(const Tdata* other);
+    Tdata* opAnd(const Tdata* other);
+    Tdata* opLt(const Tdata* other);
+    Tdata* opLte(const Tdata* other);
+    Tdata* opGt(const Tdata* other);
+    Tdata* opGte(const Tdata* other);
+    Tdata* opEq(const Tdata* other);
+    Tdata* opNeq(const Tdata* other);
+    Tdata* opNot(const Tdata* other);
+    Tdata* opBitxor(const Tdata* other);
+    Tdata* opBitand(const Tdata* other);
+    Tdata* opBitor(const Tdata* other);
+    Tdata* opBitnot(const Tdata* other);
+    Tdata* opShiftl(const Tdata* other);
+    Tdata* opShiftr(const Tdata* other);
+    Tdata* opPlus(const Tdata* other);
+    Tdata* opMinus(const Tdata* other);
+    Tdata* opTimes(const Tdata* other);
+    Tdata* opDivide(const Tdata* other);
+    Tdata* opModulus(const Tdata* other);
+    Tdata* opExp(const Tdata* other);
+
+    /* create a Tdata of a given type */
+    static Tdata* create(DataType* type, const Tvalue& value) {
+        /* make a new Tdata currently a memory leak - TODO gc */
+        Tdata* newData = new Tdata;
+
+        /* copy the type over */
+        newData->type = *type;
+
+        /* copy the value over */
+        newData->value.copyValue(value);
+
+        /* return it */
+        return newData;
+    }
+
+    /* return the value of this */
+    Tvalue* getValue() {
+        return &value;
+    }
+
+   private:
+    /* Tdata are garbage collected, so we can't create them directly
+     * only by calling the create methods above */
+    Tdata() : type(TYPE_NONE), value(dummy) {}
+
+    /* the data type and the actual value */
+    DataType type;
+    Tvalue& value;
+
+    /* this value only exists to point the value at in the constructor above to
+     * make the compiler happy TODO add the Tnone type so this at least makes
+     * some modicum of sense */
+    Tint dummy;
+};
+
 #endif
+
+

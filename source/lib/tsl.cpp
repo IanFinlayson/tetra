@@ -6,7 +6,13 @@
 #include "tetra.h"
 
 /* prints the expression(s) denoted by arguments given */
-void tslPrint(Node* args, Context* context) {
+Tdata* tslPrint(Node* args, Context* context) {
+    /* if no args given, just print a new line */
+    if (args == NULL) {
+        VirtualConsole* console = TetraEnvironment::getConsole();
+        console->processStandardOutput("\n");
+    }
+
     /* check if args is a structual node */
     if (args->kind() == NODE_ACTUAL_PARAM_LIST) {
         /* print the first thing */
@@ -27,6 +33,9 @@ void tslPrint(Node* args, Context* context) {
         /* convert to a string and print it to the connected console */
         console->processStandardOutput(arg->getValue()->toString());
     }
+
+    /* print returns nothing */
+    return NULL;
 }
 
 /* TODO these too
@@ -74,4 +83,3 @@ tstring readString(int threadNum) {
     return ret;
 }
 */
-

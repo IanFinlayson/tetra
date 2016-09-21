@@ -5,8 +5,6 @@ class Node;
 class Context;
 
 /* the print function prints any arguments which it is given */
-void tslPrint(Node* args, Context* context);
-
+Tdata* tslPrint(Node* args, Context* context);
 
 #endif
-
