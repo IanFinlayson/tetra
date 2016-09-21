@@ -21,7 +21,11 @@ class Tdata {
    public:
     /* all of the operators */
     Tdata* opDot(const Tdata* other);
-    Tdata* opAssign(const Tdata* other);
+    Tdata* opAssign(const Tdata* other) {
+        /* FIXME */
+        UNUSED(other);
+        return NULL;
+    }
     Tdata* opOr(const Tdata* other);
     Tdata* opAnd(const Tdata* other);
     Tdata* opLt(const Tdata* other);

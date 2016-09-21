@@ -68,7 +68,10 @@ class Scope {
     bool containsVar(const Node* varNode) const;
 
     /* Used by the TetraContext to obtain a stack trace */
-    void setCallNode(const Node*);
+    void setCallNode(const Node* node) {
+        callNode = node;
+    }
+
     const Node* getCallNode() const;
 
    private:

@@ -9,6 +9,9 @@
 class Tstring;
 class Node;
 
+/* macro to squelch unused variable warnings */
+#define UNUSED(x) (void) x;
+
 /* the different possibilities a data type can be */
 enum DataTypeKind {
     TYPE_INT,

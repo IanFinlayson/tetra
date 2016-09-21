@@ -48,7 +48,9 @@ class Context {
     void exitScope();
 
     /* returns a reference to the current scope */
-    Scope& getCurrentScope();
+    Scope& getCurrentScope() {
+        return programStack.top();
+    }
 
     Scope& getScopeRef();
 
