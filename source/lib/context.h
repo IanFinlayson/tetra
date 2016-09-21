@@ -2,11 +2,13 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
+#include <cassert>
 #include <stack>
 
-#include "node.h"
 #include "values.h"
 #include "scope.h"
+
+class Node;
 
 /* this class contains a stack of scopes, as well as information on the currently
  * executing program */
@@ -55,7 +57,10 @@ class Context {
     }
 
     /* wraps a call to the current scope's queryExecutionStatus */
-    ExecutionStatus queryExecutionStatus();
+    ExecutionStatus queryExecutionStatus() {
+        assert(programStack.empty() == false);
+        return programStack.top().queryExecutionStatus();
+    }
 
     /* sets the current scope's ExecutionStatus to the appropriate value */
     void notifyBreak();

@@ -83,3 +83,30 @@ bool operator<=(const Tstring& lhs, const Tstring& rhs) {
 bool operator!=(const Tstring& lhs, const Tstring& rhs) {
     return lhs.str != rhs.str;
 }
+
+Tstring::Tstring(const Tint& value) {
+    str = QString::number(value.toInt());
+}
+
+Tstring::Tstring(const Treal& value) {
+    str = QString::number(value.toDouble());
+}
+
+
+
+
+
+
+Tstring Tbool::toString() const {
+    return b ? Tstring("true") : Tstring("false");
+}
+
+
+Tstring Tint::toString() const {
+    return Tstring(*this);
+}
+Tstring Treal::toString() const {
+    return Tstring(*this);
+}
+
+

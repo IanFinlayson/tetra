@@ -13,6 +13,7 @@
 #include "scope.h"
 #include "symbol.h"
 #include "tetra.h"
+#include "tsl.h"
 #include "types.h"
 #include "values.h"
 #include "vartable.h"

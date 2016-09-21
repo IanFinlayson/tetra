@@ -57,7 +57,9 @@ class Scope {
 
     /* Used by loops and constrol statements to determine if they can proceed, or
      * if they should return */
-    ExecutionStatus queryExecutionStatus();
+    ExecutionStatus queryExecutionStatus() {
+        return executionStatus;
+    }
 
     /* sets the execution status to the specified value */
     void setExecutionStatus(ExecutionStatus status);

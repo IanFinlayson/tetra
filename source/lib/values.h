@@ -9,39 +9,43 @@
 
 #include "types.h"
 
-/* forward declare Tvalue - any Tetra value object */
+/* forward declare classes so they cen reference each other */
 class Tvalue;
+class Tstring;
+class Tint;
+class Treal;
+class Tbool;
 
 /* represents any piece of data in a tetra program */
 class Tdata {
    public:
     /* all of the operators */
-    Tdata opDot(const Tdata& other);
-    Tdata opAssign(const Tdata& other);
-    Tdata opOr(const Tdata& other);
-    Tdata opAnd(const Tdata& other);
-    Tdata opLt(const Tdata& other);
-    Tdata opLte(const Tdata& other);
-    Tdata opGt(const Tdata& other);
-    Tdata opGte(const Tdata& other);
-    Tdata opEq(const Tdata& other);
-    Tdata opNeq(const Tdata& other);
-    Tdata opNot(const Tdata& other);
-    Tdata opBitxor(const Tdata& other);
-    Tdata opBitand(const Tdata& other);
-    Tdata opBitor(const Tdata& other);
-    Tdata opBitnot(const Tdata& other);
-    Tdata opShiftl(const Tdata& other);
-    Tdata opShiftr(const Tdata& other);
-    Tdata opPlus(const Tdata& other);
-    Tdata opMinus(const Tdata& other);
-    Tdata opTimes(const Tdata& other);
-    Tdata opDivide(const Tdata& other);
-    Tdata opModulus(const Tdata& other);
-    Tdata opExp(const Tdata& other);
+    Tdata* opDot(const Tdata* other);
+    Tdata* opAssign(const Tdata* other);
+    Tdata* opOr(const Tdata* other);
+    Tdata* opAnd(const Tdata* other);
+    Tdata* opLt(const Tdata* other);
+    Tdata* opLte(const Tdata* other);
+    Tdata* opGt(const Tdata* other);
+    Tdata* opGte(const Tdata* other);
+    Tdata* opEq(const Tdata* other);
+    Tdata* opNeq(const Tdata* other);
+    Tdata* opNot(const Tdata* other);
+    Tdata* opBitxor(const Tdata* other);
+    Tdata* opBitand(const Tdata* other);
+    Tdata* opBitor(const Tdata* other);
+    Tdata* opBitnot(const Tdata* other);
+    Tdata* opShiftl(const Tdata* other);
+    Tdata* opShiftr(const Tdata* other);
+    Tdata* opPlus(const Tdata* other);
+    Tdata* opMinus(const Tdata* other);
+    Tdata* opTimes(const Tdata* other);
+    Tdata* opDivide(const Tdata* other);
+    Tdata* opModulus(const Tdata* other);
+    Tdata* opExp(const Tdata* other);
 
     /* create a Tdata of a given type */
-    Tdata create(DataType* type);
+    static Tdata* create(DataType* type);
 
     /* return the value of this */
     Tvalue* getValue() {
@@ -62,7 +66,9 @@ class Tdata {
 class Tvalue {
    public:
     virtual ~Tvalue() {}
+    virtual Tstring toString() const = 0;
 };
+
 
 class Tbool : public Tvalue {
    public:
@@ -84,7 +90,7 @@ class Tbool : public Tvalue {
     }
 
     /* conversion */
-    operator bool const() {
+    bool toBool() {
         return this->b;
     }
 
@@ -112,6 +118,8 @@ class Tbool : public Tvalue {
         tb.b ? os << "true" : os << "false";
         return os;
     }
+
+    Tstring toString() const;
 
    private:
     bool b;
@@ -227,6 +235,8 @@ class Tint : public Tvalue {
         return os;
     }
 
+    Tstring toString() const;
+
    private:
     int i;
 };
@@ -244,8 +254,20 @@ class Treal : public Tvalue {
         return r;
     }
 
+    Tstring toString() const;
+
    private:
     double r;
+};
+
+class Tlist : public Tvalue {
+   public:
+   private:
+};
+
+class Tnone : public Tvalue {
+   public:
+   private:
 };
 
 class Tstring : public Tvalue {
@@ -257,13 +279,9 @@ class Tstring : public Tvalue {
         str = QString(s);
     }
 
-    Tstring(Tint value) {
-        str = QString::number(value.toInt());
-    }
+    Tstring(const Tint& value);
 
-    Tstring(Treal value) {
-        str = QString::number(value.toDouble());
-    }
+    Tstring(const Treal& value);
 
     void push_back(QChar c) {
         str.push_back(c);
@@ -317,18 +335,12 @@ class Tstring : public Tvalue {
         return os;
     }
 
+    Tstring toString() const {
+        return *this;
+    }
+
    private:
     QString str;
-};
-
-class Tlist : public Tvalue {
-   public:
-   private:
-};
-
-class Tnone : public Tvalue {
-   public:
-   private:
 };
 
 #endif

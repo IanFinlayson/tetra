@@ -1,6 +1,8 @@
 #ifndef VARTABLE_H
 #define VARTABLE_H
 
+#include <map>
+
 class VarTable {
    public:
     /* returns a pointer to this variable, creating it if needed */
