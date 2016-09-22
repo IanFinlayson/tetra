@@ -1,4 +1,3 @@
 # the hello world program
 def main( ):
-    print("Hello World!")
-
+    print("Hello World!\n")

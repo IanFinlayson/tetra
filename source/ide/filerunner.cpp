@@ -40,6 +40,7 @@ void FileRunner::runFile(bool debug) {
 
     Node* program_root;
     TetraEnvironment::initialize();
+    TetraEnvironment::setConsole(this);
 
     try {
         program_root = parseFile(mainWindow->getOpenFile().toStdString().c_str());
