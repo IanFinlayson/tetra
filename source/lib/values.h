@@ -4,6 +4,7 @@
 #define VALUES_H
 
 #include <QString>
+#include <QDebug>
 #include <cmath>
 #include <iostream>
 
@@ -319,6 +320,8 @@ class Tstring : public Tvalue {
     QString str;
 };
 
+#include "error.h"
+
 /* represents any piece of data in a tetra program */
 class Tdata {
    public:
@@ -362,8 +365,26 @@ class Tdata {
         /* copy the type over */
         newData->type = *type;
 
-        /* copy the value over */
-        newData->value.copyValue(value);
+        /* set the value to be the right sub type */
+        switch (type->getKind()) {
+            case TYPE_INT:
+                newData->value = new Tint();
+                break;
+            case TYPE_REAL:
+                newData->value = new Treal();
+                break;
+            case TYPE_STRING:
+                newData->value = new Tstring();
+                break;
+            case TYPE_BOOL:
+                newData->value = new Tbool();
+                break;
+            default:
+                throw RuntimeError("Unhandled data type in Tdata::create", 0);
+        }
+
+        /* copy the actual value in */
+        newData->value->copyValue(value);
 
         /* return it */
         return newData;
@@ -371,22 +392,17 @@ class Tdata {
 
     /* return the value of this */
     Tvalue* getValue() {
-        return &value;
+        return value;
     }
 
    private:
     /* Tdata are garbage collected, so we can't create them directly
      * only by calling the create methods above */
-    Tdata() : type(TYPE_NONE), value(dummy) {}
+    Tdata() : type(TYPE_NONE), value(NULL) {}
 
     /* the data type and the actual value */
     DataType type;
-    Tvalue& value;
-
-    /* this value only exists to point the value at in the constructor above to
-     * make the compiler happy TODO add the Tnone type so this at least makes
-     * some modicum of sense */
-    Tint dummy;
+    Tvalue* value;
 };
 
 #endif
