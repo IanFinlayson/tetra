@@ -32,13 +32,14 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
         Tdata* sourceValue = evaluateExpression(node2, sourceContext);
 
         /* create a data reference for this name in the new scope */
-        Tdata* destinationValue = destinationScope->lookupVar(node1->getStringvalue());
+        Tdata* destinationValue = destinationScope->lookupVar(node1->getStringvalue(), node1->type());
 
         /* do the assignment */
         destinationValue->opAssign(sourceValue);
     }
 }
 
+/* evaluate a function call node */
 Tdata* evaluateFunctionCall(Node* node, Context* context) {
     /* check to see if this is a standard library function */
     Tstring funcName = node->child(0)->getStringvalue();
@@ -94,9 +95,15 @@ Tdata* evaluateExpression(Node* node, Context* context) {
         case NODE_FUNCALL:
             return evaluateFunctionCall(node, context);
 
-        case NODE_STRINGVAL:
-            /* TODO make a Tdata for this thingy */
-            return Tdata::create(node->type(), node->getStringvalue());
+        case NODE_STRINGVAL: {
+            /* make a Tdata for the value */
+            Tstring value = node->getStringvalue();
+            return Tdata::create(node->type(), &value);
+        }
+
+        case NODE_IDENTIFIER:
+            /* get the identifier out of the context */
+            return context->lookupVar(node->getStringvalue(), node->type());
 
         default:
             throw SystemError("Unhandled node type in eval", 0, node);

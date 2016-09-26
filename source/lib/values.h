@@ -358,7 +358,7 @@ class Tdata {
     Tdata* opExp(const Tdata* other);
 
     /* create a Tdata of a given type */
-    static Tdata* create(DataType* type, const Tvalue& value) {
+    static Tdata* create(DataType* type, const Tvalue* value) {
         /* make a new Tdata currently a memory leak - TODO gc */
         Tdata* newData = new Tdata;
 
@@ -383,8 +383,10 @@ class Tdata {
                 throw RuntimeError("Unhandled data type in Tdata::create", 0);
         }
 
-        /* copy the actual value in */
-        newData->value->copyValue(value);
+        /* copy the actual value in, if given */
+        if (value) {
+            newData->value->copyValue(*value);
+        }
 
         /* return it */
         return newData;

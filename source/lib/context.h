@@ -25,11 +25,12 @@ class Context {
 
     void initializeGlobalVars(const Node*);
 
-    Tdata* lookupVar(Tstring name) {
+    /* lookup a variable  in the present context */
+    Tdata* lookupVar(Tstring name, DataType* type) {
         if (getGlobalScopeRef().containsVar(name)) {
-            return (getGlobalScopeRef().lookupVar(name));
+            return (getGlobalScopeRef().lookupVar(name, type));
         } else {
-            return programStack.top().lookupVar(name);
+            return programStack.top().lookupVar(name, type);
         }
     }
 

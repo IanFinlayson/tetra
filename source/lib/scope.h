@@ -42,8 +42,8 @@ class Scope {
     }
 
     /* look a variable up in this scope by name */
-    Tdata* lookupVar(Tstring name) {
-        return varScope.lookupVar(name);
+    Tdata* lookupVar(Tstring name, DataType* type) {
+        return varScope.lookupVar(name, type);
     }
 
     /* Used for aliasing an array
@@ -64,8 +64,9 @@ class Scope {
     /* sets the execution status to the specified value */
     void setExecutionStatus(ExecutionStatus status);
 
-    bool containsVar(Tstring varName) const;
-    bool containsVar(const Node* varNode) const;
+    bool containsVar(const Tstring& varName) const {
+        return varScope.containsVar(varName);
+    }
 
     /* Used by the TetraContext to obtain a stack trace */
     void setCallNode(const Node* node) {
