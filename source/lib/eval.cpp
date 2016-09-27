@@ -32,7 +32,8 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
         Tdata* sourceValue = evaluateExpression(node2, sourceContext);
 
         /* create a data reference for this name in the new scope */
-        Tdata* destinationValue = destinationScope->lookupVar(node1->getStringvalue(), node1->type());
+        Tdata* destinationValue =
+            destinationScope->lookupVar(node1->getStringvalue(), node1->type());
 
         /* do the assignment */
         destinationValue->opAssign(sourceValue);
@@ -88,10 +89,26 @@ Tdata* evaluateFunctionCall(Node* node, Context* context) {
     }
 }
 
+/* evaluate any regular binary operator expression node the operatorMethod
+ * parameter refers to one of the Tdata operator methods e.g.  opOR, opAnd etc.
+ * from that class */
+Tdata* evaluateBinaryExpression(Node* node,
+                                Context* context,
+                                Tdata* (Tdata::*operatorMethod)(const Tdata*) ) {
+    /* evaluate both of the children */
+    Tdata* lhs = evaluateExpression(node->child(0), context);
+    Tdata* rhs = evaluateExpression(node->child(1), context);
+
+    /* call the operator method on the left, passing the right, and return the
+     * result */
+    return (lhs->*operatorMethod)(rhs);
+}
+
 /* evaluates operations on data types and returns the value */
 Tdata* evaluateExpression(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
     switch (node->kind()) {
+        /* evaluate the function call using the function above */
         case NODE_FUNCALL:
             return evaluateFunctionCall(node, context);
 
@@ -101,8 +118,59 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return Tdata::create(node->type(), &value);
         }
 
+        case NODE_INTVAL: {
+            /* make a Tdata for the value */
+            Tint value = node->getIntvalue();
+            return Tdata::create(node->type(), &value);
+        }
+
+        /* for all of these, we can simply call the binary expression function with
+         * the appropriate method parameter */
+        case NODE_ASSIGN:
+            return evaluateBinaryExpression(node, context, &Tdata::opAssign);
+        // case NODE_OR:
+        // return evaluateBinaryExpression(node, context, &Tdata::opOr);
+        // case NODE_AND:
+        // return evaluateBinaryExpression(node, context, &Tdata::opAnd);
+        // case NODE_LT:
+        // return evaluateBinaryExpression(node, context, &Tdata::opLt);
+        // case NODE_LTE:
+        // return evaluateBinaryExpression(node, context, &Tdata::opLte);
+        // case NODE_GT:
+        // return evaluateBinaryExpression(node, context, &Tdata::opGt);
+        // case NODE_GTE:
+        // return evaluateBinaryExpression(node, context, &Tdata::opGte);
+        // case NODE_EQ:
+        // return evaluateBinaryExpression(node, context, &Tdata::opEq);
+        // case NODE_NEQ:
+        // return evaluateBinaryExpression(node, context, &Tdata::opNeq);
+        // case NODE_BITXOR:
+        // return evaluateBinaryExpression(node, context, &Tdata::opBitxor);
+        // case NODE_BITAND:
+        // return evaluateBinaryExpression(node, context, &Tdata::opBitand);
+        // case NODE_BITOR:
+        // return evaluateBinaryExpression(node, context, &Tdata::opBitor);
+        // case NODE_SHIFTL:
+        // return evaluateBinaryExpression(node, context, &Tdata::opShiftl);
+        // case NODE_SHIFTR:
+        // return evaluateBinaryExpression(node, context, &Tdata::opShiftr);
+        case NODE_PLUS:
+            return evaluateBinaryExpression(node, context, &Tdata::opPlus);
+        // case NODE_MINUS:
+        // return evaluateBinaryExpression(node, context, &Tdata::opMinus);
+        // case NODE_TIMES:
+        // return evaluateBinaryExpression(node, context, &Tdata::opTimes);
+        // case NODE_DIVIDE:
+        // return evaluateBinaryExpression(node, context, &Tdata::opDivide);
+        // case NODE_MODULUS:
+        // return evaluateBinaryExpression(node, context, &Tdata::opModulus);
+        // case NODE_EXP:
+        // return evaluateBinaryExpression(node, context, &Tdata::opExp);
+        // case NODE_DOT:
+        // return evaluateBinaryExpression(node, context, &Tdata::opDot);
+
+        /* simply get the identifier out of the context */
         case NODE_IDENTIFIER:
-            /* get the identifier out of the context */
             return context->lookupVar(node->getStringvalue(), node->type());
 
         default:

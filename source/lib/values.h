@@ -219,6 +219,12 @@ class Treal : public Tvalue {
         return *this;
     }
 
+    Treal operator+(const Treal& other) {
+        Treal result;
+        result.r = r + other.r;
+        return result;
+    }
+
     double toDouble() const {
         return r;
     }
@@ -325,8 +331,6 @@ class Tstring : public Tvalue {
 /* represents any piece of data in a tetra program */
 class Tdata {
    public:
-    /* all of the operators */
-    Tdata* opDot(const Tdata* other);
     Tdata* opAssign(const Tdata* other) {
         /* copy our data type and also value */
         this->type = other->type;
@@ -335,27 +339,114 @@ class Tdata {
         /* return a pointer to this Tdata */
         return this;
     }
-    Tdata* opOr(const Tdata* other);
-    Tdata* opAnd(const Tdata* other);
-    Tdata* opLt(const Tdata* other);
-    Tdata* opLte(const Tdata* other);
-    Tdata* opGt(const Tdata* other);
-    Tdata* opGte(const Tdata* other);
-    Tdata* opEq(const Tdata* other);
-    Tdata* opNeq(const Tdata* other);
-    Tdata* opNot(const Tdata* other);
-    Tdata* opBitxor(const Tdata* other);
-    Tdata* opBitand(const Tdata* other);
-    Tdata* opBitor(const Tdata* other);
-    Tdata* opBitnot(const Tdata* other);
-    Tdata* opShiftl(const Tdata* other);
-    Tdata* opShiftr(const Tdata* other);
-    Tdata* opPlus(const Tdata* other);
-    Tdata* opMinus(const Tdata* other);
-    Tdata* opTimes(const Tdata* other);
-    Tdata* opDivide(const Tdata* other);
-    Tdata* opModulus(const Tdata* other);
-    Tdata* opExp(const Tdata* other);
+
+    Tdata* opPlus(const Tdata* other) {
+        /* create the result variable */
+        Tdata* result = create(&type, NULL);
+
+        /* do different things depending on type TODO what happens with real+int etc. */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(*((Tint*) value) + *((Tint*) other->value));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(*((Treal*) value) + *((Treal*) other->value));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(*((Tstring*) value) + *((Tstring*) other->value));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to + operator", 0);
+        }
+
+        return result;
+    }
+
+    /* TODO add the rest of these */
+    Tdata* opOr(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opAnd(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opLt(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opLte(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opGt(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opGte(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opEq(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opNeq(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opNot(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opBitxor(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opBitand(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opBitor(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opBitnot(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opShiftl(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opShiftr(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opMinus(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opTimes(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opDivide(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opModulus(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opExp(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
+    Tdata* opDot(const Tdata* other) {
+        UNUSED(other);
+        return NULL;
+    }
 
     /* create a Tdata of a given type */
     static Tdata* create(DataType* type, const Tvalue* value) {
@@ -408,5 +499,3 @@ class Tdata {
 };
 
 #endif
-
-
