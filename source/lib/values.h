@@ -225,6 +225,36 @@ class Treal : public Tvalue {
         return result;
     }
 
+    Treal operator-(const Treal& other) {
+        Treal result;
+        result.r = r - other.r;
+        return result;
+    }
+
+    Treal operator%(const Treal& other) {
+        Treal result;
+        result.r = fmod(r, other.r);
+        return result;
+    }
+
+    Treal operator/(const Treal& other) {
+        Treal result;
+        result.r = r / other.r;
+        return result;
+    }
+
+    Treal operator*(const Treal& other) {
+        Treal result;
+        result.r = r * other.r;
+        return result;
+    }
+
+    Treal pow(const Treal& other) {
+        Treal result;
+        result.r = std::pow(r, other.r);
+        return result;
+    }
+
     double toDouble() const {
         return r;
     }
@@ -362,6 +392,104 @@ class Tdata {
         return result;
     }
 
+    Tdata* opMinus(const Tdata* other) {
+        /* create the result variable */
+        Tdata* result = create(&type, NULL);
+
+        /* do different things depending on type TODO what happens with real-int etc. */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(*((Tint*) value) - *((Tint*) other->value));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(*((Treal*) value) - *((Treal*) other->value));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to - operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opTimes(const Tdata* other) {
+        /* create the result variable */
+        Tdata* result = create(&type, NULL);
+
+        /* do different things depending on type TODO what happens with real*int etc. */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(*((Tint*) value) * *((Tint*) other->value));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(*((Treal*) value) * *((Treal*) other->value));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to * operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opDivide(const Tdata* other) {
+        /* create the result variable */
+        Tdata* result = create(&type, NULL);
+
+        /* do different things depending on type TODO what happens with real/int etc. */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(*((Tint*) value) / *((Tint*) other->value));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(*((Treal*) value) / *((Treal*) other->value));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to / operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opModulus(const Tdata* other) {
+        /* create the result variable */
+        Tdata* result = create(&type, NULL);
+
+        /* this onw only works for integers */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(*((Tint*) value) % *((Tint*) other->value));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(*((Treal*) value) % *((Treal*) other->value));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to % operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opExp(const Tdata* other) {
+        /* create the result variable */
+        Tdata* result = create(&type, NULL);
+
+        /* do different things depending on type TODO what happens with real**int etc. */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(((Tint*) value)->pow(*((Tint*) other->value)));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(((Treal*) value)->pow(*((Treal*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to ** operator", 0);
+        }
+
+        return result;
+    }
+    
+
+
+
     /* TODO add the rest of these */
     Tdata* opOr(const Tdata* other) {
         UNUSED(other);
@@ -420,26 +548,6 @@ class Tdata {
         return NULL;
     }
     Tdata* opShiftr(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opMinus(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opTimes(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opDivide(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opModulus(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opExp(const Tdata* other) {
         UNUSED(other);
         return NULL;
     }

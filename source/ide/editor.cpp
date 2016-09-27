@@ -164,7 +164,7 @@ void Editor::inferTabWidth(QString fileText) {
         QString line = lines.at(i);
 
         /* if this line starts with a space */
-        if (line.at(0) == ' ') {
+        if (line.length() >= 1 && line.at(0) == ' ') {
             /* count them */
             int spaces = 1;
 

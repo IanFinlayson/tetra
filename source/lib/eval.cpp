@@ -118,9 +118,21 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return Tdata::create(node->type(), &value);
         }
 
+        case NODE_REALVAL: {
+            /* make a Tdata for the value */
+            Treal value = node->getRealvalue();
+            return Tdata::create(node->type(), &value);
+        }
+
         case NODE_INTVAL: {
             /* make a Tdata for the value */
             Tint value = node->getIntvalue();
+            return Tdata::create(node->type(), &value);
+        }
+
+        case NODE_BOOLVAL: {
+            /* make a Tdata for the value */
+            Tbool value = node->getBoolvalue();
             return Tdata::create(node->type(), &value);
         }
 
@@ -156,16 +168,16 @@ Tdata* evaluateExpression(Node* node, Context* context) {
         // return evaluateBinaryExpression(node, context, &Tdata::opShiftr);
         case NODE_PLUS:
             return evaluateBinaryExpression(node, context, &Tdata::opPlus);
-        // case NODE_MINUS:
-        // return evaluateBinaryExpression(node, context, &Tdata::opMinus);
-        // case NODE_TIMES:
-        // return evaluateBinaryExpression(node, context, &Tdata::opTimes);
-        // case NODE_DIVIDE:
-        // return evaluateBinaryExpression(node, context, &Tdata::opDivide);
-        // case NODE_MODULUS:
-        // return evaluateBinaryExpression(node, context, &Tdata::opModulus);
-        // case NODE_EXP:
-        // return evaluateBinaryExpression(node, context, &Tdata::opExp);
+        case NODE_MINUS:
+            return evaluateBinaryExpression(node, context, &Tdata::opMinus);
+         case NODE_TIMES:
+             return evaluateBinaryExpression(node, context, &Tdata::opTimes);
+         case NODE_DIVIDE:
+             return evaluateBinaryExpression(node, context, &Tdata::opDivide);
+         case NODE_MODULUS:
+             return evaluateBinaryExpression(node, context, &Tdata::opModulus);
+         case NODE_EXP:
+             return evaluateBinaryExpression(node, context, &Tdata::opExp);
         // case NODE_DOT:
         // return evaluateBinaryExpression(node, context, &Tdata::opDot);
 
