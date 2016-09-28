@@ -8,7 +8,7 @@ def fact(x int) int:
 
 def main( ):
     print("Enter n: ")
-    n = read_int()
+    n = 5
     print(n, "! = ", fact(n))
 
 

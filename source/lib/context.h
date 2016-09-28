@@ -68,7 +68,9 @@ class Context {
     /* sets the current scope's ExecutionStatus to the appropriate value */
     void notifyBreak();
     void notifyContinue();
-    void notifyReturn();
+    void notifyReturn() {
+        programStack.top().setExecutionStatus(RETURN);
+    }
     void notifyElif();
     void notifyParallel();
 

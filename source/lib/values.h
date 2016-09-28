@@ -237,6 +237,10 @@ class Treal : public Tvalue {
         return result;
     }
 
+    bool operator==(const Treal& other) {
+        return r == other.r;
+    }
+
     Treal operator/(const Treal& other) {
         Treal result;
         result.r = r / other.r;
@@ -453,7 +457,7 @@ class Tdata {
         /* create the result variable */
         Tdata* result = create(&type, NULL);
 
-        /* this onw only works for integers */
+        /* do different things depending on type TODO what happens with real%int etc. */
         switch (type.getKind()) {
             case TYPE_INT:
                 result->value->copyValue(*((Tint*) value) % *((Tint*) other->value));
@@ -475,20 +479,42 @@ class Tdata {
         /* do different things depending on type TODO what happens with real**int etc. */
         switch (type.getKind()) {
             case TYPE_INT:
-                result->value->copyValue(((Tint*) value)->pow(*((Tint*) other->value)));
-                break;
+                result->value->copyValue(*((Tint*) value) % *((Tint*) other->value));
             case TYPE_REAL:
                 result->value->copyValue(((Treal*) value)->pow(*((Treal*) other->value)));
-                break;
             default:
                 throw RuntimeError("Unhandled operands to ** operator", 0);
         }
 
         return result;
     }
-    
 
+    Tdata* opEq(const Tdata* other) {
+        /* create the bool we'll return */
+        DataType boolType(TYPE_BOOL);
+        Tdata* result = create(&boolType, NULL);
 
+        /* compare based on the types */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(Tbool((*((Tint*) value)) == (*((Tint*) other->value))));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(Tbool((*((Treal*) value)) == (*((Treal*) other->value))));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(
+                    Tbool((*((Tstring*) value)) == (*((Tstring*) other->value))));
+                break;
+            case TYPE_BOOL:
+                result->value->copyValue(Tbool((*((Tbool*) value)) == (*((Tbool*) other->value))));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to == operator", 0);
+        }
+
+        return result;
+    }
 
     /* TODO add the rest of these */
     Tdata* opOr(const Tdata* other) {
@@ -512,10 +538,6 @@ class Tdata {
         return NULL;
     }
     Tdata* opGte(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opEq(const Tdata* other) {
         UNUSED(other);
         return NULL;
     }

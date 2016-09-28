@@ -44,6 +44,7 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
 Tdata* evaluateFunctionCall(Node* node, Context* context) {
     /* check to see if this is a standard library function */
     Tstring funcName = node->child(0)->getStringvalue();
+
     if (funcName == "print") {
         if (node->child(1) != NULL) {
             return tslPrint(node->child(1), context);
@@ -152,8 +153,8 @@ Tdata* evaluateExpression(Node* node, Context* context) {
         // return evaluateBinaryExpression(node, context, &Tdata::opGt);
         // case NODE_GTE:
         // return evaluateBinaryExpression(node, context, &Tdata::opGte);
-        // case NODE_EQ:
-        // return evaluateBinaryExpression(node, context, &Tdata::opEq);
+        case NODE_EQ:
+            return evaluateBinaryExpression(node, context, &Tdata::opEq);
         // case NODE_NEQ:
         // return evaluateBinaryExpression(node, context, &Tdata::opNeq);
         // case NODE_BITXOR:
@@ -170,14 +171,14 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateBinaryExpression(node, context, &Tdata::opPlus);
         case NODE_MINUS:
             return evaluateBinaryExpression(node, context, &Tdata::opMinus);
-         case NODE_TIMES:
-             return evaluateBinaryExpression(node, context, &Tdata::opTimes);
-         case NODE_DIVIDE:
-             return evaluateBinaryExpression(node, context, &Tdata::opDivide);
-         case NODE_MODULUS:
-             return evaluateBinaryExpression(node, context, &Tdata::opModulus);
-         case NODE_EXP:
-             return evaluateBinaryExpression(node, context, &Tdata::opExp);
+        case NODE_TIMES:
+            return evaluateBinaryExpression(node, context, &Tdata::opTimes);
+        case NODE_DIVIDE:
+            return evaluateBinaryExpression(node, context, &Tdata::opDivide);
+        case NODE_MODULUS:
+            return evaluateBinaryExpression(node, context, &Tdata::opModulus);
+        case NODE_EXP:
+            return evaluateBinaryExpression(node, context, &Tdata::opExp);
         // case NODE_DOT:
         // return evaluateBinaryExpression(node, context, &Tdata::opDot);
 
@@ -198,9 +199,9 @@ Tdata* evaluateStatement(Node* node, Context* context) {
         case NODE_FUNCTION: {
             /* if there were no arguments, child 0 is the body, else child 1 */
             if (node->getNumChildren() == 1) {
-                evaluateStatement(node->child(0), context);
+                return evaluateStatement(node->child(0), context);
             } else {
-                evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context);
             }
         } break;
 
@@ -211,7 +212,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             /* if it didn't result in a break of some kind, do the second one */
             ExecutionStatus status = context->queryExecutionStatus();
             if (status != RETURN && status != BREAK && status != CONTINUE) {
-                evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context);
 
                 /* if it is a return, we return that value back */
             } else if (status == RETURN) {
@@ -219,16 +220,30 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
+        case NODE_RETURN: {
+            /* the return value, if any */
+            Tdata* returnValue = NULL;
+
+            /* check if there is a child to return or not */
+            if (node->child(0)) {
+                /* evaluate the expression */
+                returnValue = evaluateExpression(node->child(0), context);
+            }
+
+            context->notifyReturn();
+            return returnValue;
+        }
+
         case NODE_IF: {
             /* evaluate the conditional expression */
             Tdata* conditional = evaluateExpression(node->child(0), context);
             /* if true execute the 2nd child */
             if (dynamic_cast<Tbool*>(conditional->getValue())->toBool()) {
-                evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context);
             } else {
                 /* check for else block and execute it if it exists */
                 if (node->child(2) != NULL) {
-                    evaluateStatement(node->child(2), context);
+                    return evaluateStatement(node->child(2), context);
                 }
             }
         } break;

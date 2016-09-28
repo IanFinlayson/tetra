@@ -62,7 +62,9 @@ class Scope {
     }
 
     /* sets the execution status to the specified value */
-    void setExecutionStatus(ExecutionStatus status);
+    void setExecutionStatus(ExecutionStatus status) {
+        executionStatus = status;
+    }
 
     bool containsVar(const Tstring& varName) const {
         return varScope.containsVar(varName);
