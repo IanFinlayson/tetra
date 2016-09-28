@@ -75,7 +75,9 @@ class Context {
     void notifyParallel();
 
     /* sets the current scope's executionStatus to NORMAL */
-    void normalizeStatus();
+    void normalizeStatus() {
+        programStack.top().setExecutionStatus(NORMAL);
+    }
 
     /* declares  variable that can have different values across different threads */
     std::list<std::pair<pthread_t, Tdata> >& declareThreadSpecificVariable(const Tstring&);

@@ -200,9 +200,6 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return operand->opNot();
         }
 
-        // case NODE_DOT:
-        // return evaluateBinaryExpression(node, context, &Tdata::opDot);
-
         /* simply get the identifier out of the context */
         case NODE_IDENTIFIER:
             return context->lookupVar(node->getStringvalue(), node->type());
@@ -266,6 +263,40 @@ Tdata* evaluateStatement(Node* node, Context* context) {
                 if (node->child(2) != NULL) {
                     return evaluateStatement(node->child(2), context);
                 }
+            }
+        } break;
+
+        case NODE_WHILE: {
+            /* evaluate the condition */
+            Tdata* conditional = evaluateExpression(node->child(0), context);
+
+            /* while it is true */
+            while (((Tbool*)conditional->getValue())->toBool()) {
+
+                /* evaluate the loop body */
+                Tdata* returnValue = evaluateStatement(node->child(1), context);
+
+                /* check the execution status */
+                ExecutionStatus status = context->queryExecutionStatus();
+
+                /* if we returned, pass the value up */
+                if (status == RETURN) {
+                    return returnValue;
+                }
+
+                /* if we broke, reset status and break out of the loop */
+                if (status == BREAK) {
+                    context->normalizeStatus();
+                    break;
+                }
+
+                /* if we continued, just reset status and carry on */
+                if (status == CONTINUE) {
+                    context->normalizeStatus();
+                }
+
+                /* recheck the condition */
+                conditional = evaluateExpression(node->child(0), context);
             }
         } break;
 
