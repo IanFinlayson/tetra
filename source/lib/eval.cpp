@@ -141,32 +141,36 @@ Tdata* evaluateExpression(Node* node, Context* context) {
          * the appropriate method parameter */
         case NODE_ASSIGN:
             return evaluateBinaryExpression(node, context, &Tdata::opAssign);
-        // case NODE_OR:
-        // return evaluateBinaryExpression(node, context, &Tdata::opOr);
-        // case NODE_AND:
-        // return evaluateBinaryExpression(node, context, &Tdata::opAnd);
-        // case NODE_LT:
-        // return evaluateBinaryExpression(node, context, &Tdata::opLt);
-        // case NODE_LTE:
-        // return evaluateBinaryExpression(node, context, &Tdata::opLte);
-        // case NODE_GT:
-        // return evaluateBinaryExpression(node, context, &Tdata::opGt);
-        // case NODE_GTE:
-        // return evaluateBinaryExpression(node, context, &Tdata::opGte);
+
+        case NODE_OR:
+            return evaluateBinaryExpression(node, context, &Tdata::opOr);
+        case NODE_AND:
+            return evaluateBinaryExpression(node, context, &Tdata::opAnd);
+
+        case NODE_LT:
+            return evaluateBinaryExpression(node, context, &Tdata::opLt);
+        case NODE_LTE:
+            return evaluateBinaryExpression(node, context, &Tdata::opLte);
+        case NODE_GT:
+            return evaluateBinaryExpression(node, context, &Tdata::opGt);
+        case NODE_GTE:
+            return evaluateBinaryExpression(node, context, &Tdata::opGte);
         case NODE_EQ:
             return evaluateBinaryExpression(node, context, &Tdata::opEq);
-        // case NODE_NEQ:
-        // return evaluateBinaryExpression(node, context, &Tdata::opNeq);
-        // case NODE_BITXOR:
-        // return evaluateBinaryExpression(node, context, &Tdata::opBitxor);
-        // case NODE_BITAND:
-        // return evaluateBinaryExpression(node, context, &Tdata::opBitand);
-        // case NODE_BITOR:
-        // return evaluateBinaryExpression(node, context, &Tdata::opBitor);
-        // case NODE_SHIFTL:
-        // return evaluateBinaryExpression(node, context, &Tdata::opShiftl);
-        // case NODE_SHIFTR:
-        // return evaluateBinaryExpression(node, context, &Tdata::opShiftr);
+        case NODE_NEQ:
+            return evaluateBinaryExpression(node, context, &Tdata::opNeq);
+
+        case NODE_BITXOR:
+            return evaluateBinaryExpression(node, context, &Tdata::opBitxor);
+        case NODE_BITAND:
+            return evaluateBinaryExpression(node, context, &Tdata::opBitand);
+        case NODE_BITOR:
+            return evaluateBinaryExpression(node, context, &Tdata::opBitor);
+        case NODE_SHIFTL:
+            return evaluateBinaryExpression(node, context, &Tdata::opShiftl);
+        case NODE_SHIFTR:
+            return evaluateBinaryExpression(node, context, &Tdata::opShiftr);
+
         case NODE_PLUS:
             return evaluateBinaryExpression(node, context, &Tdata::opPlus);
         case NODE_MINUS:
@@ -179,6 +183,23 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateBinaryExpression(node, context, &Tdata::opModulus);
         case NODE_EXP:
             return evaluateBinaryExpression(node, context, &Tdata::opExp);
+
+        case NODE_BITNOT: {
+            /* evaluate the child */
+            Tdata* operand = evaluateExpression(node->child(0), context);
+
+            /* return the not of this */
+            return operand->opBitnot();
+        }
+
+        case NODE_NOT: {
+            /* evaluate the child */
+            Tdata* operand = evaluateExpression(node->child(0), context);
+
+            /* return the not of this */
+            return operand->opNot();
+        }
+
         // case NODE_DOT:
         // return evaluateBinaryExpression(node, context, &Tdata::opDot);
 

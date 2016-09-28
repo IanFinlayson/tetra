@@ -240,6 +240,21 @@ class Treal : public Tvalue {
     bool operator==(const Treal& other) {
         return r == other.r;
     }
+    bool operator!=(const Treal& other) {
+        return r != other.r;
+    }
+    bool operator<=(const Treal& other) {
+        return r <= other.r;
+    }
+    bool operator>=(const Treal& other) {
+        return r >= other.r;
+    }
+    bool operator<(const Treal& other) {
+        return r < other.r;
+    }
+    bool operator>(const Treal& other) {
+        return r > other.r;
+    }
 
     Treal operator/(const Treal& other) {
         Treal result;
@@ -374,6 +389,9 @@ class Tdata {
         return this;
     }
 
+    /* operator methods
+     * TODO: a lot of duplication here, how can these best be generalized?
+     */
     Tdata* opPlus(const Tdata* other) {
         /* create the result variable */
         Tdata* result = create(&type, NULL);
@@ -516,63 +534,278 @@ class Tdata {
         return result;
     }
 
-    /* TODO add the rest of these */
-    Tdata* opOr(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
-    Tdata* opAnd(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
     Tdata* opLt(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the bool we'll return */
+        DataType boolType(TYPE_BOOL);
+        Tdata* result = create(&boolType, NULL);
+
+        /* compare based on the types */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(Tbool((*((Tint*) value)) < (*((Tint*) other->value))));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(Tbool((*((Treal*) value)) < (*((Treal*) other->value))));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(
+                    Tbool((*((Tstring*) value)) < (*((Tstring*) other->value))));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to < operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opLte(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the bool we'll return */
+        DataType boolType(TYPE_BOOL);
+        Tdata* result = create(&boolType, NULL);
+
+        /* compare based on the types */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(Tbool((*((Tint*) value)) <= (*((Tint*) other->value))));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(Tbool((*((Treal*) value)) <= (*((Treal*) other->value))));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(
+                    Tbool((*((Tstring*) value)) <= (*((Tstring*) other->value))));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to <= operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opGt(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the bool we'll return */
+        DataType boolType(TYPE_BOOL);
+        Tdata* result = create(&boolType, NULL);
+
+        /* compare based on the types */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(Tbool((*((Tint*) value)) > (*((Tint*) other->value))));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(Tbool((*((Treal*) value)) > (*((Treal*) other->value))));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(
+                    Tbool((*((Tstring*) value)) > (*((Tstring*) other->value))));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to > operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opGte(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the bool we'll return */
+        DataType boolType(TYPE_BOOL);
+        Tdata* result = create(&boolType, NULL);
+
+        /* compare based on the types */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(Tbool((*((Tint*) value)) >= (*((Tint*) other->value))));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(Tbool((*((Treal*) value)) >= (*((Treal*) other->value))));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(
+                    Tbool((*((Tstring*) value)) >= (*((Tstring*) other->value))));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to >= operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opNeq(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the bool we'll return */
+        DataType boolType(TYPE_BOOL);
+        Tdata* result = create(&boolType, NULL);
+
+        /* compare based on the types */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(Tbool((*((Tint*) value)) != (*((Tint*) other->value))));
+                break;
+            case TYPE_REAL:
+                result->value->copyValue(Tbool((*((Treal*) value)) != (*((Treal*) other->value))));
+                break;
+            case TYPE_STRING:
+                result->value->copyValue(
+                    Tbool((*((Tstring*) value)) != (*((Tstring*) other->value))));
+                break;
+            case TYPE_BOOL:
+                result->value->copyValue(Tbool((*((Tbool*) value)) != (*((Tbool*) other->value))));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to != operator", 0);
+        }
+
+        return result;
     }
-    Tdata* opNot(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
-    }
+
     Tdata* opBitxor(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only ints are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue((*((Tint*) value)) ^ (*((Tint*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to ^ operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opBitand(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only ints are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue((*((Tint*) value)) & (*((Tint*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to & operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opBitor(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only ints are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue((*((Tint*) value)) | (*((Tint*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to | operator", 0);
+        }
+
+        return result;
     }
-    Tdata* opBitnot(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+
+    Tdata* opBitnot() {
+        /* create the result */
+        Tdata* result = create(&type, NULL);
+
+        /* only ints are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue(~(*((Tint*) value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to ~ operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opShiftl(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only ints are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue((*((Tint*) value)) << (*((Tint*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to << operator", 0);
+        }
+
+        return result;
     }
+
     Tdata* opShiftr(const Tdata* other) {
-        UNUSED(other);
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only ints are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_INT:
+                result->value->copyValue((*((Tint*) value)) >> (*((Tint*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to >> operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opOr(const Tdata* other) {
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only bools are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_BOOL:
+                result->value->copyValue((*((Tbool*) value)) || (*((Tbool*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to or operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opAnd(const Tdata* other) {
+        /* create the resulting value */
+        Tdata* result = create(&type, NULL);
+
+        /* only bools are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_BOOL:
+                result->value->copyValue((*((Tbool*) value)) && (*((Tbool*) other->value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to and operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opNot() {
+        /* create the result */
+        Tdata* result = create(&type, NULL);
+
+        /* only bools are allowed for this */
+        switch (type.getKind()) {
+            case TYPE_BOOL:
+                result->value->copyValue(!(*((Tbool*) value)));
+                break;
+            default:
+                throw RuntimeError("Unhandled operands to not operator", 0);
+        }
+
+        return result;
+    }
+
+    Tdata* opNegate() {
         return NULL;
     }
+
+    /* TODO add the rest of these */
     Tdata* opDot(const Tdata* other) {
         UNUSED(other);
         return NULL;
