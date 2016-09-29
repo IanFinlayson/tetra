@@ -105,6 +105,20 @@ Tdata* evaluateBinaryExpression(Node* node,
     return (lhs->*operatorMethod)(rhs);
 }
 
+/* fill a list from the children nodes of a list value node */
+void fillList(Tlist* list, Node* node, Context* context) {
+    /* evaluate the first item */
+    Tdata* first = evaluateExpression(node->child(0), context);
+
+    /* add it to the list */
+    list->append(first);
+
+    /* recursively add the rest of the list if there is one */
+    if (node->getNumChildren() == 2) {
+        fillList(list, node->child(1), context);
+    }
+}
+
 /* evaluates operations on data types and returns the value */
 Tdata* evaluateExpression(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
@@ -135,6 +149,19 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             /* make a Tdata for the value */
             Tbool value = node->getBoolvalue();
             return Tdata::create(node->type(), &value);
+        }
+
+        case NODE_LISTVAL: {
+            /* make a list data structure */
+            Tlist l;
+            /* if there are data elements, get them */
+            if (node->getNumChildren() > 0) {
+                fillList(&l, node, context);
+            }
+
+            /* wrap this list in a tdata */
+            Tdata* list = Tdata::create(node->type(), &l);
+            return list;
         }
 
         /* for all of these, we can simply call the binary expression function with

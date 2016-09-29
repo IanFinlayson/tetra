@@ -102,3 +102,22 @@ Tstring Tint::toString() const {
 Tstring Treal::toString() const {
     return Tstring(*this);
 }
+
+
+
+Tstring Tlist::toString() const {
+    Tstring result = "[";
+
+    for (unsigned i = 0; i < values.size(); i++) {
+        result += values[i]->getValue()->toString();
+
+        /* if not the last, print a comma */
+        if ((i + 1) < values.size()) {
+            result += ", ";
+        }
+    }
+
+    result += "]";
+    return result;
+}
+

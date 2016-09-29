@@ -288,11 +288,6 @@ class Treal : public Tvalue {
     double r;
 };
 
-class Tlist : public Tvalue {
-   public:
-   private:
-};
-
 class Tnone : public Tvalue {
    public:
    private:
@@ -376,6 +371,57 @@ class Tstring : public Tvalue {
 };
 
 #include "error.h"
+
+/* the Tlist class */
+class Tlist : public Tvalue {
+   public:
+    Tstring toString() const;
+
+    void copyValue(const Tvalue& other) {
+        /* clear our data first */
+        values.clear();
+
+        /* cast it to a list */
+        Tlist* otherList = (Tlist*) &other;
+
+        /* copy each element */
+        for (unsigned i = 0; i < otherList->values.size(); i++) {
+            values.push_back(otherList->values[i]);
+        }
+    }
+
+    /* set an element of the array at a given index */
+    Tdata*& operator[](unsigned int index) {
+        if (index > values.size()) {
+            throw RuntimeError("List index out of bounds.", 0);
+        } else {
+            return values[index];
+        }
+    }
+
+    /* get an element at a index */
+    Tdata* operator[](unsigned int index) const {
+        if (index > values.size()) {
+            throw RuntimeError("List index out of bounds.", 0);
+        } else {
+            return values[index]; 
+        }
+    }
+
+    /* append an element to the list */
+    void append(Tdata* element) {
+        values.push_back(element);
+    }
+
+    /* get the length of the list */
+    int length() const {
+        return values.size();
+    }
+
+   private:
+    std::vector<Tdata*> values;
+};
+
 
 /* represents any piece of data in a tetra program */
 class Tdata {
@@ -833,6 +879,9 @@ class Tdata {
             case TYPE_BOOL:
                 newData->value = new Tbool();
                 break;
+            case TYPE_LIST:
+                newData->value = new Tlist();
+                break; 
             default:
                 throw RuntimeError("Unhandled data type in Tdata::create", 0);
         }
@@ -849,6 +898,11 @@ class Tdata {
     /* return the value of this */
     Tvalue* getValue() {
         return value;
+    }
+
+    /* return the data type of this */
+    DataType* getType() {
+        return &type;
     }
 
    private:
