@@ -390,6 +390,23 @@ class Tlist : public Tvalue {
         }
     }
 
+    /* concatenate two lists */
+    Tlist operator+(const Tlist& other) {
+        Tlist result;
+
+        /* copy from lhs */
+        for (unsigned i = 0; i < values.size(); i++) {
+            result.values.push_back(values[i]);
+        }
+
+        /* copy from rhs */
+        for (unsigned i = 0; i < other.values.size(); i++) {
+            result.values.push_back(other.values[i]);
+        }
+
+        return result;
+    }
+
     /* set an element of the array at a given index */
     Tdata*& operator[](unsigned int index) {
         if (index > values.size()) {
@@ -404,7 +421,7 @@ class Tlist : public Tvalue {
         if (index > values.size()) {
             throw RuntimeError("List index out of bounds.", 0);
         } else {
-            return values[index]; 
+            return values[index];
         }
     }
 
@@ -421,7 +438,6 @@ class Tlist : public Tvalue {
    private:
     std::vector<Tdata*> values;
 };
-
 
 /* represents any piece of data in a tetra program */
 class Tdata {
@@ -452,6 +468,9 @@ class Tdata {
                 break;
             case TYPE_STRING:
                 result->value->copyValue(*((Tstring*) value) + *((Tstring*) other->value));
+                break;
+            case TYPE_LIST:
+                result->value->copyValue(*((Tlist*) value) + *((Tlist*) other->value));
                 break;
             default:
                 throw RuntimeError("Unhandled operands to + operator", 0);
@@ -851,10 +870,14 @@ class Tdata {
         return NULL;
     }
 
-    /* TODO add the rest of these */
-    Tdata* opDot(const Tdata* other) {
-        UNUSED(other);
-        return NULL;
+    Tdata* opIndex(const Tdata* other) {
+        /* TODO add strings as well */
+        switch (type.getKind()) {
+            case TYPE_LIST:
+                return ((Tlist*) value)->operator[](((Tint*) other->value)->toInt());
+            default:
+                throw RuntimeError("Unhandled operands to not operator", 0);
+        }
     }
 
     /* create a Tdata of a given type */
@@ -881,7 +904,7 @@ class Tdata {
                 break;
             case TYPE_LIST:
                 newData->value = new Tlist();
-                break; 
+                break;
             default:
                 throw RuntimeError("Unhandled data type in Tdata::create", 0);
         }

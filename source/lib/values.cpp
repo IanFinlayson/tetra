@@ -103,8 +103,6 @@ Tstring Treal::toString() const {
     return Tstring(*this);
 }
 
-
-
 Tstring Tlist::toString() const {
     Tstring result = "[";
 
@@ -120,4 +118,3 @@ Tstring Tlist::toString() const {
     result += "]";
     return result;
 }
-

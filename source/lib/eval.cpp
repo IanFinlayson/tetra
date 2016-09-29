@@ -168,12 +168,10 @@ Tdata* evaluateExpression(Node* node, Context* context) {
          * the appropriate method parameter */
         case NODE_ASSIGN:
             return evaluateBinaryExpression(node, context, &Tdata::opAssign);
-
         case NODE_OR:
             return evaluateBinaryExpression(node, context, &Tdata::opOr);
         case NODE_AND:
             return evaluateBinaryExpression(node, context, &Tdata::opAnd);
-
         case NODE_LT:
             return evaluateBinaryExpression(node, context, &Tdata::opLt);
         case NODE_LTE:
@@ -186,7 +184,6 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateBinaryExpression(node, context, &Tdata::opEq);
         case NODE_NEQ:
             return evaluateBinaryExpression(node, context, &Tdata::opNeq);
-
         case NODE_BITXOR:
             return evaluateBinaryExpression(node, context, &Tdata::opBitxor);
         case NODE_BITAND:
@@ -197,7 +194,6 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateBinaryExpression(node, context, &Tdata::opShiftl);
         case NODE_SHIFTR:
             return evaluateBinaryExpression(node, context, &Tdata::opShiftr);
-
         case NODE_PLUS:
             return evaluateBinaryExpression(node, context, &Tdata::opPlus);
         case NODE_MINUS:
@@ -225,6 +221,15 @@ Tdata* evaluateExpression(Node* node, Context* context) {
 
             /* return the not of this */
             return operand->opNot();
+        }
+
+        case NODE_INDEX: {
+            /* evaluate the list on the left and the index on the right */
+            Tdata* list = evaluateExpression(node->child(0), context);
+            Tdata* index = evaluateExpression(node->child(1), context);
+
+            /* return a pointer to the data in the list at that position */
+            return list->opIndex(index);
         }
 
         /* simply get the identifier out of the context */
@@ -298,8 +303,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             Tdata* conditional = evaluateExpression(node->child(0), context);
 
             /* while it is true */
-            while (((Tbool*)conditional->getValue())->toBool()) {
-
+            while (((Tbool*) conditional->getValue())->toBool()) {
                 /* evaluate the loop body */
                 Tdata* returnValue = evaluateStatement(node->child(1), context);
 
