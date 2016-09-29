@@ -1,4 +1,0 @@
-The following error was detected in your program:
-Error: (line 16) syntax error, unexpected TOK_DEDENT, expecting TOK_SEMICOLON or TOK_NEWLINE
-
-Execution aborted

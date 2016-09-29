@@ -159,7 +159,7 @@ program: toplevels {
 newl_star: TOK_NEWLINE newl_star {}
          | {}
 
-/* one or more new lines */
+/* one or more new lines, or end of file */
 newl_plus: TOK_NEWLINE newl_star {}
 
 /* a list of functions */

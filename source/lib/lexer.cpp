@@ -26,6 +26,9 @@ int indent_level = 0;
 /* the number of DEDENTs to return before anything else */
 int dedents_left = 0;
 
+/* if we need an extra new line to fake a blank line at eof */
+int extra_newl = 0;
+
 /* line number we are at - used for error messages */
 int yylineNumber = 1;
 
@@ -322,6 +325,12 @@ int lexString() {
  * do
  * whitespace based blocking a la Python */
 int yylex() {
+    /* if we need the extra new line at eof, do that first */
+    if (extra_newl) {
+        extra_newl = 0;
+        return TOK_NEWLINE;
+    }
+
     /* if there are dedents left to return, do it */
     if (dedents_left > 0) {
         dedents_left--;
@@ -351,6 +360,7 @@ int yylex() {
     if (eof()) {
         if (indent_level != 0) {
             dedents_left = indent_level;
+            extra_newl = 1;
             return yylex();
         } else {
             return 0;
