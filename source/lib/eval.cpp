@@ -187,10 +187,6 @@ Tdata* evaluateExpression(Node* node, Context* context) {
          * the appropriate method parameter */
         case NODE_ASSIGN:
             return evaluateBinaryExpression(node, context, &Tdata::opAssign);
-        case NODE_OR:
-            return evaluateBinaryExpression(node, context, &Tdata::opOr);
-        case NODE_AND:
-            return evaluateBinaryExpression(node, context, &Tdata::opAnd);
         case NODE_LT:
             return evaluateBinaryExpression(node, context, &Tdata::opLt);
         case NODE_LTE:
@@ -225,6 +221,36 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateBinaryExpression(node, context, &Tdata::opModulus);
         case NODE_EXP:
             return evaluateBinaryExpression(node, context, &Tdata::opExp);
+
+        /* these are done differently to support short-circuit evaluation */
+        case NODE_OR: {
+            /* evaluate lhs */
+            Tdata* lhs = evaluateExpression(node->child(0), context);
+
+            /* if true, return a true value */
+            if (((Tbool*)lhs->getValue())->toBool()) {
+                Tbool falseValue(true);
+                return Tdata::create(lhs->getType(), &falseValue);
+            } else {
+                /* do the rest of it */
+                Tdata* rhs = evaluateExpression(node->child(1), context);
+                return lhs->opOr(rhs);
+            }
+        }
+        case NODE_AND: {
+            /* evaluate lhs */
+            Tdata* lhs = evaluateExpression(node->child(0), context);
+
+            /* if false, return a false value */
+            if (((Tbool*)lhs->getValue())->toBool() == false) {
+                Tbool falseValue(false);
+                return Tdata::create(lhs->getType(), &falseValue);
+            } else {
+                /* do the rest of it */
+                Tdata* rhs = evaluateExpression(node->child(1), context);
+                return lhs->opAnd(rhs);
+            }
+        }
 
         case NODE_BITNOT: {
             /* evaluate the child */
