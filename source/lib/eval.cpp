@@ -164,6 +164,25 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return list;
         }
 
+        case NODE_LISTRANGE: {
+            /* make the list data structure */
+            Tlist l;
+
+            /* evaluate the start and end points */
+            Tdata* start = evaluateExpression(node->child(0), context);
+            Tdata* end = evaluateExpression(node->child(1), context);
+
+            /* assemble the array */
+            for (Tint t = *((Tint*) (start->getValue()));
+                 (t <= *((Tint*) (end->getValue()))).toBool(); t++) {
+                l.append(Tdata::create(node->child(0)->type(), &t));
+            }
+
+            /* wrap this list in a tdata */
+            Tdata* list = Tdata::create(node->type(), &l);
+            return list;
+        }
+
         /* for all of these, we can simply call the binary expression function with
          * the appropriate method parameter */
         case NODE_ASSIGN:
@@ -302,7 +321,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             /* evaluate the conditional expression */
             Tdata* conditional = evaluateExpression(node->child(0), context);
             /* if true execute the 2nd child */
-            if (((Tbool*)(conditional->getValue()))->toBool()) {
+            if (((Tbool*) (conditional->getValue()))->toBool()) {
                 return evaluateStatement(node->child(1), context);
             } else {
                 /* check for else block and execute it if it exists */
