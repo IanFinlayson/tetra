@@ -331,6 +331,43 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
+        case NODE_FOR: {
+            /* evaluate the list we are looping through */
+            Tdata* listData = evaluateExpression(node->child(1), context);
+
+            /* pull the list out of it */
+            Tlist* list = (Tlist*) listData->getValue();
+
+            /* the return value if we hit one */
+            Tdata* returnValue = NULL;
+
+            /* for each item in this list */
+            for (int i = 0; i < list->length(); i++) {
+                /* if we are breaking or returning, stop */
+                ExecutionStatus status = context->queryExecutionStatus();
+                if (status == BREAK) {
+                    context->normalizeStatus();
+                    return NULL;
+                } else if (status == RETURN) {
+                    context->normalizeStatus();
+                    return returnValue;
+                }
+
+                /* set context to normal for now */
+                context->normalizeStatus();
+
+                /* look the induction variable up in the context */
+                Tdata* loopVariable =
+                    context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+
+                /* set it to the next value */
+                loopVariable->opAssign(list->get(i));
+
+                /* evaluate the body of the loop */
+                returnValue = evaluateStatement(node->child(2), context);
+            }
+        } break;
+
         default:
             /* if it's none of these things, it must be an expression used as a
              * statement */
