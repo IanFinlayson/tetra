@@ -284,11 +284,25 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             return returnValue;
         }
 
+        /* just do nothing */
+        case NODE_PASS:
+            return NULL;
+            break;
+
+        /* set these in the context so we know where yo go next */
+        case NODE_BREAK:
+            context->notifyBreak();
+            break;
+        case NODE_CONTINUE:
+            context->notifyContinue();
+            break;
+
+        /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
             Tdata* conditional = evaluateExpression(node->child(0), context);
             /* if true execute the 2nd child */
-            if (dynamic_cast<Tbool*>(conditional->getValue())->toBool()) {
+            if (((Tbool*)(conditional->getValue()))->toBool()) {
                 return evaluateStatement(node->child(1), context);
             } else {
                 /* check for else block and execute it if it exists */
@@ -296,6 +310,58 @@ Tdata* evaluateStatement(Node* node, Context* context) {
                     return evaluateStatement(node->child(2), context);
                 }
             }
+        } break;
+
+        /* handle elif nodes */
+        case NODE_ELIF: {
+            context->notifyElif();
+
+            /* check the first branch */
+            Tdata* returnValue = evaluateStatement(node->child(0), context);
+
+            /* check if the first one was false */
+            ExecutionStatus status = context->queryExecutionStatus();
+            if (status == ELIF) {
+                /* if so, do the next one */
+                returnValue = evaluateStatement(node->child(1), context);
+            }
+
+            /* check to see if we need to execute the catchall else statement
+             * if it exists */
+            status = context->queryExecutionStatus();
+            if (status == ELIF && node->child(2) != NULL) {
+                /* if so, execute that */
+                returnValue = evaluateStatement(node->child(2), context);
+            }
+
+            return returnValue;
+        } break;
+
+        case NODE_ELIF_CHAIN: {
+            /* try to execute the given case of the ELIF statement */
+            Tdata* returnValue = evaluateStatement(node->child(0), context);
+
+            /* check to see if we are doing the next one */
+            ExecutionStatus status = context->queryExecutionStatus();
+            if (status == ELIF) {
+                /* if so, do it */
+                returnValue = evaluateStatement(node->child(1), context);
+            }
+
+            return returnValue;
+        } break;
+
+        case NODE_ELIF_CLAUSE: {
+            /* check the condition on the left */
+            Tdata* conditional = evaluateExpression(node->child(0), context);
+
+            /* if condition is true, execute the body */
+            if (((Tbool*) conditional->getValue())->toBool()) {
+                /* we no longer need to check the rest of the branches */
+                context->normalizeStatus();
+                return evaluateStatement(node->child(1), context);
+            }
+            return NULL;
         } break;
 
         case NODE_WHILE: {
