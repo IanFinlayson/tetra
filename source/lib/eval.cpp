@@ -164,14 +164,29 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return list;
         }
 
+        case NODE_LISTRANGE: {
+            /* make the list data structure */
+            Tlist l;
+
+            /* evaluate the start and end points */
+            Tdata* start = evaluateExpression(node->child(0), context);
+            Tdata* end = evaluateExpression(node->child(1), context);
+
+            /* assemble the array */
+            for (Tint t = *((Tint*) (start->getValue()));
+                 (t <= *((Tint*) (end->getValue()))).toBool(); t++) {
+                l.append(Tdata::create(node->child(0)->type(), &t));
+            }
+
+            /* wrap this list in a tdata */
+            Tdata* list = Tdata::create(node->type(), &l);
+            return list;
+        }
+
         /* for all of these, we can simply call the binary expression function with
          * the appropriate method parameter */
         case NODE_ASSIGN:
             return evaluateBinaryExpression(node, context, &Tdata::opAssign);
-        case NODE_OR:
-            return evaluateBinaryExpression(node, context, &Tdata::opOr);
-        case NODE_AND:
-            return evaluateBinaryExpression(node, context, &Tdata::opAnd);
         case NODE_LT:
             return evaluateBinaryExpression(node, context, &Tdata::opLt);
         case NODE_LTE:
@@ -206,6 +221,36 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateBinaryExpression(node, context, &Tdata::opModulus);
         case NODE_EXP:
             return evaluateBinaryExpression(node, context, &Tdata::opExp);
+
+        /* these are done differently to support short-circuit evaluation */
+        case NODE_OR: {
+            /* evaluate lhs */
+            Tdata* lhs = evaluateExpression(node->child(0), context);
+
+            /* if true, return a true value */
+            if (((Tbool*)lhs->getValue())->toBool()) {
+                Tbool falseValue(true);
+                return Tdata::create(lhs->getType(), &falseValue);
+            } else {
+                /* do the rest of it */
+                Tdata* rhs = evaluateExpression(node->child(1), context);
+                return lhs->opOr(rhs);
+            }
+        }
+        case NODE_AND: {
+            /* evaluate lhs */
+            Tdata* lhs = evaluateExpression(node->child(0), context);
+
+            /* if false, return a false value */
+            if (((Tbool*)lhs->getValue())->toBool() == false) {
+                Tbool falseValue(false);
+                return Tdata::create(lhs->getType(), &falseValue);
+            } else {
+                /* do the rest of it */
+                Tdata* rhs = evaluateExpression(node->child(1), context);
+                return lhs->opAnd(rhs);
+            }
+        }
 
         case NODE_BITNOT: {
             /* evaluate the child */
@@ -284,11 +329,25 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             return returnValue;
         }
 
+        /* just do nothing */
+        case NODE_PASS:
+            return NULL;
+            break;
+
+        /* set these in the context so we know where yo go next */
+        case NODE_BREAK:
+            context->notifyBreak();
+            break;
+        case NODE_CONTINUE:
+            context->notifyContinue();
+            break;
+
+        /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
             Tdata* conditional = evaluateExpression(node->child(0), context);
             /* if true execute the 2nd child */
-            if (dynamic_cast<Tbool*>(conditional->getValue())->toBool()) {
+            if (((Tbool*) (conditional->getValue()))->toBool()) {
                 return evaluateStatement(node->child(1), context);
             } else {
                 /* check for else block and execute it if it exists */
@@ -296,6 +355,58 @@ Tdata* evaluateStatement(Node* node, Context* context) {
                     return evaluateStatement(node->child(2), context);
                 }
             }
+        } break;
+
+        /* handle elif nodes */
+        case NODE_ELIF: {
+            context->notifyElif();
+
+            /* check the first branch */
+            Tdata* returnValue = evaluateStatement(node->child(0), context);
+
+            /* check if the first one was false */
+            ExecutionStatus status = context->queryExecutionStatus();
+            if (status == ELIF) {
+                /* if so, do the next one */
+                returnValue = evaluateStatement(node->child(1), context);
+            }
+
+            /* check to see if we need to execute the catchall else statement
+             * if it exists */
+            status = context->queryExecutionStatus();
+            if (status == ELIF && node->child(2) != NULL) {
+                /* if so, execute that */
+                returnValue = evaluateStatement(node->child(2), context);
+            }
+
+            return returnValue;
+        } break;
+
+        case NODE_ELIF_CHAIN: {
+            /* try to execute the given case of the ELIF statement */
+            Tdata* returnValue = evaluateStatement(node->child(0), context);
+
+            /* check to see if we are doing the next one */
+            ExecutionStatus status = context->queryExecutionStatus();
+            if (status == ELIF) {
+                /* if so, do it */
+                returnValue = evaluateStatement(node->child(1), context);
+            }
+
+            return returnValue;
+        } break;
+
+        case NODE_ELIF_CLAUSE: {
+            /* check the condition on the left */
+            Tdata* conditional = evaluateExpression(node->child(0), context);
+
+            /* if condition is true, execute the body */
+            if (((Tbool*) conditional->getValue())->toBool()) {
+                /* we no longer need to check the rest of the branches */
+                context->normalizeStatus();
+                return evaluateStatement(node->child(1), context);
+            }
+            return NULL;
         } break;
 
         case NODE_WHILE: {
@@ -328,6 +439,43 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
                 /* recheck the condition */
                 conditional = evaluateExpression(node->child(0), context);
+            }
+        } break;
+
+        case NODE_FOR: {
+            /* evaluate the list we are looping through */
+            Tdata* listData = evaluateExpression(node->child(1), context);
+
+            /* pull the list out of it */
+            Tlist* list = (Tlist*) listData->getValue();
+
+            /* the return value if we hit one */
+            Tdata* returnValue = NULL;
+
+            /* for each item in this list */
+            for (int i = 0; i < list->length(); i++) {
+                /* if we are breaking or returning, stop */
+                ExecutionStatus status = context->queryExecutionStatus();
+                if (status == BREAK) {
+                    context->normalizeStatus();
+                    return NULL;
+                } else if (status == RETURN) {
+                    context->normalizeStatus();
+                    return returnValue;
+                }
+
+                /* set context to normal for now */
+                context->normalizeStatus();
+
+                /* look the induction variable up in the context */
+                Tdata* loopVariable =
+                    context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+
+                /* set it to the next value */
+                loopVariable->opAssign(list->get(i));
+
+                /* evaluate the body of the loop */
+                returnValue = evaluateStatement(node->child(2), context);
             }
         } break;
 

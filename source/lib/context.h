@@ -66,12 +66,19 @@ class Context {
     }
 
     /* sets the current scope's ExecutionStatus to the appropriate value */
-    void notifyBreak();
-    void notifyContinue();
+    void notifyBreak() {
+        programStack.top().setExecutionStatus(BREAK);
+    }
+    void notifyContinue() {
+        programStack.top().setExecutionStatus(CONTINUE);
+    }
     void notifyReturn() {
         programStack.top().setExecutionStatus(RETURN);
     }
-    void notifyElif();
+    void notifyElif() {
+        programStack.top().setExecutionStatus(ELIF);
+    }
+
     void notifyParallel();
 
     /* sets the current scope's executionStatus to NORMAL */

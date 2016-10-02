@@ -408,7 +408,7 @@ class Tlist : public Tvalue {
     }
 
     /* set an element of the array at a given index */
-    Tdata*& operator[](unsigned int index) {
+    Tdata*& get(unsigned int index) {
         if (index > values.size()) {
             throw RuntimeError("List index out of bounds.", 0);
         } else {
@@ -417,7 +417,7 @@ class Tlist : public Tvalue {
     }
 
     /* get an element at a index */
-    Tdata* operator[](unsigned int index) const {
+    Tdata* get(unsigned int index) const {
         if (index > values.size()) {
             throw RuntimeError("List index out of bounds.", 0);
         } else {
@@ -874,7 +874,7 @@ class Tdata {
         /* TODO add strings as well */
         switch (type.getKind()) {
             case TYPE_LIST:
-                return ((Tlist*) value)->operator[](((Tint*) other->value)->toInt());
+                return ((Tlist*) value)->get(((Tint*) other->value)->toInt());
             default:
                 throw RuntimeError("Unhandled operands to not operator", 0);
         }
