@@ -529,16 +529,16 @@ Node* getClassNode(Node* node) {
 }
 
 /* find identifier */
-Symbol* findIdSym(Node* expr, Node* function = NULL) {
+Symbol findIdSym(Node* expr, Node* function = NULL) {
     /* check if it's a lambda param first */
     /* look for lambdas first */
     Node* lambda = nextLambda(expr);
-    Symbol* sym = NULL;
+    Symbol sym = Symbol();
     bool found = false;
     while (lambda && !found) {
         /* if we found the identifier, get its symbol*/
         if (lambda->hasSymbol(expr->getStringvalue())) {
-            sym = new Symbol(lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine()));
+            sym = Symbol(lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine()));
 
             found = true;
         } else {
@@ -550,12 +550,12 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
     /* if not a lambda, see if it's local to the function */
     if (function && function->hasSymbol(expr->getStringvalue())) {
         /* look it up */
-        sym = new Symbol(function->lookupSymbol(expr->getStringvalue(), expr->getLine()));
+        sym = Symbol(function->lookupSymbol(expr->getStringvalue(), expr->getLine()));
 
         /* if it is in a class, check there for a member var*/
     } else if (getClassNode(expr) &&
                classes[getClassNode(expr)->getStringvalue()].hasMember(expr->getStringvalue())) {
-        sym = new Symbol(
+        sym = Symbol(
             classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue()));
 
         /* if it is in a class, check there for a method */
@@ -563,7 +563,7 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
                classes[getClassNode(expr)->getStringvalue()].hasMethodNamed(
                    expr->getStringvalue())) {
         /* get all the methods */
-        sym = new Symbol(
+        sym = Symbol(
             expr->getStringvalue(),
             classes[getClassNode(expr)->getStringvalue()].getMethods(expr->getStringvalue()),
             expr->getLine(), true);
@@ -571,13 +571,13 @@ Symbol* findIdSym(Node* expr, Node* function = NULL) {
         /* next check for globals/constants */
     } else if (globals.count(expr->getStringvalue()) > 0) {
         /* look it up */
-        sym = new Symbol(globals[expr->getStringvalue()]);
+        sym = Symbol(globals[expr->getStringvalue()]);
 
         /* next check if it's the name of a free function */
     } else if (functions.hasFuncNamed(expr->getStringvalue())) {
         /* look it up */
         sym =
-            new Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
+            Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
                        expr->getLine(), true);
     }
     /* return the thing we found (or NULL) */
@@ -601,30 +601,30 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             /* if the left hand side is an identifier... */
             if (expr->child(0)->kind() == NODE_IDENTIFIER) {
                 /* try to find the id */
-                Symbol* sym = findIdSym(expr->child(0), function);
+                Symbol sym = findIdSym(expr->child(0), function);
                 /* if it doesn't exist  and it IS inferable...*/
-                if (!sym && !rhs->isEmptyContainerType()) {
+                if (sym.getName() == ""  && !rhs->isEmptyContainerType()) {
                     /* infer it! */
                     lhs = rhs;
                     function->insertSymbol(
                         Symbol(expr->child(0)->getStringvalue(), lhs, expr->child(0)->getLine()));
 
                     /* if it doesn't exist and it IS NOT inferable... */
-                } else if (!sym) {
+                } else if (sym.getName() == "") {
                     /* complain so much */
                     throw Error("Cannot infer subtype of empty list/dictionary.", expr->getLine());
 
                     /* if it exists and is a unassignable ... */
-                } else if (sym->isConst()) {
+                } else if (sym.isConst()) {
                     throw Error(
                         "Cannot assign to constant, class, method, or "
                         "free function.",
                         expr->getLine());
                 } else {
                     /* if we end up here, all is well - update lhs */
-                    lhs = sym->getType();
+                    lhs = sym.getType();
                 }
-                delete sym;
+
                 /* if it's not directly and identifier.. */
             } else {
                 /* get the type of the left hand side */
@@ -979,10 +979,10 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
             /* otherwise, if it doesn't already have a type... */
             /* if the id already exists, get its type */
-            Symbol* sym = findIdSym(expr, function);
+            Symbol sym = findIdSym(expr, function);
 
             /* if we didn't find it... */
-            if (!sym) {
+            if (sym.getName() == "") {
                 /* complain! */
                 throw Error(
                     "Reference to non-existent identifier '" + expr->getStringvalue() + "'.",
@@ -990,8 +990,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* otherwise, return the type */
-            DataType* dt = new DataType(*sym->getType());
-            delete sym;
+            DataType* dt = new DataType(*sym.getType());
             return dt;
         }
 
@@ -1191,32 +1190,31 @@ void checkMuTasks(Node* block, Node* function) {
     /* if there are two children or it's a wait block, it's named */
     if (block->child(1) || block->kind() == NODE_WAIT) {
         /* check if the identifier exists */
-        Symbol* sym = NULL;
-        sym = findIdSym(block->child(0), function);
+        Symbol sym = findIdSym(block->child(0), function);
 
         /* if the identifier doesn't exist yet
          * and it's not a wait node*/
-        if (!sym && block->kind() != NODE_WAIT) {
+        if (sym.getName() == "" && block->kind() != NODE_WAIT) {
             /* make a symbol for it */
-            sym = new Symbol(block->child(0)->getStringvalue(), new DataType(kind),
+            sym = Symbol(block->child(0)->getStringvalue(), new DataType(kind),
                              block->child(0)->getLine());
             /* add to this function's symtable */
-            function->insertSymbol(*sym);
+            function->insertSymbol(sym);
 
             /* if the identifier doesn't exist and it
              * is a wait node*/
-        } else if (!sym) {
+        } else if (sym.getName() == "") {
             throw Error("Cannot wait for task that has not been created",
                         block->child(0)->getLine());
         }
 
         /* if the type is wrong... */
-        if (sym->getType()->getKind() != kind) {
+        if (sym.getType()->getKind() != kind) {
             throw Error("Task or mutex identifier has improper type.", block->child(0)->getLine());
         }
 
         /* set the type */
-        block->child(0)->setDataType(sym->getType());
+        block->child(0)->setDataType(sym.getType());
 
         /* if there is a block ... */
         if (block->child(1)) {
@@ -1339,21 +1337,20 @@ void inferBlock(Node* block, Node* function) {
             }
 
             /* see if the identifier for indexing already exists */
-            Symbol* idxSym = findIdSym(block->child(0));
+            Symbol idxSym = findIdSym(block->child(0));
 
             /* if it does, make sure it is the right type */
-            if (idxSym && (*(idxSym->getType())) != (*(expr_type->subtypes))[0]) {
+            if (idxSym.getName() != ""  && (*(idxSym.getType())) != (*(expr_type->subtypes))[0]) {
                 throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
                                 "' is incompatible with container elements.",
                             block->getLine());
 
                 /* otherwise, if it doesn't exist, add it */
-            } else if (!idxSym) {
+            } else if (idxSym.getName() == "") {
                 function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
                                               &(*(expr_type->subtypes))[0], block->getLine()));
             }
 
-            delete idxSym;
             /* set the type of the node too */
             block->child(0)->setDataType(new DataType((*(expr_type->subtypes))[0]));
 

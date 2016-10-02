@@ -118,7 +118,7 @@ Symbol::Symbol(Tstring name, DataType* type, int lineNumber, bool constant) {
 }
 
 Symbol::Symbol(const Symbol& other) {
-    this->name = other.name;
+    this->name = Tstring(other.name);
     this->type = other.type;
     this->lineNumber = other.lineNumber;
     this->constant = other.constant;
