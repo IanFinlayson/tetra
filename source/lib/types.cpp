@@ -24,6 +24,157 @@ void inferBlock(Node*, Node*);
 void checkClassTypes(Node*);
 DataType* inferExpression(Node*, Node*);
 
+Tstring sstringType(Node* node) {
+    Tstring ss;
+
+    switch (node->kind()) {
+        /* statements and groups */
+        case NODE_FUNCTION:
+            return "FUNC " + node->getStringvalue();
+        case NODE_TOPLEVEL_LIST:
+            return "TOP LEVELS";
+        case NODE_STATEMENT:
+            return "STMTS";
+        case NODE_FORMAL_PARAM_LIST:
+            return "PARAMS";
+        case NODE_IDENTIFIERS:
+            return "IDENTIFIERS";
+        case NODE_OPEN:
+            return "OPEN";
+        case NODE_IMPORT:
+            return "IMPORT";
+        case NODE_PASS:
+            return "PASS";
+        case NODE_WAIT:
+            return "WAIT";
+        case NODE_RETURN:
+            return "RETURN";
+        case NODE_BREAK:
+            return "BREAK";
+        case NODE_CONTINUE:
+            return "CONTINUE";
+        case NODE_IF:
+            return "IF";
+        case NODE_WHILE:
+            return "WHILE";
+        case NODE_FOR:
+            return "FOR";
+        case NODE_ELIF:
+            return "ELIF";
+        case NODE_ELIF_CHAIN:
+            return "ELIF CHAIN";
+        case NODE_ELIF_CLAUSE:
+            return "ELIF CLAUSE";
+        case NODE_PARALLEL:
+            return "PARALLEL";
+        case NODE_PARFOR:
+            return "PARFOR";
+        case NODE_BACKGROUND:
+            return "BACKGROUND";
+        case NODE_LOCK:
+            return "LOCK";
+        case NODE_CONST:
+            return "CONST";
+        case NODE_GLOBAL:
+            return "GLOBAL";
+        case NODE_DECLARATION:
+            return "DECLARATION: " + node->getStringvalue();
+        case NODE_LAMBDA:
+            return "LAMBDA";
+        case NODE_CLASS:
+            return "CLASS " + node->getStringvalue();
+        case NODE_CLASS_PART:
+            return "CLASS PART";
+        case NODE_DOT:
+            return "DOT";
+        case NODE_METHOD_CALL:
+            return "METHOD CALL";
+        case NODE_SELF:
+            return "SELF";
+
+        /* operators */
+        case NODE_ASSIGN:
+            return "=";
+        case NODE_OR:
+            return "or";
+        case NODE_AND:
+            return "and";
+        case NODE_LT:
+            return "<";
+        case NODE_LTE:
+            return "<=";
+        case NODE_GT:
+            return ">";
+        case NODE_GTE:
+            return ">=";
+        case NODE_EQ:
+            return "==";
+        case NODE_NEQ:
+            return "!=";
+        case NODE_NOT:
+            return "not";
+        case NODE_BITXOR:
+            return "^";
+        case NODE_BITAND:
+            return "&";
+        case NODE_BITOR:
+            return "|";
+        case NODE_BITNOT:
+            return "~";
+        case NODE_SHIFTL:
+            return "<<";
+        case NODE_SHIFTR:
+            return ">>";
+        case NODE_PLUS:
+            return "+";
+        case NODE_MINUS:
+            return "-";
+        case NODE_TIMES:
+            return "*";
+        case NODE_DIVIDE:
+            return "/";
+        case NODE_MODULUS:
+            return "%";
+        case NODE_EXP:
+            return "EXP";
+        case NODE_IN:
+            return "in";
+
+        /* functions */
+        case NODE_FUNCALL:
+            return "CALL: " + node->getStringvalue();
+        case NODE_ACTUAL_PARAM_LIST:
+            return "ARGS";
+
+        /* lists */
+        case NODE_INDEX:
+            return "INDEX";
+        case NODE_LISTVAL:
+            return "LISTVAL";
+        case NODE_TUPVAL:
+            return "TUPVAL";
+        case NODE_DICTVAL:
+            return "DICTVAL";
+        case NODE_LISTRANGE:
+            return "LISTRANGE";
+
+        /* leafs */
+        case NODE_INTVAL:
+            return "INT:" + node->getStringvalue();
+        case NODE_REALVAL:
+            return "REAL: " + node->getStringvalue();
+        case NODE_STRINGVAL:
+            return "\"" + node->getStringvalue() + "\"";
+        case NODE_IDENTIFIER:
+            return "ID " + node->getStringvalue();
+        case NODE_BOOLVAL:
+            return "BOOL: " + node->getStringvalue();
+        case NODE_NONEVAL:
+            return "NONE";
+        default:
+            throw Error("Unsupported node type!");
+    }
+}
 /* return a string of a data type */
 Tstring typeToString(DataType* t) {
     switch (t->getKind()) {
@@ -51,9 +202,10 @@ Tstring typeToString(DataType* t) {
             for (unsigned long int i = 0; i < t->subtypes->size(); i++) {
                 typeString += typeToString(&((*(t->subtypes))[i])) + ",";
             }
-            /* if the tuple has more than one element ... */
-            if (t->subtypes->size() > 1) /* then get rid of the trailing comma */
-                typeString = typeString.substring(0, typeString.length() - 2);
+            /* if the tuple has elements ... */
+            if (t->subtypes->size() > 0) 
+              /* then get rid of the trailing comma */
+                typeString = typeString.substring(0, typeString.length() - 1);
 
             return typeString + ")";
         }
@@ -63,6 +215,8 @@ Tstring typeToString(DataType* t) {
             return typeToString(&((*(t->subtypes))[0])) + "->" +
                    typeToString(&((*(t->subtypes))[0]));
         }
+        case TYPE_OVERLOAD:
+             return "overload";
         default:
             throw Error("typeToString: Unknown data type");
     }
@@ -135,7 +289,7 @@ const Node* ClassContext::getMethod(DataType* type, Tstring name) {
     return methods.getFunctionNode(type, name);
 }
 
-DataType* ClassContext::getMethods(Tstring name) {
+DataType ClassContext::getMethods(Tstring name) {
     return methods.getFunctionsNamed(name);
 }
 
@@ -151,6 +305,7 @@ std::map<Tstring, Node*> ClassContext::removeInits() {
 
 /* data type functions */
 DataType::DataType(DataTypeKind kind) {
+    
     this->kind = kind;
     this->subtypes = new std::vector<DataType>;
     this->className = new Tstring();
@@ -263,17 +418,20 @@ bool operator!=(const DataType& lhs, const DataType& rhs) {
     return !(lhs == rhs);
 }
 
+
 DataType DataType::operator=(const DataType& other) {
-    if (this != &other) {
-        delete subtypes;
-        delete className;
-        kind = other.kind;
-        subtypes = new std::vector<DataType>;
-        for (unsigned long i = 0; i < subtypes->size(); i++) {
-            subtypes->push_back((*(other.subtypes))[i]);
-        }
-        className = new Tstring(*other.className);
+
+    std::vector<DataType>* newSubtypes = new std::vector<DataType>;
+    for (unsigned long i = 0; i < other.subtypes->size(); i++) {
+        newSubtypes->push_back((*(other.subtypes))[i]);
     }
+
+    kind = other.kind;
+    *className = *other.className;
+
+    std::vector<DataType>* oldSubtypes = this->subtypes;
+    this->subtypes = newSubtypes;
+    delete oldSubtypes;
     return *this;
 }
 
@@ -294,7 +452,7 @@ void buildParamTupleType(DataType* type, const Node* node) {
         buildParamTupleType(type, node->child(0));
         buildParamTupleType(type, node->child(1));
     } else if (node) {
-        type->subtypes->push_back(DataType(*node->type()));
+        type->subtypes->push_back(*node->type());
     } else {
         return;
     }
@@ -538,8 +696,7 @@ Symbol findIdSym(Node* expr, Node* function = NULL) {
     while (lambda && !found) {
         /* if we found the identifier, get its symbol*/
         if (lambda->hasSymbol(expr->getStringvalue())) {
-            sym = Symbol(lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine()));
-
+            sym = lambda->lookupSymbol(expr->getStringvalue(), lambda->getLine());
             found = true;
         } else {
             /* otherwise, go to the next lambda up */
@@ -550,13 +707,13 @@ Symbol findIdSym(Node* expr, Node* function = NULL) {
     /* if not a lambda, see if it's local to the function */
     if (function && function->hasSymbol(expr->getStringvalue())) {
         /* look it up */
-        sym = Symbol(function->lookupSymbol(expr->getStringvalue(), expr->getLine()));
+        sym = function->lookupSymbol(expr->getStringvalue(), expr->getLine());
 
         /* if it is in a class, check there for a member var*/
     } else if (getClassNode(expr) &&
                classes[getClassNode(expr)->getStringvalue()].hasMember(expr->getStringvalue())) {
-        sym = Symbol(
-            classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue()));
+        sym = 
+            classes[getClassNode(expr)->getStringvalue()].getMember(expr->getStringvalue());
 
         /* if it is in a class, check there for a method */
     } else if (getClassNode(expr) &&
@@ -571,13 +728,13 @@ Symbol findIdSym(Node* expr, Node* function = NULL) {
         /* next check for globals/constants */
     } else if (globals.count(expr->getStringvalue()) > 0) {
         /* look it up */
-        sym = Symbol(globals[expr->getStringvalue()]);
+        sym = globals[expr->getStringvalue()];
 
         /* next check if it's the name of a free function */
     } else if (functions.hasFuncNamed(expr->getStringvalue())) {
         /* look it up */
         sym =
-            Symbol(expr->getStringvalue(), functions.getFunctionsNamed(expr->getStringvalue()),
+            Symbol(expr->getStringvalue(),functions.getFunctionsNamed(expr->getStringvalue()),
                        expr->getLine(), true);
     }
     /* return the thing we found (or NULL) */
@@ -605,7 +762,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* if it doesn't exist  and it IS inferable...*/
                 if (sym.getName() == ""  && !rhs->isEmptyContainerType()) {
                     /* infer it! */
-                    lhs = rhs;
+                    lhs = new DataType(*rhs);
                     function->insertSymbol(
                         Symbol(expr->child(0)->getStringvalue(), lhs, expr->child(0)->getLine()));
 
@@ -622,7 +779,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                         expr->getLine());
                 } else {
                     /* if we end up here, all is well - update lhs */
-                    lhs = sym.getType();
+                    lhs = new DataType(*sym.getType());
                 }
 
                 /* if it's not directly and identifier.. */
@@ -647,7 +804,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the type of the rhs */
-            expr->child(0)->setDataType(new DataType(*lhs));
+            expr->child(0)->setDataType(lhs);
             return new DataType(*rhs);
         }
 
@@ -815,7 +972,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* ptr = list;
                 while (sub) {
                     /* set current one */
-                    ptr->subtypes->push_back(DataType(*sub));
+                    ptr->subtypes->push_back(*sub);
 
                     /* move to next */
                     sub = &(*(sub->subtypes))[0];
@@ -1013,7 +1170,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
                 /* if this is the first element, add the subtype */
                 if (dt->subtypes->size() == 0) {
-                    (dt->subtypes)->push_back(DataType(*elemType));
+                    (dt->subtypes)->push_back(*elemType);
                     /* if there is a previous subtype, make sure they match */
                 } else if (dt->subtypes->size() == 1 && ((*(dt->subtypes))[0]) != *elemType) {
                     throw Error("Mismatched list types", expr->getLine());
@@ -1033,8 +1190,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* valType = inferExpression(currNode->child(1), function);
                 /* if this is the first element, add the subtypes */
                 if (dt->subtypes->size() == 0) {
-                    dt->subtypes->push_back(DataType(*keyType));
-                    dt->subtypes->push_back(DataType(*valType));
+                    dt->subtypes->push_back(*keyType);
+                    dt->subtypes->push_back(*valType);
                     /* if there are previous subtypes, make sure they match */
                 } else if (dt->subtypes->size() == 2 && (((*(dt->subtypes))[0] != *keyType) ||
                                                          ((*(dt->subtypes))[1] != *valType))) {
@@ -1055,7 +1212,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 DataType* elemType = inferExpression(currNode->child(0), function);
 
                 /* add the subtype */
-                dt->subtypes->push_back(DataType(*elemType));
+                dt->subtypes->push_back(*elemType);
 
                 /* set current node to the next one */
                 currNode = currNode->child(1);
@@ -1214,7 +1371,7 @@ void checkMuTasks(Node* block, Node* function) {
         }
 
         /* set the type */
-        block->child(0)->setDataType(sym.getType());
+        block->child(0)->setDataType(new DataType(*sym.getType()));
 
         /* if there is a block ... */
         if (block->child(1)) {
@@ -1400,7 +1557,7 @@ void inferParams(Node* node, Node* function) {
         type->subtypes->push_back(DataType(TYPE_TUPLE));
         /* add the return type (if it has one)*/
         if (node->kind() == NODE_FUNCTION) {
-            type->subtypes->push_back(DataType(*(node->type())));
+            type->subtypes->push_back(*(node->type()));
         }
         /* replace the existing datatype */
         node->setDataType(type);
@@ -1426,7 +1583,7 @@ void inferParams(Node* node, Node* function) {
         /* add the param to the symbol table */
         function->insertSymbol(Symbol(node->getStringvalue(), node->type(), node->getLine()));
         /* add the param to the datatype */
-        (*(function->type()->subtypes))[0].subtypes->push_back(DataType(*node->type()));
+        (*(function->type()->subtypes))[0].subtypes->push_back(*node->type());
     }
 }
 
@@ -1457,11 +1614,11 @@ void inferGlobal(Node* node, bool isConst = false) {
             /* if there is no declared type */
         } else {
             /* infer the type from the right side */
-            node->setDataType(rhs);
+            node->setDataType(new DataType(*rhs));
         }
 
         /* set the node type */
-        node->child(0)->setDataType(rhs);
+        node->child(0)->setDataType(new DataType(*rhs));
     }
     /* add it in */
     globals.insert(std::pair<Tstring, Symbol>(
@@ -1545,7 +1702,7 @@ void initSquared(ClassContext context) {
         /* add the empty param type */
         node->type()->subtypes->push_back(DataType(TYPE_TUPLE));
         /* add the return type */
-        node->type()->subtypes->push_back(DataType(*type));
+        node->type()->subtypes->push_back(*type);
         Tstring key = context.getName() + "()";
         functions.insert(std::pair<Tstring, Node*>(key, node));
     }
@@ -1701,7 +1858,7 @@ void verifyMain() {
     }
 
     /* otherwise, if it returns something...*/
-    if ((*(mainNode->type()->subtypes))[1] != TYPE_NONE) {
+    if ((*(mainNode->type()->subtypes))[1].getKind() != TYPE_NONE) {
         /* complain about that */
         throw Error("Function 'main()' cannot have a return type other than 'none'.",
                     mainNode->getLine());

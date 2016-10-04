@@ -128,7 +128,6 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    std::cout << std::endl;
     delete tree;
     return ret;
 }

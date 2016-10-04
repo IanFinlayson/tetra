@@ -112,29 +112,26 @@ bool FunctionMap::hasFuncNamed(Tstring name) {
     return false;
 }
 
-DataType* FunctionMap::getFunctionsNamed(Tstring name) {
+DataType FunctionMap::getFunctionsNamed(Tstring name) {
     UNUSED(name);
 
     /* create a dataType to return */
-    DataType* retType = new DataType(TYPE_OVERLOAD);
+    DataType retType = DataType(TYPE_OVERLOAD);
 
     /* loop through all elements in the map */
     for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             /* if one was found, add it to the subtypes */
-            retType->subtypes->push_back(*(it->second->type()));
+            retType.subtypes->push_back(DataType(*(it->second->type())));
         }
     }
     /* If there are no subtypes, return null */
-    if (retType->subtypes->size() == 0) {
-        delete retType;
-        retType = NULL;
+    if (retType.subtypes->size() == 0) {
+        retType = DataType(TYPE_NONE);
         /* If there is one, just return that one */
-    } else if (retType->subtypes->size() == 1) {
-        DataType* temp = retType;
-        retType = new DataType((*(temp->subtypes))[0]);
-        delete temp;
+    } else if (retType.subtypes->size() == 1) {
+        retType = (*(retType.subtypes))[0];
     }
     return retType;
 }

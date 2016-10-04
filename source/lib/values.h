@@ -298,6 +298,7 @@ class Tstring : public Tvalue {
     Tstring() {
         str = QString("");
     }
+
     Tstring(const char* s) {
         str = QString(s);
     }
