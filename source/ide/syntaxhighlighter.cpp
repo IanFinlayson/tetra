@@ -1,3 +1,6 @@
+/* syntaxhighlighter.cpp
+ * implements syntax highlighting of Tetra code */
+
 #include "syntaxhighlighter.h"
 #include "settingsmanager.h"
 

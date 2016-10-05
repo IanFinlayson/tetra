@@ -1,4 +1,6 @@
-/* functions for dealing with node creation, management etc. */
+/* node.cpp
+ * this file contains functions for dealing with node creation, management etc.
+ */
 
 #include <cstdio>
 #include <cstdlib>
@@ -42,6 +44,15 @@ Node::~Node() {
     delete symtable;
 }
 
+/* get the child of a node */
+Node* Node::child(int which) const {
+    if (which < 0 || which >= numChildren) {
+        return NULL;
+    } else {
+        return children[which];
+    }
+}
+
 void Node::addChild(Node* child) {
     if (child) {
         children[numChildren] = child;
@@ -79,7 +90,7 @@ int Node::getNumChildren() const {
 void Node::insertSymbol(Symbol sym) {
     /* create symtable if needed */
     if (!symtable) {
-        symtable = new std::map<Tstring, Symbol>();
+        symtable = new std::map<String, Symbol>();
     }
 
     /* check if it's there first */
@@ -88,11 +99,11 @@ void Node::insertSymbol(Symbol sym) {
     }
 
     /* add it in */
-    symtable->insert(std::pair<Tstring, Symbol>(sym.getName(), sym));
+    symtable->insert(std::pair<String, Symbol>(sym.getName(), sym));
 }
 
 /* lookup a symbol from a symbol table */
-Symbol& Node::lookupSymbol(Tstring name, int lineNumber) const {
+Symbol& Node::lookupSymbol(String name, int lineNumber) const {
     /* if there is no symbol table or the name is not a key, it's not found! */
     if (!symtable || !symtable->count(name)) {
         throw Error("Symbol '" + name + "' not found!", lineNumber);
@@ -102,7 +113,7 @@ Symbol& Node::lookupSymbol(Tstring name, int lineNumber) const {
     return (*symtable)[name];
 }
 
-bool Node::hasSymbol(const Tstring& name) const {
+bool Node::hasSymbol(const String& name) const {
     if (!symtable) {
         return false;
     }
@@ -110,7 +121,7 @@ bool Node::hasSymbol(const Tstring& name) const {
 }
 
 /* these are also here */
-Symbol::Symbol(Tstring name, DataType* type, int lineNumber, bool constant) {
+Symbol::Symbol(String name, DataType* type, int lineNumber, bool constant) {
     this->name = name;
     this->type = type;
     this->lineNumber = lineNumber;
@@ -131,7 +142,7 @@ bool Symbol::isConst() {
 int Symbol::getLine() const {
     return lineNumber;
 }
-Tstring Symbol::getName() const {
+String Symbol::getName() const {
     return name;
 }
 DataType* Symbol::getType() const {
@@ -170,34 +181,34 @@ Node* cloneTree(Node* root) {
     return newRoot;
 }
 
-Tstring Node::getStringvalue() const {
+String Node::getStringvalue() const {
     return stringValue;
 }
 
-Tint Node::getIntvalue() const {
+Int Node::getIntvalue() const {
     return intValue;
 }
 
-Treal Node::getRealvalue() const {
+Real Node::getRealvalue() const {
     return realValue;
 }
 
-Tbool Node::getBoolvalue() const {
+Bool Node::getBoolvalue() const {
     return boolValue;
 }
 
-void Node::setStringvalue(const Tstring& value) {
+void Node::setStringvalue(const String& value) {
     stringValue = value;
 }
 
-void Node::setIntvalue(const Tint& value) {
+void Node::setIntvalue(const Int& value) {
     intValue = value;
 }
 
-void Node::setRealvalue(const Treal& value) {
+void Node::setRealvalue(const Real& value) {
     realValue = value;
 }
 
-void Node::setBoolvalue(const Tbool& value) {
+void Node::setBoolvalue(const Bool& value) {
     boolValue = value;
 }

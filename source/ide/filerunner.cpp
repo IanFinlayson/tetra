@@ -39,8 +39,8 @@ void FileRunner::runFile(bool debug) {
     bool interrupted = false;
 
     Node* program_root;
-    TetraEnvironment::initialize();
-    TetraEnvironment::setConsole(this);
+    Environment::initialize();
+    Environment::setConsole(this);
 
     try {
         program_root = parseFile(mainWindow->getOpenFile().toStdString().c_str());
@@ -74,7 +74,7 @@ void FileRunner::runFile(bool debug) {
 
 /* this function is called from the interpreter when it needs string input from
  * the user */
-Tstring FileRunner::receiveStandardInput() {
+String FileRunner::receiveStandardInput() {
     /* tell the main window we need input */
     emit needInput();
 
@@ -96,7 +96,7 @@ Tstring FileRunner::receiveStandardInput() {
     return myInput.toStdString().c_str();
 }
 
-void FileRunner::processStandardOutput(const Tstring& text) {
+void FileRunner::processStandardOutput(const String& text) {
     /* send this string to the main window for display */
     QString qtext = text.toQ();
     emit output(qtext);
@@ -115,7 +115,7 @@ void FileRunner::receiveInput(QString input) {
 /* stop the running program in its tracks */
 void FileRunner::halt() {
     /* tell the program to stop when it can */
-    TetraEnvironment::halt();
+    Environment::halt();
 
     /* free up the input lock, which no longer matters */
     inputInterrupted = true;

@@ -1,4 +1,6 @@
-/* functions for working with data values */
+/* values.cpp
+ * this file contains functions for working with data values and implements the
+ * value classes e.g. Int, String, etc. */
 
 #include <cstdio>
 #include <cstdlib>
@@ -8,103 +10,103 @@
 
 #include <QDebug>
 
-#include "values.h"
+#include "tetra.h"
 
-Tstring operator+(const Tstring& lhs, const Tstring& rhs) {
-    Tstring t;
+String operator+(const String& lhs, const String& rhs) {
+    String t;
     t.str = lhs.str + rhs.str;
     return t;
 }
 
-Tstring operator+(const char* lhs, const Tstring& rhs) {
-    return Tstring(lhs) + rhs;
+String operator+(const char* lhs, const String& rhs) {
+    return String(lhs) + rhs;
 }
 
-Tstring operator+(const Tstring& lhs, const char* rhs) {
-    return lhs + Tstring(rhs);
+String operator+(const String& lhs, const char* rhs) {
+    return lhs + String(rhs);
 }
 
-Tstring Tstring::operator=(const char* rhs) {
+String String::operator=(const char* rhs) {
     str = QString(rhs);
     return *this;
 }
 
-Tstring Tstring::operator+=(const char* rhs) {
+String String::operator+=(const char* rhs) {
     str = str + QString(rhs);
     return *this;
 }
 
-Tstring Tstring::substring(int start, int len) const {
-    Tstring t;
+String String::substring(int start, int len) const {
+    String t;
     t.str = str.mid(start, len);
     return t;
 }
 
-unsigned int Tstring::length() const {
+unsigned int String::length() const {
     return str.length();
 }
 
-bool Tstring::empty() const {
+bool String::empty() const {
     return str.length() == 0;
 }
 
-int Tstring::indexOf(const Tstring& s) const {
+int String::indexOf(const String& s) const {
     return str.indexOf(s.str);
 }
 
-Tstring Tstring::operator=(const Tstring& rhs) {
+String String::operator=(const String& rhs) {
     str = rhs.str;
     return *this;
 }
 
-Tstring Tstring::operator+=(const Tstring& rhs) {
+String String::operator+=(const String& rhs) {
     str = str + rhs.str;
     return *this;
 }
 
-bool operator<(const Tstring& lhs, const Tstring& rhs) {
+bool operator<(const String& lhs, const String& rhs) {
     return lhs.str < rhs.str;
 }
-bool operator==(const Tstring& lhs, const Tstring& rhs) {
+bool operator==(const String& lhs, const String& rhs) {
     return lhs.str == rhs.str;
 }
 
-bool operator>(const Tstring& lhs, const Tstring& rhs) {
+bool operator>(const String& lhs, const String& rhs) {
     return lhs.str > rhs.str;
 }
 
-bool operator>=(const Tstring& lhs, const Tstring& rhs) {
+bool operator>=(const String& lhs, const String& rhs) {
     return lhs.str >= rhs.str;
 }
-bool operator<=(const Tstring& lhs, const Tstring& rhs) {
+bool operator<=(const String& lhs, const String& rhs) {
     return lhs.str <= rhs.str;
 }
 
-bool operator!=(const Tstring& lhs, const Tstring& rhs) {
+bool operator!=(const String& lhs, const String& rhs) {
     return lhs.str != rhs.str;
 }
 
-Tstring::Tstring(const Tint& value) {
+String::String(const Int& value) {
     str = QString::number(value.toInt());
 }
 
-Tstring::Tstring(const Treal& value) {
+String::String(const Real& value) {
     str = QString::number(value.toDouble());
 }
 
-Tstring Tbool::toString() const {
-    return b ? Tstring("true") : Tstring("false");
+String Bool::toString() const {
+    return b ? String("true") : String("false");
 }
 
-Tstring Tint::toString() const {
-    return Tstring(*this);
+String Int::toString() const {
+    return String(*this);
 }
-Tstring Treal::toString() const {
-    return Tstring(*this);
+String Real::toString() const {
+    return String(*this);
 }
 
-Tstring Tlist::toString() const {
-    Tstring result = "[";
+String List::toString() const {
+    String result = "[";
 
     for (unsigned i = 0; i < values.size(); i++) {
         result += values[i]->getValue()->toString();

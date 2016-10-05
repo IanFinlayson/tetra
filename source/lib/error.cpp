@@ -1,4 +1,5 @@
-/* functions for error reporting */
+/* error.cpp
+* this file contains functions for error reporting */
 
 #include <cstdio>
 #include <cstdlib>
@@ -9,13 +10,13 @@
 #include "tetra.h"
 
 /* this function search and replaces a string in place */
-void replace(Tstring& str, const Tstring& from, const Tstring& to) {
+void replace(String& str, const String& from, const String& to) {
     UNUSED(str);
     UNUSED(from);
     UNUSED(to);
     /* FIXME
    size_t start_pos = str.find(from);
-   if (start_pos != Tstring::npos) {
+   if (start_pos != String::npos) {
     str.replace(start_pos, from.length(), to);
     replace(str, from, to);
    }
@@ -24,7 +25,7 @@ void replace(Tstring& str, const Tstring& from, const Tstring& to) {
 
 /* this function takes a string and modifies it in place
  * with TOK_ missing and some other pretty printing */
-void prettyPrintMessage(Tstring& str) {
+void prettyPrintMessage(String& str) {
     replace(str, "PLUS", "'+'");
     replace(str, "MINUS", "'-'");
     replace(str, "TIMES", "'*'");
@@ -63,13 +64,13 @@ void prettyPrintMessage(Tstring& str) {
 }
 
 /* Error exception functions */
-Error::Error(const Tstring& mesg, int lineNumber) {
+Error::Error(const String& mesg, int lineNumber) {
     this->mesg = mesg;
     prettyPrintMessage(this->mesg);
     this->lineNumber = lineNumber;
 }
 
-Tstring Error::getMessage() const {
+String Error::getMessage() const {
     return mesg;
 }
 
@@ -89,10 +90,10 @@ std::ostream& operator<<(std::ostream& out, const Error& error) {
 }
 
 /* the runtime error class */
-RuntimeError::RuntimeError(const Tstring& message, int line) : Error(message, line) {}
+RuntimeError::RuntimeError(const String& message, int line) : Error(message, line) {}
 
 /* the system error class */
-SystemError::SystemError(const Tstring& message, int line, Node* nodeArg)
+SystemError::SystemError(const String& message, int line, Node* nodeArg)
     : Error(message, line), node(nodeArg) {}
 
 Node* SystemError::getNode() {

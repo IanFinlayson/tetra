@@ -1,12 +1,14 @@
-/* data types used in the language */
+/* types.h
+ * declares information for data types used in the language */
 
 #ifndef TYPE_H
 #define TYPE_H
 
 #include <cmath>
+#include <vector>
 
 /* forward declare this since it's used for lots of things */
-class Tstring;
+class String;
 class Node;
 
 /* macro to squelch unused variable warnings */
@@ -37,7 +39,7 @@ class DataType {
     ~DataType();
     DataTypeKind getKind() const;
     std::vector<DataType>* subtypes;
-    Tstring* className;
+    String* className;
     DataType operator=(const DataType& other);
     bool isEmptyContainerType() const;
 
@@ -50,7 +52,7 @@ bool operator==(const DataType& lhs, const DataType& rhs);
 bool operator!=(const DataType& lhs, const DataType& rhs);
 
 /* function which returns a string representation of a data type */
-Tstring typeToString(DataType* t);
+String typeToString(DataType* t);
 void inferParams(Node* node, Node* function = NULL);
 void buildParamTupleType(DataType* type, const Node* node);
 void initTypes(Node* node);

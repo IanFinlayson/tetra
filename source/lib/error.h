@@ -1,4 +1,5 @@
-/* error types */
+/* error.h
+ * this file declares the different error types */
 
 #ifndef ERROR_H
 #define ERROR_H
@@ -8,23 +9,23 @@
 #include <vector>
 
 #include "types.h"
-#include "values.h"
+#include "strings.h"
 
 /* any type of error is handled with this exception */
 class Error {
    public:
-    Error(const Tstring& mesg, int lineNumber = 0);
-    Tstring getMessage() const;
+    Error(const String& mesg, int lineNumber = 0);
+    String getMessage() const;
     int getLine() const;
 
    private:
-    Tstring mesg;
+    String mesg;
     int lineNumber;
 };
 
 class RuntimeError : public Error {
    public:
-    RuntimeError(const Tstring& message, int lineNumber);
+    RuntimeError(const String& message, int lineNumber);
 };
 
 class InterruptError : public Error {
@@ -34,7 +35,7 @@ class InterruptError : public Error {
 
 class SystemError : public Error {
    public:
-    SystemError(const Tstring& message, int lineNumber, Node* nodeArg);
+    SystemError(const String& message, int lineNumber, Node* nodeArg);
     Node* getNode();
 
    private:

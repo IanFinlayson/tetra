@@ -1,6 +1,6 @@
-/* this program takes in Tetra code and produces a parse tree which allows it
- * to be tested and visualized.  It now produces a structured text dump.
- * along with graphical output with graphiz */
+/* dump.cpp
+ * this file contains functions for dumping Tetra data structures (such as
+ * parse trees) to the screen or an image for easier debugging */
 
 #include <cstdio>
 #include <cstdlib>
@@ -12,8 +12,8 @@
 #include "tetra.h"
 
 /* returns a string representation of a node type */
-Tstring stringType(Node* node) {
-    Tstring ss;
+String stringType(Node* node) {
+    String ss;
 
     switch (node->kind()) {
         /* statements and groups */
@@ -165,14 +165,14 @@ Tstring stringType(Node* node) {
 }
 
 /* generate a unique label for a node */
-Tstring genId() {
-    static Tint count = 0;
+String genId() {
+    static Int count = 0;
     count++;
-    return Tstring("n") + Tstring(count);
+    return String("n") + String(count);
 }
 
 /* dump a single node to a graphviz dot file */
-void dumpNodeGraphviz(Node* node, Tstring id, std::ofstream& out) {
+void dumpNodeGraphviz(Node* node, String id, std::ofstream& out) {
     if (!node) {
         return;
     }
@@ -185,7 +185,7 @@ void dumpNodeGraphviz(Node* node, Tstring id, std::ofstream& out) {
     /* for each child */
     for (int i = 0; i < node->getNumChildren(); i++) {
         /* generate a new id */
-        Tstring childId = genId();
+        String childId = genId();
 
         /* dump the connection */
         out << "  " << id << " -> " << childId << ";\n";

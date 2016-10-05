@@ -100,7 +100,7 @@ bool eof() {
 }
 
 /* look up a string and return its token code */
-int lookupId(const Tstring& id) {
+int lookupId(const String& id) {
     yylval.lineNumber = yylineNumber;
     if (id == "if") {
         return TOK_IF;
@@ -205,24 +205,24 @@ int lookupId(const Tstring& id) {
         return TOK_TASK;
     }
     if (id == "true") {
-        yylval.boolValue = new Tbool;
-        *(yylval.boolValue) = Tbool(true);
+        yylval.boolValue = new Bool;
+        *(yylval.boolValue) = Bool(true);
         return TOK_BOOLVAL;
     } else if (id == "false") {
-        yylval.boolValue = new Tbool;
-        *(yylval.boolValue) = Tbool(false);
+        yylval.boolValue = new Bool;
+        *(yylval.boolValue) = Bool(false);
         return TOK_BOOLVAL;
     }
 
     /* save the identifier */
-    yylval.stringval = new Tstring;
+    yylval.stringval = new String;
     *(yylval.stringval) = id;
     return TOK_IDENTIFIER;
 }
 
 /* lex an identifier (or reserved word) given a start */
 int lexIdent(QChar start) {
-    Tstring id;
+    String id;
     id.push_back(start);
 
     while (peek().isLetterOrNumber() || peek() == '_') {
@@ -235,7 +235,7 @@ int lexIdent(QChar start) {
 /* lex a number
  * TODO handle more bases, scientific notation etc. */
 int lexNumber(QChar start) {
-    Tstring number;
+    String number;
     number.push_back(start);
 
     /* have we seen a decimal point yet? */
@@ -277,11 +277,11 @@ int lexNumber(QChar start) {
 
     /* if there's no decimal its an int */
     if (number.find('.') == -1) {
-        yylval.intValue = new Tint;
+        yylval.intValue = new Int;
         *(yylval.intValue) = number.toInt();
         return TOK_INTVAL;
     } else {
-        yylval.realValue = new Treal;
+        yylval.realValue = new Real;
         *(yylval.realValue) = number.toReal();
         return TOK_REALVAL;
     }
@@ -289,7 +289,7 @@ int lexNumber(QChar start) {
 
 /* lex a string constant */
 int lexString() {
-    Tstring str;
+    String str;
     while (true) {
         QChar next = get();
         if (next == '\\') {
@@ -314,7 +314,7 @@ int lexString() {
     }
 
     /* save the string */
-    yylval.stringval = new Tstring;
+    yylval.stringval = new String;
     *(yylval.stringval) = str;
     return TOK_STRINGVAL;
 }

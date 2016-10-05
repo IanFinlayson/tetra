@@ -1,3 +1,7 @@
+/* settingsdialog.h
+ * declares the SettingsDialog class which allows the user to modify IDE
+ * settings */
+
 #include <QDialog>
 #include <QSettings>
 #include "ui_settings.h"

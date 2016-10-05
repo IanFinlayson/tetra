@@ -1,9 +1,16 @@
+/* scope.h
+ * the Scope class keeps track of variables which belong to a given function
+ * (or globals in case of the global scope object) */
 
 #ifndef SCOPE_H
 #define SCOPE_H
 
 #include <list>
+
 #include "vartable.h"
+#include "strings.h"
+
+class Node;
 
 enum ThreadStatus { RUNNING, STOPPED, DESTROYED, WAITING };
 
@@ -42,7 +49,7 @@ class Scope {
     }
 
     /* look a variable up in this scope by name */
-    Tdata* lookupVar(Tstring name, DataType* type) {
+    Data* lookupVar(String name, DataType* type) {
         return varScope.lookupVar(name, type);
     }
 
@@ -50,10 +57,10 @@ class Scope {
      * Returns an uninitialized pointer that will be associated with varName
      * The calling program can set this pointer to point to whatever varname
      * should alias. */
-    Tdata& declareReference(const Tstring varName);
+    Data& declareReference(const String varName);
 
     /* declare a variable that can hold different values across different threads */
-    std::list<std::pair<pthread_t, Tdata> >& declareThreadSpecificVariable(const Tstring&);
+    std::list<std::pair<pthread_t, Data> >& declareThreadSpecificVariable(const String&);
 
     /* Used by loops and constrol statements to determine if they can proceed, or
      * if they should return */
@@ -66,7 +73,7 @@ class Scope {
         executionStatus = status;
     }
 
-    bool containsVar(const Tstring& varName) const {
+    bool containsVar(const String& varName) const {
         return varScope.containsVar(varName);
     }
 

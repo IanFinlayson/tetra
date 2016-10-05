@@ -1,8 +1,6 @@
-/*
- * This file wraps a call to the executeProgram function of main.cpp
- * This command line running by executing this file, while allowing tools
- * access to a method which will build and run the program
- */
+/* main.cpp
+ * this file contains the main entry point of the command line Tetra
+ * interpreter */
 
 #include <argp.h>
 #include <cstdlib>
@@ -98,8 +96,8 @@ int main(int argc, char** argv) {
 
     CommandConsole mainConsole = CommandConsole();
 
-    TetraEnvironment::initialize();
-    TetraEnvironment::setConsole(&mainConsole);
+    Environment::initialize();
+    Environment::setConsole(&mainConsole);
 
     Node* tree;
 
@@ -107,7 +105,7 @@ int main(int argc, char** argv) {
      */
     try {
         /* file is last parameter */
-        tree = parseFile(Tstring(args.inputFileName));
+        tree = parseFile(String(args.inputFileName));
     } catch (Error e) {
         std::cout << "The following error was detected in your program:\n"
                   << e << "\nExecution aborted" << std::endl;

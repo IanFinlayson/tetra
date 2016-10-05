@@ -19,13 +19,13 @@ TARGET = tetra
 
 # specify the files used
 HEADERS = $$files(*.h)
-HEADERS -= parser.h
+HEADERS -= Parser.h
 
 SOURCES = $$files(*.cpp)
-SOURCES -= parser.cpp
+SOURCES -= Parser.cpp
 
 # all of this is to make bison work correctly
-BISONSOURCES = parser.y
+BISONSOURCES = Parser.y
 OTHER_FILES += $$BISONSOURCES
 bisonsource.input = BISONSOURCES
 bisonsource.output = ${QMAKE_FILE_BASE}.cpp

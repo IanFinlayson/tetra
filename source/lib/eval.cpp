@@ -1,6 +1,6 @@
-/*
- * This program interprets a tetra file by getting its tree representation
- * Takes a single filename containing the Tetra code as a parameter
+/* eval.cpp
+ * this file contains routines for evaluating the different tpyes of program
+ * nodes
  */
 
 #include <assert.h>
@@ -29,10 +29,10 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
          * destination */
 
         /* evaluate node2 to get a value */
-        Tdata* sourceValue = evaluateExpression(node2, sourceContext);
+        Data* sourceValue = evaluateExpression(node2, sourceContext);
 
         /* create a data reference for this name in the new scope */
-        Tdata* destinationValue =
+        Data* destinationValue =
             destinationScope->lookupVar(node1->getStringvalue(), node1->type());
 
         /* do the assignment */
@@ -41,9 +41,9 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
 }
 
 /* evaluate a function call node */
-Tdata* evaluateFunctionCall(Node* node, Context* context) {
+Data* evaluateFunctionCall(Node* node, Context* context) {
     /* check to see if this is a standard library function */
-    Tstring funcName = node->child(0)->getStringvalue();
+    String funcName = node->child(0)->getStringvalue();
 
     if (funcName == "print") {
         if (node->child(1) != NULL) {
@@ -80,7 +80,7 @@ Tdata* evaluateFunctionCall(Node* node, Context* context) {
         context->getCurrentScope().setCallNode(node);
 
         /* transfer control to the function capturing the return value */
-        Tdata* returnValue = evaluateStatement(funcNode, context);
+        Data* returnValue = evaluateStatement(funcNode, context);
 
         /* returns to the old scope once the function has finished evaluating */
         context->exitScope();
@@ -91,14 +91,14 @@ Tdata* evaluateFunctionCall(Node* node, Context* context) {
 }
 
 /* evaluate any regular binary operator expression node the operatorMethod
- * parameter refers to one of the Tdata operator methods e.g.  opOR, opAnd etc.
+ * parameter refers to one of the Data operator methods e.g.  opOR, opAnd etc.
  * from that class */
-Tdata* evaluateBinaryExpression(Node* node,
-                                Context* context,
-                                Tdata* (Tdata::*operatorMethod)(const Tdata*) ) {
+Data* evaluateBinaryExpression(Node* node,
+                               Context* context,
+                               Data* (Data::*operatorMethod)(const Data*) ) {
     /* evaluate both of the children */
-    Tdata* lhs = evaluateExpression(node->child(0), context);
-    Tdata* rhs = evaluateExpression(node->child(1), context);
+    Data* lhs = evaluateExpression(node->child(0), context);
+    Data* rhs = evaluateExpression(node->child(1), context);
 
     /* call the operator method on the left, passing the right, and return the
      * result */
@@ -106,9 +106,9 @@ Tdata* evaluateBinaryExpression(Node* node,
 }
 
 /* fill a list from the children nodes of a list value node */
-void fillList(Tlist* list, Node* node, Context* context) {
+void fillList(List* list, Node* node, Context* context) {
     /* evaluate the first item */
-    Tdata* first = evaluateExpression(node->child(0), context);
+    Data* first = evaluateExpression(node->child(0), context);
 
     /* add it to the list */
     list->append(first);
@@ -120,7 +120,7 @@ void fillList(Tlist* list, Node* node, Context* context) {
 }
 
 /* evaluates operations on data types and returns the value */
-Tdata* evaluateExpression(Node* node, Context* context) {
+Data* evaluateExpression(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
     switch (node->kind()) {
         /* evaluate the function call using the function above */
@@ -128,133 +128,133 @@ Tdata* evaluateExpression(Node* node, Context* context) {
             return evaluateFunctionCall(node, context);
 
         case NODE_STRINGVAL: {
-            /* make a Tdata for the value */
-            Tstring value = node->getStringvalue();
-            return Tdata::create(node->type(), &value);
+            /* make a Data for the value */
+            String value = node->getStringvalue();
+            return Data::create(node->type(), &value);
         }
 
         case NODE_REALVAL: {
-            /* make a Tdata for the value */
-            Treal value = node->getRealvalue();
-            return Tdata::create(node->type(), &value);
+            /* make a Data for the value */
+            Real value = node->getRealvalue();
+            return Data::create(node->type(), &value);
         }
 
         case NODE_INTVAL: {
-            /* make a Tdata for the value */
-            Tint value = node->getIntvalue();
-            return Tdata::create(node->type(), &value);
+            /* make a Data for the value */
+            Int value = node->getIntvalue();
+            return Data::create(node->type(), &value);
         }
 
         case NODE_BOOLVAL: {
-            /* make a Tdata for the value */
-            Tbool value = node->getBoolvalue();
-            return Tdata::create(node->type(), &value);
+            /* make a Data for the value */
+            Bool value = node->getBoolvalue();
+            return Data::create(node->type(), &value);
         }
 
         case NODE_LISTVAL: {
             /* make a list data structure */
-            Tlist l;
+            List l;
             /* if there are data elements, get them */
             if (node->getNumChildren() > 0) {
                 fillList(&l, node, context);
             }
 
             /* wrap this list in a tdata */
-            Tdata* list = Tdata::create(node->type(), &l);
+            Data* list = Data::create(node->type(), &l);
             return list;
         }
 
         case NODE_LISTRANGE: {
             /* make the list data structure */
-            Tlist l;
+            List l;
 
             /* evaluate the start and end points */
-            Tdata* start = evaluateExpression(node->child(0), context);
-            Tdata* end = evaluateExpression(node->child(1), context);
+            Data* start = evaluateExpression(node->child(0), context);
+            Data* end = evaluateExpression(node->child(1), context);
 
             /* assemble the array */
-            for (Tint t = *((Tint*) (start->getValue()));
-                 (t <= *((Tint*) (end->getValue()))).toBool(); t++) {
-                l.append(Tdata::create(node->child(0)->type(), &t));
+            for (Int t = *((Int*) (start->getValue())); (t <= *((Int*) (end->getValue()))).toBool();
+                 t++) {
+                l.append(Data::create(node->child(0)->type(), &t));
             }
 
             /* wrap this list in a tdata */
-            Tdata* list = Tdata::create(node->type(), &l);
+            Data* list = Data::create(node->type(), &l);
             return list;
         }
 
         /* for all of these, we can simply call the binary expression function with
          * the appropriate method parameter */
         case NODE_ASSIGN:
-            return evaluateBinaryExpression(node, context, &Tdata::opAssign);
+            return evaluateBinaryExpression(node, context, &Data::opAssign);
         case NODE_LT:
-            return evaluateBinaryExpression(node, context, &Tdata::opLt);
+            return evaluateBinaryExpression(node, context, &Data::opLt);
         case NODE_LTE:
-            return evaluateBinaryExpression(node, context, &Tdata::opLte);
+            return evaluateBinaryExpression(node, context, &Data::opLte);
         case NODE_GT:
-            return evaluateBinaryExpression(node, context, &Tdata::opGt);
+            return evaluateBinaryExpression(node, context, &Data::opGt);
         case NODE_GTE:
-            return evaluateBinaryExpression(node, context, &Tdata::opGte);
+            return evaluateBinaryExpression(node, context, &Data::opGte);
         case NODE_EQ:
-            return evaluateBinaryExpression(node, context, &Tdata::opEq);
+            return evaluateBinaryExpression(node, context, &Data::opEq);
         case NODE_NEQ:
-            return evaluateBinaryExpression(node, context, &Tdata::opNeq);
+            return evaluateBinaryExpression(node, context, &Data::opNeq);
         case NODE_BITXOR:
-            return evaluateBinaryExpression(node, context, &Tdata::opBitxor);
+            return evaluateBinaryExpression(node, context, &Data::opBitxor);
         case NODE_BITAND:
-            return evaluateBinaryExpression(node, context, &Tdata::opBitand);
+            return evaluateBinaryExpression(node, context, &Data::opBitand);
         case NODE_BITOR:
-            return evaluateBinaryExpression(node, context, &Tdata::opBitor);
+            return evaluateBinaryExpression(node, context, &Data::opBitor);
         case NODE_SHIFTL:
-            return evaluateBinaryExpression(node, context, &Tdata::opShiftl);
+            return evaluateBinaryExpression(node, context, &Data::opShiftl);
         case NODE_SHIFTR:
-            return evaluateBinaryExpression(node, context, &Tdata::opShiftr);
+            return evaluateBinaryExpression(node, context, &Data::opShiftr);
         case NODE_PLUS:
-            return evaluateBinaryExpression(node, context, &Tdata::opPlus);
+            return evaluateBinaryExpression(node, context, &Data::opPlus);
         case NODE_MINUS:
-            return evaluateBinaryExpression(node, context, &Tdata::opMinus);
+            return evaluateBinaryExpression(node, context, &Data::opMinus);
         case NODE_TIMES:
-            return evaluateBinaryExpression(node, context, &Tdata::opTimes);
+            return evaluateBinaryExpression(node, context, &Data::opTimes);
         case NODE_DIVIDE:
-            return evaluateBinaryExpression(node, context, &Tdata::opDivide);
+            return evaluateBinaryExpression(node, context, &Data::opDivide);
         case NODE_MODULUS:
-            return evaluateBinaryExpression(node, context, &Tdata::opModulus);
+            return evaluateBinaryExpression(node, context, &Data::opModulus);
         case NODE_EXP:
-            return evaluateBinaryExpression(node, context, &Tdata::opExp);
+            return evaluateBinaryExpression(node, context, &Data::opExp);
 
         /* these are done differently to support short-circuit evaluation */
         case NODE_OR: {
             /* evaluate lhs */
-            Tdata* lhs = evaluateExpression(node->child(0), context);
+            Data* lhs = evaluateExpression(node->child(0), context);
 
             /* if true, return a true value */
-            if (((Tbool*)lhs->getValue())->toBool()) {
-                Tbool falseValue(true);
-                return Tdata::create(lhs->getType(), &falseValue);
+            if (((Bool*) lhs->getValue())->toBool()) {
+                Bool falseValue(true);
+                return Data::create(lhs->getType(), &falseValue);
             } else {
                 /* do the rest of it */
-                Tdata* rhs = evaluateExpression(node->child(1), context);
+                Data* rhs = evaluateExpression(node->child(1), context);
                 return lhs->opOr(rhs);
             }
         }
         case NODE_AND: {
             /* evaluate lhs */
-            Tdata* lhs = evaluateExpression(node->child(0), context);
+            Data* lhs = evaluateExpression(node->child(0), context);
 
             /* if false, return a false value */
-            if (((Tbool*)lhs->getValue())->toBool() == false) {
-                Tbool falseValue(false);
-                return Tdata::create(lhs->getType(), &falseValue);
+            if (((Bool*) lhs->getValue())->toBool() == false) {
+                Bool falseValue(false);
+                return Data::create(lhs->getType(), &falseValue);
             } else {
                 /* do the rest of it */
-                Tdata* rhs = evaluateExpression(node->child(1), context);
+                Data* rhs = evaluateExpression(node->child(1), context);
                 return lhs->opAnd(rhs);
             }
         }
 
         case NODE_BITNOT: {
             /* evaluate the child */
-            Tdata* operand = evaluateExpression(node->child(0), context);
+            Data* operand = evaluateExpression(node->child(0), context);
 
             /* return the not of this */
             return operand->opBitnot();
@@ -262,7 +262,7 @@ Tdata* evaluateExpression(Node* node, Context* context) {
 
         case NODE_NOT: {
             /* evaluate the child */
-            Tdata* operand = evaluateExpression(node->child(0), context);
+            Data* operand = evaluateExpression(node->child(0), context);
 
             /* return the not of this */
             return operand->opNot();
@@ -270,8 +270,8 @@ Tdata* evaluateExpression(Node* node, Context* context) {
 
         case NODE_INDEX: {
             /* evaluate the list on the left and the index on the right */
-            Tdata* list = evaluateExpression(node->child(0), context);
-            Tdata* index = evaluateExpression(node->child(1), context);
+            Data* list = evaluateExpression(node->child(0), context);
+            Data* index = evaluateExpression(node->child(1), context);
 
             /* return a pointer to the data in the list at that position */
             return list->opIndex(index);
@@ -288,7 +288,7 @@ Tdata* evaluateExpression(Node* node, Context* context) {
 }
 
 /* evaluate a statement node - only returns a value for return statements */
-Tdata* evaluateStatement(Node* node, Context* context) {
+Data* evaluateStatement(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
     switch (node->kind()) {
         case NODE_FUNCTION: {
@@ -302,7 +302,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
         case NODE_STATEMENT: {
             /* evaluate the first child */
-            Tdata* value = evaluateStatement(node->child(0), context);
+            Data* value = evaluateStatement(node->child(0), context);
 
             /* if it didn't result in a break of some kind, do the second one */
             ExecutionStatus status = context->queryExecutionStatus();
@@ -317,7 +317,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
         case NODE_RETURN: {
             /* the return value, if any */
-            Tdata* returnValue = NULL;
+            Data* returnValue = NULL;
 
             /* check if there is a child to return or not */
             if (node->child(0)) {
@@ -327,7 +327,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
             context->notifyReturn();
             return returnValue;
-        }
+        } break;
 
         /* just do nothing */
         case NODE_PASS:
@@ -345,9 +345,9 @@ Tdata* evaluateStatement(Node* node, Context* context) {
         /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
-            Tdata* conditional = evaluateExpression(node->child(0), context);
+            Data* conditional = evaluateExpression(node->child(0), context);
             /* if true execute the 2nd child */
-            if (((Tbool*) (conditional->getValue()))->toBool()) {
+            if (((Bool*) (conditional->getValue()))->toBool()) {
                 return evaluateStatement(node->child(1), context);
             } else {
                 /* check for else block and execute it if it exists */
@@ -362,7 +362,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
             context->notifyElif();
 
             /* check the first branch */
-            Tdata* returnValue = evaluateStatement(node->child(0), context);
+            Data* returnValue = evaluateStatement(node->child(0), context);
 
             /* check if the first one was false */
             ExecutionStatus status = context->queryExecutionStatus();
@@ -384,7 +384,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
         case NODE_ELIF_CHAIN: {
             /* try to execute the given case of the ELIF statement */
-            Tdata* returnValue = evaluateStatement(node->child(0), context);
+            Data* returnValue = evaluateStatement(node->child(0), context);
 
             /* check to see if we are doing the next one */
             ExecutionStatus status = context->queryExecutionStatus();
@@ -398,10 +398,10 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
         case NODE_ELIF_CLAUSE: {
             /* check the condition on the left */
-            Tdata* conditional = evaluateExpression(node->child(0), context);
+            Data* conditional = evaluateExpression(node->child(0), context);
 
             /* if condition is true, execute the body */
-            if (((Tbool*) conditional->getValue())->toBool()) {
+            if (((Bool*) conditional->getValue())->toBool()) {
                 /* we no longer need to check the rest of the branches */
                 context->normalizeStatus();
                 return evaluateStatement(node->child(1), context);
@@ -411,12 +411,12 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
         case NODE_WHILE: {
             /* evaluate the condition */
-            Tdata* conditional = evaluateExpression(node->child(0), context);
+            Data* conditional = evaluateExpression(node->child(0), context);
 
             /* while it is true */
-            while (((Tbool*) conditional->getValue())->toBool()) {
+            while (((Bool*) conditional->getValue())->toBool()) {
                 /* evaluate the loop body */
-                Tdata* returnValue = evaluateStatement(node->child(1), context);
+                Data* returnValue = evaluateStatement(node->child(1), context);
 
                 /* check the execution status */
                 ExecutionStatus status = context->queryExecutionStatus();
@@ -444,13 +444,13 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 
         case NODE_FOR: {
             /* evaluate the list we are looping through */
-            Tdata* listData = evaluateExpression(node->child(1), context);
+            Data* listData = evaluateExpression(node->child(1), context);
 
             /* pull the list out of it */
-            Tlist* list = (Tlist*) listData->getValue();
+            List* list = (List*) listData->getValue();
 
             /* the return value if we hit one */
-            Tdata* returnValue = NULL;
+            Data* returnValue = NULL;
 
             /* for each item in this list */
             for (int i = 0; i < list->length(); i++) {
@@ -468,7 +468,7 @@ Tdata* evaluateStatement(Node* node, Context* context) {
                 context->normalizeStatus();
 
                 /* look the induction variable up in the context */
-                Tdata* loopVariable =
+                Data* loopVariable =
                     context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
                 /* set it to the next value */
@@ -492,12 +492,12 @@ Tdata* evaluateStatement(Node* node, Context* context) {
 /* Equivilant of main for the interpreter module */
 int interpret(Node* tree, int debug, int threads) {
     /* set environment settings */
-    TetraEnvironment::setDebug(debug);
-    TetraEnvironment::setMaxThreads(threads);
-    TetraEnvironment::setRunning();
+    Environment::setDebug(debug);
+    Environment::setMaxThreads(threads);
+    Environment::setRunning();
 
     /* construct a context (this also initializes the global scope) */
-    Context context(TetraEnvironment::obtainNewThreadID());
+    Context context(Environment::obtainNewThreadID());
 
     /* attempt to find the main function */
     Node* main = functions.getFunctionNode("main()");

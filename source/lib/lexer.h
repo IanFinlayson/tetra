@@ -1,4 +1,5 @@
-/* stuff for the lexer */
+/* lexer.h
+ * declares functions for the lexer */
 
 #ifndef LEXER_H
 #define LEXER_H
@@ -19,6 +20,6 @@ void deleteLexFile();
 int yylex();
 
 /* this function calls yyparse on a file and returns the parse tree node */
-Node* parseFile(const Tstring& fname);
+Node* parseFile(const String& fname);
 
 #endif

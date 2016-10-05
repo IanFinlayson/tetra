@@ -1,3 +1,6 @@
+/* context.cpp
+ * this file implements the Context class which keeps track of variables in the
+ * scopes of the running program */
 
 #include "tetra.h"
 
@@ -18,11 +21,11 @@ Context::Context(long tID) {
     assert(success == 0);
 
     /* Only need to instantiate debug info if in debug mode */
-    if (TetraEnvironment::isDebugMode()) {
-        parForVars = new std::vector<Tstring>();
+    if (Environment::isDebugMode()) {
+        parForVars = new std::vector<String>();
         scopes = new std::stack<const Node*>();
-        globalReferenceTable = new std::map<Tstring, int>();
-        referenceTables = new std::stack<std::map<Tstring, int> >();
+        globalReferenceTable = new std::map<String, int>();
+        referenceTables = new std::stack<std::map<String, int> >();
     } else {
         parForVars = NULL;
         scopes = NULL;
@@ -38,7 +41,7 @@ void Context::initializeGlobalVars(const Node* tree) {
         if (candidate->kind() == NODE_GLOBAL || candidate->kind() == NODE_CONST) {
             /* If debugging is enabled, register the name of the global in the global */
             /* reference lookup table */
-            if (TetraEnvironment::isDebugMode()) {
+            if (Environment::isDebugMode()) {
                 Node* id = candidate->child(0);
                 (*globalReferenceTable)[id->getStringvalue()] = id->getIntvalue().toInt();
             }

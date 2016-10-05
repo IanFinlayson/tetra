@@ -1,10 +1,14 @@
+/* environment.h
+ * this class keeps track of the running environment of programs being
+ * interpreted */
+
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
 #include "eval.h"
 
 /* stores constants related to the environment where the program is running */
-class TetraEnvironment {
+class Environment {
    public:
     static void initialize();
     static VirtualConsole* getConsole();
@@ -71,7 +75,7 @@ class ThreadEnvironment {
     /* This vector holds each MUTEX lock created by the program
      * By putting them all in one global location, we allow threads to query
      * whether a particular mutex has been created or not */
-    std::map<Tstring, pthread_mutex_t*> mutexes;
+    std::map<String, pthread_mutex_t*> mutexes;
     pthread_mutex_t map_mutex;
 
     /* we may want to change the constructor to an initializer, as pthread_create
@@ -100,7 +104,7 @@ class ThreadEnvironment {
 
     /* this method returns the mutex associated with a string, or creates a new
      * mutex associated with the string and returns that */
-    static pthread_mutex_t* identifyMutex(Tstring mutexName);
+    static pthread_mutex_t* identifyMutex(String mutexName);
 };
 
 #endif

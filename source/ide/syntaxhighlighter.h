@@ -1,3 +1,6 @@
+/* syntaxhighlighter.h
+ * this file comes with the Qt toolkit examples, original Qt license to follow */
+
 /****************************************************************************
 **
 ** Copyright (C) 2013 Digia Plc and/or its subsidiary(-ies).

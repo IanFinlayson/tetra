@@ -33,10 +33,10 @@ Node* root;
     Node* node;
 
     /* PODS only in union! */
-    Tint* intValue;
-    Treal* realValue;
-    Tbool* boolValue;
-    Tstring* stringval;
+    Int* intValue;
+    Real* realValue;
+    Bool* boolValue;
+    String* stringval;
 
     DataType* dataType;
     int lineNumber;
@@ -214,7 +214,7 @@ module: TOK_OPEN identifiers {
 /* class */
 class: TOK_CLASS TOK_IDENTIFIER TOK_COLON newl_plus class_block {
     $$ = new Node(NODE_CLASS);
-    $$->setStringvalue(Tstring(*$2));
+    $$->setStringvalue(String(*$2));
     delete $2;
     $$->addChild($5);
 }
@@ -244,7 +244,7 @@ class_part: function
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
     $$->setDataType(new DataType(TYPE_CLASS));
-    $$->setStringvalue(Tstring("init"));
+    $$->setStringvalue(String("init"));
     $$->addChild($3);
     $$->addChild($5);
     $$->setLine($1);
@@ -289,7 +289,7 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
 /* a single function */
 function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
-    $$->setStringvalue(Tstring(*$2));
+    $$->setStringvalue(String(*$2));
     delete $2;
     $$->setDataType($4);
     $$->addChild($3);
@@ -320,7 +320,7 @@ formal_params: declaration TOK_COMMA formal_params {
 declaration: TOK_IDENTIFIER type {
     $$ = new Node(NODE_DECLARATION);
     $$->setLine(yylineNumber);
-    $$->setStringvalue(Tstring(*$1));
+    $$->setStringvalue(String(*$1));
     delete $1;
     $$->setDataType($2);
 } 
@@ -375,7 +375,7 @@ type: TOK_INT {
     $$ = $1;
 } | TOK_IDENTIFIER {
     $$ = new DataType(TYPE_CLASS);
-    $$->className = new Tstring(*$1);
+    $$->className = new String(*$1);
     delete $1;
 }
 
@@ -892,7 +892,7 @@ timesterm: TOK_PLUS timesterm {
     /* subtract from zero */
     $$ = new Node(NODE_MINUS);
     Node* zero = new Node(NODE_INTVAL);
-    zero->setIntvalue(Tint(0));
+    zero->setIntvalue(Int(0));
     $$->addChild(zero);
     $$->addChild($2);
 } | TOK_BITNOT timesterm {
@@ -940,19 +940,19 @@ rvalue: functionCall {
     $$ = $2;
 } | TOK_INTVAL {
     $$ = new Node(NODE_INTVAL);
-    $$->setIntvalue(Tint(*$1));
+    $$->setIntvalue(Int(*$1));
     delete $1;
 } | TOK_REALVAL {
     $$ = new Node(NODE_REALVAL);
-    $$->setRealvalue(Treal((*$1)));
+    $$->setRealvalue(Real((*$1)));
     delete $1;
 } | TOK_BOOLVAL {
     $$ = new Node(NODE_BOOLVAL);
-    $$->setBoolvalue(Tbool((*$1)));
+    $$->setBoolvalue(Bool((*$1)));
     delete $1;
 } | TOK_STRINGVAL {
     $$ = new Node(NODE_STRINGVAL);
-    $$->setStringvalue(Tstring(*$1));
+    $$->setStringvalue(String(*$1));
     delete $1;
 } | TOK_NONE {
     $$ = new Node(NODE_NONEVAL);
@@ -1062,7 +1062,7 @@ index: TOK_LEFTBRACKET expression TOK_RIGHTBRACKET {
 /* a node wrapper around an ID */
 identifier: TOK_IDENTIFIER {
     $$ = new Node(NODE_IDENTIFIER);
-    $$->setStringvalue(Tstring(*$1));
+    $$->setStringvalue(String(*$1));
     delete $1;
     $$->setLine(yylineNumber);
 }  
@@ -1103,7 +1103,7 @@ void yyerror(const char* str) {
 
 /* parse from a file */
 extern std::istream* in;
-Node* parseFile(const Tstring& fname) {
+Node* parseFile(const String& fname) {
     /* reset all of the lexer stuff */
     reset_lexer( );
 

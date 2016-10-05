@@ -1,4 +1,5 @@
-/* function, class and variable information */
+/* symbol.h
+ * function, class and variable information */
 
 #ifndef SYMBOL_H
 #define SYMBOL_H
@@ -14,15 +15,15 @@
 class Symbol {
    public:
     Symbol();
-    Symbol(Tstring name, DataType* type, int lineNumber, bool constant = false);
+    Symbol(String name, DataType* type, int lineNumber, bool constant = false);
     Symbol(const Symbol&);
     int getLine() const;
-    Tstring getName() const;
+    String getName() const;
     DataType* getType() const;
     bool isConst();
 
    private:
-    Tstring name;
+    String name;
     DataType* type;
     bool constant;
     int lineNumber;
@@ -38,41 +39,41 @@ class Symbol {
  */
 class FunctionMap {
    private:
-    std::map<Tstring, Node*> lookup;
+    std::map<String, Node*> lookup;
 
    public:
     FunctionMap();
     /* Returns the address of a node containing the function body of the
        function
        denoted by functionSignature */
-    Node* getFunctionNode(const Tstring functionSignature);
-    Node* getFunctionNode(DataType*, Tstring);
+    Node* getFunctionNode(const String functionSignature);
+    Node* getFunctionNode(DataType*, String);
 
     Node* getFunctionNode(const Node* callNode);
 
     /* Generates a unique function signature based on the name AND the arguments
     */
-    static Tstring getFunctionSignature(const Node* node);
+    static String getFunctionSignature(const Node* node);
 
     /* Fills the function map given the specified base node */
     void build(Node* tree);
 
     /* returns true if the map contains a function with the */
     /* provided name, regardless of params and return types */
-    bool hasFuncNamed(Tstring name);
+    bool hasFuncNamed(String name);
 
     /* returns true if the map contains the function */
     bool hasFunction(Node* node);
-    bool hasFunction(DataType*, Tstring);
+    bool hasFunction(DataType*, String);
 
-    DataType* getFunctionsNamed(Tstring);
+    DataType* getFunctionsNamed(String);
 
     /* renames functions with the name provided and returns them as a */
     /* vector of pairs */
-    std::map<Tstring, Node*> remove(Tstring);
+    std::map<String, Node*> remove(String);
 
     /* wrapper around std::map.insert */
-    void insert(std::pair<Tstring, Node*>);
+    void insert(std::pair<String, Node*>);
 
     /* clear everything out of the function map, e.g. to reuse it */
     void clearAll();
@@ -81,29 +82,29 @@ class FunctionMap {
 /* stores a class definition's context (methods & members) */
 class ClassContext {
    public:
-    ClassContext(Tstring name);
+    ClassContext(String name);
     ClassContext();
-    Tstring getName();
-    bool hasMember(Tstring);
-    bool hasMethod(DataType*, Tstring);
-    bool hasMethodNamed(Tstring);
+    String getName();
+    bool hasMember(String);
+    bool hasMethod(DataType*, String);
+    bool hasMethodNamed(String);
     void addMember(Symbol);
     void addMembers(Node* node);
     void addMethod(Node*);
     void addMethods(Node*);
-    Symbol& getMember(Tstring);
-    DataType* getMethods(Tstring);
-    const Node* getMethod(DataType*, Tstring);
-    std::map<Tstring, Node*> removeInits();
+    Symbol& getMember(String);
+    DataType* getMethods(String);
+    const Node* getMethod(DataType*, String);
+    std::map<String, Node*> removeInits();
 
    private:
-    Tstring name;
+    String name;
     FunctionMap methods;
-    std::map<Tstring, Symbol> members;
+    std::map<String, Symbol> members;
 };
 
 /* the global symbol table */
-extern std::map<Tstring, Symbol> globals;
+extern std::map<String, Symbol> globals;
 
 /* the global function map */
 extern FunctionMap functions;

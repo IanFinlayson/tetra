@@ -1,26 +1,25 @@
+/* vartable.h
+ * the variable table just stores a map of variables accessed by name */
+
 #ifndef VARTABLE_H
 #define VARTABLE_H
 
 #include <map>
 
+class Data;
+class DataType;
+class String;
+
 class VarTable {
    public:
     /* returns a pointer to this variable, creating it if needed */
-    Tdata* lookupVar(const Tstring& name, DataType* type) {
-        /* if not here, create it */
-        if (variables.find(name) == variables.end()) {
-            variables[name] = Tdata::create(type, NULL);
-        }
+    Data* lookupVar(const String& name, DataType* type);
 
-        return variables[name];
-    }
-
-    bool containsVar(const Tstring& name) const {
-        return variables.find(name) != variables.end();
-    }
+    /* checks if a variable exists in the table */
+    bool containsVar(const String& name) const;
 
    private:
-    std::map<Tstring, Tdata*> variables;
+    std::map<String, Data*> variables;
 };
 
 #endif

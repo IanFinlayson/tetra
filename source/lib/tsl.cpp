@@ -1,15 +1,15 @@
-/* this file defines Tetra Standard Library functions */
+/* tsp.cpp
+ * this file defines Tetra Standard Library functions */
 
-#include <string.h>
 #include <iostream>
 
 #include "tetra.h"
 
 /* prints the expression(s) denoted by arguments given */
-Tdata* tslPrint(Node* args, Context* context) {
+Data* tslPrint(Node* args, Context* context) {
     /* if no args given, just print a new line */
     if (args == NULL) {
-        VirtualConsole* console = TetraEnvironment::getConsole();
+        VirtualConsole* console = Environment::getConsole();
         console->processStandardOutput("\n");
     }
 
@@ -25,10 +25,10 @@ Tdata* tslPrint(Node* args, Context* context) {
 
     /* if args is an expression, actually print it */
     else {
-        VirtualConsole* console = TetraEnvironment::getConsole();
+        VirtualConsole* console = Environment::getConsole();
 
         /* evaluate the node and get the value of it */
-        Tdata* arg = evaluateExpression(args, context);
+        Data* arg = evaluateExpression(args, context);
 
         /* convert to a string and print it to the connected console */
         console->processStandardOutput(arg->getValue()->toString());
@@ -42,7 +42,7 @@ Tdata* tslPrint(Node* args, Context* context) {
 int readInt(int threadNum) {
     int ret = 0;
     // while(!(cin >> ret)) {
-    while (!(tstringstream(TetraEnvironment::getConsole(threadNum, false)
+    while (!(tstringstream(Environment::getConsole(threadNum, false)
                     .receiveStandardInput()) >>
                 ret)) {
         // Moves down the stream until it finds a readable number
@@ -55,7 +55,7 @@ int readInt(int threadNum) {
 double readReal(int threadNum) {
     double ret = 0;
     // while(!(cin >> ret)) {
-    while (!(tstringstream(TetraEnvironment::getConsole(threadNum, false)
+    while (!(tstringstream(Environment::getConsole(threadNum, false)
                     .receiveStandardInput()) >>
                 ret)) {
         // moves along the buffer until it finds a readable value
@@ -68,7 +68,7 @@ double readReal(int threadNum) {
 bool readBool(int threadNum) {
     // Returns false on some variation of 'false', 'no', or 0
     tstring input =
-        TetraEnvironment::getConsole(threadNum, false).receiveStandardInput();
+        Environment::getConsole(threadNum, false).receiveStandardInput();
     // Compare input against the recognized values for false
     if (input == "false" || input == "no" || input == "0") {
         return false;
@@ -78,7 +78,7 @@ bool readBool(int threadNum) {
 
 tstring readString(int threadNum) {
     tstring ret =
-        TetraEnvironment::getConsole(threadNum, false).receiveStandardInput();
+        Environment::getConsole(threadNum, false).receiveStandardInput();
 
     return ret;
 }

@@ -1,14 +1,16 @@
-#include <sstream>
+/* console.cpp
+ * this file defines the command line console for I/O */
 
+#include <sstream>
 #include "console.h"
 
-Tstring CommandConsole::receiveStandardInput() {
+String CommandConsole::receiveStandardInput() {
     char input[1024];
     std::cin >> input;
 
-    return Tstring(input);
+    return String(input);
 }
 
-void CommandConsole::processStandardOutput(const Tstring& output) {
+void CommandConsole::processStandardOutput(const String& output) {
     std::cout << output;
 }

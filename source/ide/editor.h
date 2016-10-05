@@ -70,11 +70,14 @@ class Editor : public QPlainTextEdit {
     void replaceAll(QString before, QString after, bool matchCase);
 
   public slots:
+    /* update aspects of the GUI */
     void updateCursorCoordinates();
     void updateLineNumberAreaWidth(int newBlockCount);
     void updateLineNumberArea(const QRect&, int);
     void unhighlightLine();
 
+    /* copy only available when something is selected. undo/redo only available
+     * when there is a history */
     void setCopyAvailable(bool);
     void setRedoAvailable(bool);
     void setUndoAvailable(bool);
@@ -84,6 +87,7 @@ class Editor : public QPlainTextEdit {
     void resizeEvent(QResizeEvent* event);
 
   private:
+    /* these are for inferring the tab amount from loaded files */
     int getLeadingSpaces();
     bool isTab(QString direction);
 
@@ -97,6 +101,7 @@ class Editor : public QPlainTextEdit {
     bool copyAvailable, redoAvailable, undoAvailable;
 };
 
+/* the area on the left of the screen showing line numbers */
 class LineNumberArea : public QWidget {
   public:
     LineNumberArea(Editor* editor)

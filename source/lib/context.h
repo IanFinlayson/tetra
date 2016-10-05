@@ -1,3 +1,6 @@
+/* context.h
+ * this file declares the Context class which keeps track of variables in scope(s)
+ * as the program runs */
 
 #ifndef CONTEXT_H
 #define CONTEXT_H
@@ -26,7 +29,7 @@ class Context {
     void initializeGlobalVars(const Node*);
 
     /* lookup a variable  in the present context */
-    Tdata* lookupVar(Tstring name, DataType* type) {
+    Data* lookupVar(String name, DataType* type) {
         if (getGlobalScopeRef().containsVar(name)) {
             return (getGlobalScopeRef().lookupVar(name, type));
         } else {
@@ -87,7 +90,7 @@ class Context {
     }
 
     /* declares  variable that can have different values across different threads */
-    std::list<std::pair<pthread_t, Tdata> >& declareThreadSpecificVariable(const Tstring&);
+    std::list<std::pair<pthread_t, Data> >& declareThreadSpecificVariable(const String&);
 
     /* performs a deep copy of the current context */
     Context& operator=(const Context&);
@@ -101,11 +104,11 @@ class Context {
 
     /* for use when debugging */
     int getLastLineNum();
-    void* fetchVariable(Tstring s);
-    std::map<Tstring, int>& getRefTable() {
+    void* fetchVariable(String s);
+    std::map<String, int>& getRefTable() {
         return referenceTables->top();
     }
-    std::map<Tstring, int>& getGlobRefTable() {
+    std::map<String, int>& getGlobRefTable() {
         return *globalReferenceTable;
     }
     void updateVarReferenceTable(const Node* node);
@@ -127,7 +130,7 @@ class Context {
     ThreadStatus getRunStatus() {
         return runStatus;
     }
-    bool isParallelForVariable(Tstring);
+    bool isParallelForVariable(String);
 
     void setLastLineNo(int pLast) {
         lastLineNo = pLast;
@@ -144,7 +147,7 @@ class Context {
     void setRunStatus(ThreadStatus pStatus) {
         runStatus = pStatus;
     }
-    void registerParallelForVariable(Tstring);
+    void registerParallelForVariable(String);
 
     /* used to give debug info to newly created threads */
     void copyDebugInfo(Context* baseContext) {
@@ -173,14 +176,14 @@ class Context {
 
     std::stack<const Node*>* scopes;
 
-    std::stack<std::map<Tstring, int> >* referenceTables;
+    std::stack<std::map<String, int> >* referenceTables;
 
-    std::map<Tstring, int>* globalReferenceTable;
+    std::map<String, int>* globalReferenceTable;
 
     ThreadStatus runStatus;
 
     pthread_mutex_t parallelList_mutex;
-    std::vector<Tstring>* parForVars;
+    std::vector<String>* parForVars;
 };
 
 #endif

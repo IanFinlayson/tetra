@@ -1,3 +1,6 @@
+/* console.h
+ * this file declares the console class for performing console I/O */
+
 #ifndef OBSERVER_H
 #define OBSERVER_H
 
@@ -7,8 +10,8 @@
 
 class CommandConsole : public VirtualConsole {
    public:
-    Tstring receiveStandardInput();
-    void processStandardOutput(const Tstring& output);
+    String receiveStandardInput();
+    void processStandardOutput(const String& output);
 };
 
 #endif

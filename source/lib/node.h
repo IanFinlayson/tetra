@@ -1,4 +1,5 @@
-/* parse tree node information */
+/* node.h
+ * declares parse tree node information */
 
 #ifndef NODE_H
 #define NODE_H
@@ -7,14 +8,17 @@
 #include <string>
 #include <vector>
 
-#include "values.h"
+#include "int.h"
+#include "real.h"
+#include "strings.h"
+#include "bool.h"
 
 /* forward declarations */
 class DataType;
-class Tdata;
+class Data;
 class Symbol;
 
-class Tstring;
+class String;
 
 /* types of nodes */
 enum NodeKind {
@@ -105,7 +109,7 @@ class Node {
     Node(Node* other);
     ~Node();
     void setDataType(DataType* dataType);
-    void setValue(Tdata* value);
+    void setValue(Data* value);
     void setLine(int lineNumber);
 
     /* accessors */
@@ -119,32 +123,26 @@ class Node {
     int getNumChildren() const;
 
     /* get the child of a node */
-    Node* child(int which) const {
-        if (which < 0 || which >= numChildren) {
-            return NULL;
-        } else {
-            return children[which];
-        }
-    }
+    Node* child(int which) const;
 
     /* symbol functions */
     void insertSymbol(Symbol sym);
-    Symbol& lookupSymbol(Tstring name, int lineNumber) const;
-    bool hasSymbol(const Tstring& name) const;
+    Symbol& lookupSymbol(String name, int lineNumber) const;
+    bool hasSymbol(const String& name) const;
 
     /* the symbol table used for this Node - currently only function nodes have
      * one */
-    std::map<Tstring, Symbol>* symtable;
+    std::map<String, Symbol>* symtable;
 
-    Tstring getStringvalue() const;
-    Tint getIntvalue() const;
-    Treal getRealvalue() const;
-    Tbool getBoolvalue() const;
+    String getStringvalue() const;
+    Int getIntvalue() const;
+    Real getRealvalue() const;
+    Bool getBoolvalue() const;
 
-    void setStringvalue(const Tstring& value);
-    void setIntvalue(const Tint& value);
-    void setRealvalue(const Treal& value);
-    void setBoolvalue(const Tbool& value);
+    void setStringvalue(const String& value);
+    void setIntvalue(const Int& value);
+    void setRealvalue(const Real& value);
+    void setBoolvalue(const Bool& value);
 
    private:
     /* the children nodes of this node */
@@ -165,10 +163,10 @@ class Node {
     Node* parent;
 
     /* the values which can be present in some nodes */
-    Tstring stringValue;
-    Tint intValue;
-    Treal realValue;
-    Tbool boolValue;
+    String stringValue;
+    Int intValue;
+    Real realValue;
+    Bool boolValue;
 };
 
 /* clone a tree */

@@ -1,3 +1,7 @@
+/* environment.cpp
+ * this file implements the Environment class which keeps track of
+ * values defining the way the program executes */
+
 #include <pthread.h>
 #include <iostream>
 
@@ -9,13 +13,13 @@
  * where to print
  */
 
-void TetraEnvironment::initialize() {
+void Environment::initialize() {
     maxThreads = 8;
     console = NULL;
 }
 
 /* get a new thread ID */
-int TetraEnvironment::obtainNewThreadID() {
+int Environment::obtainNewThreadID() {
     int ret = -1;
     pthread_mutex_lock(&next_thread_mutex);
     ret = nextThreadID;
@@ -24,52 +28,52 @@ int TetraEnvironment::obtainNewThreadID() {
     return ret;
 }
 
-void TetraEnvironment::setMaxThreads(int pNum) {
+void Environment::setMaxThreads(int pNum) {
     maxThreads = pNum;
 }
 
-int TetraEnvironment::getMaxThreads() {
+int Environment::getMaxThreads() {
     return maxThreads;
 }
 
-VirtualConsole* TetraEnvironment::getConsole() {
+VirtualConsole* Environment::getConsole() {
     return console;
 }
 
-void TetraEnvironment::setConsole(VirtualConsole* vc) {
+void Environment::setConsole(VirtualConsole* vc) {
     console = vc;
 }
 
 /* halt the given program ASAP - used so the user can halt buggy programs */
-void TetraEnvironment::halt() {
-    TetraEnvironment::running = false;
+void Environment::halt() {
+    Environment::running = false;
 }
 
-bool TetraEnvironment::isRunning() {
+bool Environment::isRunning() {
     return running;
 }
 
-void TetraEnvironment::setRunning() {
+void Environment::setRunning() {
     running = true;
 }
 
 /* determines whether the interpreter should be executing in debug mode or not
 */
-void TetraEnvironment::setDebug(bool toggle) {
+void Environment::setDebug(bool toggle) {
     debugMode = toggle;
 }
 
-bool TetraEnvironment::isDebugMode() {
+bool Environment::isDebugMode() {
     return debugMode;
 }
 
 /* static variable initializations for the environment */
-int TetraEnvironment::maxThreads = 8;
-bool TetraEnvironment::debugMode = false;
-bool TetraEnvironment::running = true;
-VirtualConsole* TetraEnvironment::console = NULL;
-pthread_mutex_t TetraEnvironment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
-long TetraEnvironment::nextThreadID = 0;
+int Environment::maxThreads = 8;
+bool Environment::debugMode = false;
+bool Environment::running = true;
+VirtualConsole* Environment::console = NULL;
+pthread_mutex_t Environment::next_thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+long Environment::nextThreadID = 0;
 
 /* This class contains everything needed for a thread of execution to keep track
  * of and join back with all threads that it spawns */
@@ -172,7 +176,7 @@ void ThreadEnvironment::joinDetachedThreads() {
 /* This method returns the mutex associated with a string, or creates a new
  * mutex associated with the string and returns that
  * TODO:This is a candidate for a read/write mutex */
-pthread_mutex_t* ThreadEnvironment::identifyMutex(Tstring mutexName) {
+pthread_mutex_t* ThreadEnvironment::identifyMutex(String mutexName) {
     pthread_mutex_lock(&instance.map_mutex);
 
     if (instance.mutexes.find(mutexName) == instance.mutexes.end()) {

@@ -1,10 +1,10 @@
-/*
- * This file builds a function lookup table so that when the interpreter
+/* functions.cpp
+ * this file builds a function lookup table so that when the interpreter
  * encounters a function call, it can easily find the address of the
- * appropriate node where the called function code resides Since there is only
+ * appropriate node where the called function code resides since there is only
  * one funciton table per program (even if using multiple files, the further
- * functions should be addable by calling buildTree for each file's syntax
- * tree) This uses a single object design.
+ * functions should be addable by calling buildtree for each file's syntax
+ * tree) this uses a single object design.
  */
 
 #include <assert.h>
@@ -18,12 +18,12 @@
 
 /* given a function signature, returns the adress of a node containing the
    function definition for that signature */
-Node* FunctionMap::getFunctionNode(const Tstring functionSignature) {
+Node* FunctionMap::getFunctionNode(const String functionSignature) {
     /* if function is not there, will return default Node* (i.e. NULL) */
     return lookup[functionSignature];
 }
 
-Node* FunctionMap::getFunctionNode(DataType* params, Tstring name) {
+Node* FunctionMap::getFunctionNode(DataType* params, String name) {
     return lookup[name + typeToString(params)];
 }
 
@@ -62,7 +62,7 @@ void FunctionMap::build(Node* tree) {
 }
 
 /* wrapper around std::map's insert function */
-void FunctionMap::insert(std::pair<Tstring, Node*> pair) {
+void FunctionMap::insert(std::pair<String, Node*> pair) {
     lookup.insert(pair);
 }
 
@@ -71,16 +71,16 @@ void FunctionMap::clearAll() {
     lookup.clear();
 }
 
-std::map<Tstring, Node*> FunctionMap::remove(Tstring name) {
+std::map<String, Node*> FunctionMap::remove(String name) {
     /* make a map to store the pairs to return */
-    std::map<Tstring, Node*> pairs;
+    std::map<String, Node*> pairs;
     UNUSED(name);
 
     /* make a vector to store keys to remove */
-    std::vector<Tstring> keys;
+    std::vector<String> keys;
 
     /* find the functions */
-    for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
+    for (std::map<String, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             /* add it to the return list */
@@ -99,10 +99,10 @@ std::map<Tstring, Node*> FunctionMap::remove(Tstring name) {
     return pairs;
 }
 
-bool FunctionMap::hasFuncNamed(Tstring name) {
+bool FunctionMap::hasFuncNamed(String name) {
     /* loop through all elements in the map */
     UNUSED(name);
-    for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
+    for (std::map<String, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             return true;
@@ -112,14 +112,14 @@ bool FunctionMap::hasFuncNamed(Tstring name) {
     return false;
 }
 
-DataType* FunctionMap::getFunctionsNamed(Tstring name) {
+DataType* FunctionMap::getFunctionsNamed(String name) {
     UNUSED(name);
 
     /* create a dataType to return */
     DataType* retType = new DataType(TYPE_OVERLOAD);
 
     /* loop through all elements in the map */
-    for (std::map<Tstring, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
+    for (std::map<String, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             /* if one was found, add it to the subtypes */
@@ -143,13 +143,13 @@ bool FunctionMap::hasFunction(Node* node) {
     return lookup.count(getFunctionSignature(node));
 }
 
-bool FunctionMap::hasFunction(DataType* type, Tstring name) {
+bool FunctionMap::hasFunction(DataType* type, String name) {
     return lookup.count(name + typeToString(type));
 }
 
 /* Given a NODE_FUNCTION (seen by the build method) or NODE_FUNCALL (seen at
  * runtime) Assembles the function signature for the function */
-Tstring FunctionMap::getFunctionSignature(const Node* node) {
+String FunctionMap::getFunctionSignature(const Node* node) {
     if (node->kind() == NODE_FUNCTION) {
         return node->getStringvalue() + typeToString(&((*(node->type()->subtypes))[0]));
     } else if (node->kind() == NODE_FUNCALL) {
@@ -159,7 +159,7 @@ Tstring FunctionMap::getFunctionSignature(const Node* node) {
             buildParamTupleType(params, node->child(1));
         }
 
-        Tstring paramStr = typeToString(params);
+        String paramStr = typeToString(params);
         delete params;
         return node->child(0)->getStringvalue() + paramStr;
     }
