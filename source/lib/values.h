@@ -14,7 +14,6 @@ class Value {
    public:
     virtual ~Value() {}
     virtual String toString() const = 0;
-
     virtual void copyValue(const Value& other) = 0;
 };
 

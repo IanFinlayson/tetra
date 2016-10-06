@@ -12,6 +12,7 @@
 
 extern int yylineNumber;
 
+/* returns a string representation of a node type */
 /* node member functions */
 Node::Node(NodeKind nodeType) {
     this->nodeType = nodeType;
@@ -39,7 +40,8 @@ Node::~Node() {
     for (int i = 0; i < this->numChildren; i++) {
         delete this->child(i);
     }
-
+    // std::cout << "deleting node: " << sstringType(this) << " str: " << stringValue << " type : "
+    // <<typeToString(dataType)  <<std::endl;
     delete dataType;
     delete symtable;
 }
@@ -62,8 +64,9 @@ void Node::addChild(Node* child) {
 }
 
 void Node::setDataType(DataType* dataType) {
-    delete this->dataType;
-    this->dataType = dataType;
+    DataType* temp = this->dataType;
+    this->dataType = new DataType(*dataType);
+    delete temp;
 }
 
 void Node::setLine(int lineNumber) {
@@ -123,16 +126,39 @@ bool Node::hasSymbol(const String& name) const {
 /* these are also here */
 Symbol::Symbol(String name, DataType* type, int lineNumber, bool constant) {
     this->name = name;
-    this->type = type;
+    this->type = new DataType(*type);
+    this->lineNumber = lineNumber;
+    this->constant = constant;
+}
+
+Symbol::Symbol(String name, DataType type, int lineNumber, bool constant) {
+    this->name = name;
+    this->type = new DataType(type);
     this->lineNumber = lineNumber;
     this->constant = constant;
 }
 
 Symbol::Symbol(const Symbol& other) {
-    this->name = other.name;
-    this->type = other.type;
+    this->name = String(other.name);
+    this->type = new DataType(*other.getType());
     this->lineNumber = other.lineNumber;
     this->constant = other.constant;
+}
+
+Symbol::~Symbol() {
+    delete type;
+}
+
+Symbol Symbol::operator=(const Symbol& other) {
+    if (this == &other)
+        return *this;
+
+    delete this->type;
+    this->name = other.name;
+    this->type = new DataType(*other.getType());
+    this->lineNumber = other.lineNumber;
+    this->constant = other.constant;
+    return *this;
 }
 
 bool Symbol::isConst() {

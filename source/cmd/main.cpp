@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
     }
 
     std::cout << std::endl;
+
     delete tree;
     return ret;
 }
