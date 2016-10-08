@@ -34,21 +34,19 @@ class Symbol {
 
 /*
  * This file builds a function lookup table so that when the interpreter
- * encounters a function     call, it can easily find the address of the
- * appropriate node where the called function code res    ides
- * Since there is only one funciton table per program (even if using multiple
- * files, the further     functions should be addable by calling buildTree for
- * each file's syntax tree)
+ * encounters a function call, it can easily find the address of the
+ * appropriate node where the called function code res ides Since there is only
+ * one funciton table per program (even if using multiple files, the further
+ * functions should be addable by calling buildTree for each file's syntax
+ * tree)
  */
 class FunctionMap {
-   private:
-    std::map<String, Node*> lookup;
+   private: std::map<String, Node*> lookup;
 
    public:
     FunctionMap();
     /* Returns the address of a node containing the function body of the
-       function
-       denoted by functionSignature */
+       function denoted by functionSignature */
     Node* getFunctionNode(const String functionSignature);
     Node* getFunctionNode(DataType*, String);
 

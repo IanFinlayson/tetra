@@ -342,6 +342,18 @@ Data* evaluateStatement(Node* node, Context* context) {
             context->notifyContinue();
             break;
 
+        case NODE_GLOBAL: {
+            /* evaluate the  right hand side */
+            Data* value = evaluateExpression(node->child(1), context);
+
+            /* get a pointer to the global thing on the left */
+            Data* global = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+
+            /* do the assignment */
+            global->opAssign(value);
+
+        } break;
+
         /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
