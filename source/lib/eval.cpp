@@ -342,7 +342,8 @@ Data* evaluateStatement(Node* node, Context* context) {
             context->notifyContinue();
             break;
 
-        case NODE_GLOBAL: {
+        case NODE_GLOBAL:
+        case NODE_CONST: {
             /* evaluate the  right hand side */
             Data* value = evaluateExpression(node->child(1), context);
 
