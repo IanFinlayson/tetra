@@ -244,7 +244,7 @@ class_part: function
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
     $$->setDataType(DataType(TYPE_CLASS));
-    $$->setStringvalue(Tstring("init"));
+    $$->setStringvalue(String("init"));
     $$->addChild($3);
     $$->addChild($5);
     $$->setLine($1);
@@ -264,7 +264,6 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
     $$->addChild($2);
     $$->addChild($5);
     $2->setDataType(*$3);
-    delete $3;
     delete $3;
 } | TOK_GLOBAL typed_identifier TOK_ASSIGN assignterm {
     $$ = new Node(NODE_GLOBAL);

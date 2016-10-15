@@ -34,6 +34,7 @@ enum DataTypeKind {
 /* a data type contains the above enum, along with a pointer to the "sub" type */
 class DataType {
    public:
+    DataType();
     DataType(DataTypeKind kind);
     DataType(const DataType& other);
     ~DataType();

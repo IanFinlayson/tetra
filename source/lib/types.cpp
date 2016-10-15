@@ -23,11 +23,11 @@ FunctionMap functions;
 /* prototypes */
 void inferBlock(Node*, Node*);
 void checkClassTypes(Node*);
-DataType* inferExpression(Node*, Node*);
+DataType inferExpression(Node*, Node*);
 
 /* return a string of a data type */
-String typeToString(DataType* t) {
-    switch (t->getKind()) {
+String typeToString(DataType t) {
+    switch (t.getKind()) {
         case TYPE_NONE:
             return "none";
         case TYPE_INT:
@@ -43,33 +43,37 @@ String typeToString(DataType* t) {
         case TYPE_TASK:
             return "task";
         case TYPE_LIST:
-            return "[" + typeToString(&((*(t->subtypes))[0])) + "]";
+            return "[" + typeToString(&((*(t.subtypes))[0])) + "]";
         case TYPE_DICT:
-            return "{" + typeToString(&((*(t->subtypes))[0])) + ":" +
-                   typeToString(&((*(t->subtypes))[1])) + "}";
+            return "{" + typeToString(&((*(t.subtypes))[0])) + ":" +
+                   typeToString(&((*(t.subtypes))[1])) + "}";
         case TYPE_TUPLE: {
             String typeString = "(";
-            for (unsigned long int i = 0; i < t->subtypes->size(); i++) {
-                typeString += typeToString(&((*(t->subtypes))[i])) + ",";
+            for (unsigned long int i = 0; i < t.subtypes->size(); i++) {
+                typeString += typeToString(&((*(t.subtypes))[i])) + ",";
             }
             /* if the tuple has elements ... */
-            if (t->subtypes->size() > 0)
+            if (t.subtypes->size() > 0)
                 /* then get rid of the trailing comma */
                 typeString = typeString.substring(0, typeString.length() - 1);
 
             return typeString + ")";
         }
         case TYPE_CLASS:
-            return *(t->className);
+            return *(t.className);
         case TYPE_FUNCTION: {
-            return typeToString(&((*(t->subtypes))[0])) + "->" +
-                   typeToString(&((*(t->subtypes))[0]));
+            return typeToString(&((*(t.subtypes))[0])) + "->" +
+                   typeToString(&((*(t.subtypes))[0]));
         }
         case TYPE_OVERLOAD:
             return "overload";
         default:
             throw Error("typeToString: Unknown data type");
     }
+}
+
+String typeToString(DataType* t) {
+  return typeToString(*t);
 }
 
 /* class context functions */
@@ -154,6 +158,12 @@ std::map<String, Node*> ClassContext::removeInits() {
 }
 
 /* data type functions */
+DataType::DataType() {
+    this->kind = TYPE_NONE;
+    this->subtypes = new std::vector<DataType>;
+    this->className = new String();
+}
+
 DataType::DataType(DataTypeKind kind) {
     this->kind = kind;
     this->subtypes = new std::vector<DataType>;
@@ -306,7 +316,7 @@ void buildParamTupleType(DataType* type, const Node* node) {
 }
 
 /* infer the types of a print call */
-DataType* inferPrint(Node* pcall, Node* function) {
+DataType inferPrint(Node* pcall, Node* function) {
     /* just infer each expression, but we don't care what it is */
 
     /* get the first arg */
@@ -337,30 +347,30 @@ DataType* inferPrint(Node* pcall, Node* function) {
         }
     }
 
-    return new DataType(TYPE_NONE);
+    return DataType(TYPE_NONE);
 }
 
-DataType* inferLen(Node* functionCall, Node* function) {
+DataType inferLen(Node* functionCall, Node* function) {
     /* check that there is one argument */
     if (functionCall->getNumChildren() != 2 || functionCall->child(1)->getNumChildren() != 1) {
         throw Error("len function expects one argument", functionCall->getLine());
     }
 
     /* infer the argument and capture its type */
-    DataType* t = inferExpression(functionCall->child(1)->child(0), function);
+    DataType t = inferExpression(functionCall->child(1)->child(0), function);
 
     /* check that it is a list or a string */
-    if ((t->getKind() != TYPE_LIST) && (t->getKind() != TYPE_STRING) &&
-        (t->getKind() != TYPE_TUPLE) && (t->getKind() != TYPE_DICT)) {
+    if ((t.getKind() != TYPE_LIST) && (t.getKind() != TYPE_STRING) &&
+        (t.getKind() != TYPE_TUPLE) && (t.getKind() != TYPE_DICT)) {
         throw Error("len function must be called on string, list, tuple, or dictionary",
                     functionCall->getLine());
     }
 
     /* should return an int */
-    return new DataType(TYPE_INT);
+    return DataType(TYPE_INT);
 }
 
-DataType* inferRead(Node* functionCall) {
+DataType inferRead(Node* functionCall) {
     /* make sure there are no parameters */
     if (functionCall->getNumChildren() > 1) {
         throw Error(functionCall->getStringvalue() + " should not have any parameters",
@@ -369,20 +379,20 @@ DataType* inferRead(Node* functionCall) {
 
     /* get the return type right */
     if (functionCall->child(0)->getStringvalue() == "read_string")
-        return new DataType(TYPE_STRING);
+        return DataType(TYPE_STRING);
     if (functionCall->child(0)->getStringvalue() == "read_int")
-        return new DataType(TYPE_INT);
+        return DataType(TYPE_INT);
     if (functionCall->child(0)->getStringvalue() == "read_real")
-        return new DataType(TYPE_REAL);
+        return DataType(TYPE_REAL);
     if (functionCall->child(0)->getStringvalue() == "read_bool")
-        return new DataType(TYPE_BOOL);
+        return DataType(TYPE_BOOL);
 
     throw Error("This should not happen!", functionCall->getLine());
 }
 
 /* this function checks if a function call is part of the standard library and
  * infers it */
-DataType* inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
+DataType inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
     is_stdlib = true;
 
     if (functionCall->child(0)->getStringvalue() == "print") {
@@ -401,7 +411,7 @@ DataType* inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
     }
 
     is_stdlib = false;
-    return NULL;
+    return DataType(TYPE_NONE);
 }
 
 /* accepts a node as a parameter and returns true if that node
@@ -587,12 +597,10 @@ Symbol findIdSym(Node* expr, Node* function = NULL) {
 }
 
 /* infer the types of an expression, and also return the type */
-DataType* inferExpressionPrime(Node* expr, Node* function) {
-    if (!expr)
-        return NULL;
+DataType inferExpressionPrime(Node* expr, Node* function) {
 
     /* the left hand side, right hand side, and result used below */
-    DataType *lhs, *rhs;
+    DataType lhs, rhs;
 
     /* switch on the type of expression */
     switch (expr->kind()) {
@@ -605,9 +613,9 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* try to find the id */
                 Symbol sym = findIdSym(expr->child(0), function);
                 /* if it doesn't exist  and it IS inferable...*/
-                if (sym.getName() == "" && !rhs->isEmptyContainerType()) {
+                if (sym.getName() == "" && !rhs.isEmptyContainerType()) {
                     /* infer it! */
-                    lhs = new DataType(*rhs);
+                    lhs = rhs;
                     function->insertSymbol(
                         Symbol(expr->child(0)->getStringvalue(), lhs, expr->child(0)->getLine()));
 
@@ -624,7 +632,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                         expr->getLine());
                 } else {
                     /* if we end up here, all is well - update lhs */
-                    lhs = new DataType(*sym.getType());
+                    lhs = *sym.getType();
                 }
 
                 /* if it's not directly and identifier.. */
@@ -644,12 +652,12 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* make sure both sides are the same type */
-            if (*rhs != *lhs) {
+            if (rhs != lhs) {
                 throw Error("Assignment of incompatible types.", expr->getLine());
             }
 
             /* return the type of the rhs */
-            expr->child(0)->setDataType(*lhs);
+            expr->child(0)->setDataType(lhs);
             return rhs;
         }
 
@@ -658,11 +666,11 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             /* check that both children are bools */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
-            if ((lhs->getKind() != TYPE_BOOL) || (rhs->getKind() != TYPE_BOOL)) {
+            if ((lhs.getKind() != TYPE_BOOL) || (rhs.getKind() != TYPE_BOOL)) {
                 throw Error("Only bool values may be used with and/or", expr->getLine());
             }
             /* the result is a bool as well */
-            return new DataType(TYPE_BOOL);
+            return DataType(TYPE_BOOL);
         case NODE_LT:
         case NODE_LTE:
         case NODE_GT:
@@ -671,18 +679,18 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
              * TODO at some point add in int->real promotion */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
-            if (*lhs != *rhs) {
+            if (lhs != rhs) {
                 throw Error("Only matching types can be compared", expr->getLine());
             }
 
             /* check that they are strings, ints, or reals */
-            if (lhs->getKind() != TYPE_STRING && lhs->getKind() != TYPE_REAL &&
-                lhs->getKind() != TYPE_INT) {
+            if (lhs.getKind() != TYPE_STRING && lhs.getKind() != TYPE_REAL &&
+                lhs.getKind() != TYPE_INT) {
                 throw Error("This comparison invalid on given type.", expr->getLine());
             }
 
             /* the result is a bool */
-            return new DataType(TYPE_BOOL);
+            return DataType(TYPE_BOOL);
 
         case NODE_EQ:
         case NODE_NEQ:
@@ -690,20 +698,20 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
              * TODO at some point add in int->real promotion */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
-            if (*lhs != *rhs) {
+            if (lhs != rhs) {
                 throw Error("Only matching types can be compared", expr->getLine());
             }
 
             /* the result is a bool */
-            return new DataType(TYPE_BOOL);
+            return DataType(TYPE_BOOL);
 
         case NODE_NOT:
             /* check that the operand is bool */
             lhs = inferExpression(expr->child(0), function);
-            if (lhs->getKind() != TYPE_BOOL) {
+            if (lhs.getKind() != TYPE_BOOL) {
                 throw Error("Operand of not must be a bool", expr->getLine());
             }
-            return new DataType(TYPE_BOOL);
+            return DataType(TYPE_BOOL);
 
         case NODE_IN: {
             /* get the types of both sides */
@@ -711,26 +719,26 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             rhs = inferExpression(expr->child(1), function);
 
             /* if the container on the right is a dictionary or a list... */
-            if (rhs->getKind() == TYPE_LIST || rhs->getKind() == TYPE_DICT) {
+            if (rhs.getKind() == TYPE_LIST || rhs.getKind() == TYPE_DICT) {
                 /* make sure that the list subtype/ dictionary key type
                  * matches the
                  * type of the left operand */
-                if (*lhs != ((*(rhs->subtypes))[0])) {
+                if (lhs != ((*(rhs.subtypes))[0])) {
                     /* otherwise, complain */
                     throw Error("Mismatched operands to 'in' operator.", expr->getLine());
                     /* if we got here then it matched */
                 } else {
-                    return new DataType(TYPE_BOOL);
+                    return DataType(TYPE_BOOL);
                 }
 
                 /* if the container on the right is a tuple... */
-            } else if (rhs->getKind() == TYPE_TUPLE) {
+            } else if (rhs.getKind() == TYPE_TUPLE) {
                 /* look through the types of each of its elements */
-                for (long unsigned i = 0; i < rhs->subtypes->size(); i++) {
+                for (long unsigned i = 0; i < rhs.subtypes->size(); i++) {
                     /* if one type matches the left side... */
-                    if (*lhs == (*(rhs->subtypes))[i]) {
+                    if (lhs == (*(rhs.subtypes))[i]) {
                         /* then it passes type checking */
-                        return new DataType(TYPE_BOOL);
+                        return DataType(TYPE_BOOL);
                     }
                     /* if we get here, then the tuple doesn't have any
                      * element that is the same type as the left operand */
@@ -738,10 +746,10 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 throw Error("Mismatched operands to 'in' operator.", expr->getLine());
 
                 /* if the left side is a string */
-            } else if (rhs->getKind() == TYPE_STRING) {
+            } else if (rhs.getKind() == TYPE_STRING) {
                 /* make sure the right side is too */
-                if (lhs->getKind() == TYPE_STRING) {
-                    return new DataType(TYPE_BOOL);
+                if (lhs.getKind() == TYPE_STRING) {
+                    return DataType(TYPE_BOOL);
                     /* otherwise, COMPLAIN */
                 } else {
                     throw Error("Mismatched operands to 'in' operator.", expr->getLine());
@@ -766,20 +774,20 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
 
-            if ((lhs->getKind() != TYPE_INT) || (rhs->getKind() != TYPE_INT)) {
+            if ((lhs.getKind() != TYPE_INT) || (rhs.getKind() != TYPE_INT)) {
                 throw Error("Operands to bitwise operator must be integer", expr->getLine());
             }
 
             /* returns an integer back */
-            return new DataType(TYPE_INT);
+            return DataType(TYPE_INT);
 
         case NODE_BITNOT:
             /* check that the operand is an int */
             lhs = inferExpression(expr->child(0), function);
-            if (lhs->getKind() != TYPE_INT) {
+            if (lhs.getKind() != TYPE_INT) {
                 throw Error("Operand to bitwise not must be an integer", expr->getLine());
             }
-            return new DataType(TYPE_INT);
+            return DataType(TYPE_INT);
 
         case NODE_PLUS:
         case NODE_MINUS:
@@ -792,43 +800,24 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
 
-            if (*lhs != *rhs) {
+            if (lhs != rhs) {
                 throw Error("In binary operator, the types " + typeToString(lhs) + " and " +
                                 typeToString(rhs) + " are not compatible",
                             expr->getLine());
             }
 
-            if ((lhs->getKind() != TYPE_INT) && (rhs->getKind() != TYPE_REAL)) {
+            if ((lhs.getKind() != TYPE_INT) && (rhs.getKind() != TYPE_REAL)) {
                 /* special case: adding strings and list is OK */
                 if ((expr->kind() == NODE_PLUS) &&
-                    ((lhs->getKind() == TYPE_STRING) || (lhs->getKind() == TYPE_LIST))) {
+                    ((lhs.getKind() == TYPE_STRING) || (lhs.getKind() == TYPE_LIST))) {
                     /* s'alright */
                 } else {
                     throw Error("Numeric type required", expr->getLine());
                 }
             }
-
-            /* if it's a list, we need to copy the type! */
-            if (lhs->getKind() == TYPE_LIST) {
-                DataType* list = new DataType(TYPE_LIST);
-
-                /* copy subs all the way */
-                DataType* sub = &(*(lhs->subtypes))[0];
-                DataType* ptr = list;
-                while (sub) {
-                    /* set current one */
-                    ptr->subtypes->push_back(*sub);
-
-                    /* move to next */
-                    sub = &(*(sub->subtypes))[0];
-                    ptr = &(*(ptr->subtypes))[0];
-                }
-
-                return list;
-            }
-
+             
             /* return the same type back */
-            return new DataType(lhs->getKind());
+            return lhs;
 
         case NODE_INDEX: {
             /* check children */
@@ -836,27 +825,27 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             rhs = inferExpression(expr->child(1), function);
 
             /* get the kind of lhs*/
-            DataTypeKind kind = lhs->getKind();
+            DataTypeKind kind = lhs.getKind();
 
             /* return the type of the container's values */
             /* dictionaries */
             if (kind == TYPE_DICT) {
                 /* check the key type */
-                if ((*(lhs->subtypes))[0] != *rhs) {
+                if ((*(lhs.subtypes))[0] != rhs) {
                     throw Error("Key has incompatible type.", expr->getLine());
                 }
-                return new DataType((*(lhs->subtypes))[1]);
+                return (*(lhs.subtypes))[1];
 
                 /* tuples */
             } else if (kind == TYPE_TUPLE) {
                 /* check the index type */
-                if (rhs->getKind() != TYPE_INT) {
+                if (rhs.getKind() != TYPE_INT) {
                     throw Error("Tuple index must be an integer.", expr->getLine());
                 }
                 /* make sure the index is in range */
-                if ((unsigned long) expr->child(1)->getIntvalue().toInt() < lhs->subtypes->size()) {
+                if ((unsigned long) expr->child(1)->getIntvalue().toInt() < lhs.subtypes->size()) {
                     /* get return the type of the index */
-                    return new DataType((*(lhs->subtypes))[expr->child(1)->getIntvalue().toInt()]);
+                    return (*(lhs.subtypes))[expr->child(1)->getIntvalue().toInt()];
                     /* if it isn't in range */
                 } else {
                     /* complain! */
@@ -866,19 +855,18 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 /* lists */
             } else if (kind == TYPE_LIST) {
                 /* check the index type */
-                if (rhs->getKind() != TYPE_INT) {
+                if (rhs.getKind() != TYPE_INT) {
                     throw Error("List index must be an integer.", expr->getLine());
                 }
-                DataType* dt = new DataType(((*(lhs->subtypes))[0]));
-                return dt; /* new DataType(((*(lhs->subtypes))[0]));  */
+                return ((*(lhs.subtypes))[0]);
 
                 /* strings */
             } else if (kind == TYPE_STRING) {
                 /* check the index type */
-                if (rhs->getKind() != TYPE_INT) {
+                if (rhs.getKind() != TYPE_INT) {
                     throw Error("String index must be an integer.", expr->getLine());
                 }
-                return new DataType(*lhs);
+                return lhs;
 
                 /* otherwise it isn't an indexable type */
             } else {
@@ -891,13 +879,13 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             rhs = inferExpression(expr->child(1), function);
 
             /* make sure the types are both ints */
-            if (lhs->getKind() != TYPE_INT || lhs->getKind() != TYPE_INT) {
+            if (lhs.getKind() != TYPE_INT || lhs.getKind() != TYPE_INT) {
                 throw Error("Cannot create range with types other than INT.", expr->getLine());
             }
 
             /* a listrange can only possibly be a list of ints */
-            DataType* t = new DataType(TYPE_LIST);
-            t->subtypes->push_back(DataType(TYPE_INT));
+            DataType t = DataType(TYPE_LIST);
+            t.subtypes->push_back(DataType(TYPE_INT));
             return t;
         }
 
@@ -924,22 +912,22 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
             /* make sure that we found a matching function */
             /* if we have a single function... */
-            if (lhs->getKind() == TYPE_FUNCTION) {
+            if (lhs.getKind() == TYPE_FUNCTION) {
                 /* if it has the right params... */
-                if ((*(lhs->subtypes))[0] == *rhsParams) {
+                if ((*(lhs.subtypes))[0] == *rhsParams) {
                     /* return the return type */
                     delete rhsParams;
-                    return new DataType((*(lhs->subtypes))[1]);
+                    return (*(lhs.subtypes))[1];
                 }
                 /* if we have multiple possibilities */
-            } else if (lhs->getKind() == TYPE_OVERLOAD) {
+            } else if (lhs.getKind() == TYPE_OVERLOAD) {
                 /* check each of them */
-                for (long unsigned int i = 0; i < lhs->subtypes->size(); i++) {
+                for (long unsigned int i = 0; i < lhs.subtypes->size(); i++) {
                     /* if one has the right params... */
-                    if ((*((*(lhs->subtypes))[i].subtypes))[0] == *rhsParams) {
+                    if ((*((*(lhs.subtypes))[i].subtypes))[0] == *rhsParams) {
                         /* return its return type */
                         delete rhsParams;
-                        return new DataType((*((*(lhs->subtypes))[i].subtypes))[1]);
+                        return (*((*(lhs.subtypes))[i].subtypes))[1];
                     }
                 }
             }
@@ -977,7 +965,7 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
                 function->insertSymbol(
                     Symbol(expr->getStringvalue(), expr->type(), expr->getLine()));
                 /* then just return the type it already has */
-                return expr->type();
+                return *expr->type();
             }
             /* otherwise, if it doesn't already have a type... */
             /* if the id already exists, get its type */
@@ -992,32 +980,31 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* otherwise, return the type */
-            DataType* dt = new DataType(*sym.getType());
-            return dt;
+            return *sym.getType();
         }
 
         /* return these types */
         case NODE_INTVAL:
-            return new DataType(TYPE_INT);
+            return DataType(TYPE_INT);
         case NODE_REALVAL:
-            return new DataType(TYPE_REAL);
+            return DataType(TYPE_REAL);
         case NODE_BOOLVAL:
-            return new DataType(TYPE_BOOL);
+            return DataType(TYPE_BOOL);
         case NODE_STRINGVAL:
-            return new DataType(TYPE_STRING);
+            return DataType(TYPE_STRING);
         case NODE_NONEVAL:
-            return new DataType(TYPE_NONE);
+            return DataType(TYPE_NONE);
         case NODE_LISTVAL: {
-            DataType* dt = new DataType(TYPE_LIST);
+            DataType dt = DataType(TYPE_LIST);
             Node* currNode = expr;
             /* traverse the subtree of list values */
             while (currNode && currNode->getNumChildren() > 0) {
-                DataType* elemType = inferExpression(currNode->child(0), function);
+                DataType elemType = inferExpression(currNode->child(0), function);
                 /* if this is the first element, add the subtype */
-                if (dt->subtypes->size() == 0) {
-                    (dt->subtypes)->push_back(*elemType);
+                if (dt.subtypes->size() == 0) {
+                    (dt.subtypes)->push_back(elemType);
                     /* if there is a previous subtype, make sure they match */
-                } else if (dt->subtypes->size() == 1 && ((*(dt->subtypes))[0]) != *elemType) {
+                } else if (dt.subtypes->size() == 1 && ((*(dt.subtypes))[0]) != elemType) {
                     throw Error("Mismatched list types", expr->getLine());
                 }
                 /* set current node to the next one */
@@ -1027,19 +1014,19 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
         }
 
         case NODE_DICTVAL: {
-            DataType* dt = new DataType(TYPE_DICT);
+            DataType dt = DataType(TYPE_DICT);
             Node* currNode = expr;
             /* traverse the subtree of dictvals */
             while (currNode && currNode->getNumChildren() > 0) {
-                DataType* keyType = inferExpression(currNode->child(0), function);
-                DataType* valType = inferExpression(currNode->child(1), function);
+                DataType keyType = inferExpression(currNode->child(0), function);
+                DataType valType = inferExpression(currNode->child(1), function);
                 /* if this is the first element, add the subtypes */
-                if (dt->subtypes->size() == 0) {
-                    dt->subtypes->push_back(*keyType);
-                    dt->subtypes->push_back(*valType);
+                if (dt.subtypes->size() == 0) {
+                    dt.subtypes->push_back(keyType);
+                    dt.subtypes->push_back(valType);
                     /* if there are previous subtypes, make sure they match */
-                } else if (dt->subtypes->size() == 2 && (((*(dt->subtypes))[0] != *keyType) ||
-                                                         ((*(dt->subtypes))[1] != *valType))) {
+                } else if (dt.subtypes->size() == 2 && (((*(dt.subtypes))[0] != keyType) ||
+                                                         ((*(dt.subtypes))[1] != valType))) {
                     throw Error("Mismatched key/value types", expr->getLine());
                 }
                 /* set current node to the next one */
@@ -1050,14 +1037,14 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
         }
 
         case NODE_TUPVAL: {
-            DataType* dt = new DataType(TYPE_TUPLE);
+            DataType dt = DataType(TYPE_TUPLE);
             Node* currNode = expr;
             /* traverse the subtree of tuple values */
             while (currNode && currNode->getNumChildren() > 0) {
-                DataType* elemType = inferExpression(currNode->child(0), function);
+                DataType elemType = inferExpression(currNode->child(0), function);
 
                 /* add the subtype */
-                dt->subtypes->push_back(*elemType);
+                dt.subtypes->push_back(elemType);
 
                 /* set current node to the next one */
                 currNode = currNode->child(1);
@@ -1076,28 +1063,27 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             /* infer the the return type */
             if (expr->getNumChildren() > 1) {
                 expr->type()->subtypes->push_back(
-                    DataType(*inferExpression(expr->child(1), function)));
+                    inferExpression(expr->child(1), function));
             } else {
                 expr->type()->subtypes->push_back(
-                    DataType(*inferExpression(expr->child(0), function)));
+                    inferExpression(expr->child(0), function));
             }
 
-            return expr->type();
+            return *expr->type();
         }
 
         case NODE_DOT: {
             lhs = inferExpression(expr->child(0), function);
             /* check that class exists */
-            if (!lhs->className || !classes.count(*lhs->className)) {
+            if (!lhs.className || !classes.count(*lhs.className)) {
                 throw Error("Class does not exist.", expr->getLine());
                 /* check that class has member var */
-            } else if (!classes[*lhs->className].hasMember(expr->child(1)->getStringvalue())) {
+            } else if (!classes[*lhs.className].hasMember(expr->child(1)->getStringvalue())) {
                 throw Error("Class does not contain specified member variable.", expr->getLine());
             }
 
             /* return the type of the member variable */
-            return new DataType(
-                *classes[*lhs->className].getMember(expr->child(1)->getStringvalue()).getType());
+            return *classes[*lhs.className].getMember(expr->child(1)->getStringvalue()).getType();
         }
 
         case NODE_SELF: {
@@ -1109,8 +1095,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the class' type */
-            DataType* type = new DataType(TYPE_CLASS);
-            *(type->className) = classNode->getStringvalue();
+            DataType type = DataType(TYPE_CLASS);
+            *(type.className) = classNode->getStringvalue();
             return type;
         }
 
@@ -1128,23 +1114,21 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* check that class exists */
-            if (!lhs->className || !classes.count(*lhs->className)) {
-                throw Error("Class '" + *(lhs->className) + "' does not exist.", expr->getLine());
+            if (!lhs.className || !classes.count(*lhs.className)) {
+                throw Error("Class '" + *(lhs.className) + "' does not exist.", expr->getLine());
 
                 /* check that class has method */
-            } else if (!classes[*lhs->className].hasMethod(
+            } else if (!classes[*lhs.className].hasMethod(
                            rhsParams, expr->child(1)->child(0)->getStringvalue())) {
-                throw Error("Class '" + *(lhs->className) + "' does not contain method '" +
+                throw Error("Class '" + *(lhs.className) + "' does not contain method '" +
                                 expr->child(1)->child(0)->getStringvalue() + "'. " +
                                 expr->child(1)->getStringvalue() + typeToString(rhsParams),
                             expr->getLine());
             }
 
             /* return the return type of the method */
-            return new DataType(
-                *classes[*lhs->className]
-                     .getMethod(rhsParams, expr->child(1)->child(0)->getStringvalue())
-                     ->type());
+            return *classes[*lhs.className].getMethod(
+                rhsParams, expr->child(1)->child(0)->getStringvalue())->type();
         }
 
         case NODE_DECLARATION: {
@@ -1159,19 +1143,16 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 }
 
 /* infer an expression and assign it to the node */
-DataType* inferExpression(Node* expr, Node* function) {
+DataType inferExpression(Node* expr, Node* function) {
 
     /* do the inference */
-    DataType* t = inferExpressionPrime(expr, function);
+    DataType t = inferExpressionPrime(expr, function);
 
     /* assign it into this node */
-    expr->setDataType(*t);
-
-    /* clean up */
-    delete t;
+    expr->setDataType(t);
 
     /* return it */
-    return expr->type();
+    return *expr->type();
 }
 
 /* infer/ type check function for tasks and locks */
@@ -1255,29 +1236,28 @@ void inferBlock(Node* block, Node* function) {
             }
 
             /* infer the expression */
-            DataType* ret;
+            DataType ret;
             if (block->child(0)) {
-                ret = new DataType(*inferExpression(block->child(0), function));
+                ret = inferExpression(block->child(0), function);
             } else {
-                ret = new DataType(TYPE_NONE);
+                ret = DataType(TYPE_NONE);
             }
 
             /* check that it matches the return type */
-            if (*ret != function->type()->subtypes->back()) {
+            if (ret != function->type()->subtypes->back()) {
                 throw Error("Return value type '" + typeToString(ret) +
                                 "' does not match function's declared type '" +
                                 typeToString(&function->type()->subtypes->back()) + "'.",
                             block->getLine());
             }
-            delete ret;
             break;
         }
         case NODE_IF: {
             /* infer the type of the expression */
-            DataType* cond = inferExpression(block->child(0), function);
+            DataType cond = inferExpression(block->child(0), function);
 
             /* check that it is a BOOL */
-            if (cond->getKind() != TYPE_BOOL) {
+            if (cond.getKind() != TYPE_BOOL) {
                 throw Error("if condition must be a bool", block->getLine());
             }
 
@@ -1304,10 +1284,10 @@ void inferBlock(Node* block, Node* function) {
             break;
         case NODE_ELIF_CLAUSE: {
             /* check the expression on the left */
-            DataType* cond = inferExpression(block->child(0), function);
+            DataType cond = inferExpression(block->child(0), function);
 
             /* check that it is a BOOL */
-            if (cond->getKind() != TYPE_BOOL) {
+            if (cond.getKind() != TYPE_BOOL) {
                 throw Error("elif condition must be a bool", block->getLine());
             }
 
@@ -1317,10 +1297,10 @@ void inferBlock(Node* block, Node* function) {
         }
         case NODE_WHILE: {
             /* infer the type of the expression */
-            DataType* cond = inferExpression(block->child(0), function);
+            DataType cond = inferExpression(block->child(0), function);
 
             /* check that it is a BOOL */
-            if (cond->getKind() != TYPE_BOOL) {
+            if (cond.getKind() != TYPE_BOOL) {
                 throw Error("while condition must be a bool", block->getLine());
             }
 
@@ -1331,11 +1311,11 @@ void inferBlock(Node* block, Node* function) {
         case NODE_PARFOR:
         case NODE_FOR: {
             /* infer the type of the expression */
-            DataType* expr_type = inferExpression(block->child(1), function);
+            DataType expr_type = inferExpression(block->child(1), function);
 
             /* make sure it is some type of list */
-            if (expr_type->getKind() != TYPE_LIST && expr_type->getKind() != TYPE_DICT &&
-                expr_type->getKind() != TYPE_STRING) {
+            if (expr_type.getKind() != TYPE_LIST && expr_type.getKind() != TYPE_DICT &&
+                expr_type.getKind() != TYPE_STRING) {
                 throw Error(
                     "for expression must be of type list, "
                     "dictionary, or string",
@@ -1346,7 +1326,7 @@ void inferBlock(Node* block, Node* function) {
             Symbol idxSym = findIdSym(block->child(0));
 
             /* if it does, make sure it is the right type */
-            if (idxSym.getName() != "" && (*(idxSym.getType())) != (*(expr_type->subtypes))[0]) {
+            if (idxSym.getName() != "" && (*(idxSym.getType())) != (*(expr_type.subtypes))[0]) {
                 throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
                                 "' is incompatible with container elements.",
                             block->getLine());
@@ -1354,11 +1334,11 @@ void inferBlock(Node* block, Node* function) {
                 /* otherwise, if it doesn't exist, add it */
             } else if (idxSym.getName() == "") {
                 function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
-                                              &(*(expr_type->subtypes))[0], block->getLine()));
+                                              &(*(expr_type.subtypes))[0], block->getLine()));
             }
 
             /* set the type of the node too */
-            block->child(0)->setDataType((*(expr_type->subtypes))[0]);
+            block->child(0)->setDataType((*(expr_type.subtypes))[0]);
 
             /* check the block under this */
             inferBlock(block->child(2), function);
@@ -1452,22 +1432,22 @@ void inferGlobal(Node* node, bool isConst = false) {
     /* if there is an assignment */
     if (node->child(1)) {
         /* get the type of the right hand side */
-        DataType* rhs = inferExpression(node->child(1), NULL);
+        DataType rhs = inferExpression(node->child(1), NULL);
 
         /* if the left hand side has a declared type.. */
         if (node->child(0)->type()) {
             /* check that the types match */
-            if (*(node->child(0)->type()) != *rhs) {
+            if (*(node->child(0)->type()) != rhs) {
                 throw Error("Assignment of unmatched types.", node->getLine());
             }
             /* if there is no declared type */
         } else {
             /* infer the type from the right side */
-            node->setDataType(*rhs);
+            node->setDataType(rhs);
         }
 
         /* set the node type */
-        node->child(0)->setDataType(*rhs);
+        node->child(0)->setDataType(rhs);
     }
     /* add it in */
     globals.insert(std::pair<String, Symbol>(
@@ -1546,7 +1526,7 @@ void initSquared(ClassContext context) {
     if (!inits.size()) {
         /* make a default one and add it! */
         Node* node = new Node(NODE_FUNCTION);
-        node->setStringvalue(Tstring(context.getName()));
+        node->setStringvalue(String(context.getName()));
         node->setDataType(DataType(TYPE_FUNCTION));
         /* add the empty param type */
         node->type()->subtypes->push_back(DataType(TYPE_TUPLE));

@@ -109,7 +109,7 @@ class Node {
     Node(Node* other);
     ~Node();
     void setDataType(DataType dataType);
-    void setValue(Tdata* value);
+    void setValue(Data* value);
     void setLine(int lineNumber);
 
     /* accessors */

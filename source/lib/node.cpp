@@ -40,8 +40,6 @@ Node::~Node() {
     for (int i = 0; i < this->numChildren; i++) {
         delete this->child(i);
     }
-    // std::cout << "deleting node: " << sstringType(this) << " str: " << stringValue << " type : "
-    // <<typeToString(dataType)  <<std::endl;
     delete dataType;
     delete symtable;
 }
