@@ -63,9 +63,9 @@ void Node::addChild(Node* child) {
     }
 }
 
-void Node::setDataType(DataType* dataType) {
+void Node::setDataType(DataType dataType) {
     DataType* temp = this->dataType;
-    this->dataType = new DataType(*dataType);
+    this->dataType = new DataType(dataType);
     delete temp;
 }
 

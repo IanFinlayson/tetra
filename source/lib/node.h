@@ -108,8 +108,8 @@ class Node {
     Node(NodeKind type);
     Node(Node* other);
     ~Node();
-    void setDataType(DataType* dataType);
-    void setValue(Data* value);
+    void setDataType(DataType dataType);
+    void setValue(Tdata* value);
     void setLine(int lineNumber);
 
     /* accessors */

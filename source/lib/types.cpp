@@ -25,157 +25,6 @@ void inferBlock(Node*, Node*);
 void checkClassTypes(Node*);
 DataType* inferExpression(Node*, Node*);
 
-String sstringType(Node* node) {
-    String ss;
-
-    switch (node->kind()) {
-        /* statements and groups */
-        case NODE_FUNCTION:
-            return "FUNC " + node->getStringvalue();
-        case NODE_TOPLEVEL_LIST:
-            return "TOP LEVELS";
-        case NODE_STATEMENT:
-            return "STMTS";
-        case NODE_FORMAL_PARAM_LIST:
-            return "PARAMS";
-        case NODE_IDENTIFIERS:
-            return "IDENTIFIERS";
-        case NODE_OPEN:
-            return "OPEN";
-        case NODE_IMPORT:
-            return "IMPORT";
-        case NODE_PASS:
-            return "PASS";
-        case NODE_WAIT:
-            return "WAIT";
-        case NODE_RETURN:
-            return "RETURN";
-        case NODE_BREAK:
-            return "BREAK";
-        case NODE_CONTINUE:
-            return "CONTINUE";
-        case NODE_IF:
-            return "IF";
-        case NODE_WHILE:
-            return "WHILE";
-        case NODE_FOR:
-            return "FOR";
-        case NODE_ELIF:
-            return "ELIF";
-        case NODE_ELIF_CHAIN:
-            return "ELIF CHAIN";
-        case NODE_ELIF_CLAUSE:
-            return "ELIF CLAUSE";
-        case NODE_PARALLEL:
-            return "PARALLEL";
-        case NODE_PARFOR:
-            return "PARFOR";
-        case NODE_BACKGROUND:
-            return "BACKGROUND";
-        case NODE_LOCK:
-            return "LOCK";
-        case NODE_CONST:
-            return "CONST";
-        case NODE_GLOBAL:
-            return "GLOBAL";
-        case NODE_DECLARATION:
-            return "DECLARATION: " + node->getStringvalue();
-        case NODE_LAMBDA:
-            return "LAMBDA";
-        case NODE_CLASS:
-            return "CLASS " + node->getStringvalue();
-        case NODE_CLASS_PART:
-            return "CLASS PART";
-        case NODE_DOT:
-            return "DOT";
-        case NODE_METHOD_CALL:
-            return "METHOD CALL";
-        case NODE_SELF:
-            return "SELF";
-
-        /* operators */
-        case NODE_ASSIGN:
-            return "=";
-        case NODE_OR:
-            return "or";
-        case NODE_AND:
-            return "and";
-        case NODE_LT:
-            return "<";
-        case NODE_LTE:
-            return "<=";
-        case NODE_GT:
-            return ">";
-        case NODE_GTE:
-            return ">=";
-        case NODE_EQ:
-            return "==";
-        case NODE_NEQ:
-            return "!=";
-        case NODE_NOT:
-            return "not";
-        case NODE_BITXOR:
-            return "^";
-        case NODE_BITAND:
-            return "&";
-        case NODE_BITOR:
-            return "|";
-        case NODE_BITNOT:
-            return "~";
-        case NODE_SHIFTL:
-            return "<<";
-        case NODE_SHIFTR:
-            return ">>";
-        case NODE_PLUS:
-            return "+";
-        case NODE_MINUS:
-            return "-";
-        case NODE_TIMES:
-            return "*";
-        case NODE_DIVIDE:
-            return "/";
-        case NODE_MODULUS:
-            return "%";
-        case NODE_EXP:
-            return "EXP";
-        case NODE_IN:
-            return "in";
-
-        /* functions */
-        case NODE_FUNCALL:
-            return "CALL: " + node->getStringvalue();
-        case NODE_ACTUAL_PARAM_LIST:
-            return "ARGS";
-
-        /* lists */
-        case NODE_INDEX:
-            return "INDEX";
-        case NODE_LISTVAL:
-            return "LISTVAL";
-        case NODE_TUPVAL:
-            return "TUPVAL";
-        case NODE_DICTVAL:
-            return "DICTVAL";
-        case NODE_LISTRANGE:
-            return "LISTRANGE";
-
-        /* leafs */
-        case NODE_INTVAL:
-            return "INT:" + node->getStringvalue();
-        case NODE_REALVAL:
-            return "REAL: " + node->getStringvalue();
-        case NODE_STRINGVAL:
-            return "\"" + node->getStringvalue() + "\"";
-        case NODE_IDENTIFIER:
-            return "ID " + node->getStringvalue();
-        case NODE_BOOLVAL:
-            return "BOOL: " + node->getStringvalue();
-        case NODE_NONEVAL:
-            return "NONE";
-        default:
-            throw Error("Unsupported node type!");
-    }
-}
 /* return a string of a data type */
 String typeToString(DataType* t) {
     switch (t->getKind()) {
@@ -800,8 +649,8 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the type of the rhs */
-            expr->child(0)->setDataType(lhs);
-            return new DataType(*rhs);
+            expr->child(0)->setDataType(*lhs);
+            return rhs;
         }
 
         case NODE_OR:
@@ -1311,14 +1160,18 @@ DataType* inferExpressionPrime(Node* expr, Node* function) {
 
 /* infer an expression and assign it to the node */
 DataType* inferExpression(Node* expr, Node* function) {
+
     /* do the inference */
     DataType* t = inferExpressionPrime(expr, function);
 
     /* assign it into this node */
-    expr->setDataType(t);
+    expr->setDataType(*t);
+
+    /* clean up */
+    delete t;
 
     /* return it */
-    return t;
+    return expr->type();
 }
 
 /* infer/ type check function for tasks and locks */
@@ -1367,7 +1220,7 @@ void checkMuTasks(Node* block, Node* function) {
         }
 
         /* set the type */
-        block->child(0)->setDataType(new DataType(*sym.getType()));
+        block->child(0)->setDataType(*sym.getType());
 
         /* if there is a block ... */
         if (block->child(1)) {
@@ -1505,7 +1358,7 @@ void inferBlock(Node* block, Node* function) {
             }
 
             /* set the type of the node too */
-            block->child(0)->setDataType(new DataType((*(expr_type->subtypes))[0]));
+            block->child(0)->setDataType((*(expr_type->subtypes))[0]);
 
             /* check the block under this */
             inferBlock(block->child(2), function);
@@ -1548,12 +1401,12 @@ void inferParams(Node* node, Node* function) {
     /* if we are in the function node */
     if (node->kind() == NODE_FUNCTION || node->kind() == NODE_LAMBDA) {
         /* make a new function datatype */
-        DataType* type = new DataType(TYPE_FUNCTION);
+        DataType type = DataType(TYPE_FUNCTION);
         /* add an empty param tuple */
-        type->subtypes->push_back(DataType(TYPE_TUPLE));
+        type.subtypes->push_back(DataType(TYPE_TUPLE));
         /* add the return type (if it has one)*/
         if (node->kind() == NODE_FUNCTION) {
-            type->subtypes->push_back(*(node->type()));
+            type.subtypes->push_back(*(node->type()));
         }
         /* replace the existing datatype */
         node->setDataType(type);
@@ -1610,11 +1463,11 @@ void inferGlobal(Node* node, bool isConst = false) {
             /* if there is no declared type */
         } else {
             /* infer the type from the right side */
-            node->setDataType(new DataType(*rhs));
+            node->setDataType(*rhs);
         }
 
         /* set the node type */
-        node->child(0)->setDataType(new DataType(*rhs));
+        node->child(0)->setDataType(*rhs);
     }
     /* add it in */
     globals.insert(std::pair<String, Symbol>(
@@ -1693,8 +1546,8 @@ void initSquared(ClassContext context) {
     if (!inits.size()) {
         /* make a default one and add it! */
         Node* node = new Node(NODE_FUNCTION);
-        node->setStringvalue(String(context.getName()));
-        node->setDataType(new DataType(TYPE_FUNCTION));
+        node->setStringvalue(Tstring(context.getName()));
+        node->setDataType(DataType(TYPE_FUNCTION));
         /* add the empty param type */
         node->type()->subtypes->push_back(DataType(TYPE_TUPLE));
         /* add the return type */

@@ -243,8 +243,8 @@ class_part: function
 
 init_function: TOK_DEF TOK_INIT formal_param_list TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
-    $$->setDataType(new DataType(TYPE_CLASS));
-    $$->setStringvalue(String("init"));
+    $$->setDataType(DataType(TYPE_CLASS));
+    $$->setStringvalue(Tstring("init"));
     $$->addChild($3);
     $$->addChild($5);
     $$->setLine($1);
@@ -263,7 +263,9 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
     $$ = new Node(NODE_CONST);
     $$->addChild($2);
     $$->addChild($5);
-    $2->setDataType($3);
+    $2->setDataType(*$3);
+    delete $3;
+    delete $3;
 } | TOK_GLOBAL typed_identifier TOK_ASSIGN assignterm {
     $$ = new Node(NODE_GLOBAL);
     $$->addChild($2);
@@ -276,11 +278,13 @@ datadecl: TOK_CONST identifier TOK_ASSIGN assignterm {
     $$ = new Node(NODE_GLOBAL);
     $$->addChild($2);
     $$->addChild($5);
-    $2->setDataType($3);
+    $2->setDataType(*$3);
+    delete $3;
 } | TOK_GLOBAL identifier type {
     $$ = new Node(NODE_GLOBAL);
     $$->addChild($2);
-    $2->setDataType($3);
+    $2->setDataType(*$3);
+    delete $3;
 } | TOK_GLOBAL typed_identifier {
     $$ = new Node(NODE_GLOBAL);
     $$->addChild($2);
@@ -291,7 +295,8 @@ function: TOK_DEF TOK_IDENTIFIER formal_param_list return_type TOK_COLON block {
     $$ = new Node(NODE_FUNCTION);
     $$->setStringvalue(String(*$2));
     delete $2;
-    $$->setDataType($4);
+    $$->setDataType(*$4);
+    delete $4;
     $$->addChild($3);
     $$->addChild($6);
     $$->setLine($1);
@@ -322,7 +327,8 @@ declaration: TOK_IDENTIFIER type {
     $$->setLine(yylineNumber);
     $$->setStringvalue(String(*$1));
     delete $1;
-    $$->setDataType($2);
+    $$->setDataType(*$2);
+    delete $2;
 } 
 
 /* tuple types */
@@ -343,11 +349,13 @@ type_dec_tuple: TOK_LEFTPARENS type_decs TOK_RIGHTPARENS {
 
 type_decs: type TOK_COMMA type_decs {
     $$ = new Node(NODE_TUPLE_TYPES);
-    $$->setDataType($1);
+    $$->setDataType(*$1);
+    delete $1;
     $$->addChild($3);
 } | type {
     $$ = new Node(NODE_TUPLE_TYPES);
-    $$->setDataType($1);
+    $$->setDataType(*$1);
+    delete $1;
 }
 
 /* types just primitives and lists for now */
@@ -458,7 +466,8 @@ simple_statement: pass_statement
 typed_identifier: identifier TOK_AS type {
     $$ = $1;
     $$->setLine(yylineNumber);
-    $1->setDataType($3);
+    $1->setDataType(*$3);
+    delete $3;
 }
 
 /* a compound statement is one which has a block of code under it */
