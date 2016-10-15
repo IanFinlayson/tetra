@@ -1183,7 +1183,7 @@ void checkMuTasks(Node* block, Node* function) {
          * and it's not a wait node*/
         if (sym.getName() == "" && block->kind() != NODE_WAIT) {
             /* make a symbol for it */
-            sym = Symbol(block->child(0)->getStringvalue(), new DataType(kind),
+            sym = Symbol(block->child(0)->getStringvalue(), DataType(kind),
                          block->child(0)->getLine());
             /* add to this function's symtable */
             function->insertSymbol(sym);
