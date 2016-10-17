@@ -13,6 +13,7 @@
 #include "int.h"
 #include "lexer.h"
 #include "list.h"
+#include "dict.h"
 #include "node.h"
 #include "parser.h"
 #include "real.h"

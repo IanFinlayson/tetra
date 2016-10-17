@@ -1,6 +1,5 @@
 TODO List
 =========
-- make sure all allocations are matched with de-allocation (tdata will use GC later)
 - add eval code to evaluate statements and expressions back in
 - add support for new types:
   + dicts

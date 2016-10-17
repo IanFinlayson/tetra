@@ -120,3 +120,21 @@ String List::toString() const {
     result += "]";
     return result;
 }
+
+String Dict::toString() const {
+    String result = "{";
+    unsigned elemsLeft = values.size();
+
+    for (auto const &pair : values) {
+        result += pair.first;
+        result += ":";
+        result += pair.second->getValue()->toString();
+        elemsLeft--;
+        if (elemsLeft) {
+          result += ", ";
+        }
+    }
+
+    result += "}";
+    return result;
+}

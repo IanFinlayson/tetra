@@ -14,6 +14,7 @@
 #include "real.h"
 #include "bool.h"
 #include "list.h"
+#include "dict.h"
 
 Data* Data::opAssign(const Data* other) {
     /* copy our data type and also value */
@@ -442,6 +443,8 @@ Data* Data::opIndex(const Data* other) {
     switch (type.getKind()) {
         case TYPE_LIST:
             return ((List*) value)->get(((Int*) other->value)->toInt());
+        case TYPE_DICT:
+            return ((Dict*) value)->get(other->getValue()->toString());
         default:
             throw RuntimeError("Unhandled operands to not operator", 0);
     }
@@ -471,6 +474,9 @@ Data* Data::create(DataType* type, const Value* value) {
             break;
         case TYPE_LIST:
             newData->value = new List();
+            break;
+        case TYPE_DICT:
+            newData->value = new Dict();
             break;
         default:
             throw RuntimeError("Unhandled data type in Data::create", 0);

@@ -46,7 +46,7 @@ class Data {
     static Data* create(DataType* type, const Value* value);
 
     /* return the value of this */
-    Value* getValue() {
+    Value* getValue() const{
         return value;
     }
 
