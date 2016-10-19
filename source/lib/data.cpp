@@ -444,7 +444,7 @@ Data* Data::opIndex(const Data* other) {
         case TYPE_LIST:
             return ((List*) value)->get(((Int*) other->value)->toInt());
         case TYPE_DICT:
-            return ((Dict*) value)->get(other->getValue()->toString());
+            return ((Dict*) value)->get(other);
         default:
             throw RuntimeError("Unhandled operands to not operator", 0);
     }

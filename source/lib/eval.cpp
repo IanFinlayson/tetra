@@ -485,7 +485,7 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_FOR: {
 
-            /* TODO: Add case TYPE_STRING */ 
+            /* TODO: Add TYPE_STRING */ 
             DataTypeKind k = node->child(1)->type()->getKind();
 
               if (k == TYPE_LIST) {
@@ -533,8 +533,8 @@ Data* evaluateStatement(Node* node, Context* context) {
                 /* the return value if we hit one */
                 Data* returnValue = NULL;
 
-                /* for each item in this dict */
-                for (auto const &pair : *dict->getValues()) {
+                /* for each key in this dict */
+                for (auto const &pair : *dict->getKeys()) {
                     /* if we are breaking or returning, stop */
                     ExecutionStatus status = context->queryExecutionStatus();
                     if (status == BREAK) {
@@ -552,8 +552,8 @@ Data* evaluateStatement(Node* node, Context* context) {
                     Data* loopVariable =
                         context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
-                    /* set it to the next value */
-                    loopVariable->opAssign(dict->get(pair.second->getValue()->toString()));
+                    /* set it to the next key */
+                    loopVariable->opAssign(pair.second);
 
                     /* evaluate the body of the loop */
                     returnValue = evaluateStatement(node->child(2), context);
