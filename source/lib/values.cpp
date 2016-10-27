@@ -126,7 +126,7 @@ String Dict::toString() const {
     unsigned elemsLeft = values.size();
 
     for (auto const &pair : values) {
-        result += String(pair.first.c_str());
+        result += pair.first;
         result += ":";
         result += pair.second.second->getValue()->toString();
         elemsLeft--;

@@ -27,11 +27,7 @@ class Dict : public Value {
 
     /* get the value from the dict mapped to by the given key */
     Data*& get(const Data* key) {
-          std::cout << "in get()" << std::endl;
-          std::string keyString = key->getValue()->toString().toQ().toUtf8().constData();
-          std::cout << "keyString = '" << keyString << "'"<<std::endl;
-          std::cout << "values.count(keystring) = " << values.count(keyString)<< std::endl;
-          std::cout << "values.at(keyString) = '" << values.at(keyString).second->getValue()->toString() << "'."<< std::endl;
+          String keyString = key->getValue()->toString();
         if (!values.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
@@ -41,11 +37,7 @@ class Dict : public Value {
 
     /* get the value from the dict mapped to by the given key */
     Data* get(const Data* key) const {
-          std::string keyString = key->getValue()->toString().toQ().toUtf8().constData();
-          std::cout << "in get()const " << std::endl;
-          std::cout << "keyString = '" << keyString << "'"<<std::endl;
-          std::cout << "values.count(keystring) = " << values.count(keyString)<< std::endl;
-          std::cout << "values.at(keyString) = '" << values.at(keyString).second->getValue()->toString() << "'."<< std::endl;
+          String keyString = key->getValue()->toString();
         if (!values.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
@@ -55,25 +47,19 @@ class Dict : public Value {
 
     /* return true if the dictionary contains the given key */
     bool hasKey(const Data* key) const {
-        std::string keyString = key->getValue()->toString().toQ().toUtf8().constData();
-        std::cout << "in hasKey()" << std::endl;
-        std::cout << "keyString = '" << keyString << "'"<<std::endl;
-        std::cout << "values.count(keystring) = " << values.count(keyString) << std::endl;
+        String keyString = key->getValue()->toString();
         return values.count(keyString);
     }
 
-    /* add a key value pair to the dict*/
+    /* add a key value pair to the dict
+     * If no value is given, the key is mapped to itself
+     * as a placeholder.*/
     void put(Data* key, Data* value = NULL) {
-        std::cout << "in put()" << std::endl;
-        std::string keyString = key->getValue()->toString().toQ().toUtf8().constData();
-        std::cout <<"set keystring to '" << keyString<< "'.\n";
-        std::cout << "before put, values.count(keyString) = " << values.count(keyString)<< std::endl;
+        String keyString = key->getValue()->toString();
         if (!value) {
             value = key;
         }
         values[keyString] = std::make_pair(key,value);
-        std::cout << "after put, values.count(keyString) = " << values.count(keyString)<< std::endl;
-        std::cout << "values.at(keyString) = '" << values.at(keyString).second->getValue()->toString() << "'."<< std::endl;
     }
 
     /* get the length of the dict */
@@ -82,12 +68,12 @@ class Dict : public Value {
     }
 
     /* return a pointer to the map */
-    std::map<std::string, std::pair<Data*, Data*> >* getValues() { 
+    std::map<String, std::pair<Data*, Data*> >* getValues() { 
         return &values; 
     }
 
    private:
-    std::map<std::string,std::pair<Data*, Data*> > values;
+    std::map<String,std::pair<Data*, Data*> > values;
 };
 
 #endif
