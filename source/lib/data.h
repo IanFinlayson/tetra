@@ -40,13 +40,13 @@ class Data {
     Data* opAnd(const Data* other);
     Data* opNot();
     Data* opNegate();
-    Data* opIndex(const Data* other);
+    Data* opIndex(Data* other, bool isLValue = true);
 
     /* create a Data of a given type */
     static Data* create(DataType* type, const Value* value);
 
     /* return the value of this */
-    Value* getValue() const{
+    Value* getValue() const {
         return value;
     }
 

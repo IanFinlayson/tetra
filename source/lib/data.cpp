@@ -438,12 +438,15 @@ Data* Data::opNegate() {
     return NULL;
 }
 
-Data* Data::opIndex(const Data* other) {
+Data* Data::opIndex(Data* other, bool isLValue) {
     /* TODO add strings as well */
     switch (type.getKind()) {
         case TYPE_LIST:
             return ((List*) value)->get(((Int*) other->value)->toInt());
         case TYPE_DICT:
+            if (isLValue && !(((Dict*) value)->hasKey(other))) {
+                ((Dict*)value)->put(other);
+            }
             return ((Dict*) value)->get(other);
         default:
             throw RuntimeError("Unhandled operands to not operator", 0);

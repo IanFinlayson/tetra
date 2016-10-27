@@ -134,6 +134,14 @@ void fillDict(Dict* dict, Node* node, Context* context) {
     }
 }
 
+/* return true if the passed node is on the left 
+ * hand side of an assignment */
+bool isLValue(Node* node) {
+
+    return (node->getParent()->kind() == NODE_ASSIGN)
+        && (node->getParent()->child(0) == node);
+}
+
 /* evaluates operations on data types and returns the value */
 Data* evaluateExpression(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
@@ -298,11 +306,10 @@ Data* evaluateExpression(Node* node, Context* context) {
 
         case NODE_INDEX: {
             /* evaluate the list on the left and the index on the right */
-            Data* list = evaluateExpression(node->child(0), context);
+            Data* container = evaluateExpression(node->child(0), context);
             Data* index = evaluateExpression(node->child(1), context);
 
-            /* return a pointer to the data in the list at that position */
-            return list->opIndex(index);
+            return container->opIndex(index, isLValue(node));
         }
 
         /* simply get the identifier out of the context */
@@ -534,7 +541,7 @@ Data* evaluateStatement(Node* node, Context* context) {
                 Data* returnValue = NULL;
 
                 /* for each key in this dict */
-                for (auto const &pair : *dict->getKeys()) {
+                for (auto const &pair : *dict->getValues()) {
                     /* if we are breaking or returning, stop */
                     ExecutionStatus status = context->queryExecutionStatus();
                     if (status == BREAK) {
@@ -553,7 +560,7 @@ Data* evaluateStatement(Node* node, Context* context) {
                         context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
                     /* set it to the next key */
-                    loopVariable->opAssign(pair.second);
+                    loopVariable->opAssign((Data*) pair.second.first);
 
                     /* evaluate the body of the loop */
                     returnValue = evaluateStatement(node->child(2), context);
