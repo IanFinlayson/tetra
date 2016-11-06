@@ -56,9 +56,6 @@ class Dict : public Value {
      * as a placeholder.*/
     void put(Data* key, Data* value = NULL) {
         String keyString = key->getValue()->toString();
-        if (!value) {
-            value = key;
-        }
         values[keyString] = std::make_pair(key,value);
     }
 

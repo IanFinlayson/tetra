@@ -64,7 +64,9 @@ class List : public Value {
 
     /* append an element to the list */
     void append(Data* element) {
-        values.push_back(element);
+        Data* valPtr = Data::create(element->getType(), NULL);
+        valPtr->opAssign(element);
+        values.push_back(valPtr);
     }
 
     /* get the length of the list */

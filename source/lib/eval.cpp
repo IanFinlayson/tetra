@@ -219,10 +219,13 @@ Data* evaluateExpression(Node* node, Context* context) {
             return list;
         }
 
-        /* for all of these, we can simply call the binary expression function with
-         * the appropriate method parameter */
-        case NODE_ASSIGN:
-            return evaluateBinaryExpression(node, context, &Data::opAssign);
+        case NODE_ASSIGN: {
+            /* evaluate both of the children */
+            Data* lhs = evaluateExpression(node->child(0), context);
+            Data* rhs = evaluateExpression(node->child(1), context);
+            lhs->opAssign(rhs);
+            return lhs;
+        }
         case NODE_LT:
             return evaluateBinaryExpression(node, context, &Data::opLt);
         case NODE_LTE:

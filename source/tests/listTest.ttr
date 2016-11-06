@@ -1,0 +1,35 @@
+def main():
+  bob = 5
+  print("set bob = 5 and bob = ")
+  print(bob)
+  print("\n")
+  l = [bob]
+  print("set l = [bob] and l = ")
+  print(l)
+  print("\n")
+  l[0] = 1
+  print("set l[0] = 1 and l = ")
+  print(l)
+  print("\n")
+  print("now bob = ")
+  print(bob)
+  print("\n")
+
+  m = [6]
+  print("set m = [6] and m = ")
+  print(m)
+  print("\n")
+  n = [7]
+  print("set n = [7] and n = ")
+  print(n)
+  print("\n")
+  o = [m,n]
+  print("set o = [m,n] and o = ")
+  print(o)
+  print("\n")
+  m[0] = 2
+  print("set m[0] = 2 and m = ")
+  print(m)
+  print("\n")
+  print("now o = ")
+  print(o)
