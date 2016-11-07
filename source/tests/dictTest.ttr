@@ -1,0 +1,47 @@
+def main():
+  bob = 5
+  print("set bob = 5 and bob = ")
+  print(bob)
+  print("\n")
+  l = {"bob":bob}
+  print("set l = {'bob':bob} and l = ")
+  print(l)
+  print("\n")
+  l["bob"] = 1
+  print("set l['bob'] = 1 and l = ")
+  print(l)
+  print("\n")
+  print("now bob = ")
+  print(bob)
+  print("\n")
+
+  m = {"frank":6}
+  print("set m = {'frank':6} and m = ")
+  print(m)
+  print("\n")
+  n = {"harry":7}
+  print("set n = {'harry':7} and n = ")
+  print(n)
+  print("\n")
+  o = {m:n}
+  print("set o = {m:n} and o = ")
+  print(o)
+  print("\n")
+  m["frank"] = 2
+  print("set m['frank'] = 2 and m = ")
+  print(m)
+  print("\n")
+  print("now o = ")
+  print(o)
+  print("\n")
+
+  p = l
+  print("set p = l and p = ")
+  print(p)
+  print("\n")
+  p["bob"] = 3  
+  print("set p['bob'] = 3 and p = ")
+  print(p)
+  print("\n")
+  print("now l = ")
+  print(l)
