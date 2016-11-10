@@ -49,9 +49,15 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         if (node->child(1) != NULL) {
             return tslPrint(node->child(1), context);
         } else {
-            /* print with no arguments */
             return tslPrint(NULL, context);
         }
+    } else if (funcName == "input") {
+        if (node->child(1) != NULL) {
+            return tslInput(node->child(1), context);
+        } else {
+            return tslInput(NULL, context);
+        }
+
     }
 
     /* TODO add the other standard lib functions */
