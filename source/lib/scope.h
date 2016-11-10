@@ -60,7 +60,7 @@ class Scope {
     Data& declareReference(const String varName);
 
     /* declare a variable that can hold different values across different threads */
-    std::list<std::pair<pthread_t, Data> >& declareThreadSpecificVariable(const String&);
+    std::list<std::pair<QThread*, Data> >& declareThreadSpecificVariable(const String&);
 
     /* Used by loops and constrol statements to determine if they can proceed, or
      * if they should return */
