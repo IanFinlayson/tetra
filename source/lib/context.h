@@ -5,6 +5,7 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
+#include <QMutex>
 #include <cassert>
 #include <stack>
 
@@ -90,13 +91,13 @@ class Context {
     }
 
     /* declares  variable that can have different values across different threads */
-    std::list<std::pair<pthread_t, Data> >& declareThreadSpecificVariable(const String&);
+    std::list<std::pair<QThread*, Data> >& declareThreadSpecificVariable(const String&);
 
     /* performs a deep copy of the current context */
     Context& operator=(const Context&);
 
     /* methods dealing with parallelism at a contextual level */
-    void addThread(pthread_t);
+    void addThread(QThread*);
     void setupParallel();
     void endParallel();
 
@@ -182,7 +183,7 @@ class Context {
 
     ThreadStatus runStatus;
 
-    pthread_mutex_t parallelList_mutex;
+    QMutex parallelList_mutex;
     std::vector<String>* parForVars;
 };
 

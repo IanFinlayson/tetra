@@ -17,8 +17,6 @@ Context::Context(long tID) {
     lastLineNo = -1;
 
     runStatus = STOPPED;
-    bool success = pthread_mutex_init(&parallelList_mutex, NULL);
-    assert(success == 0);
 
     /* Only need to instantiate debug info if in debug mode */
     if (Environment::isDebugMode()) {

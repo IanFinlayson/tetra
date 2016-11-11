@@ -11,6 +11,7 @@ Data* tslPrint(Node* args, Context* context) {
     if (args == NULL) {
         VirtualConsole* console = Environment::getConsole();
         console->processStandardOutput("\n");
+        return NULL;
     }
 
     /* check if args is a structual node */
@@ -37,6 +38,22 @@ Data* tslPrint(Node* args, Context* context) {
     /* print returns nothing */
     return NULL;
 }
+
+/* get input from the user and return it */
+Data* tslInput(Node* args, Context* context) {
+    /* if there is an argument, print it first */
+    if (args != NULL) {
+        tslPrint(args, context);
+    }
+
+    /* read the string from the user */
+    String ret = Environment::getConsole()->receiveStandardInput();
+
+    /* wrap it up and return it */
+    DataType t(TYPE_STRING);
+    return Data::create(&t, &ret);
+}
+
 
 /* TODO these too
 int readInt(int threadNum) {

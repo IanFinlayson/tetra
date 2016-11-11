@@ -12,6 +12,9 @@ QMAKE_CXXFLAGS -= -O1
 QMAKE_CXXFLAGS -= -O2
 QMAKE_CXXFLAGS -= -O3
 
+# stop Qt from writing messages in the terminal
+DEFINES += QT_NO_DEBUG_OUTPUT QT_NO_WARNING_OUTPUT
+
 # set options
 CONFIG += qt debug thread
 

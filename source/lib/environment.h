@@ -5,6 +5,8 @@
 #ifndef ENVIRONMENT_H
 #define ENVIRONMENT_H
 
+#include <QMutex>
+#include <QThread>
 #include "eval.h"
 
 /* stores constants related to the environment where the program is running */
@@ -30,13 +32,13 @@ class Environment {
     static bool debugMode;
 
     static long nextThreadID;
-    static pthread_mutex_t next_thread_mutex;
+    static QMutex* next_thread_mutex;
 };
 
 class ThreadPool {
    private:
-    pthread_mutex_t threadCount_mutex;
-    std::vector<pthread_t> currentThreads;
+    QMutex threadCount_mutex;
+    std::vector<QThread*> currentThreads;
 
    public:
     ThreadPool();
@@ -47,12 +49,12 @@ class ThreadPool {
     int queryThreads();
 
     /* atomically increments the number of active threads */
-    void addThread(pthread_t aThread);
+    void addThread(QThread* aThread);
 
     /* atomically decrements the number of active threads */
-    void removeThread(pthread_t rThread);
+    void removeThread(QThread* rThread);
 
-    pthread_t getNextJoin();
+    QThread* getNextJoin();
 
     void waitTillEmpty();
 };
@@ -68,18 +70,16 @@ class ThreadEnvironment {
      * instructions)
      *  mutex insures that threads don;t simultaneously try to destroy
      *  themselves/add new threads */
-    std::vector<pthread_t> currentThreads;
-    pthread_mutex_t threadCount_mutex;
+    std::vector<QThread*> currentThreads;
+    QMutex threadCount_mutex;
     ThreadPool backgroundThreads;
 
     /* This vector holds each MUTEX lock created by the program
      * By putting them all in one global location, we allow threads to query
      * whether a particular mutex has been created or not */
-    std::map<String, pthread_mutex_t*> mutexes;
-    pthread_mutex_t map_mutex;
+    std::map<String, QMutex*> mutexes;
+    QMutex map_mutex;
 
-    /* we may want to change the constructor to an initializer, as pthread_create
-     * may return errors */
     ThreadEnvironment();
     ~ThreadEnvironment();
 
@@ -92,19 +92,19 @@ class ThreadEnvironment {
     static int queryThreads();
 
     /* atomically increments the number of active threads */
-    static void addThread(pthread_t aThread);
+    static void addThread(QThread* aThread);
 
     /* atomically decrements the number of active threads */
-    static void removeThread(pthread_t rThread);
+    static void removeThread(QThread* rThread);
 
-    static pthread_t getNextJoin();
+    static QThread* getNextJoin();
 
     /* join any threads still running */
     static void joinDetachedThreads();
 
     /* this method returns the mutex associated with a string, or creates a new
      * mutex associated with the string and returns that */
-    static pthread_mutex_t* identifyMutex(String mutexName);
+    static QMutex* identifyMutex(String mutexName);
 };
 
 #endif

@@ -5,7 +5,6 @@
 #define EVAL_H
 
 #include <assert.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <time.h>
 #include <algorithm>

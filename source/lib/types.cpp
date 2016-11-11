@@ -370,24 +370,24 @@ DataType inferLen(Node* functionCall, Node* function) {
     return DataType(TYPE_INT);
 }
 
-DataType inferRead(Node* functionCall) {
-    /* make sure there are no parameters */
-    if (functionCall->getNumChildren() > 1) {
-        throw Error(functionCall->getStringvalue() + " should not have any parameters",
-                    functionCall->getLine());
+DataType inferInput(Node* functionCall, Node* function) {
+    /* make sure there are 0 or 1 parameters */
+    if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() > 1) {
+        throw Error("input should not have more than one parameter",
+                functionCall->getLine());
     }
 
-    /* get the return type right */
-    if (functionCall->child(0)->getStringvalue() == "read_string")
-        return DataType(TYPE_STRING);
-    if (functionCall->child(0)->getStringvalue() == "read_int")
-        return DataType(TYPE_INT);
-    if (functionCall->child(0)->getStringvalue() == "read_real")
-        return DataType(TYPE_REAL);
-    if (functionCall->child(0)->getStringvalue() == "read_bool")
-        return DataType(TYPE_BOOL);
+    /* infer the type of the argument, if any */
+    if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() == 1) {
+        DataType t = inferExpression(functionCall->child(1)->child(0), function);
+        if (t.getKind() != TYPE_STRING) {
+            throw Error("input expects a string parameter",
+                    functionCall->getLine());
+        }
+    }
 
-    throw Error("This should not happen!", functionCall->getLine());
+    /* should return an string */
+    return DataType(TYPE_STRING); 
 }
 
 /* this function checks if a function call is part of the standard library and
@@ -403,11 +403,8 @@ DataType inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
         return inferLen(functionCall, function);
     }
 
-    if ((functionCall->child(0)->getStringvalue() == "read_string") ||
-        (functionCall->child(0)->getStringvalue() == "read_int") ||
-        (functionCall->child(0)->getStringvalue() == "read_real") ||
-        (functionCall->child(0)->getStringvalue() == "read_bool")) {
-        return inferRead(functionCall);
+    if (functionCall->child(0)->getStringvalue() == "input") {
+        return inferInput(functionCall, function);
     }
 
     is_stdlib = false;
