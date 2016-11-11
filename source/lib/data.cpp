@@ -449,7 +449,7 @@ Data* Data::opIndex(Data* other, bool isLValue) {
             }
             return ((Dict*) value)->get(other);
         default:
-            throw RuntimeError("Unhandled operands to not operator", 0);
+            throw RuntimeError("Unhandled operands to index operator", 0);
     }
 }
 

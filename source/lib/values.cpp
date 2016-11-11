@@ -128,7 +128,7 @@ String Dict::toString() const {
     for (auto const &pair : values) {
         result += pair.first;
         result += ":";
-        result += pair.second.second->getValue()->toString();
+        result += pair.second[1]->getValue()->toString();
         elemsLeft--;
         if (elemsLeft) {
           result += ", ";

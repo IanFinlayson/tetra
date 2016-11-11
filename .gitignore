@@ -11,6 +11,8 @@ parser.output
 # Vim swap files
 .*.swp
 .*.swo
+.*.swn
+.*.swl
 
 # tag files
 tags
