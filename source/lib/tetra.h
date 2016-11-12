@@ -14,6 +14,7 @@
 #include "lexer.h"
 #include "list.h"
 #include "dict.h"
+#include "tuple.h"
 #include "node.h"
 #include "parser.h"
 #include "real.h"

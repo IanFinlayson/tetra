@@ -73,8 +73,26 @@ class List : public Value {
         return values.size();
     }
 
+   protected:
+
+    String getValString() const{
+        String result = "";
+        for (unsigned i = 0; i < values.size(); i++) {
+            DataTypeKind kind = values[i]->getType()->getKind();
+            String outer = (kind == TYPE_STRING) ? "'" : "";
+            result += outer + values[i]->getValue()->toString() +outer; 
+            /* if not the last, print a comma */
+            if ((i + 1) < values.size()) {
+                result += ", ";
+            }
+        }
+        return result;
+    }
+
    private:
     std::vector<Data*> values;
+    static const String L_DELIM;
+    static const String R_DELIM;
 };
 
 #endif

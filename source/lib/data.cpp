@@ -15,6 +15,7 @@
 #include "bool.h"
 #include "list.h"
 #include "dict.h"
+#include "tuple.h"
 
 Data* Data::opAssign(const Data* other) {
     /* copy our data type and also value */
@@ -476,6 +477,8 @@ Data* Data::create(DataType* type, const Value* value) {
             newData->value = new Bool();
             break;
         case TYPE_TUPLE:
+            newData->value = new Tuple();
+            break;
         case TYPE_LIST:
             newData->value = new List();
             break;
