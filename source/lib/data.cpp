@@ -475,6 +475,7 @@ Data* Data::create(DataType* type, const Value* value) {
         case TYPE_BOOL:
             newData->value = new Bool();
             break;
+        case TYPE_TUPLE:
         case TYPE_LIST:
             newData->value = new List();
             break;

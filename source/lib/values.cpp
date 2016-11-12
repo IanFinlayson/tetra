@@ -109,8 +109,9 @@ String List::toString() const {
     String result = "[";
 
     for (unsigned i = 0; i < values.size(); i++) {
-        result += values[i]->getValue()->toString();
-
+        DataTypeKind kind = values[i]->getType()->getKind();
+        String outer = (kind == TYPE_STRING) ? "'" : "";
+        result += outer + values[i]->getValue()->toString() +outer; 
         /* if not the last, print a comma */
         if ((i + 1) < values.size()) {
             result += ", ";
@@ -126,9 +127,17 @@ String Dict::toString() const {
     unsigned elemsLeft = values.size();
 
     for (auto const &pair : values) {
+        DataTypeKind keyKind = pair.second[0]->getType()->getKind();
+        DataTypeKind valKind = pair.second[1]->getType()->getKind();
+        String keyOuter = (keyKind == TYPE_STRING) ? "'" : "";
+        String valOuter = (valKind == TYPE_STRING) ? "'" : "";
+        result += keyOuter; 
         result += pair.first;
+        result += keyOuter; 
         result += ":";
+        result += valOuter; 
         result += pair.second[1]->getValue()->toString();
+        result += valOuter; 
         elemsLeft--;
         if (elemsLeft) {
           result += ", ";

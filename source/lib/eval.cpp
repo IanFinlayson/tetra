@@ -181,6 +181,7 @@ Data* evaluateExpression(Node* node, Context* context) {
             return Data::create(node->type(), &value);
         }
 
+        case NODE_TUPVAL:
         case NODE_LISTVAL: {
             /* make a list data structure */
             List l;
