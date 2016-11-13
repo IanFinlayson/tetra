@@ -5,18 +5,22 @@
 #ifndef TUPLE_H
 #define TUPLE_H
 
-#include "values.h"
+#include "list.h"
 #include "error.h"
-
-class Data;
 
 /* the List class */
 class Tuple : public List {
-   public:
-    String toString() const;
    private:
     static const String L_DELIM;
     static const String R_DELIM;
+   protected:
+    String getLDelim () const {
+        return L_DELIM;
+    }
+
+    String getRDelim () const {
+        return R_DELIM;
+    }
 };
 
 #endif

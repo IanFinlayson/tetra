@@ -111,17 +111,10 @@ String Real::toString() const {
     return String(*this);
 }
 
-String List::toString() const {
-    String result = L_DELIM;
+String Container::toString() const {
+    String result = getLDelim();
     result += getValString();
-    result += R_DELIM;
-    return result;
-}
-
-String Tuple::toString() const {
-    String result = L_DELIM;
-    result += getValString();
-    result += R_DELIM;
+    result += getRDelim();
     return result;
 }
 

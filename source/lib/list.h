@@ -5,14 +5,12 @@
 #define LIST_H
 
 #include "values.h"
+#include "container.h"
 #include "error.h"
 
-class Data;
-
 /* the List class */
-class List : public Value {
+class List : public Container {
    public:
-    String toString() const;
 
     void copyValue(const Value& other) {
         /* clear our data first */
@@ -74,23 +72,15 @@ class List : public Value {
     }
 
    protected:
+    String getLDelim () const {
+        return L_DELIM;
+    }
 
-    String getValString() const{
-        String result = "";
-        for (unsigned i = 0; i < values.size(); i++) {
-            DataTypeKind kind = values[i]->getType()->getKind();
-            String outer = (kind == TYPE_STRING) ? "'" : "";
-            result += outer + values[i]->getValue()->toString() +outer; 
-            /* if not the last, print a comma */
-            if ((i + 1) < values.size()) {
-                result += ", ";
-            }
-        }
-        return result;
+    String getRDelim () const {
+        return R_DELIM;
     }
 
    private:
-    std::vector<Data*> values;
     static const String L_DELIM;
     static const String R_DELIM;
 };
