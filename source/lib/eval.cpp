@@ -3,6 +3,7 @@
  * nodes
  */
 
+
 #include <assert.h>
 #include <cstdlib>
 #include <iostream>
@@ -191,6 +192,7 @@ Data* evaluateExpression(Node* node, Context* context) {
             return Data::create(node->type(), &value);
         }
 
+        case NODE_TUPVAL:
         case NODE_LISTVAL: {
             /* make a list data structure */
             List l;
@@ -580,7 +582,7 @@ Data* evaluateStatement(Node* node, Context* context) {
                         context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
                     /* set it to the next key */
-                    loopVariable->opAssign((Data*) pair.second.first);
+                    loopVariable->opAssign((Data*) pair.second[0]);
 
                     /* evaluate the body of the loop */
                     returnValue = evaluateStatement(node->child(2), context);

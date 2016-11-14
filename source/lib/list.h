@@ -5,14 +5,12 @@
 #define LIST_H
 
 #include "values.h"
+#include "container.h"
 #include "error.h"
 
-class Data;
-
 /* the List class */
-class List : public Value {
+class List : public Container {
    public:
-    String toString() const;
 
     void copyValue(const Value& other) {
         /* clear our data first */
@@ -64,8 +62,7 @@ class List : public Value {
 
     /* append an element to the list */
     void append(Data* element) {
-        Data* valPtr = Data::create(element->getType(), NULL);
-        valPtr->opAssign(element);
+        Data* valPtr = Data::create(element->getType(), element->getValue());
         values.push_back(valPtr);
     }
 
@@ -74,8 +71,18 @@ class List : public Value {
         return values.size();
     }
 
+   protected:
+    String getLDelim () const {
+        return L_DELIM;
+    }
+
+    String getRDelim () const {
+        return R_DELIM;
+    }
+
    private:
-    std::vector<Data*> values;
+    static const String L_DELIM;
+    static const String R_DELIM;
 };
 
 #endif

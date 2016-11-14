@@ -26,22 +26,22 @@ class Dict : public Value {
     }
 
     /* get the value from the dict mapped to by the given key */
-    Data*& get(const Data* key) {
+    Data*& get(Data* key) {
           String keyString = key->getValue()->toString();
         if (!values.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return values.at(keyString).second;
+            return values.at(keyString)[1];
         }
     }
 
     /* get the value from the dict mapped to by the given key */
-    Data* get(const Data* key) const {
+    Data* get(Data* key) const {
           String keyString = key->getValue()->toString();
         if (!values.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return values.at(keyString).second;;
+            return values.at(keyString)[1];
         }
     }
 
@@ -52,25 +52,35 @@ class Dict : public Value {
     }
 
     /* add a key value pair to the dict
-     * If no value is given, the key is mapped to itself
-     * as a placeholder.*/
+     * If no value is given, the key is mapped to 
+     * a placeholder.*/
     void put(Data* key, Data* value = NULL) {
         String keyString = key->getValue()->toString();
-        values[keyString] = std::make_pair(key,value);
+        std::vector<Data*> vec;
+        Data* keyPtr = Data::create(key->getType(), key->getValue());
+        Data* valPtr; 
+        if (!value) {
+            valPtr = Data::create(key->getType(), key->getValue());
+        } else {
+            valPtr = Data::create(value->getType(), value->getValue());
+        }
+        vec.push_back(keyPtr);
+        vec.push_back(valPtr);
+        values[keyString] = vec;
     }
 
-    /* get the length of the dict */
+      /* get the length of the dict */
     int length() const {
         return values.size();
     }
 
     /* return a pointer to the map */
-    std::map<String, std::pair<Data*, Data*> >* getValues() { 
+    std::map<String, std::vector<Data*> >* getValues() { 
         return &values; 
     }
 
    private:
-    std::map<String,std::pair<Data*, Data*> > values;
+    std::map<String, std::vector<Data*> > values;
 };
 
 #endif

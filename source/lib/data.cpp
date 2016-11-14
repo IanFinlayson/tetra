@@ -15,6 +15,7 @@
 #include "bool.h"
 #include "list.h"
 #include "dict.h"
+#include "tuple.h"
 
 Data* Data::opAssign(const Data* other) {
     /* copy our data type and also value */
@@ -449,7 +450,7 @@ Data* Data::opIndex(Data* other, bool isLValue) {
             }
             return ((Dict*) value)->get(other);
         default:
-            throw RuntimeError("Unhandled operands to not operator", 0);
+            throw RuntimeError("Unhandled operands to index operator", 0);
     }
 }
 
@@ -474,6 +475,9 @@ Data* Data::create(DataType* type, const Value* value) {
             break;
         case TYPE_BOOL:
             newData->value = new Bool();
+            break;
+        case TYPE_TUPLE:
+            newData->value = new Tuple();
             break;
         case TYPE_LIST:
             newData->value = new List();

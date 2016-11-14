@@ -12,6 +12,12 @@
 
 #include "tetra.h"
 
+
+const String List::L_DELIM = "[";
+const String List::R_DELIM = "]";
+const String Tuple::L_DELIM = "(";
+const String Tuple::R_DELIM = ")";
+
 String operator+(const String& lhs, const String& rhs) {
     String t;
     t.str = lhs.str + rhs.str;
@@ -105,19 +111,10 @@ String Real::toString() const {
     return String(*this);
 }
 
-String List::toString() const {
-    String result = "[";
-
-    for (unsigned i = 0; i < values.size(); i++) {
-        result += values[i]->getValue()->toString();
-
-        /* if not the last, print a comma */
-        if ((i + 1) < values.size()) {
-            result += ", ";
-        }
-    }
-
-    result += "]";
+String Container::toString() const {
+    String result = getLDelim();
+    result += getValString();
+    result += getRDelim();
     return result;
 }
 
@@ -126,10 +123,24 @@ String Dict::toString() const {
     unsigned elemsLeft = values.size();
 
     for (auto const &pair : values) {
+        DataTypeKind keyKind = pair.second[0]->getType()->getKind();
+        DataTypeKind valKind = pair.second[1]->getType()->getKind();
+
+        String keyOuter = (keyKind == TYPE_STRING) ? "'" : "";
+        String valOuter = (valKind == TYPE_STRING) ? "'" : "";
+
+        result += keyOuter; 
         result += pair.first;
+        result += keyOuter; 
+
         result += ":";
-        result += pair.second.second->getValue()->toString();
+
+        result += valOuter; 
+        result += pair.second[1]->getValue()->toString();
+        result += valOuter; 
+
         elemsLeft--;
+
         if (elemsLeft) {
           result += ", ";
         }

@@ -33,3 +33,15 @@ def main():
   print("\n")
   print("now o = ")
   print(o)
+  print("\n")
+
+  p = l
+  print("set p = l and p = ")
+  print(p)
+  print("\n")
+  p[0] = 3  
+  print("set p[0] = 3 and p = ")
+  print(p)
+  print("\n")
+  print("now l = ")
+  print(l)
