@@ -446,7 +446,7 @@ Data* Data::opIndex(Data* other, bool isLValue) {
             return ((List*) value)->get(((Int*) other->value)->toInt());
         case TYPE_DICT:
             if (isLValue && !(((Dict*) value)->hasKey(other))) {
-                ((Dict*)value)->put(other);
+                ((Dict*) value)->put(other);
             }
             return ((Dict*) value)->get(other);
         default:

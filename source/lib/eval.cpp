@@ -3,7 +3,6 @@
  * nodes
  */
 
-
 #include <assert.h>
 #include <cstdlib>
 #include <iostream>
@@ -60,7 +59,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
             return tslInput(NULL, context);
         }
 
-    /* type conversion ones */
+        /* type conversion ones */
     } else if (funcName == "int") {
         return tslInt(node->child(1), context);
     } else if (funcName == "real") {
@@ -70,7 +69,6 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
     } else if (funcName == "bool") {
         return tslBool(node->child(1), context);
     }
-
 
     /* TODO add the other standard lib functions */
 
@@ -152,12 +150,10 @@ void fillDict(Dict* dict, Node* node, Context* context) {
     }
 }
 
-/* return true if the passed node is on the left 
+/* return true if the passed node is on the left
  * hand side of an assignment */
 bool isLValue(Node* node) {
-
-    return (node->getParent()->kind() == NODE_ASSIGN)
-        && (node->getParent()->child(0) == node);
+    return (node->getParent()->kind() == NODE_ASSIGN) && (node->getParent()->child(0) == node);
 }
 
 /* evaluates operations on data types and returns the value */
@@ -405,7 +401,8 @@ Data* evaluateStatement(Node* node, Context* context) {
             Data* value = evaluateExpression(node->child(1), context);
 
             /* get a pointer to the global thing on the left */
-            Data* global = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+            Data* global =
+                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
             /* do the assignment */
             global->opAssign(value);
@@ -513,57 +510,21 @@ Data* evaluateStatement(Node* node, Context* context) {
         } break;
 
         case NODE_FOR: {
-
-            /* TODO: Add TYPE_STRING */ 
+            /* TODO: Add TYPE_STRING */
             DataTypeKind k = node->child(1)->type()->getKind();
 
-              if (k == TYPE_LIST) {
-                  /* evaluate the list we are looping through */
-                  Data* listData = evaluateExpression(node->child(1), context);
-
-                  /* pull the list out of it */
-                  List* list = (List*) listData->getValue();
-
-                  /* the return value if we hit one */
-                  Data* returnValue = NULL;
-
-                  /* for each item in this list */
-                  for (int i = 0; i < list->length(); i++) {
-                      /* if we are breaking or returning, stop */
-                      ExecutionStatus status = context->queryExecutionStatus();
-                      if (status == BREAK) {
-                          context->normalizeStatus();
-                          return NULL;
-                      } else if (status == RETURN) {
-                          context->normalizeStatus();
-                          return returnValue;
-                      }
-
-                      /* set context to normal for now */
-                      context->normalizeStatus();
-
-                      /* look the induction variable up in the context */
-                      Data* loopVariable =
-                          context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
-
-                      /* set it to the next value */
-                      loopVariable->opAssign(list->get(i));
-
-                      /* evaluate the body of the loop */
-                      returnValue = evaluateStatement(node->child(2), context);
-                  }
-            } else if (k == TYPE_DICT) {
-                /* evaluate the dict we are looping through */
-                Data* dictData = evaluateExpression(node->child(1), context);
+            if (k == TYPE_LIST) {
+                /* evaluate the list we are looping through */
+                Data* listData = evaluateExpression(node->child(1), context);
 
                 /* pull the list out of it */
-                Dict* dict = (Dict*) dictData->getValue();
+                List* list = (List*) listData->getValue();
 
                 /* the return value if we hit one */
                 Data* returnValue = NULL;
 
-                /* for each key in this dict */
-                for (auto const &pair : *dict->getValues()) {
+                /* for each item in this list */
+                for (int i = 0; i < list->length(); i++) {
                     /* if we are breaking or returning, stop */
                     ExecutionStatus status = context->queryExecutionStatus();
                     if (status == BREAK) {
@@ -578,8 +539,43 @@ Data* evaluateStatement(Node* node, Context* context) {
                     context->normalizeStatus();
 
                     /* look the induction variable up in the context */
-                    Data* loopVariable =
-                        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                                                            node->child(0)->type());
+
+                    /* set it to the next value */
+                    loopVariable->opAssign(list->get(i));
+
+                    /* evaluate the body of the loop */
+                    returnValue = evaluateStatement(node->child(2), context);
+                }
+            } else if (k == TYPE_DICT) {
+                /* evaluate the dict we are looping through */
+                Data* dictData = evaluateExpression(node->child(1), context);
+
+                /* pull the list out of it */
+                Dict* dict = (Dict*) dictData->getValue();
+
+                /* the return value if we hit one */
+                Data* returnValue = NULL;
+
+                /* for each key in this dict */
+                for (auto const& pair : *dict->getValues()) {
+                    /* if we are breaking or returning, stop */
+                    ExecutionStatus status = context->queryExecutionStatus();
+                    if (status == BREAK) {
+                        context->normalizeStatus();
+                        return NULL;
+                    } else if (status == RETURN) {
+                        context->normalizeStatus();
+                        return returnValue;
+                    }
+
+                    /* set context to normal for now */
+                    context->normalizeStatus();
+
+                    /* look the induction variable up in the context */
+                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                                                            node->child(0)->type());
 
                     /* set it to the next key */
                     loopVariable->opAssign((Data*) pair.second[0]);
@@ -587,7 +583,6 @@ Data* evaluateStatement(Node* node, Context* context) {
                     /* evaluate the body of the loop */
                     returnValue = evaluateStatement(node->child(2), context);
                 }
-            
             }
         } break;
 

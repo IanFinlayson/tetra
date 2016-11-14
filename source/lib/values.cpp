@@ -12,7 +12,6 @@
 
 #include "tetra.h"
 
-
 const String List::L_DELIM = "[";
 const String List::R_DELIM = "]";
 const String Tuple::L_DELIM = "(";
@@ -122,27 +121,27 @@ String Dict::toString() const {
     String result = "{";
     unsigned elemsLeft = values.size();
 
-    for (auto const &pair : values) {
+    for (auto const& pair : values) {
         DataTypeKind keyKind = pair.second[0]->getType()->getKind();
         DataTypeKind valKind = pair.second[1]->getType()->getKind();
 
         String keyOuter = (keyKind == TYPE_STRING) ? "'" : "";
         String valOuter = (valKind == TYPE_STRING) ? "'" : "";
 
-        result += keyOuter; 
+        result += keyOuter;
         result += pair.first;
-        result += keyOuter; 
+        result += keyOuter;
 
         result += ":";
 
-        result += valOuter; 
+        result += valOuter;
         result += pair.second[1]->getValue()->toString();
-        result += valOuter; 
+        result += valOuter;
 
         elemsLeft--;
 
         if (elemsLeft) {
-          result += ", ";
+            result += ", ";
         }
     }
 

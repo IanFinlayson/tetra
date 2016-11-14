@@ -13,15 +13,13 @@ class Container : public Value {
    public:
     String toString() const;
 
-
    protected:
-
     String getValString() const {
         String valString = "";
         for (unsigned i = 0; i < values.size(); i++) {
             DataTypeKind kind = values[i]->getType()->getKind();
             String outer = (kind == TYPE_STRING) ? "'" : "";
-            valString += outer + values[i]->getValue()->toString() +outer; 
+            valString += outer + values[i]->getValue()->toString() + outer;
             /* if not the last, print a comma */
             if ((i + 1) < values.size()) {
                 valString += ", ";

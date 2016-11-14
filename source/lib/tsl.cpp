@@ -129,7 +129,6 @@ Data* tslString(Node* args, Context* context) {
         default:
             throw RuntimeError("Invalid type conversion", args->getLine());
     }
-
 }
 
 Data* tslBool(Node* args, Context* context) {
@@ -152,7 +151,4 @@ Data* tslBool(Node* args, Context* context) {
         default:
             throw RuntimeError("Invalid type conversion", args->getLine());
     }
-
-
 }
-

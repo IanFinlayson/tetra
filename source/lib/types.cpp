@@ -62,8 +62,7 @@ String typeToString(DataType t) {
         case TYPE_CLASS:
             return *(t.className);
         case TYPE_FUNCTION: {
-            return typeToString(&((*(t.subtypes))[0])) + "->" +
-                   typeToString(&((*(t.subtypes))[0]));
+            return typeToString(&((*(t.subtypes))[0])) + "->" + typeToString(&((*(t.subtypes))[0]));
         }
         case TYPE_OVERLOAD:
             return "overload";
@@ -73,7 +72,7 @@ String typeToString(DataType t) {
 }
 
 String typeToString(DataType* t) {
-  return typeToString(*t);
+    return typeToString(*t);
 }
 
 /* class context functions */
@@ -360,8 +359,8 @@ DataType inferLen(Node* functionCall, Node* function) {
     DataType t = inferExpression(functionCall->child(1)->child(0), function);
 
     /* check that it is a list or a string */
-    if ((t.getKind() != TYPE_LIST) && (t.getKind() != TYPE_STRING) &&
-        (t.getKind() != TYPE_TUPLE) && (t.getKind() != TYPE_DICT)) {
+    if ((t.getKind() != TYPE_LIST) && (t.getKind() != TYPE_STRING) && (t.getKind() != TYPE_TUPLE) &&
+        (t.getKind() != TYPE_DICT)) {
         throw Error("len function must be called on string, list, tuple, or dictionary",
                     functionCall->getLine());
     }
@@ -373,21 +372,19 @@ DataType inferLen(Node* functionCall, Node* function) {
 DataType inferInput(Node* functionCall, Node* function) {
     /* make sure there are 0 or 1 parameters */
     if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() > 1) {
-        throw Error("input should not have more than one parameter",
-                functionCall->getLine());
+        throw Error("input should not have more than one parameter", functionCall->getLine());
     }
 
     /* infer the type of the argument, if any */
     if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() == 1) {
         DataType t = inferExpression(functionCall->child(1)->child(0), function);
         if (t.getKind() != TYPE_STRING) {
-            throw Error("input expects a string parameter",
-                    functionCall->getLine());
+            throw Error("input expects a string parameter", functionCall->getLine());
         }
     }
 
     /* should return an string */
-    return DataType(TYPE_STRING); 
+    return DataType(TYPE_STRING);
 }
 
 DataType inferConversion(Node* functionCall, Node* function) {
@@ -438,7 +435,8 @@ DataType inferConversion(Node* functionCall, Node* function) {
             case TYPE_BOOL:
                 break;
             default:
-                throw Error("Unexpected argument type in string conversion", functionCall->getLine());
+                throw Error("Unexpected argument type in string conversion",
+                            functionCall->getLine());
         }
         return DataType(TYPE_STRING);
     } else {
@@ -658,7 +656,6 @@ Symbol findIdSym(Node* expr, Node* function = NULL) {
 
 /* infer the types of an expression, and also return the type */
 DataType inferExpressionPrime(Node* expr, Node* function) {
-
     /* the left hand side, right hand side, and result used below */
     DataType lhs, rhs;
 
@@ -875,7 +872,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                     throw Error("Numeric type required", expr->getLine());
                 }
             }
-             
+
             /* return the same type back */
             return lhs;
 
@@ -1085,8 +1082,8 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                     dt.subtypes->push_back(keyType);
                     dt.subtypes->push_back(valType);
                     /* if there are previous subtypes, make sure they match */
-                } else if (dt.subtypes->size() == 2 && (((*(dt.subtypes))[0] != keyType) ||
-                                                         ((*(dt.subtypes))[1] != valType))) {
+                } else if (dt.subtypes->size() == 2 &&
+                           (((*(dt.subtypes))[0] != keyType) || ((*(dt.subtypes))[1] != valType))) {
                     throw Error("Mismatched key/value types", expr->getLine());
                 }
                 /* set current node to the next one */
@@ -1122,11 +1119,9 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
 
             /* infer the the return type */
             if (expr->getNumChildren() > 1) {
-                expr->type()->subtypes->push_back(
-                    inferExpression(expr->child(1), function));
+                expr->type()->subtypes->push_back(inferExpression(expr->child(1), function));
             } else {
-                expr->type()->subtypes->push_back(
-                    inferExpression(expr->child(0), function));
+                expr->type()->subtypes->push_back(inferExpression(expr->child(0), function));
             }
 
             return *expr->type();
@@ -1187,8 +1182,9 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the return type of the method */
-            return *classes[*lhs.className].getMethod(
-                rhsParams, expr->child(1)->child(0)->getStringvalue())->type();
+            return *classes[*lhs.className]
+                        .getMethod(rhsParams, expr->child(1)->child(0)->getStringvalue())
+                        ->type();
         }
 
         case NODE_DECLARATION: {
@@ -1204,7 +1200,6 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
 
 /* infer an expression and assign it to the node */
 DataType inferExpression(Node* expr, Node* function) {
-
     /* do the inference */
     DataType t = inferExpressionPrime(expr, function);
 

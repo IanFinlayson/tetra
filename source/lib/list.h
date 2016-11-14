@@ -11,7 +11,6 @@
 /* the List class */
 class List : public Container {
    public:
-
     void copyValue(const Value& other) {
         /* clear our data first */
         values.clear();
@@ -72,11 +71,11 @@ class List : public Container {
     }
 
    protected:
-    String getLDelim () const {
+    String getLDelim() const {
         return L_DELIM;
     }
 
-    String getRDelim () const {
+    String getRDelim() const {
         return R_DELIM;
     }
 

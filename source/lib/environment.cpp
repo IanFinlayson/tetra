@@ -79,8 +79,7 @@ QMutex* Environment::next_thread_mutex = NULL;
 
 /* This class contains everything needed for a thread of execution to keep track
  * of and join back with all threads that it spawns */
-ThreadPool::ThreadPool() : currentThreads() {
-}
+ThreadPool::ThreadPool() : currentThreads() {}
 
 /* Since the threadCount is a less-visited area, we will use a coarse mutex for
  * reading and writing
@@ -139,8 +138,7 @@ void ThreadPool::waitTillEmpty() {
     }
 }
 
-ThreadEnvironment::ThreadEnvironment() : backgroundThreads(), mutexes() {
-}
+ThreadEnvironment::ThreadEnvironment() : backgroundThreads(), mutexes() {}
 
 /* Destructor destroys the allocated mutexes */
 ThreadEnvironment::~ThreadEnvironment() {}

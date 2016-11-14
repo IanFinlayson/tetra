@@ -41,7 +41,8 @@ class Symbol {
  * tree)
  */
 class FunctionMap {
-   private: std::map<String, Node*> lookup;
+   private:
+    std::map<String, Node*> lookup;
 
    public:
     FunctionMap();
