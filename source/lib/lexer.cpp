@@ -251,6 +251,21 @@ int lexNumber(QChar start) {
             continue;
         }
 
+        /* scientific notation */
+        if (next == 'e' || next == 'E') {
+            /* push it */
+            number.push_back(next);
+            get();
+
+            /* push optional sign */
+            next = peek();
+            if (next == '+' || next == '-') {
+                number.push_back(next);
+                get();
+            }
+            continue;
+        }
+
         if (next == '.' && seendot) {
             break;
         }
@@ -275,8 +290,8 @@ int lexNumber(QChar start) {
         break;
     }
 
-    /* if there's no decimal its an int */
-    if (number.find('.') == -1) {
+    /* if there's no decimal or e/E its an int */
+    if (number.find('.') == -1 && number.find('e') == -1 && number.find('E') == -1) {
         yylval.intValue = new Int;
         *(yylval.intValue) = number.toInt();
         return TOK_INTVAL;

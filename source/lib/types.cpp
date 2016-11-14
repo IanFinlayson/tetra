@@ -888,7 +888,6 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
             /* return the same type back */
             return lhs;
 
-
         case NODE_INDEX: {
             /* check children */
             lhs = inferExpression(expr->child(0), function);
