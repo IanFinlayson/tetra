@@ -306,6 +306,14 @@ Data* evaluateExpression(Node* node, Context* context) {
             }
         }
 
+        case NODE_UMINUS: {
+            /* evaluate the child */
+            Data* operand = evaluateExpression(node->child(0), context);
+
+            /* return the negative of this */
+            return operand->opNegate();
+        }
+
         case NODE_BITNOT: {
             /* evaluate the child */
             Data* operand = evaluateExpression(node->child(0), context);

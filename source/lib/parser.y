@@ -897,11 +897,7 @@ timesterm: TOK_PLUS timesterm {
     /* why would anybody do this??? */
     $$ = $2;
 } | TOK_MINUS timesterm {
-    /* subtract from zero */
-    $$ = new Node(NODE_MINUS);
-    Node* zero = new Node(NODE_INTVAL);
-    zero->setIntvalue(Int(0));
-    $$->addChild(zero);
+    $$ = new Node(NODE_UMINUS);
     $$->addChild($2);
 } | TOK_BITNOT timesterm {
     $$ = new Node(NODE_BITNOT);

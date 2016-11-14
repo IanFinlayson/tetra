@@ -32,6 +32,12 @@ class Real : public Value {
         return result;
     }
 
+    Real operator-() {
+        Real result;
+        result.r = -r;
+        return result;
+    }
+
     Real operator%(const Real& other) {
         Real result;
         result.r = fmod(r, other.r);

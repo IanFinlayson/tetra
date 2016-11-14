@@ -876,6 +876,19 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
             /* return the same type back */
             return lhs;
 
+        case NODE_UMINUS:
+            /* check the argument */
+            lhs = inferExpression(expr->child(0), function);
+
+            /* only int or real */
+            if ((lhs.getKind() != TYPE_INT) && (lhs.getKind() != TYPE_REAL)) {
+                throw Error("Numeric type required for unary minus", expr->getLine());
+            }
+
+            /* return the same type back */
+            return lhs;
+
+
         case NODE_INDEX: {
             /* check children */
             lhs = inferExpression(expr->child(0), function);

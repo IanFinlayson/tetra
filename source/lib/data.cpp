@@ -436,7 +436,22 @@ Data* Data::opNot() {
 }
 
 Data* Data::opNegate() {
-    return NULL;
+    /* create the result */
+    Data* result = create(&type, NULL);
+
+    /* only numeric types are allowed for this */
+    switch (type.getKind()) {
+        case TYPE_INT:
+            result->value->copyValue(-(*((Int*) value)));
+            break;
+        case TYPE_REAL:
+            result->value->copyValue(-(*((Real*) value)));
+            break;
+        default:
+            throw RuntimeError("Unhandled operands to not operator", 0);
+    }
+
+    return result;
 }
 
 Data* Data::opIndex(Data* other, bool isLValue) {
