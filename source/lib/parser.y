@@ -142,7 +142,7 @@ Node* root;
              background lock_statement index list_value list_values datadecl 
              wait_statement declaration lambda identifiers module tuple_value tuple_values
              dict_value dict_values typed_identifier class class_block class_parts class_part
-             init_function lvalue type_decs lambdaterm interm
+             init_function lvalue type_decs lambdaterm interm funcname
 
 %type <dataType> return_type type type_dec_tuple function_type dict_type
 
@@ -1076,17 +1076,43 @@ identifier: TOK_IDENTIFIER {
 }  
 
 /* a function call */
-functionCall: identifier TOK_LEFTPARENS TOK_RIGHTPARENS {
+functionCall: funcname TOK_LEFTPARENS TOK_RIGHTPARENS {
     $$ = new Node(NODE_FUNCALL);
     $$->addChild($1);
     $$->setLine($2);
 
-} | identifier TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
+} | funcname TOK_LEFTPARENS actual_param_list TOK_RIGHTPARENS {
     $$ = new Node(NODE_FUNCALL);
     $$->addChild($1);
     $$->addChild($3);
     $$->setLine($2);
   }
+
+/* a functiona name is either a plain id or a basic types
+   these can be called for type conversions a la Python */
+funcname: identifier {
+        $$ = $1;
+} | TOK_INT {
+    /* make an id node for this */
+    $$ = new Node(NODE_IDENTIFIER);
+    $$->setStringvalue(String("int"));
+    $$->setLine($1);
+} | TOK_REAL {
+    /* make an id node for this */
+    $$ = new Node(NODE_IDENTIFIER);
+    $$->setStringvalue(String("real"));
+    $$->setLine($1);
+} | TOK_STRING {
+    /* make an id node for this */
+    $$ = new Node(NODE_IDENTIFIER);
+    $$->setStringvalue(String("string"));
+    $$->setLine($1);
+} | TOK_BOOL {
+    /* make an id node for this */
+    $$ = new Node(NODE_IDENTIFIER);
+    $$->setStringvalue(String("bool"));
+    $$->setLine($1);
+}
 
 /* a list of at least one parameter */
 actual_param_list: expression TOK_COMMA actual_param_list {

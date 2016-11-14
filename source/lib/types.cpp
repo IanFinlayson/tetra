@@ -390,6 +390,62 @@ DataType inferInput(Node* functionCall, Node* function) {
     return DataType(TYPE_STRING); 
 }
 
+DataType inferConversion(Node* functionCall, Node* function) {
+    /* check that there is one argument */
+    if (functionCall->getNumChildren() != 2 || functionCall->child(1)->getNumChildren() != 1) {
+        throw Error("type conversion function expects one argument", functionCall->getLine());
+    }
+
+    /* infer the argument and capture its type */
+    DataType t = inferExpression(functionCall->child(1)->child(0), function);
+
+    /* do the check based on which convert it is */
+    if (functionCall->child(0)->getStringvalue() == "int") {
+        switch (t.getKind()) {
+            case TYPE_REAL:
+            case TYPE_STRING:
+            case TYPE_BOOL:
+                break;
+            default:
+                throw Error("Unexpected argument type in int conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_INT);
+
+    } else if (functionCall->child(0)->getStringvalue() == "real") {
+        switch (t.getKind()) {
+            case TYPE_INT:
+            case TYPE_STRING:
+                break;
+            default:
+                throw Error("Unexpected argument type in real conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_REAL);
+
+    } else if (functionCall->child(0)->getStringvalue() == "bool") {
+        switch (t.getKind()) {
+            case TYPE_INT:
+            case TYPE_STRING:
+                break;
+            default:
+                throw Error("Unexpected argument type in bool conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_BOOL);
+
+    } else if (functionCall->child(0)->getStringvalue() == "string") {
+        switch (t.getKind()) {
+            case TYPE_REAL:
+            case TYPE_INT:
+            case TYPE_BOOL:
+                break;
+            default:
+                throw Error("Unexpected argument type in string conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_STRING);
+    } else {
+        throw Error("Unhandled conversion function", functionCall->getLine());
+    }
+}
+
 /* this function checks if a function call is part of the standard library and
  * infers it */
 DataType inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
@@ -405,6 +461,13 @@ DataType inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
 
     if (functionCall->child(0)->getStringvalue() == "input") {
         return inferInput(functionCall, function);
+    }
+
+    if ((functionCall->child(0)->getStringvalue() == "int") ||
+        (functionCall->child(0)->getStringvalue() == "real") ||
+        (functionCall->child(0)->getStringvalue() == "string") ||
+        (functionCall->child(0)->getStringvalue() == "bool")) {
+        return inferConversion(functionCall, function);
     }
 
     is_stdlib = false;

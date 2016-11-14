@@ -13,4 +13,10 @@ Data* tslPrint(Node* args, Context* context);
 /* the input function reads a string from the user, with an optional prompt */
 Data* tslInput(Node* args, Context* context);
 
+/* the type conversion functions */
+Data* tslInt(Node* args, Context* context);
+Data* tslReal(Node* args, Context* context);
+Data* tslString(Node* args, Context* context);
+Data* tslBool(Node* args, Context* context);
+
 #endif

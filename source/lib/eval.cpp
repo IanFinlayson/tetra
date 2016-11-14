@@ -45,6 +45,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
     /* check to see if this is a standard library function */
     String funcName = node->child(0)->getStringvalue();
 
+    /* i/o functions */
     if (funcName == "print") {
         if (node->child(1) != NULL) {
             return tslPrint(node->child(1), context);
@@ -58,7 +59,17 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
             return tslInput(NULL, context);
         }
 
+    /* type conversion ones */
+    } else if (funcName == "int") {
+        return tslInt(node->child(1), context);
+    } else if (funcName == "real") {
+        return tslReal(node->child(1), context);
+    } else if (funcName == "string") {
+        return tslString(node->child(1), context);
+    } else if (funcName == "bool") {
+        return tslBool(node->child(1), context);
     }
+
 
     /* TODO add the other standard lib functions */
 

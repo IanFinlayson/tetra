@@ -54,49 +54,105 @@ Data* tslInput(Node* args, Context* context) {
     return Data::create(&t, &ret);
 }
 
+/* the type conversions */
+Data* tslInt(Node* args, Context* context) {
+    /* evaluate the argument */
+    Data* argument = evaluateExpression(args->child(0), context);
+    DataType t(TYPE_INT);
 
-/* TODO these too
-int readInt(int threadNum) {
-    int ret = 0;
-    // while(!(cin >> ret)) {
-    while (!(tstringstream(Environment::getConsole(threadNum, false)
-                    .receiveStandardInput()) >>
-                ret)) {
-        // Moves down the stream until it finds a readable number
-        cin.clear();
-        cin.ignore();
+    /* the three type possibilities */
+    switch (argument->getType()->getKind()) {
+        case TYPE_STRING: {
+            String* sarg = (String*) argument->getValue();
+            Int result = sarg->toInt();
+            return Data::create(&t, &result);
+        }
+        case TYPE_REAL: {
+            Real* rarg = (Real*) argument->getValue();
+            Int result = rarg->toDouble();
+            return Data::create(&t, &result);
+        }
+        case TYPE_BOOL: {
+            Bool* barg = (Bool*) argument->getValue();
+            Int result = barg->toBool() ? 1 : 0;
+            return Data::create(&t, &result);
+        }
+        default:
+            throw RuntimeError("Invalid type conversion", args->getLine());
     }
-    return ret;
 }
 
-double readReal(int threadNum) {
-    double ret = 0;
-    // while(!(cin >> ret)) {
-    while (!(tstringstream(Environment::getConsole(threadNum, false)
-                    .receiveStandardInput()) >>
-                ret)) {
-        // moves along the buffer until it finds a readable value
-        cin.clear();
-        cin.ignore();
+Data* tslReal(Node* args, Context* context) {
+    /* evaluate the argument */
+    Data* argument = evaluateExpression(args->child(0), context);
+    DataType t(TYPE_REAL);
+
+    /* the type possibilities */
+    switch (argument->getType()->getKind()) {
+        case TYPE_STRING: {
+            String* sarg = (String*) argument->getValue();
+            Real result = sarg->toReal();
+            return Data::create(&t, &result);
+        }
+        case TYPE_INT: {
+            Int* iarg = (Int*) argument->getValue();
+            Real result = iarg->toInt();
+            return Data::create(&t, &result);
+        }
+        default:
+            throw RuntimeError("Invalid type conversion", args->getLine());
     }
-    return ret;
 }
 
-bool readBool(int threadNum) {
-    // Returns false on some variation of 'false', 'no', or 0
-    tstring input =
-        Environment::getConsole(threadNum, false).receiveStandardInput();
-    // Compare input against the recognized values for false
-    if (input == "false" || input == "no" || input == "0") {
-        return false;
-    } else
-        return true;
+Data* tslString(Node* args, Context* context) {
+    /* evaluate the argument */
+    Data* argument = evaluateExpression(args->child(0), context);
+    DataType t(TYPE_STRING);
+
+    /* the three type possibilities */
+    switch (argument->getType()->getKind()) {
+        case TYPE_INT: {
+            Int* iarg = (Int*) argument->getValue();
+            String result = iarg->toString();
+            return Data::create(&t, &result);
+        }
+        case TYPE_REAL: {
+            Real* rarg = (Real*) argument->getValue();
+            String result = rarg->toString();
+            return Data::create(&t, &result);
+        }
+        case TYPE_BOOL: {
+            Bool* barg = (Bool*) argument->getValue();
+            String result = barg->toString();
+            return Data::create(&t, &result);
+        }
+        default:
+            throw RuntimeError("Invalid type conversion", args->getLine());
+    }
+
 }
 
-tstring readString(int threadNum) {
-    tstring ret =
-        Environment::getConsole(threadNum, false).receiveStandardInput();
+Data* tslBool(Node* args, Context* context) {
+    /* evaluate the argument */
+    Data* argument = evaluateExpression(args->child(0), context);
+    DataType t(TYPE_BOOL);
 
-    return ret;
+    /* the type possibilities */
+    switch (argument->getType()->getKind()) {
+        case TYPE_STRING: {
+            String* sarg = (String*) argument->getValue();
+            Bool result = sarg->toBool();
+            return Data::create(&t, &result);
+        }
+        case TYPE_INT: {
+            Int* iarg = (Int*) argument->getValue();
+            Bool result = (iarg->toInt() == 0) ? false : true;
+            return Data::create(&t, &result);
+        }
+        default:
+            throw RuntimeError("Invalid type conversion", args->getLine());
+    }
+
+
 }
-*/
+

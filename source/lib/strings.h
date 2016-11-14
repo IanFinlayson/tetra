@@ -37,6 +37,15 @@ class String : public Value {
         return Int(str.toInt());
     }
 
+    Bool toBool() {
+        QString lower = str.toLower();
+        if (lower == "true" || lower == "1" || lower == "yes" || lower == "y") {
+            return Bool(true);
+        } else {
+            return Bool(false);
+        }
+    }
+
     Real toReal() {
         return Real(str.toDouble());
     }
