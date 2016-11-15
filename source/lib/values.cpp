@@ -47,6 +47,10 @@ String String::substring(int start, int len) const {
     return t;
 }
 
+void String::replace(const String& before, const String& after, bool case_sensitive) {
+    str.replace(before.str, after.str, case_sensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+}
+
 unsigned int String::length() const {
     return str.length();
 }

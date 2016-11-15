@@ -591,6 +591,44 @@ Data* evaluateStatement(Node* node, Context* context) {
                     /* evaluate the body of the loop */
                     returnValue = evaluateStatement(node->child(2), context);
                 }
+            } else if (k == TYPE_STRING) {
+                /* evaluate the string we are looping through */
+                Data* stringData = evaluateExpression(node->child(1), context);
+
+                /* pull the string out of it */
+                String* string = (String*) stringData->getValue();
+
+                /* the return value if we hit one */
+                Data* returnValue = NULL;
+
+                /* for each item in this string */
+                for (unsigned int i = 0; i < string->length(); i++) {
+                    /* if we are breaking or returning, stop */
+                    ExecutionStatus status = context->queryExecutionStatus();
+                    if (status == BREAK) {
+                        context->normalizeStatus();
+                        return NULL;
+                    } else if (status == RETURN) {
+                        context->normalizeStatus();
+                        return returnValue;
+                    }
+
+                    /* set context to normal for now */
+                    context->normalizeStatus();
+
+                    /* look the induction variable up in the context */
+                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                                                            node->child(0)->type());
+
+                    /* set it to the next value */
+                    String letter = string->substring(i, 1);
+                    DataType d(TYPE_STRING);
+                    Data* letterD = Data::create(&d, &letter);
+                    loopVariable->opAssign(letterD);
+
+                    /* evaluate the body of the loop */
+                    returnValue = evaluateStatement(node->child(2), context);
+                }
             }
         } break;
 

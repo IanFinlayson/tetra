@@ -232,8 +232,7 @@ int lexIdent(QChar start) {
     return lookupId(id);
 }
 
-/* lex a number
- * TODO handle more bases, scientific notation etc. */
+/* lex a number TODO handle more bases */
 int lexNumber(QChar start) {
     String number;
     number.push_back(start);

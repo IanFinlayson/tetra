@@ -9,5 +9,3 @@ def fact(x int) int:
 def main( ):
     n = int(input("Enter n: "))
     print(n, "! = ", fact(n))
-
-

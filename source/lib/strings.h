@@ -67,6 +67,8 @@ class String : public Value {
     friend String operator+(const char* lhs, const String& rhs);
     friend String operator+(const String& lhs, const char* rhs);
 
+    void replace(const String& before, const String& after, bool case_sensitive = true);
+
     String substring(int start, int len = -1) const;
     unsigned int length() const;
     bool empty() const;

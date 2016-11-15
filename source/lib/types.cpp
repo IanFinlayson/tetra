@@ -733,7 +733,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
         case NODE_GT:
         case NODE_GTE:
             /* check that both sides have the same type
-             * TODO at some point add in int->real promotion */
+             * at some point add in int->real promotion */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
             if (lhs != rhs) {
@@ -752,7 +752,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
         case NODE_EQ:
         case NODE_NEQ:
             /* check that both sides have the same type
-             * TODO at some point add in int->real promotion */
+             * at some point add in int->real promotion */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
             if (lhs != rhs) {
@@ -853,7 +853,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
         case NODE_MODULUS:
         case NODE_EXP:
             /* check that both operands match and that they are int/real
-             * TODO at some point add in int->real promotion... */
+             * at some point add in int->real promotion... */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
 
@@ -1393,19 +1393,38 @@ void inferBlock(Node* block, Node* function) {
             Symbol idxSym = findIdSym(block->child(0));
 
             /* if it does, make sure it is the right type */
-            if (idxSym.getName() != "" && (*(idxSym.getType())) != (*(expr_type.subtypes))[0]) {
-                throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
+            if (idxSym.getName() != "") {
+
+                /* if it's a string, the symbol must be too */
+                if (expr_type.getKind() == TYPE_STRING) {
+                    if (idxSym.getType()->getKind() != TYPE_STRING) {
+                        throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
                                 "' is incompatible with container elements.",
-                            block->getLine());
+                                block->getLine());
+                    }
+                } else {
+                    /* otherwise, the subtype should match the symbol type */
+                    if ((*(idxSym.getType())) != (*(expr_type.subtypes))[0]) {
+                        throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
+                                "' is incompatible with container elements.",
+                                block->getLine());
+                    }
+                }
 
                 /* otherwise, if it doesn't exist, add it */
             } else if (idxSym.getName() == "") {
-                function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
+                if (expr_type.getKind() == TYPE_STRING) {
+                    /* make it a string */
+                    function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
+                                              DataType(TYPE_STRING), block->getLine()));
+                    block->child(0)->setDataType(DataType(TYPE_STRING));
+                } else {
+                    /* make it whatever the subtype is */
+                    function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
                                               &(*(expr_type.subtypes))[0], block->getLine()));
+                    block->child(0)->setDataType((*(expr_type.subtypes))[0]);
+                }
             }
-
-            /* set the type of the node too */
-            block->child(0)->setDataType((*(expr_type.subtypes))[0]);
 
             /* check the block under this */
             inferBlock(block->child(2), function);
