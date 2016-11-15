@@ -27,5 +27,6 @@
 #include "types.h"
 #include "values.h"
 #include "vartable.h"
+#include "worker.h"
 
 #endif

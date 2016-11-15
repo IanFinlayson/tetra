@@ -42,10 +42,13 @@ enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN, PARALLEL };
 /* a scope contains local variables of a function */
 class Scope {
    public:
-    Scope() {}
+    Scope() {
+        executionStatus = NORMAL;
+    }
 
     Scope(const Node* node) {
         UNUSED(node);
+        executionStatus = NORMAL;
     }
 
     /* look a variable up in this scope by name */
@@ -58,9 +61,6 @@ class Scope {
      * The calling program can set this pointer to point to whatever varname
      * should alias. */
     Data& declareReference(const String varName);
-
-    /* declare a variable that can hold different values across different threads */
-    std::list<std::pair<QThread*, Data> >& declareThreadSpecificVariable(const String&);
 
     /* Used by loops and constrol statements to determine if they can proceed, or
      * if they should return */

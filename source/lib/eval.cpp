@@ -9,6 +9,7 @@
 #include <map>
 #include <sstream>
 #include <string>
+#include <QThread>
 
 #include "tetra.h"
 
@@ -345,6 +346,43 @@ Data* evaluateExpression(Node* node, Context* context) {
     }
 }
 
+/* evaluate a parallel statement */
+Data* evaluateParallel(Node* node, Context* context) {
+    Node* next = node->child(0);
+    std::vector<ParallelWorker*> children_threads;
+
+    while (next != NULL) {
+        /* peel off the left child */
+        Node* left = next->child(0);
+
+        /* launch a thread for it */
+        ParallelWorker* worker1 = new ParallelWorker(left, context);
+        worker1->start();
+        children_threads.push_back(worker1);
+
+        /* get the other child */
+        next = next->child(1);
+
+        /* if it's not a stmts line, do it and stop */
+        if (next->kind() != NODE_STATEMENT) {
+            /* launch a thread for it */
+            ParallelWorker* worker2 = new ParallelWorker(next, context);
+            worker2->start();
+            children_threads.push_back(worker2);
+            next = NULL;
+        }
+    }
+
+    /* wait for them to finish and deallocate them */
+    for (unsigned int i = 0; i < children_threads.size(); i++) {
+        children_threads[i]->wait();
+        delete children_threads[i];
+    }
+
+    /* TODO what should happen if a parallel has a return in it??? */
+    return NULL;
+}
+
 /* evaluate a statement node - only returns a value for return statements */
 Data* evaluateStatement(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
@@ -628,6 +666,11 @@ Data* evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
+
+        case NODE_PARALLEL:
+            return evaluateParallel(node, context);
+            break;
+
         default:
             /* if it's none of these things, it must be an expression used as a
              * statement */
@@ -646,7 +689,7 @@ int interpret(Node* tree, int debug, int threads) {
     Environment::setRunning();
 
     /* construct a context (this also initializes the global scope) */
-    Context context(Environment::obtainNewThreadID());
+    Context context;
 
     /* attempt to find the main function */
     Node* main = functions.getFunctionNode("main()");
@@ -662,9 +705,6 @@ int interpret(Node* tree, int debug, int threads) {
 
     /* evaluate the main function */
     evaluateStatement(main, &context);
-
-    /* wait for any unfinished business */
-    ThreadEnvironment::joinDetachedThreads();
 
     /* leave the scope */
     context.exitScope();

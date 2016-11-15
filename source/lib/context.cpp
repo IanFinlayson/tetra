@@ -4,19 +4,16 @@
 
 #include "tetra.h"
 
-Context::Context(long tID) {
+Context::Context() {
     /* initialize the global scope */
     initializeNewScope(NULL);
     globalScope = &(programStack.top());
-    threadID = tID;
 
     /* debug variables */
     stopAtNext = false;
     stepping = false;
     resume = false;
     lastLineNo = -1;
-
-    runStatus = STOPPED;
 
     /* Only need to instantiate debug info if in debug mode */
     if (Environment::isDebugMode()) {
