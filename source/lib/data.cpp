@@ -455,7 +455,6 @@ Data* Data::opNegate() {
 }
 
 Data* Data::opIndex(Data* other, bool isLValue) {
-    /* TODO add strings as well */
     switch (type.getKind()) {
         case TYPE_LIST:
             return ((List*) value)->get(((Int*) other->value)->toInt());
@@ -464,6 +463,11 @@ Data* Data::opIndex(Data* other, bool isLValue) {
                 ((Dict*) value)->put(other);
             }
             return ((Dict*) value)->get(other);
+        case TYPE_STRING: {
+            int index = ((Int*) other->value)->toInt();
+            String letter = ((String*) value)->substring(index, 1);
+            return Data::create(&type, &letter);
+        }
         default:
             throw RuntimeError("Unhandled operands to index operator", 0);
     }
