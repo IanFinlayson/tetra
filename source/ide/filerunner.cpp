@@ -37,6 +37,7 @@ void FileRunner::runFile(bool debug) {
 
     /* assume normal completion */
     bool interrupted = false;
+    bool error = false;
 
     Node* program_root;
     Environment::initialize();
@@ -55,16 +56,17 @@ void FileRunner::runFile(bool debug) {
         interrupted = true;
     } catch (Error e) {
         emit errorSeen(e.getMessage().toQ(), e.getLine());
+        error = true;
     }
     QThread::currentThread()->quit();
 
     /* calculate elapsed running time */
     double seconds = programTimer.elapsed() / 1000.0;
 
-    if (!interrupted) {
+    if (!interrupted && !error) {
         emit output("\nProgram finished in " + QString::number(seconds, 'f', 2) +
                     " seconds");
-    } else {
+    } else if (!error) {
         emit output("\nProgram interupted after " +
                     QString::number(seconds, 'f', 2) + " seconds");
     }

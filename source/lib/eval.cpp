@@ -47,20 +47,13 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
 
     /* i/o functions */
     if (funcName == "print") {
-        if (node->child(1) != NULL) {
-            return tslPrint(node->child(1), context);
-        } else {
-            return tslPrint(NULL, context);
-        }
+        return tslPrint(node->child(1), context);
     } else if (funcName == "input") {
-        if (node->child(1) != NULL) {
-            return tslInput(node->child(1), context);
-        } else {
-            return tslInput(NULL, context);
-        }
+        return tslInput(node->child(1), context);
+    }
 
-        /* type conversion ones */
-    } else if (funcName == "int") {
+    /* type conversion ones */
+    else if (funcName == "int") {
         return tslInt(node->child(1), context);
     } else if (funcName == "real") {
         return tslReal(node->child(1), context);
@@ -70,8 +63,12 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         return tslBool(node->child(1), context);
     }
 
-    /* TODO add the other standard lib functions */
+    /* len function */
+    else if (funcName == "len") {
+        return tslLen(node->child(1), context);
+    }
 
+    /* regular user defined functions */
     else {
         /* it's user defined, find it in the tree */
         Node* funcNode = functions.getFunctionNode(node);
@@ -518,7 +515,6 @@ Data* evaluateStatement(Node* node, Context* context) {
         } break;
 
         case NODE_FOR: {
-            /* TODO: Add TYPE_STRING */
             DataTypeKind k = node->child(1)->type()->getKind();
 
             if (k == TYPE_LIST) {

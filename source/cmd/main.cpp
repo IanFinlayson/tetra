@@ -107,8 +107,7 @@ int main(int argc, char** argv) {
         /* file is last parameter */
         tree = parseFile(String(args.inputFileName));
     } catch (Error e) {
-        std::cout << "The following error was detected in your program:\n"
-                  << e << "\nExecution aborted" << std::endl;
+        std::cout << e;
         exit(EXIT_FAILURE);
     }
     int ret = 0;

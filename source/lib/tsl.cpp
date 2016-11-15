@@ -152,3 +152,28 @@ Data* tslBool(Node* args, Context* context) {
             throw RuntimeError("Invalid type conversion", args->getLine());
     }
 }
+
+Data* tslLen(Node* args, Context* context) {
+    /* evaluate the argument */
+    Data* argument = evaluateExpression(args->child(0), context);
+    DataType t(TYPE_INT);
+    Int length;
+
+    /* the type possibilities */
+    switch (argument->getType()->getKind()) {
+        case TYPE_STRING:
+            length = ((String*) argument->getValue())->length();
+            return Data::create(&t, &length);
+        case TYPE_DICT:
+            length = ((Dict*) argument->getValue())->length();
+            return Data::create(&t, &length);
+        case TYPE_LIST:
+            length = ((List*) argument->getValue())->length();
+            return Data::create(&t, &length);
+        case TYPE_TUPLE:
+            length = ((Tuple*) argument->getValue())->length();
+            return Data::create(&t, &length);
+        default:
+            throw RuntimeError("Invalid argument to len function", args->getLine());
+    }
+}

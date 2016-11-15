@@ -1394,20 +1394,19 @@ void inferBlock(Node* block, Node* function) {
 
             /* if it does, make sure it is the right type */
             if (idxSym.getName() != "") {
-
                 /* if it's a string, the symbol must be too */
                 if (expr_type.getKind() == TYPE_STRING) {
                     if (idxSym.getType()->getKind() != TYPE_STRING) {
                         throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
-                                "' is incompatible with container elements.",
-                                block->getLine());
+                                        "' is incompatible with container elements.",
+                                    block->getLine());
                     }
                 } else {
                     /* otherwise, the subtype should match the symbol type */
                     if ((*(idxSym.getType())) != (*(expr_type.subtypes))[0]) {
                         throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
-                                "' is incompatible with container elements.",
-                                block->getLine());
+                                        "' is incompatible with container elements.",
+                                    block->getLine());
                     }
                 }
 
@@ -1416,12 +1415,12 @@ void inferBlock(Node* block, Node* function) {
                 if (expr_type.getKind() == TYPE_STRING) {
                     /* make it a string */
                     function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
-                                              DataType(TYPE_STRING), block->getLine()));
+                                                  DataType(TYPE_STRING), block->getLine()));
                     block->child(0)->setDataType(DataType(TYPE_STRING));
                 } else {
                     /* make it whatever the subtype is */
                     function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
-                                              &(*(expr_type.subtypes))[0], block->getLine()));
+                                                  &(*(expr_type.subtypes))[0], block->getLine()));
                     block->child(0)->setDataType((*(expr_type.subtypes))[0]);
                 }
             }
@@ -1558,7 +1557,7 @@ void inferGlobals(Node* node) {
 
 /* add stl functions to the list of globals */
 void addStls() {
-    String stls[] = {"len", "read_string", "read_int", "read_real", "read_bool", "print"};
+    String stls[] = {"len", "input", "int", "string", "bool", "real", "print"};
 
     for (unsigned long i = 0; i < sizeof(stls) / sizeof(stls[0]); i++) {
         /* add them to the globals */

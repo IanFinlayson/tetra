@@ -19,4 +19,7 @@ Data* tslReal(Node* args, Context* context);
 Data* tslString(Node* args, Context* context);
 Data* tslBool(Node* args, Context* context);
 
+/* the len function returns the size of lists, dicts or strings */
+Data* tslLen(Node* args, Context* context);
+
 #endif
