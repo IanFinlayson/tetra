@@ -3,13 +3,13 @@
  * nodes
  */
 
-
 #include <assert.h>
 #include <cstdlib>
 #include <iostream>
 #include <map>
 #include <sstream>
 #include <string>
+#include <QThread>
 
 #include "tetra.h"
 
@@ -46,23 +46,30 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
     /* check to see if this is a standard library function */
     String funcName = node->child(0)->getStringvalue();
 
+    /* i/o functions */
     if (funcName == "print") {
-        if (node->child(1) != NULL) {
-            return tslPrint(node->child(1), context);
-        } else {
-            return tslPrint(NULL, context);
-        }
+        return tslPrint(node->child(1), context);
     } else if (funcName == "input") {
-        if (node->child(1) != NULL) {
-            return tslInput(node->child(1), context);
-        } else {
-            return tslInput(NULL, context);
-        }
-
+        return tslInput(node->child(1), context);
     }
 
-    /* TODO add the other standard lib functions */
+    /* type conversion ones */
+    else if (funcName == "int") {
+        return tslInt(node->child(1), context);
+    } else if (funcName == "real") {
+        return tslReal(node->child(1), context);
+    } else if (funcName == "string") {
+        return tslString(node->child(1), context);
+    } else if (funcName == "bool") {
+        return tslBool(node->child(1), context);
+    }
 
+    /* len function */
+    else if (funcName == "len") {
+        return tslLen(node->child(1), context);
+    }
+
+    /* regular user defined functions */
     else {
         /* it's user defined, find it in the tree */
         Node* funcNode = functions.getFunctionNode(node);
@@ -145,12 +152,10 @@ void fillDict(Dict* dict, Node* node, Context* context) {
     }
 }
 
-/* return true if the passed node is on the left 
+/* return true if the passed node is on the left
  * hand side of an assignment */
 bool isLValue(Node* node) {
-
-    return (node->getParent()->kind() == NODE_ASSIGN)
-        && (node->getParent()->child(0) == node);
+    return (node->getParent()->kind() == NODE_ASSIGN) && (node->getParent()->child(0) == node);
 }
 
 /* evaluates operations on data types and returns the value */
@@ -303,6 +308,14 @@ Data* evaluateExpression(Node* node, Context* context) {
             }
         }
 
+        case NODE_UMINUS: {
+            /* evaluate the child */
+            Data* operand = evaluateExpression(node->child(0), context);
+
+            /* return the negative of this */
+            return operand->opNegate();
+        }
+
         case NODE_BITNOT: {
             /* evaluate the child */
             Data* operand = evaluateExpression(node->child(0), context);
@@ -335,6 +348,43 @@ Data* evaluateExpression(Node* node, Context* context) {
             throw SystemError("Unhandled node type in eval", 0, node);
             break;
     }
+}
+
+/* evaluate a parallel statement */
+Data* evaluateParallel(Node* node, Context* context) {
+    Node* next = node->child(0);
+    std::vector<ParallelWorker*> children_threads;
+
+    while (next != NULL) {
+        /* peel off the left child */
+        Node* left = next->child(0);
+
+        /* launch a thread for it */
+        ParallelWorker* worker1 = new ParallelWorker(left, context);
+        worker1->start();
+        children_threads.push_back(worker1);
+
+        /* get the other child */
+        next = next->child(1);
+
+        /* if it's not a stmts line, do it and stop */
+        if (next->kind() != NODE_STATEMENT) {
+            /* launch a thread for it */
+            ParallelWorker* worker2 = new ParallelWorker(next, context);
+            worker2->start();
+            children_threads.push_back(worker2);
+            next = NULL;
+        }
+    }
+
+    /* wait for them to finish and deallocate them */
+    for (unsigned int i = 0; i < children_threads.size(); i++) {
+        children_threads[i]->wait();
+        delete children_threads[i];
+    }
+
+    /* TODO what should happen if a parallel has a return in it??? */
+    return NULL;
 }
 
 /* evaluate a statement node - only returns a value for return statements */
@@ -398,7 +448,8 @@ Data* evaluateStatement(Node* node, Context* context) {
             Data* value = evaluateExpression(node->child(1), context);
 
             /* get a pointer to the global thing on the left */
-            Data* global = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+            Data* global =
+                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
             /* do the assignment */
             global->opAssign(value);
@@ -507,43 +558,88 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_FOR: {
 
-            /* TODO: Add TYPE_STRING */ 
+            DataTypeKind k = node->child(1)->type()->getKind();
+            if (k == TYPE_DICT || k == TYPE_LIST) {
+                /* evaluate the list we are looping through */
+                Data* containerData = evaluateExpression(node->child(1), context);
 
-            /* evaluate the list we are looping through */
-            Data* containerData = evaluateExpression(node->child(1), context);
+                /* pull the list out of it */
+                Container* container = (Container*) containerData->getValue();
 
-            /* pull the list out of it */
-            Container* container = (Container*) containerData->getValue();
+                /* the return value if we hit one */
+                Data* returnValue = NULL;
 
-            /* the return value if we hit one */
-            Data* returnValue = NULL;
+                /* for each item in this list */
+                for (unsigned i = 0; i < container->length(); i++) {
+                    /* if we are breaking or returning, stop */
+                    ExecutionStatus status = context->queryExecutionStatus();
+                    if (status == BREAK) {
+                        context->normalizeStatus();
+                        return NULL;
+                    } else if (status == RETURN) {
+                        context->normalizeStatus();
+                        return returnValue;
+                    }
 
-            /* for each item in this list */
-            for (unsigned i = 0; i < container->length(); i++) {
-                /* if we are breaking or returning, stop */
-                ExecutionStatus status = context->queryExecutionStatus();
-                if (status == BREAK) {
+                    /* set context to normal for now */
                     context->normalizeStatus();
-                    return NULL;
-                } else if (status == RETURN) {
+
+                    /* look the induction variable up in the context */
+                    Data* loopVariable =
+                        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+
+                    /* set it to the next value */
+                    loopVariable->opAssign((*container)[i]);
+
+                    /* evaluate the body of the loop */
+                    returnValue = evaluateStatement(node->child(2), context);
+            }
+
+            } else if (k == TYPE_STRING) {
+                /* evaluate the string we are looping through */
+                Data* stringData = evaluateExpression(node->child(1), context);
+
+                /* pull the string out of it */
+                String* string = (String*) stringData->getValue();
+
+                /* the return value if we hit one */
+                Data* returnValue = NULL;
+
+                /* for each item in this string */
+                for (unsigned int i = 0; i < string->length(); i++) {
+                    /* if we are breaking or returning, stop */
+                    ExecutionStatus status = context->queryExecutionStatus();
+                    if (status == BREAK) {
+                        context->normalizeStatus();
+                        return NULL;
+                    } else if (status == RETURN) {
+                        context->normalizeStatus();
+                        return returnValue;
+                    }
+
+                    /* set context to normal for now */
                     context->normalizeStatus();
-                    return returnValue;
+
+                    /* look the induction variable up in the context */
+                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                                                            node->child(0)->type());
+
+                    /* set it to the next value */
+                    String letter = string->substring(i, 1);
+                    DataType d(TYPE_STRING);
+                    Data* letterD = Data::create(&d, &letter);
+                    loopVariable->opAssign(letterD);
+
+                    /* evaluate the body of the loop */
+                    returnValue = evaluateStatement(node->child(2), context);
                 }
-
-                /* set context to normal for now */
-                context->normalizeStatus();
-
-                /* look the induction variable up in the context */
-                Data* loopVariable =
-                    context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
-
-                /* set it to the next value */
-                loopVariable->opAssign((*container)[i]);
-
-                /* evaluate the body of the loop */
-                returnValue = evaluateStatement(node->child(2), context);
             }
         } break;
+
+
+        case NODE_PARALLEL:
+            return evaluateParallel(node, context);
+            break;
 
         default:
             /* if it's none of these things, it must be an expression used as a
@@ -563,7 +659,7 @@ int interpret(Node* tree, int debug, int threads) {
     Environment::setRunning();
 
     /* construct a context (this also initializes the global scope) */
-    Context context(Environment::obtainNewThreadID());
+    Context context;
 
     /* attempt to find the main function */
     Node* main = functions.getFunctionNode("main()");
@@ -579,9 +675,6 @@ int interpret(Node* tree, int debug, int threads) {
 
     /* evaluate the main function */
     evaluateStatement(main, &context);
-
-    /* wait for any unfinished business */
-    ThreadEnvironment::joinDetachedThreads();
 
     /* leave the scope */
     context.exitScope();

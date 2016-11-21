@@ -15,7 +15,7 @@ def sum(numbers [int]) int:
         b = sum_range(numbers, mid, len(numbers) - 1)
     return a + b
 
-# print the sum of the first 100 natural numbers
+# print the sum of the first 10000 natural numbers
 def main( ):
     print(sum([1 ... 10000]))
 

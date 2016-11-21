@@ -12,7 +12,6 @@
 
 #include "tetra.h"
 
-
 const String List::L_DELIM = "[";
 const String List::R_DELIM = "]";
 const String Tuple::L_DELIM = "(";
@@ -48,6 +47,10 @@ String String::substring(int start, int len) const {
     String t;
     t.str = str.mid(start, len);
     return t;
+}
+
+void String::replace(const String& before, const String& after, bool case_sensitive) {
+    str.replace(before.str, after.str, case_sensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
 }
 
 unsigned int String::length() const {

@@ -33,7 +33,7 @@ Data* Data::opPlus(const Data* other) {
     /* create the result variable */
     Data* result = create(&type, NULL);
 
-    /* do different things depending on type TODO what happens with real+int etc. */
+    /* do different things depending on type what happens with real+int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
             result->value->copyValue(*((Int*) value) + *((Int*) other->value));
@@ -58,7 +58,7 @@ Data* Data::opMinus(const Data* other) {
     /* create the result variable */
     Data* result = create(&type, NULL);
 
-    /* do different things depending on type TODO what happens with real-int etc. */
+    /* do different things depending on type what happens with real-int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
             result->value->copyValue(*((Int*) value) - *((Int*) other->value));
@@ -77,7 +77,7 @@ Data* Data::opTimes(const Data* other) {
     /* create the result variable */
     Data* result = create(&type, NULL);
 
-    /* do different things depending on type TODO what happens with real*int etc. */
+    /* do different things depending on type what happens with real*int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
             result->value->copyValue(*((Int*) value) * *((Int*) other->value));
@@ -96,7 +96,7 @@ Data* Data::opDivide(const Data* other) {
     /* create the result variable */
     Data* result = create(&type, NULL);
 
-    /* do different things depending on type TODO what happens with real/int etc. */
+    /* do different things depending on type what happens with real/int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
             result->value->copyValue(*((Int*) value) / *((Int*) other->value));
@@ -115,7 +115,7 @@ Data* Data::opModulus(const Data* other) {
     /* create the result variable */
     Data* result = create(&type, NULL);
 
-    /* do different things depending on type TODO what happens with real%int etc. */
+    /* do different things depending on type what happens with real%int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
             result->value->copyValue(*((Int*) value) % *((Int*) other->value));
@@ -134,7 +134,7 @@ Data* Data::opExp(const Data* other) {
     /* create the result variable */
     Data* result = create(&type, NULL);
 
-    /* do different things depending on type TODO what happens with real**int etc. */
+    /* do different things depending on type what happens with real**int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
             result->value->copyValue(*((Int*) value) % *((Int*) other->value));
@@ -436,10 +436,26 @@ Data* Data::opNot() {
 }
 
 Data* Data::opNegate() {
-    return NULL;
+    /* create the result */
+    Data* result = create(&type, NULL);
+
+    /* only numeric types are allowed for this */
+    switch (type.getKind()) {
+        case TYPE_INT:
+            result->value->copyValue(-(*((Int*) value)));
+            break;
+        case TYPE_REAL:
+            result->value->copyValue(-(*((Real*) value)));
+            break;
+        default:
+            throw RuntimeError("Unhandled operands to not operator", 0);
+    }
+
+    return result;
 }
 
 Data* Data::opIndex(Data* other, bool isLValue) {
+<<<<<<< HEAD
     /* TODO add strings as well */
     if (type.getKind() == TYPE_DICT 
         && isLValue 
@@ -448,6 +464,14 @@ Data* Data::opIndex(Data* other, bool isLValue) {
         Pair p;
         p.set(other, Data::create(other->getType(), other->getValue()));
         ((Dict*)value)->add(Data::create(other->getType(),&p));
+                ((Dict*) value)->put(other);
+            }
+            return ((Dict*) value)->get(other);
+        case TYPE_STRING: {
+            int index = ((Int*) other->value)->toInt();
+            String letter = ((String*) value)->substring(index, 1);
+            return Data::create(&type, &letter);
+        }
     }
     return ((Container*)value)->get(other);
 }

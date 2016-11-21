@@ -82,6 +82,7 @@ enum NodeKind {
     NODE_LISTRANGE,
     NODE_INDEX,
     NODE_IN,
+    NODE_UMINUS,
 
     /* function call */
     NODE_FUNCALL,

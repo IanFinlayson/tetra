@@ -24,9 +24,13 @@ syn match tetraError '\t'
 syn keyword tetraValue true false
 syn match tetraValue '\d\+'
 syn match tetraValue '[-+]\d\+'
-syn match tetraValue '\d\+\.\d*'
-syn match tetraValue '[-+]\d\+\.\d*'
+" floating point value regexes taken from c.vim syntax file
+syn match tetraValue '\d\+\.\d*\(e[-+]\=\d\+\)\=[fl]\='
+syn match tetraValue '\.\d\+\(e[-+]\=\d\+\)\=[fl]\=\>'
+syn match tetraValue '\d\+e[-+]\=\d\+[fl]\=\>'
 syn region tetraValue start='"' end='"' skip='\\"'
+
+
 
 " hook it up
 hi def link tetraKeyword Keyword

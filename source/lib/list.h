@@ -9,7 +9,6 @@
 /* the List class */
 class List : public Container {
    public:
-
     /* concatenate two lists */
     List operator+(const List& other) {
         List result;
@@ -48,11 +47,11 @@ class List : public Container {
     }
 
    protected:
-    String getLDelim () const {
+    String getLDelim() const {
         return L_DELIM;
     }
 
-    String getRDelim () const {
+    String getRDelim() const {
         return R_DELIM;
     }
 

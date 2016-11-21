@@ -12,12 +12,13 @@ class Tuple : public List {
    private:
     static const String L_DELIM;
     static const String R_DELIM;
+
    protected:
-    String getLDelim () const {
+    String getLDelim() const {
         return L_DELIM;
     }
 
-    String getRDelim () const {
+    String getRDelim() const {
         return R_DELIM;
     }
 };

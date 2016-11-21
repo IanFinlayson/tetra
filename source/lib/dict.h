@@ -12,14 +12,13 @@ class Data;
 /* the Dict class */
 class Dict : public Container {
    public:
-
     Data* operator[](unsigned i) const{
         return ((Pair*)(Container::operator[](i)->getValue()))->getKey();
     }
 
     /* get the value from the dict mapped to by the given key */
     Data*& get(Data* key) {
-          String keyString = key->getValue()->toString();
+        String keyString = key->getValue()->toString();
         if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
@@ -29,7 +28,7 @@ class Dict : public Container {
 
     /* get the value from the dict mapped to by the given key */
     Data* get(Data* key) const {
-          String keyString = key->getValue()->toString();
+        String keyString = key->getValue()->toString();
         if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
@@ -57,8 +56,6 @@ class Dict : public Container {
 
     String getRDelim () const {
         return R_DELIM;
-    }
-
    private:
     static const String L_DELIM;
     static const String R_DELIM;

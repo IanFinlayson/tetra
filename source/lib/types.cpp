@@ -62,8 +62,7 @@ String typeToString(DataType t) {
         case TYPE_CLASS:
             return *(t.className);
         case TYPE_FUNCTION: {
-            return typeToString(&((*(t.subtypes))[0])) + "->" +
-                   typeToString(&((*(t.subtypes))[0]));
+            return typeToString(&((*(t.subtypes))[0])) + "->" + typeToString(&((*(t.subtypes))[0]));
         }
         case TYPE_OVERLOAD:
             return "overload";
@@ -73,7 +72,7 @@ String typeToString(DataType t) {
 }
 
 String typeToString(DataType* t) {
-  return typeToString(*t);
+    return typeToString(*t);
 }
 
 /* class context functions */
@@ -360,8 +359,8 @@ DataType inferLen(Node* functionCall, Node* function) {
     DataType t = inferExpression(functionCall->child(1)->child(0), function);
 
     /* check that it is a list or a string */
-    if ((t.getKind() != TYPE_LIST) && (t.getKind() != TYPE_STRING) &&
-        (t.getKind() != TYPE_TUPLE) && (t.getKind() != TYPE_DICT)) {
+    if ((t.getKind() != TYPE_LIST) && (t.getKind() != TYPE_STRING) && (t.getKind() != TYPE_TUPLE) &&
+        (t.getKind() != TYPE_DICT)) {
         throw Error("len function must be called on string, list, tuple, or dictionary",
                     functionCall->getLine());
     }
@@ -373,21 +372,76 @@ DataType inferLen(Node* functionCall, Node* function) {
 DataType inferInput(Node* functionCall, Node* function) {
     /* make sure there are 0 or 1 parameters */
     if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() > 1) {
-        throw Error("input should not have more than one parameter",
-                functionCall->getLine());
+        throw Error("input should not have more than one parameter", functionCall->getLine());
     }
 
     /* infer the type of the argument, if any */
     if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() == 1) {
         DataType t = inferExpression(functionCall->child(1)->child(0), function);
         if (t.getKind() != TYPE_STRING) {
-            throw Error("input expects a string parameter",
-                    functionCall->getLine());
+            throw Error("input expects a string parameter", functionCall->getLine());
         }
     }
 
     /* should return an string */
-    return DataType(TYPE_STRING); 
+    return DataType(TYPE_STRING);
+}
+
+DataType inferConversion(Node* functionCall, Node* function) {
+    /* check that there is one argument */
+    if (functionCall->getNumChildren() != 2 || functionCall->child(1)->getNumChildren() != 1) {
+        throw Error("type conversion function expects one argument", functionCall->getLine());
+    }
+
+    /* infer the argument and capture its type */
+    DataType t = inferExpression(functionCall->child(1)->child(0), function);
+
+    /* do the check based on which convert it is */
+    if (functionCall->child(0)->getStringvalue() == "int") {
+        switch (t.getKind()) {
+            case TYPE_REAL:
+            case TYPE_STRING:
+            case TYPE_BOOL:
+                break;
+            default:
+                throw Error("Unexpected argument type in int conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_INT);
+
+    } else if (functionCall->child(0)->getStringvalue() == "real") {
+        switch (t.getKind()) {
+            case TYPE_INT:
+            case TYPE_STRING:
+                break;
+            default:
+                throw Error("Unexpected argument type in real conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_REAL);
+
+    } else if (functionCall->child(0)->getStringvalue() == "bool") {
+        switch (t.getKind()) {
+            case TYPE_INT:
+            case TYPE_STRING:
+                break;
+            default:
+                throw Error("Unexpected argument type in bool conversion", functionCall->getLine());
+        }
+        return DataType(TYPE_BOOL);
+
+    } else if (functionCall->child(0)->getStringvalue() == "string") {
+        switch (t.getKind()) {
+            case TYPE_REAL:
+            case TYPE_INT:
+            case TYPE_BOOL:
+                break;
+            default:
+                throw Error("Unexpected argument type in string conversion",
+                            functionCall->getLine());
+        }
+        return DataType(TYPE_STRING);
+    } else {
+        throw Error("Unhandled conversion function", functionCall->getLine());
+    }
 }
 
 /* this function checks if a function call is part of the standard library and
@@ -405,6 +459,13 @@ DataType inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
 
     if (functionCall->child(0)->getStringvalue() == "input") {
         return inferInput(functionCall, function);
+    }
+
+    if ((functionCall->child(0)->getStringvalue() == "int") ||
+        (functionCall->child(0)->getStringvalue() == "real") ||
+        (functionCall->child(0)->getStringvalue() == "string") ||
+        (functionCall->child(0)->getStringvalue() == "bool")) {
+        return inferConversion(functionCall, function);
     }
 
     is_stdlib = false;
@@ -595,7 +656,6 @@ Symbol findIdSym(Node* expr, Node* function = NULL) {
 
 /* infer the types of an expression, and also return the type */
 DataType inferExpressionPrime(Node* expr, Node* function) {
-
     /* the left hand side, right hand side, and result used below */
     DataType lhs, rhs;
 
@@ -673,7 +733,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
         case NODE_GT:
         case NODE_GTE:
             /* check that both sides have the same type
-             * TODO at some point add in int->real promotion */
+             * at some point add in int->real promotion */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
             if (lhs != rhs) {
@@ -692,7 +752,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
         case NODE_EQ:
         case NODE_NEQ:
             /* check that both sides have the same type
-             * TODO at some point add in int->real promotion */
+             * at some point add in int->real promotion */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
             if (lhs != rhs) {
@@ -793,7 +853,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
         case NODE_MODULUS:
         case NODE_EXP:
             /* check that both operands match and that they are int/real
-             * TODO at some point add in int->real promotion... */
+             * at some point add in int->real promotion... */
             lhs = inferExpression(expr->child(0), function);
             rhs = inferExpression(expr->child(1), function);
 
@@ -812,7 +872,19 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                     throw Error("Numeric type required", expr->getLine());
                 }
             }
-             
+
+            /* return the same type back */
+            return lhs;
+
+        case NODE_UMINUS:
+            /* check the argument */
+            lhs = inferExpression(expr->child(0), function);
+
+            /* only int or real */
+            if ((lhs.getKind() != TYPE_INT) && (lhs.getKind() != TYPE_REAL)) {
+                throw Error("Numeric type required for unary minus", expr->getLine());
+            }
+
             /* return the same type back */
             return lhs;
 
@@ -1022,8 +1094,8 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                     dt.subtypes->push_back(keyType);
                     dt.subtypes->push_back(valType);
                     /* if there are previous subtypes, make sure they match */
-                } else if (dt.subtypes->size() == 2 && (((*(dt.subtypes))[0] != keyType) ||
-                                                         ((*(dt.subtypes))[1] != valType))) {
+                } else if (dt.subtypes->size() == 2 &&
+                           (((*(dt.subtypes))[0] != keyType) || ((*(dt.subtypes))[1] != valType))) {
                     throw Error("Mismatched key/value types", expr->getLine());
                 }
                 /* set current node to the next one */
@@ -1059,11 +1131,9 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
 
             /* infer the the return type */
             if (expr->getNumChildren() > 1) {
-                expr->type()->subtypes->push_back(
-                    inferExpression(expr->child(1), function));
+                expr->type()->subtypes->push_back(inferExpression(expr->child(1), function));
             } else {
-                expr->type()->subtypes->push_back(
-                    inferExpression(expr->child(0), function));
+                expr->type()->subtypes->push_back(inferExpression(expr->child(0), function));
             }
 
             return *expr->type();
@@ -1124,8 +1194,9 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
             }
 
             /* return the return type of the method */
-            return *classes[*lhs.className].getMethod(
-                rhsParams, expr->child(1)->child(0)->getStringvalue())->type();
+            return *classes[*lhs.className]
+                        .getMethod(rhsParams, expr->child(1)->child(0)->getStringvalue())
+                        ->type();
         }
 
         case NODE_DECLARATION: {
@@ -1141,7 +1212,6 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
 
 /* infer an expression and assign it to the node */
 DataType inferExpression(Node* expr, Node* function) {
-
     /* do the inference */
     DataType t = inferExpressionPrime(expr, function);
 
@@ -1323,19 +1393,37 @@ void inferBlock(Node* block, Node* function) {
             Symbol idxSym = findIdSym(block->child(0));
 
             /* if it does, make sure it is the right type */
-            if (idxSym.getName() != "" && (*(idxSym.getType())) != (*(expr_type.subtypes))[0]) {
-                throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
-                                "' is incompatible with container elements.",
-                            block->getLine());
+            if (idxSym.getName() != "") {
+                /* if it's a string, the symbol must be too */
+                if (expr_type.getKind() == TYPE_STRING) {
+                    if (idxSym.getType()->getKind() != TYPE_STRING) {
+                        throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
+                                        "' is incompatible with container elements.",
+                                    block->getLine());
+                    }
+                } else {
+                    /* otherwise, the subtype should match the symbol type */
+                    if ((*(idxSym.getType())) != (*(expr_type.subtypes))[0]) {
+                        throw Error("Type of index variable '" + block->child(0)->getStringvalue() +
+                                        "' is incompatible with container elements.",
+                                    block->getLine());
+                    }
+                }
 
                 /* otherwise, if it doesn't exist, add it */
             } else if (idxSym.getName() == "") {
-                function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
-                                              &(*(expr_type.subtypes))[0], block->getLine()));
+                if (expr_type.getKind() == TYPE_STRING) {
+                    /* make it a string */
+                    function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
+                                                  DataType(TYPE_STRING), block->getLine()));
+                    block->child(0)->setDataType(DataType(TYPE_STRING));
+                } else {
+                    /* make it whatever the subtype is */
+                    function->insertSymbol(Symbol(block->child(0)->getStringvalue(),
+                                                  &(*(expr_type.subtypes))[0], block->getLine()));
+                    block->child(0)->setDataType((*(expr_type.subtypes))[0]);
+                }
             }
-
-            /* set the type of the node too */
-            block->child(0)->setDataType((*(expr_type.subtypes))[0]);
 
             /* check the block under this */
             inferBlock(block->child(2), function);
@@ -1469,7 +1557,7 @@ void inferGlobals(Node* node) {
 
 /* add stl functions to the list of globals */
 void addStls() {
-    String stls[] = {"len", "read_string", "read_int", "read_real", "read_bool", "print"};
+    String stls[] = {"len", "input", "int", "string", "bool", "real", "print"};
 
     for (unsigned long i = 0; i < sizeof(stls) / sizeof(stls[0]); i++) {
         /* add them to the globals */

@@ -7,6 +7,7 @@
 #include "bool.h"
 #include "context.h"
 #include "data.h"
+#include "dict.h"
 #include "error.h"
 #include "environment.h"
 #include "eval.h"
@@ -28,5 +29,6 @@
 #include "types.h"
 #include "values.h"
 #include "vartable.h"
+#include "worker.h"
 
 #endif

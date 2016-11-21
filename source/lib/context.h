@@ -5,7 +5,6 @@
 #ifndef CONTEXT_H
 #define CONTEXT_H
 
-#include <QMutex>
 #include <cassert>
 #include <stack>
 
@@ -21,7 +20,6 @@ class Context {
     /* note that this constructor starts with a GLOBAL scope. One must be */
     /* initialized through initializeNewScope to have it represent local data */
     Context();
-    Context(long);
 
     /*	Context(const Context&); */
 
@@ -90,18 +88,8 @@ class Context {
         programStack.top().setExecutionStatus(NORMAL);
     }
 
-    /* declares  variable that can have different values across different threads */
-    std::list<std::pair<QThread*, Data> >& declareThreadSpecificVariable(const String&);
-
     /* performs a deep copy of the current context */
     Context& operator=(const Context&);
-
-    /* methods dealing with parallelism at a contextual level */
-    void addThread(QThread*);
-    void setupParallel();
-    void endParallel();
-
-    long getThreadID();
 
     /* for use when debugging */
     int getLastLineNum();
@@ -128,9 +116,6 @@ class Context {
     bool getResume() {
         return resume;
     }
-    ThreadStatus getRunStatus() {
-        return runStatus;
-    }
     bool isParallelForVariable(String);
 
     void setLastLineNo(int pLast) {
@@ -144,9 +129,6 @@ class Context {
     }
     void setResume(bool pResume) {
         resume = pResume;
-    }
-    void setRunStatus(ThreadStatus pStatus) {
-        runStatus = pStatus;
     }
     void registerParallelForVariable(String);
 
@@ -169,7 +151,6 @@ class Context {
     std::stack<Scope> programStack;
     Scope* globalScope;
 
-    long threadID;
     int lastLineNo;
     bool stepping;
     bool stopAtNext;
@@ -181,9 +162,6 @@ class Context {
 
     std::map<String, int>* globalReferenceTable;
 
-    ThreadStatus runStatus;
-
-    QMutex parallelList_mutex;
     std::vector<String>* parForVars;
 };
 
