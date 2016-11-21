@@ -4,26 +4,11 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include "values.h"
 #include "container.h"
-#include "error.h"
 
 /* the List class */
 class List : public Container {
    public:
-
-    void copyValue(const Value& other) {
-        /* clear our data first */
-        values.clear();
-
-        /* cast it to a list */
-        List* otherList = (List*) &other;
-
-        /* copy each element */
-        for (unsigned i = 0; i < otherList->values.size(); i++) {
-            values.push_back(otherList->values[i]);
-        }
-    }
 
     /* concatenate two lists */
     List operator+(const List& other) {
@@ -42,33 +27,24 @@ class List : public Container {
         return result;
     }
 
-    /* set an element of the array at a given index */
-    Data*& get(unsigned int index) {
-        if (index > values.size()) {
+    /* get an element of the array at a given index */
+    Data*& get(Data* index) {
+        unsigned i = ((Int*) index->getValue())->toInt();
+        if (i > values.size()) {
             throw RuntimeError("List index out of bounds.", 0);
         } else {
-            return values[index];
+            return values[i];
         }
     }
 
     /* get an element at a index */
-    Data* get(unsigned int index) const {
-        if (index > values.size()) {
+    Data* get(Data* index) const {
+        unsigned i = ((Int*) index->getValue())->toInt();
+        if (i > values.size()) {
             throw RuntimeError("List index out of bounds.", 0);
         } else {
-            return values[index];
+            return values[i];
         }
-    }
-
-    /* append an element to the list */
-    void append(Data* element) {
-        Data* valPtr = Data::create(element->getType(), element->getValue());
-        values.push_back(valPtr);
-    }
-
-    /* get the length of the list */
-    int length() const {
-        return values.size();
     }
 
    protected:

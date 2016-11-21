@@ -6,7 +6,6 @@
 #define TUPLE_H
 
 #include "list.h"
-#include "error.h"
 
 /* the List class */
 class Tuple : public List {

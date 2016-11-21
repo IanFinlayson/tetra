@@ -4,83 +4,66 @@
 #ifndef DICT_H
 #define DICT_H
 
-#include "values.h"
-#include "error.h"
+#include "container.h"
+#include "pair.h"
 
 class Data;
 
 /* the Dict class */
-class Dict : public Value {
+class Dict : public Container {
    public:
-    String toString() const;
 
-    void copyValue(const Value& other) {
-        /* clear our data first */
-        values.clear();
-
-        /* cast it to a dict */
-        Dict* otherDict = (Dict*) &other;
-
-        /* copy each element */
-        values.insert(otherDict->values.begin(),otherDict->values.end());
+    Data* operator[](unsigned i) const{
+        return ((Pair*)(Container::operator[](i)->getValue()))->getKey();
     }
 
     /* get the value from the dict mapped to by the given key */
     Data*& get(Data* key) {
           String keyString = key->getValue()->toString();
-        if (!values.count(keyString)) {
+        if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return values.at(keyString)[1];
+            return ((Pair*)(((*this)[idxMap.at(keyString)])->getValue()))->getVal();
         }
     }
 
     /* get the value from the dict mapped to by the given key */
     Data* get(Data* key) const {
           String keyString = key->getValue()->toString();
-        if (!values.count(keyString)) {
+        if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return values.at(keyString)[1];
+            return ((Pair*)(((*this)[idxMap.at(keyString)])->getValue()))->getVal();
         }
     }
 
     /* return true if the dictionary contains the given key */
     bool hasKey(const Data* key) const {
         String keyString = key->getValue()->toString();
-        return values.count(keyString);
+        return idxMap.count(keyString);
     }
 
-    /* add a key value pair to the dict
-     * If no value is given, the key is mapped to 
-     * a placeholder.*/
-    void put(Data* key, Data* value = NULL) {
-        String keyString = key->getValue()->toString();
-        std::vector<Data*> vec;
-        Data* keyPtr = Data::create(key->getType(), key->getValue());
-        Data* valPtr; 
-        if (!value) {
-            valPtr = Data::create(key->getType(), key->getValue());
-        } else {
-            valPtr = Data::create(value->getType(), value->getValue());
-        }
-        vec.push_back(keyPtr);
-        vec.push_back(valPtr);
-        values[keyString] = vec;
+    void add(Data* element) {
+        /* add to the val list*/
+        Container::add(element);
+        /*make the index mapping*/
+        idxMap.emplace(((Pair*)(element->getValue()))->getVal()->getValue()->toString(), length() - 1); 
+    }    
+
+   protected:
+    String getLDelim () const {
+        return L_DELIM;
     }
 
-      /* get the length of the dict */
-    int length() const {
-        return values.size();
-    }
-
-    /* return a pointer to the map */
-    std::map<String, std::vector<Data*> >* getValues() { 
-        return &values; 
+    String getRDelim () const {
+        return R_DELIM;
     }
 
    private:
-    std::map<String, std::vector<Data*> > values;
+    static const String L_DELIM;
+    static const String R_DELIM;
+    /* maps key to array index */
+    std::map<String, unsigned> idxMap;
 };
 
 #endif
