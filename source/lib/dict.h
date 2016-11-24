@@ -56,6 +56,7 @@ class Dict : public Container {
 
     String getRDelim () const {
         return R_DELIM;
+    }
    private:
     static const String L_DELIM;
     static const String R_DELIM;

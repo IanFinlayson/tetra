@@ -455,25 +455,23 @@ Data* Data::opNegate() {
 }
 
 Data* Data::opIndex(Data* other, bool isLValue) {
-<<<<<<< HEAD
-    /* TODO add strings as well */
-    if (type.getKind() == TYPE_DICT 
-        && isLValue 
-        && !(((Dict*) value)->hasKey(other))) {
-
-        Pair p;
-        p.set(other, Data::create(other->getType(), other->getValue()));
-        ((Dict*)value)->add(Data::create(other->getType(),&p));
-                ((Dict*) value)->put(other);
-            }
-            return ((Dict*) value)->get(other);
+    switch (type.getKind()) {
+        case TYPE_DICT:  
+            if (isLValue && !(((Dict*) value)->hasKey(other))) {
+                Pair p;
+                p.set(other, Data::create(other->getType(), other->getValue()));
+                ((Dict*)value)->add(Data::create(other->getType(),&p));
+             }
+        case TYPE_LIST:
+            return ((Container*)value)->get(other);
         case TYPE_STRING: {
             int index = ((Int*) other->value)->toInt();
             String letter = ((String*) value)->substring(index, 1);
             return Data::create(&type, &letter);
         }
+        default:
+            throw RuntimeError("Unhandled operands to + operator", 0);
     }
-    return ((Container*)value)->get(other);
 }
 
 /* create a Data of a given type */

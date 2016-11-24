@@ -38,8 +38,8 @@ class Container : public Value {
 
     /* add an element */
     void add(Data* element) {
-        Data* valPtr = Data::create(element->getType(), element->getValue());
-        values.push_back(valPtr);
+        //Data* valPtr = Data::create(element->getType(), element->getValue());
+        values.push_back(element);
     }
 
     /* tetra program element access */ 
