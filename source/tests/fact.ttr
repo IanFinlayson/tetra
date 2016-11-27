@@ -1,0 +1,14 @@
+# a simple factorial function
+def fact(x int) int:
+    # if x is zero, then 1
+    if x == 0:
+        return 1
+    else:
+        return x * fact(x - 1)
+
+def main( ):
+    print("Enter n: ")
+    n = 5
+    print(n, "! = ", fact(n))
+
+

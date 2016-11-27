@@ -1,0 +1,20 @@
+def main():
+  m = {"frank":6}
+  print("set m = {'frank':6} and m = ")
+  print(m)
+  print("\n")
+  n = {"harry":7}
+  print("set n = {'harry':7} and n = ")
+  print(n)
+  print("\n")
+  o = {m:n}
+  print("set o = {m:n} and o = ")
+  print(o)
+  print("\n")
+  m["frank"] = 2
+  print("set m['frank'] = 2 and m = ")
+  print(m)
+  print("\n")
+  print("now o = ")
+  print(o)
+  print("\n")

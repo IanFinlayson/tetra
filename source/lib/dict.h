@@ -22,7 +22,7 @@ class Dict : public Container {
         if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return ((Pair*)(((*this)[idxMap.at(keyString)])->getValue()))->getVal();
+            return ((Pair*)(values[idxMap.at(keyString)])->getValue())->getVal();
         }
     }
 
@@ -32,13 +32,14 @@ class Dict : public Container {
         if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return ((Pair*)(((*this)[idxMap.at(keyString)])->getValue()))->getVal();
+            return ((Pair*)(values[idxMap.at(keyString)])->getValue())->getVal();
         }
     }
 
     /* return true if the dictionary contains the given key */
     bool hasKey(const Data* key) const {
         String keyString = key->getValue()->toString();
+        std::cout << "keystring = '" << keyString << "' and count = " << idxMap.count(keyString) << std::endl;
         return idxMap.count(keyString);
     }
 
@@ -46,7 +47,11 @@ class Dict : public Container {
         /* add to the val list*/
         Container::add(element);
         /*make the index mapping*/
-        idxMap.emplace(((Pair*)(element->getValue()))->getVal()->getValue()->toString(), length() - 1); 
+        String keyString = ((Pair*)(element->getValue()))->getKey()->getValue()->toString();
+        try {
+        idxMap[keyString] =  (length() - 1); 
+        std::cout<<"added '" << keyString << "' and idxMap.count(keyString) = " << idxMap.count(keyString) << std::endl;
+        } catch (const std::exception& e) {std::cout << "exception = " << e.what()<< std::endl;}
     }    
 
    protected:

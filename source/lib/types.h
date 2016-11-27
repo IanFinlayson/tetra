@@ -28,7 +28,8 @@ enum DataTypeKind {
     TYPE_CLASS,
     TYPE_MUTEX,
     TYPE_TASK,
-    TYPE_OVERLOAD
+    TYPE_OVERLOAD,
+    TYPE_PAIR
 };
 
 /* a data type contains the above enum, along with a pointer to the "sub" type */
@@ -47,6 +48,8 @@ class DataType {
    private:
     DataTypeKind kind;
 };
+
+static DataType* PAIR_TYPE = new DataType(TYPE_PAIR);
 
 /* operators for comparing types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs);

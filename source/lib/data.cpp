@@ -458,9 +458,10 @@ Data* Data::opIndex(Data* other, bool isLValue) {
     switch (type.getKind()) {
         case TYPE_DICT:  
             if (isLValue && !(((Dict*) value)->hasKey(other))) {
+                std::cout << "isLval = " << isLValue << std::endl;
                 Pair p;
-                p.set(other, Data::create(other->getType(), other->getValue()));
-                ((Dict*)value)->add(Data::create(other->getType(),&p));
+                p.set(other, Data::create(&((*(type.subtypes))[1]), nullptr));
+                ((Dict*)value)->add(Data::create(PAIR_TYPE,&p));
              }
         case TYPE_LIST:
             return ((Container*)value)->get(other);
@@ -504,6 +505,9 @@ Data* Data::create(DataType* type, const Value* value) {
             break;
         case TYPE_DICT:
             newData->value = new Dict();
+            break;
+        case TYPE_PAIR:
+            newData->value = new Pair();
             break;
         default:
             throw RuntimeError("Unhandled data type in Data::create", 0);

@@ -13,6 +13,8 @@
 
 #include "tetra.h"
 
+extern DataType* PAIR_TYPE;
+
 /* this function populates a scope object with the variables contained in a
  * portion of the subtree containing the actual parameter expressions which are
  * passed in */
@@ -143,7 +145,7 @@ void fillDict(Dict* dict, Node* node, Context* context) {
     Pair p;
     p.set(firstKey, firstVal);
     /* wrap this pair in a tdata */
-    Data* elem = Data::create(node->type(), &p);
+    Data* elem = Data::create(PAIR_TYPE, &p);
     dict->add(elem);
 
     /* recursively add the rest of the dict if there is one */
