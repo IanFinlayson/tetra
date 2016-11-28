@@ -3,6 +3,10 @@ def main():
   print("set bob = 5 and bob = ")
   print(bob)
   print("\n")
+  notbob = 7
+  print("set notbob = 7 and notbob = ")
+  print(notbob)
+  print("\n")
   l = {"bob":bob}
   print("set l = {'bob':bob} and l = ")
   print(l)
@@ -13,6 +17,24 @@ def main():
   print("\n")
   print("now bob = ")
   print(bob)
+  print("\n")
+  l["notbob"] = notbob
+  print("set l['notbob'] = notbob and l = ")
+  print(l)
+  print("\n")
+  l["notbob"] = 3
+  print("set l['notbob'] = 3 and l = ")
+  print(l)
+  print("\n")
+  print("now notbob = ")
+  print(notbob)
+  print("\n")
+  notbob = 8
+  print("set notbob = 8 and notbob = ")
+  print(notbob)
+  print("\n")
+  print("now l = ")
+  print(l)
   print("\n")
 
   m = {"frank":6}

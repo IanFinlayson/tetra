@@ -141,9 +141,13 @@ void fillDict(Dict* dict, Node* node, Context* context) {
     Data* firstKey = evaluateExpression(node->child(0), context);
     Data* firstVal = evaluateExpression(node->child(1), context);
 
+    /*copy */
+    Data* keyCopy = Data::create(firstKey->getType(), firstKey->getValue());
+    Data* valCopy = Data::create(firstVal->getType(), firstVal->getValue());
+
     /* add it to the list */
     Pair p;
-    p.set(firstKey, firstVal);
+    p.set(keyCopy, valCopy);
     /* wrap this pair in a tdata */
     Data* elem = Data::create(PAIR_TYPE, &p);
     dict->add(elem);
