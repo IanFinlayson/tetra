@@ -458,7 +458,6 @@ Data* Data::opIndex(Data* other, bool isLValue) {
     switch (type.getKind()) {
         case TYPE_DICT:  
             if (isLValue && !(((Dict*) value)->hasKey(other))) {
-                std::cout << "isLval = " << isLValue << std::endl;
                 Pair p;
                 p.set(other, Data::create(&((*(type.subtypes))[1]), nullptr));
                 ((Dict*)value)->add(Data::create(PAIR_TYPE,&p));

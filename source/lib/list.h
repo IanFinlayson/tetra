@@ -26,6 +26,13 @@ class List : public Container {
         return result;
     }
 
+
+    /* add an element */
+    void add(Data* element) {
+        //Data* valPtr = Data::create(element->getType(), element->getValue());
+        values.push_back(element);
+    }
+
     /* get an element of the array at a given index */
     Data*& get(Data* index) {
         unsigned i = ((Int*) index->getValue())->toInt();

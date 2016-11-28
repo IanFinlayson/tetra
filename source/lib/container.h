@@ -36,11 +36,7 @@ class Container : public Value {
         }
     }
 
-    /* add an element */
-    void add(Data* element) {
-        //Data* valPtr = Data::create(element->getType(), element->getValue());
-        values.push_back(element);
-    }
+    virtual void add(Data* element) = 0; 
 
     /* tetra program element access */ 
     virtual Data*& get(Data* idx) = 0;

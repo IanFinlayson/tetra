@@ -39,20 +39,16 @@ class Dict : public Container {
     /* return true if the dictionary contains the given key */
     bool hasKey(const Data* key) const {
         String keyString = key->getValue()->toString();
-        std::cout << "keystring = '" << keyString << "' and count = " << idxMap.count(keyString) << std::endl;
         return idxMap.count(keyString);
     }
 
     void add(Data* element) {
         /* add to the val list*/
-        Container::add(element);
+        values.push_back(element);
         /*make the index mapping*/
         String keyString = ((Pair*)(element->getValue()))->getKey()->getValue()->toString();
-        try {
         idxMap[keyString] =  (length() - 1); 
-        std::cout<<"added '" << keyString << "' and idxMap.count(keyString) = " << idxMap.count(keyString) << std::endl;
-        } catch (const std::exception& e) {std::cout << "exception = " << e.what()<< std::endl;}
-    }    
+    }
 
    protected:
     String getLDelim () const {
