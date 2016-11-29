@@ -1,0 +1,30 @@
+def main():
+  l = [1...10]
+  m = [1,1,2,3,5,8,13,21,34]
+  d = {1:"one", 2:"two", 3: "three", 4: "four", 5: "five"}
+
+
+  for num in l:
+    print("num = ")
+    print(num)
+    print("\n")
+
+  print("\n")
+  for fibnum in m:
+    print("fibnum = ")
+    print(fibnum)
+    print("\n")
+    print("fibnum^2 = ")
+    print(fibnum*fibnum)
+    print("\n")
+
+  print("\n")
+  for key in d:
+    print("key = ")
+    print(key)
+    print("\n")
+    print("val = ")
+    print(d[key])
+    print("\n")
+
+    

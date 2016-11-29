@@ -26,6 +26,10 @@ class List : public Container {
         return result;
     }
 
+    /* for loop iteration through elems*/
+    Data* operator[](unsigned i) const{
+        return values[i];
+    }
 
     /* add an element */
     void add(Data* element) {

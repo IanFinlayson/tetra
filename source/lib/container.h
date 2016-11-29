@@ -14,9 +14,7 @@ class Container : public Value {
     String toString() const;
 
     /* for loop iteration through elems*/
-    Data* operator[](unsigned i) const{
-        return values[i];
-    }
+    virtual Data* operator[](unsigned i) const = 0;
 
     /* get the length of the container */
     unsigned length() const {

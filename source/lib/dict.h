@@ -13,7 +13,7 @@ class Data;
 class Dict : public Container {
    public:
     Data* operator[](unsigned i) const{
-        return ((Pair*)(Container::operator[](i)->getValue()))->getKey();
+        return ((Pair*)(values[i]->getValue()))->getKey();
     }
 
     /* get the value from the dict mapped to by the given key */
