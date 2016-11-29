@@ -127,7 +127,7 @@ void fillList(List* list, Node* node, Context* context) {
     Data* first = evaluateExpression(node->child(0), context);
 
     /* add it to the list */
-    list->add(first);
+    list->add(Data::create(first->getType(), first->getValue()));
 
     /* recursively add the rest of the list if there is one */
     if (node->getNumChildren() == 2) {
