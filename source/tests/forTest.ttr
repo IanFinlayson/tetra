@@ -15,7 +15,7 @@ def main():
     print(fibnum)
     print("\n")
     print("fibnum^2 = ")
-    print(fibnum*fibnum)
+    print(fibnum**2)
     print("\n")
 
   print("\n")

@@ -137,9 +137,11 @@ Data* Data::opExp(const Data* other) {
     /* do different things depending on type what happens with real**int etc. */
     switch (type.getKind()) {
         case TYPE_INT:
-            result->value->copyValue(*((Int*) value) % *((Int*) other->value));
+            result->value->copyValue(((Int*) value)->pow(*((Int*) other->value)));
+            break;
         case TYPE_REAL:
             result->value->copyValue(((Real*) value)->pow(*((Real*) other->value)));
+            break;
         default:
             throw RuntimeError("Unhandled operands to ** operator", 0);
     }
