@@ -12,6 +12,7 @@
 #include "environment.h"
 #include "eval.h"
 #include "int.h"
+#include "function.h"
 #include "lexer.h"
 #include "list.h"
 #include "dict.h"

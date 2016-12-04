@@ -144,3 +144,7 @@ String Container::toString() const {
     result += getRDelim();
     return result;
 }
+
+String Function::toString() const {
+    return "<function " + getName() + " at " + getAddress() + ">";
+}

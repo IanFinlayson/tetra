@@ -16,6 +16,7 @@
 #include "list.h"
 #include "dict.h"
 #include "tuple.h"
+#include "function.h"
 
 Data* Data::opAssign(const Data* other) {
     /* copy our data type and also value */
@@ -509,6 +510,9 @@ Data* Data::create(DataType* type, const Value* value) {
             break;
         case TYPE_PAIR:
             newData->value = new Pair();
+            break;
+        case TYPE_FUNCTION:
+            newData->value = new Function();
             break;
         default:
             throw RuntimeError("Unhandled data type in Data::create", 0);

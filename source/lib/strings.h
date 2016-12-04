@@ -21,6 +21,10 @@ class String : public Value {
         str = QString(s);
     }
 
+    String(const void* address) {
+        str.sprintf("%lX12",(unsigned long)address);
+    }
+
     String(const Int& value);
 
     String(const Real& value);

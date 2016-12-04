@@ -137,7 +137,7 @@ void fillList(List* list, Node* node, Context* context) {
 
 /* fill a dict from the children nodes of a dict value node */
 void fillDict(Dict* dict, Node* node, Context* context) {
-    /* evaluate the first item */
+    /* evaluate the first pair */
     Data* firstKey = evaluateExpression(node->child(0), context);
     Data* firstVal = evaluateExpression(node->child(1), context);
 
@@ -145,7 +145,7 @@ void fillDict(Dict* dict, Node* node, Context* context) {
     Data* keyCopy = Data::create(firstKey->getType(), firstKey->getValue());
     Data* valCopy = Data::create(firstVal->getType(), firstVal->getValue());
 
-    /* add it to the list */
+    /* add both to a pair */
     Pair p;
     p.set(keyCopy, valCopy);
     /* wrap this pair in a tdata */
