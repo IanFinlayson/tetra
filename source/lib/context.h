@@ -10,6 +10,9 @@
 
 #include "values.h"
 #include "scope.h"
+#include "symbol.h"
+#include "function.h"
+#include "data.h"
 
 class Node;
 
@@ -31,8 +34,14 @@ class Context {
     Data* lookupVar(String name, DataType* type) {
         if (getGlobalScopeRef().containsVar(name)) {
             return (getGlobalScopeRef().lookupVar(name, type));
-        } else {
+        } else if (type->getKind() != TYPE_FUNCTION) {
             return programStack.top().lookupVar(name, type);
+        } else {
+            String signature 
+                = FunctionMap::getFunctionSignature(name,type);
+            Node* funcNode =  functions.getFunctionNode(signature);
+            Function funcVal(funcNode);
+            return Data::create(type, &funcVal);
         }
     }
 

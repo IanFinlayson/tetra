@@ -56,6 +56,7 @@ class FunctionMap {
     /* Generates a unique function signature based on the name AND the arguments
     */
     static String getFunctionSignature(const Node* node);
+    static String getFunctionSignature(const String name, const DataType* type);
 
     /* Fills the function map given the specified base node */
     void build(Node* tree);
