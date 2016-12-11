@@ -3,3 +3,4 @@ def f():
 def main():
   l = [f]
   print(l)
+#  f()

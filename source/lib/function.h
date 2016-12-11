@@ -31,6 +31,10 @@ class Function : public Value {
     String getAddress() const {
         return String(Int((unsigned long)f));
     }
+     
+    Node* getNode() const {
+        return f;
+    }
 
    private:
     Node* f;

@@ -74,7 +74,10 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
     /* regular user defined functions */
     else {
         /* it's user defined, find it in the tree */
-        Node* funcNode = functions.getFunctionNode(node);
+        /*TODO look other places.*/
+        std::cout << typeToString(node->type())<< std::endl;
+        Data* func= context->lookupVar(node->getStringvalue(), node->type());
+        Node* funcNode = ((Function*)func->getValue())->getNode();
 
         /* check if there are parameters to be passed, and do so if needed */
         if (node->child(1) != NULL) {

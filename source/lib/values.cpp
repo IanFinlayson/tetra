@@ -146,5 +146,5 @@ String Container::toString() const {
 }
 
 String Function::toString() const {
-    return "<function " + getName() + " at " + getAddress() + ">";
+    return "<" + getName() + typeToString(getNode()->type()) + " at " + getAddress() + ">";
 }
