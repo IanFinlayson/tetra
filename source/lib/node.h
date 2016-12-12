@@ -163,6 +163,10 @@ class Node {
     /* pointer to parent node */
     Node* parent;
 
+    /* pointer from funcall to corresponding function implementation 
+     * set at time of typechecking for easy reference during execution */
+    Node* functionImplNode;
+
     /* the values which can be present in some nodes */
     String stringValue;
     Int intValue;

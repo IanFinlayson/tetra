@@ -62,7 +62,7 @@ String typeToString(DataType t) {
         case TYPE_CLASS:
             return *(t.className);
         case TYPE_FUNCTION: {
-            return typeToString(&((*(t.subtypes))[0])) + "->" + typeToString(&((*(t.subtypes))[0]));
+            return typeToString(&((*(t.subtypes))[0])) + "->" + typeToString(&((*(t.subtypes))[1]));
         }
         case TYPE_OVERLOAD:
             return "overload";

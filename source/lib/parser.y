@@ -983,7 +983,7 @@ lvalue: expterm index {
     $$->setLine($2);
 } | identifier {
     $$ = $1;
-} 
+}  
 /* a list literal */
 list_value: TOK_LEFTBRACKET TOK_RIGHTBRACKET {
     /* an empty list definition */
@@ -1082,12 +1082,14 @@ functionCall: funcname TOK_LEFTPARENS TOK_RIGHTPARENS {
     $$->addChild($1);
     $$->addChild($3);
     $$->setLine($2);
-  }
+}
 
 /* a functiona name is either a plain id or a basic types
    these can be called for type conversions a la Python */
-funcname: identifier {
-        $$ = $1;
+funcname: lvalue {
+    $$ = $1;
+} | functionCall {
+    $$ = $1;
 } | TOK_INT {
     /* make an id node for this */
     $$ = new Node(NODE_IDENTIFIER);

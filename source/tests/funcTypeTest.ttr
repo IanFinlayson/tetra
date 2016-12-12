@@ -1,6 +1,19 @@
 def f():
   print("hi\n")
+def g(x int, y string):
+  print("hi")
+  print(x)
+  print(y)
+  print("\n")
+def h() (int, string)->none:
+  return g
 def main():
   l = [f]
   print(l)
-#  f()
+  print("\n")
+  l[0]()
+  m = [l]
+  m[0][0]()
+  n = [h()]
+  n[0](5, "h")
+  h()(5,"i")

@@ -17,12 +17,13 @@ class String : public Value {
     String() {
         str = QString("");
     }
+
     String(const char* s) {
         str = QString(s);
     }
 
     String(const void* address) {
-        str.sprintf("%lX12",(unsigned long)address);
+        str.sprintf("%lX",(unsigned long)address);
     }
 
     String(const Int& value);
