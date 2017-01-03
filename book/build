@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# compile the code highlighter
+flex texify.lex || exit 1
+gcc lex.yy.c -o texify || exit 1
+
+# apply it to all tetra code files
+for ttr in $(ls chapter*/*.ttr)
+do
+    ./texify $ttr < $ttr > $ttr.tex
+done
+
+# run pdflatex
+pdflatex --interaction=batchmode ttpl.tex
+pdflatex --interaction=batchmode ttpl.tex
+pdflatex --interaction=batchmode ttpl.tex
+
+# run bibtex and pdflatex twice more
+#bibtex ttpl
+#pdflatex --interaction=batchmode ttpl.tex
+#pdflatex --interaction=batchmode ttpl.tex
+#pdflatex --interaction=batchmode ttpl.tex
+
+# clean up extra files
+rm -f lex.yy.c texify ttpl.aux ttpl.lof ttpl.log ttpl.out ttpl.blg ttpl.bbl ttpl.ps ttpl.toc ttpl.dvi ttpl.nav ttpl.snm ttpl.vrb chapter*/*.ttr.tex 
+

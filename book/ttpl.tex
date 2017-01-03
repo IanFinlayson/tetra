@@ -1,0 +1,150 @@
+% main.tex
+% this file contains the main typesetting information for the
+% tetra text book.  it also contains front and back matter
+% toc, etc. but pulls the chapters from individual files
+
+\documentclass[14pt,twoside,openany]{memoir}
+\usepackage{hyperref}
+\usepackage{wallpaper}
+\usepackage{tabularx}
+\usepackage{textcomp}
+\usepackage{graphicx}
+\usepackage[labelformat=empty]{caption}
+\usepackage{geometry}
+\usepackage{color}
+\usepackage{tcolorbox}
+
+% define all the important meta information
+\title{The Tetra Programming Language}
+\author{Ian Finlayson, Ph.D. \\ Department of Computer Science \\ The University of Mary Washington}
+\date{\today}
+\newcommand{\tpledition}{1\textsuperscript{st} Edition}
+
+% fonts
+\usepackage[T1]{fontenc}
+\usepackage[bitstream-charter]{mathdesign}
+\usepackage{FiraSans}
+\usepackage{FiraMono}
+
+% source code colors
+\definecolor{keywordcolor}{RGB}{0, 64, 136}
+\definecolor{typecolor}{RGB}{178, 140, 16}
+\definecolor{builtincolor}{RGB}{115, 55, 140}
+\definecolor{commentcolor}{RGB}{26, 93, 17}
+\definecolor{valuecolor}{RGB}{170, 0, 0}
+\definecolor{codebgcolor}{RGB}{245, 245, 245}
+\definecolor{codeframecolor}{RGB}{70, 70, 70}
+
+\tcbset{
+    colback=codebgcolor,
+    colframe=codeframecolor,
+    fonttitle=\bfseries\ttfamily
+}
+
+
+% set my custom chapter style (based on "ger")
+\chapterstyle{default}
+\renewcommand*{\chapnumfont}{\normalfont\HUGE\bfseries\sffamily}
+\renewcommand*{\chaptitlefont}{\normalfont\HUGE\bfseries\sffamily}
+\renewcommand{\printchaptername}{\normalfont\HUGE\bfseries\sffamily Chapter} 
+\renewcommand*{\chapterheadstart}{
+\mbox{}\\\mbox{}\rule[0pt]{\textwidth}{1.4pt}\par}
+\setlength{\midchapskip}{20pt}
+\renewcommand*{\printchaptertitle}[1]{\chaptitlefont #1
+\\\mbox{}\rule[5pt]{\textwidth}{1.4pt}}
+
+% set up the page geometry, normal 8.5 by 11 with margins
+\geometry{
+  body={6.5in, 8.5in},
+  left=1.0in,
+  top=1.25in
+}
+
+% get rid of the garish link colors
+\hypersetup {
+    colorlinks = false,
+    hidelinks = true
+}
+
+% set the memoir page style
+\pagestyle{plain}
+
+% title page stuff
+\makeatletter
+\def\maketitle{%
+  \null
+  \ThisCenterWallPaper{1.75}{skyway.jpg}
+  \thispagestyle{empty}%
+  \vfill
+  {\color{white} \begin{center}\leavevmode
+    \normalfont
+      {\raggedright {\fontsize{44pt}{44pt}\selectfont \sffamily \textbf{\@title}\par}%
+       \vskip 12pt
+       {\Huge \sffamily \textbf{\tpledition}\par}}%
+    \vskip 4in
+      {\raggedleft \Huge \sffamily \textbf{\@author}\par}%
+  \end{center}}%
+  \vfill
+  \null
+  \cleardoublepage
+  }
+\makeatother
+
+% begin the main document
+\begin{document}
+
+% don't put in silly blank pages
+\let\cleardoublepage\clearpage
+
+% plop in the title page, defined above
+\maketitle
+
+% do all the front matter junk
+\frontmatter
+
+% copyright etc.
+{
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{12pt}
+
+    % put all the stuff at the bottom of the page
+    \null
+    \vfill
+
+    \textcopyright \the\year\ by Ian Finlayson
+
+    \href{https://creativecommons.org/licenses/by-sa/4.0/}{\includegraphics{cc}}
+
+    This work is licensed under a
+    \href{https://creativecommons.org/licenses/by-sa/4.0/}{Creative Commons
+    Attribution-ShareAlike 4.0 International License}.  Electronic versions
+    of this book may be found freely online at \url{http://tetra-lang.org/book}.
+
+    Should you have any questions, suggestions or questions regarding this text,
+    please feel free to email the author at \href{mailto:finlayson@umw.edu}{\texttt{finlayson@umw.edu}}
+
+    The cover image is a photograph of the Sunshine Skyway Bridge which spans
+    the Tampa Bay in Florida.  The image is attributed to Taildragon at \\
+    \url{http://en.wikipedia.org}
+}
+\pagebreak
+
+% make the table of contents
+\tableofcontents
+
+% and now put in the actual chapters
+\mainmatter
+
+\input{chapter1/chapter1.tex}
+\input{chapter2/chapter2.tex}
+\input{chapter3/chapter3.tex}
+\input{chapter4/chapter4.tex}
+\input{chapter5/chapter5.tex}
+\input{chapter6/chapter6.tex}
+\input{chapter7/chapter7.tex}
+\input{chapter8/chapter8.tex}
+\input{chapter9/chapter9.tex}
+\input{chapter10/chapter10.tex}
+
+\end{document}
+
