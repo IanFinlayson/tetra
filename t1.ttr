@@ -1,0 +1,14 @@
+def loop() int:
+    i = 0
+    while i < 100:
+        i = i + 1
+    return i
+
+
+# sum an array of numbers in parallel
+def main():
+    parallel:
+        a = loop()
+        b = loop()
+    print(a + b)
+
