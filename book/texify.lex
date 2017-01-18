@@ -79,11 +79,9 @@ void wrap_color(char* text, char* color) {
 int main(int argc, char** argv) {
     /* preamble */
     char* title = strstr(argv[1], "/") + 1;
-    printf("\\vspace*{-24pt}\n");
+    //printf("\\vspace*{-24pt}\n");
     printf("\\begin{figure}[h]\n");
-    printf("\\caption{}\n");
-    printf("\\label{\\codelabel{}}\n");
-    printf("\\begin{tcolorbox}[title=Listing \\ref{\\codelabel{}} %s]\n", title);
+    printf("\\begin{tcolorbox}\n");
     printf("{\\ttfamily\n");
     printf("\\setlength{\\parindent}{0pt}\\setlength{\\parskip}{0pt}\n");
 
@@ -91,8 +89,11 @@ int main(int argc, char** argv) {
     while (yylex());
 
     /* postamble */
+    printf("\\vspace{-12pt}\n");
     printf("}\n");
     printf("\\end{tcolorbox}\n");
+    printf("\\caption{%s}\n", title);
+    printf("\\label{\\codelabel{}}\n");
     printf("\\end{figure}\n");
     return 0;
 }
