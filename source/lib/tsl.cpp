@@ -49,6 +49,20 @@ Data* tslInput(Node* args, Context* context) {
     /* read the string from the user */
     String ret = Environment::getConsole()->receiveStandardInput();
 
+    /* if we are echoing input, do it, surrounded by tildes the whole reason
+     * this is supported is so that we can run the interpreter with input
+     * re-directed from a file, and still have the program's execution look
+     * like a user typed it.  This is used in producing the output listings
+     * for the Tetra book automatically (the ~ get replaced with LaTeX
+     * formatting.  It's unlikely this feature will be useful in any other
+     * context! */
+    if (Environment::isEcho()) {
+        VirtualConsole* console = Environment::getConsole();
+        console->processStandardOutput("~");
+        console->processStandardOutput(ret);
+        console->processStandardOutput("~\n");
+    }
+
     /* wrap it up and return it */
     DataType t(TYPE_STRING);
     return Data::create(&t, &ret);

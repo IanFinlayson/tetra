@@ -56,8 +56,17 @@ bool Environment::isDebugMode() {
     return debugMode;
 }
 
+void Environment::setEcho() {
+    inputEcho = true;
+}
+
+bool Environment::isEcho() {
+    return inputEcho;
+}
+
 /* static variable initializations for the environment */
 int Environment::maxThreads = 8;
+bool Environment::inputEcho = false;
 bool Environment::debugMode = false;
 bool Environment::running = true;
 VirtualConsole* Environment::console = NULL;

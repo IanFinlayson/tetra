@@ -4,10 +4,23 @@
 flex texify.lex || exit 1
 gcc lex.yy.c -o texify || exit 1
 
-# apply it to all tetra code files
+# for each source code file
 for ttr in $(ls chapter*/*.ttr)
 do
+    # do the highlighting to convert into a tex file
     ./texify $ttr < $ttr > $ttr.tex
+
+    # put the color box into the output
+    echo "\\begin{outputbox}\n" > $ttr.out
+
+    # run the program on its input, saving the output
+    tetra -e $ttr < $ttr.in >> $ttr.out
+
+    # end the color box
+    echo "\\end{outputbox}\n" >> $ttr.out
+
+    # replace text between ~ with that text in color
+    sed -i 's/~\([^~]*\)~/{\\textbf{\\color{inputcolor}{\1}}}/g' $ttr.out
 done
 
 # run pdflatex
@@ -22,5 +35,5 @@ pdflatex --interaction=batchmode ttpl.tex
 #pdflatex --interaction=batchmode ttpl.tex
 
 # clean up extra files
-rm -f lex.yy.c texify ttpl.aux ttpl.lof ttpl.log ttpl.out ttpl.blg ttpl.bbl ttpl.ps ttpl.toc ttpl.dvi ttpl.nav ttpl.snm ttpl.vrb chapter*/*.ttr.tex 
+rm -f lex.yy.c texify ttpl.aux ttpl.lof ttpl.log ttpl.out ttpl.blg ttpl.bbl ttpl.ps ttpl.toc ttpl.dvi ttpl.nav ttpl.snm ttpl.vrb chapter*/*.ttr.tex chapter*/*.ttr.out
 

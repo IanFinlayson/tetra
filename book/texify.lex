@@ -9,6 +9,30 @@ void wrap_color(char* text, char* color) {
     printf("\\textcolor{%s}{%s}", color, text);
 }
 
+/* whether we have a pending new line */
+int pending_newline = 0;
+
+/* set a pending newline */
+void newl_pending() {
+    pending_newline = 1;
+}
+
+/* line numbering */
+static int line_number = 1;
+void number() {
+    printf("\\textcolor{linenocolor}{%d} ", line_number++);
+}
+
+
+/* check if there is a pending new line and print it if need be */
+void c() {
+    if (pending_newline) {
+        printf("\\\\\n");
+        number();
+        pending_newline = 0;
+    }
+}
+
 %}
 
 %option noyywrap
@@ -35,14 +59,14 @@ void wrap_color(char* text, char* color) {
 "init" |
 "self" |
 "constant" |
-"none" {wrap_color(yytext, "keywordcolor");}
+"none" {c(); wrap_color(yytext, "keywordcolor");}
 
 "int" |
 "real" |
 "string" |
 "bool" |
 "task" |
-"mutex" {wrap_color(yytext, "typecolor");}
+"mutex" {c(); wrap_color(yytext, "typecolor");}
 
 "print" |
 "len" |
@@ -51,17 +75,17 @@ void wrap_color(char* text, char* color) {
 "read_bool" |
 "read_real" |
 "array" |
-"keys" {wrap_color(yytext, "builtincolor");}
+"keys" {c(); wrap_color(yytext, "builtincolor");}
 
-^[ ]+  {
+^[ ]+  {c(); 
     int spaces = strlen(yytext);    
     printf("\\hspace*{%dpt}", INDENT * spaces);
 }
 
-[0-9]+ {wrap_color(yytext, "valuecolor");}
-\"(\\.|[^"])*\" {wrap_color(yytext, "valuecolor");}
+[0-9]+ {c(); wrap_color(yytext, "valuecolor");}
+\"(\\.|[^"])*\" {c(); wrap_color(yytext, "valuecolor");}
 
-"#".*$ {
+"#".*$ {c(); 
     /* put a \ before the # sign */    
     char* stuff = malloc(strlen(yytext) + 2);
     strcpy(stuff + 1, yytext);
@@ -69,32 +93,47 @@ void wrap_color(char* text, char* color) {
     wrap_color(stuff, "commentcolor");
 }
 
-"\n" {printf("\\\\\n");}
+"\n" {newl_pending();}
 
-[a-zA-Z]+ {printf("%s", yytext);}
-.    {printf("%s", yytext);}
+[a-zA-Z]+ {c(); printf("%s", yytext);}
+.    {c(); printf("%s", yytext);}
 
 %%
 
-int main(int argc, char** argv) {
+int main() {
+    /* redefine figure name to be listing */
+    printf("\\renewcommand{\\figurename}{Listing}\n");
+
     /* preamble */
-    char* title = strstr(argv[1], "/") + 1;
-    //printf("\\vspace*{-24pt}\n");
-    printf("\\begin{figure}[h]\n");
-    printf("\\begin{tcolorbox}\n");
+    printf("\\begin{figure}[H]\n");
+    printf("\\caption{%s}\n", "\\codecaption{}");
+    printf("\\label{\\codelabel{}}\n");
+    
+    /* hrule */
+    printf("\\noindent\\makebox[\\textwidth]{\\rule{\\textwidth}{0.4pt}}\n");
+
+    /* use teletype */
     printf("{\\ttfamily\n");
+
+    /* turn off normal indentation */
     printf("\\setlength{\\parindent}{0pt}\\setlength{\\parskip}{0pt}\n");
+
+    /* put in the first line number */
+    number();
 
     /* process all input */
     while (yylex());
 
+    /* hrule */
+    printf("\\vspace{-6pt}\\\\");
+    printf("\\noindent\\makebox[\\textwidth]{\\rule{\\textwidth}{0.4pt}}\n");
+
     /* postamble */
-    printf("\\vspace{-12pt}\n");
     printf("}\n");
-    printf("\\end{tcolorbox}\n");
-    printf("\\caption{%s}\n", title);
-    printf("\\label{\\codelabel{}}\n");
     printf("\\end{figure}\n");
+
+    /* redefine figure name back to figure */
+    printf("\\renewcommand{\\figurename}{Figure}\n");
     return 0;
 }
 

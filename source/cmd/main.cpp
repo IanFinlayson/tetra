@@ -18,6 +18,7 @@ const char args_doc[] = "FILE";
 /* the command line options for the compiler */
 const struct argp_option options[] = {{"debug", 'd', 0, 0, "Start in debugging mode", 0},
                                       {"threads", 't', "NUM", 0, "Specify NUM threads maximum", 0},
+                                      {"echo", 'e', 0, 0, "Echo input back", 0},
                                       {0, 0, 0, 0, 0, 0}};
 
 /* used by main to communicate with parse_opt */
@@ -25,6 +26,7 @@ struct arguments {
     char* inputFileName;
     int debug;
     int threads;
+    int echo;
 };
 
 /* the function which parses command line options */
@@ -37,6 +39,11 @@ error_t parse_opt(int key, char* arg, struct argp_state* state) {
         case 'd':
             /* the debug flag is set */
             arguments->debug = 1;
+            break;
+
+        case 'e':
+            /* they want to echo input back */
+            arguments->echo = 1;
             break;
 
         case 't':
@@ -83,6 +90,7 @@ int main(int argc, char** argv) {
     /* the default values */
     args.debug = 0;
     args.threads = 8;
+    args.echo = 0;
     args.inputFileName = NULL;
 
     /* parse command line */
@@ -98,6 +106,11 @@ int main(int argc, char** argv) {
 
     Environment::initialize();
     Environment::setConsole(&mainConsole);
+
+    /* turn on echoing of input */
+    if (args.echo) {
+        Environment::setEcho();
+    }
 
     Node* tree;
 
@@ -130,3 +143,4 @@ int main(int argc, char** argv) {
     delete tree;
     return ret;
 }
+

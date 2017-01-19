@@ -17,6 +17,8 @@ class Environment {
     static int getMaxThreads();
     static void setMaxThreads(int);
     static void setDebug(bool);
+    static void setEcho();
+    static bool isEcho();
     static bool isDebugMode();
     static void halt();
     static bool isRunning();
@@ -24,6 +26,7 @@ class Environment {
 
    private:
     static bool running;
+    static bool inputEcho;
     static int maxThreads;
     static VirtualConsole* console;
     static bool debugMode;
