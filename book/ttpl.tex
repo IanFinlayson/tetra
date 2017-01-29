@@ -3,7 +3,7 @@
 % tetra text book.  it also contains front and back matter
 % toc, etc. but pulls the chapters from individual files
 
-\documentclass[14pt,twoside,openany]{memoir}
+\documentclass[13pt,twoside,openany]{memoir}
 \usepackage{hyperref}
 \usepackage{wallpaper}
 \usepackage{tabularx}
@@ -24,6 +24,10 @@
     The University of Mary Washington}
 \date{\today}
 \newcommand{\tpledition}{1\textsuperscript{st} Edition}
+
+% skip but don't indent
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{12pt}
 
 % fonts
 \usepackage[T1]{fontenc}
@@ -65,7 +69,7 @@
 
 % an environment used for output boxes
 \newenvironment{outputbox}
-{\begin{tcolorbox}[colback=outputbgcolor, arc=0pt]
+{\begin{tcolorbox}[boxrule=0.5pt, colframe=black, colback=outputbgcolor, arc=0.5pt]
  \begin{alltt}}
 {\end{alltt}
  \end{tcolorbox}}
@@ -118,8 +122,6 @@
 
 % copyright etc.
 {
-    \setlength{\parindent}{0pt}
-    \setlength{\parskip}{12pt}
 
     % put all the stuff at the bottom of the page
     \null
