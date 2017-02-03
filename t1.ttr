@@ -1,14 +1,11 @@
-def loop() int:
-    i = 0
-    while i < 100:
-        i = i + 1
-    return i
+def f(amt real):
+    print(amt, " starting\n")
+    sleep(amt)
+    print(amt, " done!\n")
 
-
-# sum an array of numbers in parallel
 def main():
     parallel:
-        a = loop()
-        b = loop()
-    print(a + b)
-
+        f(1.0)
+        f(2.0)
+        f(3.0)
+    print("Back in main\n")

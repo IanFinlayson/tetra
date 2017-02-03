@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <stack>
+#include <QMutex>
 
 #include "values.h"
 #include "scope.h"
@@ -32,17 +33,21 @@ class Context {
 
     /* lookup a variable  in the present context */
     Data* lookupVar(String name, DataType* type) {
-        if (getGlobalScopeRef().containsVar(name)) {
-            return (getGlobalScopeRef().lookupVar(name, type));
+        Data* value;
+
+        if (getGlobalScopeRef()->containsVar(name)) {
+            value = (getGlobalScopeRef()->lookupVar(name, type));
         } else if (type->getKind() != TYPE_FUNCTION) {
-            return programStack.top().lookupVar(name, type);
+            value = programStack.top()->lookupVar(name, type);
         } else {
             String signature 
                 = FunctionMap::getFunctionSignature(name,type);
             Node* funcNode =  functions.getFunctionNode(signature);
             Function funcVal(funcNode);
-            return Data::create(type, &funcVal);
+            value = Data::create(type, &funcVal);
         }
+
+        return value;
     }
 
     /* overloaded function call, one when there is no initial setup for a scope
@@ -50,51 +55,50 @@ class Context {
        The second is for adding a scope which had to have some data preloaded into
        it, as is the case when calling a function with arguments */
     void initializeNewScope(const Node* callNode);
-    void initializeNewScope(Scope& newScope);
-
-    /* pushes an alias to the given scope onto the stack used for multithreading */
-    void branchOff(const Scope& baseScope, Scope* globScope);
+    void initializeNewScope(Scope* newScope);
 
     /* pops the current scope off the stack. Has the effect of destroying all variables of the
      * present scope */
     void exitScope();
 
     /* returns a reference to the current scope */
-    Scope& getCurrentScope() {
+    Scope* getCurrentScope() {
         return programStack.top();
     }
 
-    Scope& getScopeRef();
+    Scope* getScopeRef();
 
-    Scope& getGlobalScopeRef() {
-        return *globalScope;
+    Scope* getGlobalScopeRef() {
+        return globalScope;
     }
 
     /* wraps a call to the current scope's queryExecutionStatus */
     ExecutionStatus queryExecutionStatus() {
         assert(programStack.empty() == false);
-        return programStack.top().queryExecutionStatus();
+        return programStack.top()->queryExecutionStatus();
     }
 
     /* sets the current scope's ExecutionStatus to the appropriate value */
     void notifyBreak() {
-        programStack.top().setExecutionStatus(BREAK);
+        programStack.top()->setExecutionStatus(BREAK);
     }
     void notifyContinue() {
-        programStack.top().setExecutionStatus(CONTINUE);
+        programStack.top()->setExecutionStatus(CONTINUE);
     }
     void notifyReturn() {
-        programStack.top().setExecutionStatus(RETURN);
+        programStack.top()->setExecutionStatus(RETURN);
     }
     void notifyElif() {
-        programStack.top().setExecutionStatus(ELIF);
+        programStack.top()->setExecutionStatus(ELIF);
     }
 
-    void notifyParallel();
+    void notifyParallel() {
+        programStack.top()->setExecutionStatus(PARALLEL);
+    }
 
     /* sets the current scope's executionStatus to NORMAL */
     void normalizeStatus() {
-        programStack.top().setExecutionStatus(NORMAL);
+        programStack.top()->setExecutionStatus(NORMAL);
     }
 
     /* performs a deep copy of the current context */
@@ -157,18 +161,15 @@ class Context {
     void printStackTrace() const;
 
    private:
-    std::stack<Scope> programStack;
+    std::stack<Scope*> programStack;
     Scope* globalScope;
-
     int lastLineNo;
     bool stepping;
     bool stopAtNext;
     bool resume;
 
     std::stack<const Node*>* scopes;
-
     std::stack<std::map<String, int> >* referenceTables;
-
     std::map<String, int>* globalReferenceTable;
 
     std::vector<String>* parForVars;

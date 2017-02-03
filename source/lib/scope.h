@@ -53,7 +53,15 @@ class Scope {
 
     /* look a variable up in this scope by name */
     Data* lookupVar(String name, DataType* type) {
-        return varScope.lookupVar(name, type);
+        Data* var;
+        if (executionStatus == PARALLEL) {
+            varMutex.lock();
+        }
+        var = varScope.lookupVar(name, type);
+        if (executionStatus == PARALLEL) {
+            varMutex.unlock();
+        }
+        return var;
     }
 
     /* Used for aliasing an array
@@ -88,13 +96,15 @@ class Scope {
     VarTable varScope;
     ExecutionStatus executionStatus;
 
-    /* This boolean denotes that there are multiple threads working in the current
-     * scope.
-     * While that is the case, Insertions into the scope's VarTable must be
-     * performed in a threadsafe manner */
+    /* this boolean denotes that there are multiple threads working in the
+     * current scope.  While that is the case, Insertions into the scope's
+     * VarTable must be performed in a threadsafe manner */
     bool multiThreaded;
 
-    /* By storing the address of the call node, we can print back a call stack to
+    /* mutex for protecting variables when in parallel mode */
+    QMutex varMutex;
+
+    /* by storing the address of the call node, we can print back a call stack to
      * the user if the program terminates unexpectedly */
     const Node* callNode;
 };

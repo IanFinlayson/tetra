@@ -15,13 +15,27 @@ class ParallelWorker : public QThread {
 
     public:
         ParallelWorker(Node* node, Context* context) {
+            /* store the node to evaluate it once we start */
             this->node = node;
-            this->context = context;
+
+            /* make a copy of the context */
+            this->context = new Context(*context);
         }
+
+        /* TODO MAKE OUR OWN CONTEXT! */
 
         /* this function is called in the new thread */
         void run() Q_DECL_OVERRIDE {
+            /* run evaluate our node, and save the return value */
             returnValue = evaluateStatement(node, context);
+
+            /* remove the context clone */
+            delete context;
+        }
+
+        /* provides the return value of the node we run */
+        Data* getReturn() const {
+            return returnValue;
         }
 
         virtual ~ParallelWorker() {}

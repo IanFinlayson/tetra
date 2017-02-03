@@ -13,6 +13,9 @@ Data* tslPrint(Node* args, Context* context);
 /* the input function reads a string from the user, with an optional prompt */
 Data* tslInput(Node* args, Context* context);
 
+/* a void function to sleep for some real number of seconds */
+Data* tslSleep(Node* args, Context* context);
+
 /* the type conversion functions */
 Data* tslInt(Node* args, Context* context);
 Data* tslReal(Node* args, Context* context);

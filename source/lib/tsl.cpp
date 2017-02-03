@@ -39,6 +39,19 @@ Data* tslPrint(Node* args, Context* context) {
     return NULL;
 }
 
+/* sleeps for some real number of seconds */
+Data* tslSleep(Node* args, Context* context) {
+    /* evaluate the arguments */
+    Data* argument = evaluateExpression(args->child(0), context);
+
+    /* get it as a real */
+    Real* rarg = (Real*) argument->getValue();
+
+    /* sleep on the current thread */
+    QThread::msleep(rarg->toDouble() * 1000.0);
+    return NULL;
+}
+
 /* get input from the user and return it */
 Data* tslInput(Node* args, Context* context) {
     /* if there is an argument, print it first */

@@ -6,8 +6,8 @@
 
 Context::Context() {
     /* initialize the global scope */
-    initializeNewScope(NULL);
-    globalScope = &(programStack.top());
+    globalScope = new Scope();
+    programStack.push(globalScope);
 
     /* debug variables */
     stopAtNext = false;
@@ -29,6 +29,7 @@ Context::Context() {
     }
 }
 
+/* set up the global variables from the parse tree */
 void Context::initializeGlobalVars(const Node* tree) {
     /* Traverse the tree */
     if (tree->kind() == NODE_TOPLEVEL_LIST) {
@@ -51,21 +52,22 @@ void Context::initializeGlobalVars(const Node* tree) {
     }
 }
 
-/* Initializes an empty scope and sets that as the current scope */
+/* initializes an empty scope and sets that as the current scope */
 void Context::initializeNewScope(const Node* callNode) {
-    Scope newScope(callNode);
+    Scope* newScope = new Scope(callNode);
     programStack.push(newScope);
 }
 
-/* Takes the given scope and sets it as the current scope */
-/* This allows local data to get passed in */
-void Context::initializeNewScope(Scope& newScope) {
-    Scope newScopePtr(newScope);
-    programStack.push(newScopePtr);
+/* takes the given scope and sets it as the current scope this allows local
+data to get passed in */
+void Context::initializeNewScope(Scope* newScope) {
+    programStack.push(newScope);
 }
 
 /* destroys the current scope, returning to the previously initialized scope */
 void Context::exitScope() {
+    Scope* scope = programStack.top();
+    delete scope;
     programStack.pop();
 }
 

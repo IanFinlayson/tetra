@@ -369,6 +369,25 @@ DataType inferLen(Node* functionCall, Node* function) {
     return DataType(TYPE_INT);
 }
 
+
+DataType inferSleep(Node* functionCall, Node* function) {
+    /* check that there is one argument */
+    if (functionCall->getNumChildren() != 2 || functionCall->child(1)->getNumChildren() != 1) {
+        throw Error("sleep function expects one argument", functionCall->getLine());
+    }
+
+    /* infer the argument and capture its type */
+    DataType t = inferExpression(functionCall->child(1)->child(0), function);
+
+    /* check that it is a real value */
+    if (t.getKind() != TYPE_REAL) {
+        throw Error("sleep function must be called on a real value", functionCall->getLine());
+    }
+
+    /* returns none */
+    return DataType(TYPE_NONE);
+}
+
 DataType inferInput(Node* functionCall, Node* function) {
     /* make sure there are 0 or 1 parameters */
     if (functionCall->getNumChildren() == 2 && functionCall->child(1)->getNumChildren() > 1) {
@@ -455,6 +474,10 @@ DataType inferStdlib(Node* functionCall, Node* function, bool& is_stdlib) {
 
     if (functionCall->child(0)->getStringvalue() == "len") {
         return inferLen(functionCall, function);
+    }
+
+    if (functionCall->child(0)->getStringvalue() == "sleep") {
+        return inferSleep(functionCall, function);
     }
 
     if (functionCall->child(0)->getStringvalue() == "input") {

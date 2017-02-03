@@ -9,7 +9,6 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <QThread>
 
 #include "tetra.h"
 
@@ -55,6 +54,11 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         return tslInput(node->child(1), context);
     }
 
+    /* sleep function */
+    else if (funcName == "sleep") {
+        return tslSleep(node->child(1), context);
+    }
+
     /* type conversion ones */
     else if (funcName == "int") {
         return tslInt(node->child(1), context);
@@ -81,10 +85,10 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         /* check if there are parameters to be passed, and do so if needed */
         if (node->child(1) != NULL) {
             /* make a scope for the new function we are calling */
-            Scope destScope(node);
+            Scope* destScope = new Scope(node);
 
             /* dump the passed parameters into the new scope */
-            pasteArgList(funcNode->child(0), node->child(1), &destScope, context);
+            pasteArgList(funcNode->child(0), node->child(1), destScope, context);
 
             /* set the new scope in our context */
             context->initializeNewScope(destScope);
@@ -95,7 +99,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
 
         /* place this node on the call stack, so it can be printed in the stack
          * trace */
-        context->getCurrentScope().setCallNode(node);
+        context->getCurrentScope()->setCallNode(node);
 
         /* transfer control to the function capturing the return value */
         Data* returnValue = evaluateStatement(funcNode, context);
@@ -360,6 +364,10 @@ Data* evaluateExpression(Node* node, Context* context) {
 
 /* evaluate a parallel statement */
 Data* evaluateParallel(Node* node, Context* context) {
+    /* mark the context as being parallel */
+    context->notifyParallel();
+
+    /* keep track of all the sub-statements */
     Node* next = node->child(0);
     std::vector<ParallelWorker*> children_threads;
 
@@ -390,6 +398,9 @@ Data* evaluateParallel(Node* node, Context* context) {
         children_threads[i]->wait();
         delete children_threads[i];
     }
+
+    /* end parallel mode */
+    context->normalizeStatus();
 
     /* TODO what should happen if a parallel has a return in it??? */
     return NULL;
