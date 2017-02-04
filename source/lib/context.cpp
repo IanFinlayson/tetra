@@ -8,25 +8,6 @@ Context::Context() {
     /* initialize the global scope */
     globalScope = new Scope();
     programStack.push(globalScope);
-
-    /* debug variables */
-    stopAtNext = false;
-    stepping = false;
-    resume = false;
-    lastLineNo = -1;
-
-    /* Only need to instantiate debug info if in debug mode */
-    if (Environment::isDebugMode()) {
-        parForVars = new std::vector<String>();
-        scopes = new std::stack<const Node*>();
-        globalReferenceTable = new std::map<String, int>();
-        referenceTables = new std::stack<std::map<String, int> >();
-    } else {
-        parForVars = NULL;
-        scopes = NULL;
-        referenceTables = NULL;
-        globalReferenceTable = NULL;
-    }
 }
 
 /* set up the global variables from the parse tree */
@@ -35,13 +16,6 @@ void Context::initializeGlobalVars(const Node* tree) {
     if (tree->kind() == NODE_TOPLEVEL_LIST) {
         Node* candidate = tree->child(0);
         if (candidate->kind() == NODE_GLOBAL || candidate->kind() == NODE_CONST) {
-            /* If debugging is enabled, register the name of the global in the global */
-            /* reference lookup table */
-            if (Environment::isDebugMode()) {
-                Node* id = candidate->child(0);
-                (*globalReferenceTable)[id->getStringvalue()] = id->getIntvalue().toInt();
-            }
-
             /* perform assignment at this global scope */
             evaluateStatement(candidate, this);
         }

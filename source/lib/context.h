@@ -104,75 +104,10 @@ class Context {
     /* performs a deep copy of the current context */
     Context& operator=(const Context&);
 
-    /* for use when debugging */
-    int getLastLineNum();
-    void* fetchVariable(String s);
-    std::map<String, int>& getRefTable() {
-        return referenceTables->top();
-    }
-    std::map<String, int>& getGlobRefTable() {
-        return *globalReferenceTable;
-    }
-    void updateVarReferenceTable(const Node* node);
-    void popReferenceTable();
-
-    /* get and set methods for debug flags (inline) */
-    int getLastLineNo() {
-        return lastLineNo;
-    }
-    bool getStepping() {
-        return stepping;
-    }
-    bool getStopAtNext() {
-        return stopAtNext;
-    }
-    bool getResume() {
-        return resume;
-    }
-    bool isParallelForVariable(String);
-
-    void setLastLineNo(int pLast) {
-        lastLineNo = pLast;
-    }
-    void setStepping(bool steppingArg) {
-        stepping = steppingArg;
-    }
-    void setStopAtNext(bool pStopAtNext) {
-        stopAtNext = pStopAtNext;
-    }
-    void setResume(bool pResume) {
-        resume = pResume;
-    }
-    void registerParallelForVariable(String);
-
-    /* used to give debug info to newly created threads */
-    void copyDebugInfo(Context* baseContext) {
-        *parForVars = *(baseContext->parForVars);
-        *referenceTables = *(baseContext->referenceTables);
-        *globalReferenceTable = *(baseContext->globalReferenceTable);
-        scopes->push(baseContext->scopes->top());
-    }
-
-    std::stack<const Node*>& getScopes() {
-        return *scopes;
-    }
-
-    /* prints a stack trace */
-    void printStackTrace() const;
-
    private:
+    /* the scopes avaiable at this time */
     std::stack<Scope*> programStack;
     Scope* globalScope;
-    int lastLineNo;
-    bool stepping;
-    bool stopAtNext;
-    bool resume;
-
-    std::stack<const Node*>* scopes;
-    std::stack<std::map<String, int> >* referenceTables;
-    std::map<String, int>* globalReferenceTable;
-
-    std::vector<String>* parForVars;
 };
 
 #endif

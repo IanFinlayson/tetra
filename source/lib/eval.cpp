@@ -12,6 +12,9 @@
 
 #include "tetra.h"
 
+/* all of the background threads that have been launched */
+std::vector<ParallelWorker*> backgroundThreads;
+
 extern DataType* PAIR_TYPE;
 
 /* this function populates a scope object with the variables contained in a
@@ -406,6 +409,18 @@ Data* evaluateParallel(Node* node, Context* context) {
     return NULL;
 }
 
+Data* evaluateBackground(Node* node, Context* context) {
+    /* mark the context as being parallel */
+    context->notifyParallel();
+
+    /* make a thread for running this node, and add to the list */
+    ParallelWorker* worker = new ParallelWorker(node->child(0), context);
+    worker->start();
+    backgroundThreads.push_back(worker);
+
+    return NULL;
+}
+
 /* evaluate a statement node - only returns a value for return statements */
 Data* evaluateStatement(Node* node, Context* context) {
     /* do different things based on the type of statement this is */
@@ -655,10 +670,13 @@ Data* evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
-
+        /* handle the parallel constructs */
         case NODE_PARALLEL:
             return evaluateParallel(node, context);
             break;
+
+        case NODE_BACKGROUND:
+            return evaluateBackground(node, context);
 
         default:
             /* if it's none of these things, it must be an expression used as a
@@ -670,7 +688,7 @@ Data* evaluateStatement(Node* node, Context* context) {
     return NULL;
 }
 
-/* Equivilant of main for the interpreter module */
+/* equivilant of main for the interpreter module */
 int interpret(Node* tree, int debug, int threads) {
     /* set environment settings */
     Environment::setDebug(debug);
@@ -694,6 +712,12 @@ int interpret(Node* tree, int debug, int threads) {
 
     /* evaluate the main function */
     evaluateStatement(main, &context);
+
+    /* wait for any background threads to finish */
+    for (int i = 0; i < backgroundThreads.size(); i++) {
+        backgroundThreads[i]->wait();
+        delete backgroundThreads[i];
+    }
 
     /* leave the scope */
     context.exitScope();
