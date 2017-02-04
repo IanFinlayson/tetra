@@ -151,8 +151,12 @@ String stringType(Node* node) {
             return "INT:" + node->getStringvalue();
         case NODE_REALVAL:
             return "REAL: " + node->getStringvalue();
-        case NODE_STRINGVAL:
-            return "\"" + node->getStringvalue() + "\"";
+        case NODE_STRINGVAL: {
+            /* print the string, but escape new lines to preserve formatting */
+            String constant = node->getStringvalue();
+            constant.replace("\n", "\\n");
+            return "\"" + constant + "\"";
+        }
         case NODE_IDENTIFIER:
             return "ID " + node->getStringvalue();
         case NODE_BOOLVAL:

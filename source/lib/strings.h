@@ -1,4 +1,4 @@
-/* string.h
+/* strings.h
  * the String class represents a (unicode) string in a Tetra program */
 
 #ifndef TSTRING_H

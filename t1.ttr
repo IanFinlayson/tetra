@@ -1,11 +1,7 @@
-def f(amt real):
-    print(amt, " starting\n")
-    sleep(amt)
-    print(amt, " done!\n")
-
 def main():
-    parallel:
-        f(1.0)
-        f(2.0)
-        f(3.0)
+    print("In main\n")
+    background:
+        print("Starting Background\n")
+        sleep(1.0)
+        print("Ending Background\n")
     print("Back in main\n")
