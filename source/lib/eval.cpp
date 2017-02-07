@@ -714,7 +714,7 @@ int interpret(Node* tree, int debug, int threads) {
     evaluateStatement(main, &context);
 
     /* wait for any background threads to finish */
-    for (int i = 0; i < backgroundThreads.size(); i++) {
+    for (unsigned int i = 0; i < backgroundThreads.size(); i++) {
         backgroundThreads[i]->wait();
         delete backgroundThreads[i];
     }

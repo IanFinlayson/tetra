@@ -1085,8 +1085,10 @@ functionCall: funcname TOK_LEFTPARENS TOK_RIGHTPARENS {
 }
 
 /* a functiona name is either a plain id or a basic types
-   these can be called for type conversions a la Python */
-funcname: lvalue {
+   these can be called for type conversions a la Python 
+   FIXME add the ability to do things like var[idx](params)
+   without conflicts */
+funcname: identifier {
     $$ = $1;
 } | functionCall {
     $$ = $1;
