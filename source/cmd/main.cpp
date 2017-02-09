@@ -123,6 +123,8 @@ int main(int argc, char** argv) {
         std::cout << e;
         exit(EXIT_FAILURE);
     }
+
+    /* now try to interpret the tree */
     int ret = 0;
     try {
         ret = interpret(tree, args.debug, args.threads);
