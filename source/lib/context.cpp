@@ -27,8 +27,8 @@ void Context::initializeGlobalVars(const Node* tree) {
 }
 
 /* initializes an empty scope and sets that as the current scope */
-void Context::initializeNewScope(const Node* callNode) {
-    Scope* newScope = new Scope(callNode);
+void Context::initializeNewScope() {
+    Scope* newScope = new Scope();
     programStack.push(newScope);
 }
 

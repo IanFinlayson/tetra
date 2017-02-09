@@ -56,7 +56,7 @@ class Context {
        (i.e. a function call with no formal parameters that must be initialized)
        The second is for adding a scope which had to have some data preloaded into
        it, as is the case when calling a function with arguments */
-    void initializeNewScope(const Node* callNode);
+    void initializeNewScope();
     void initializeNewScope(Scope* newScope);
 
     /* pops the current scope off the stack. Has the effect of destroying all variables of the

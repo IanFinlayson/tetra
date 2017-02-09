@@ -74,7 +74,6 @@ void FunctionMap::clearAll() {
 std::map<String, Node*> FunctionMap::remove(String name) {
     /* make a map to store the pairs to return */
     std::map<String, Node*> pairs;
-    UNUSED(name);
 
     /* make a vector to store keys to remove */
     std::vector<String> keys;
@@ -101,7 +100,6 @@ std::map<String, Node*> FunctionMap::remove(String name) {
 
 bool FunctionMap::hasFuncNamed(String name) {
     /* loop through all elements in the map */
-    UNUSED(name);
     for (std::map<String, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
@@ -113,8 +111,6 @@ bool FunctionMap::hasFuncNamed(String name) {
 }
 
 DataType FunctionMap::getFunctionsNamed(String name) {
-    UNUSED(name);
-
     /* create a dataType to return */
     DataType retType = DataType(TYPE_OVERLOAD);
 

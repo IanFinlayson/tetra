@@ -87,7 +87,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         /* check if there are parameters to be passed, and do so if needed */
         if (node->child(1) != NULL) {
             /* make a scope for the new function we are calling */
-            Scope* destScope = new Scope(node);
+            Scope* destScope = new Scope();
 
             /* dump the passed parameters into the new scope */
             pasteArgList(funcNode->child(0), node->child(1), destScope, context);
@@ -96,7 +96,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
             context->initializeNewScope(destScope);
         } else {
             /* if there are no args, we still need to initialize a new scope */
-            context->initializeNewScope(node);
+            context->initializeNewScope();
         }
 
         /* place this node on the call stack, so it can be printed in the stack
@@ -707,7 +707,7 @@ int interpret(Node* tree, int debug, int threads) {
     context.initializeGlobalVars(tree);
 
     /* initialize a scope fpr the main method, and run */
-    context.initializeNewScope(main);
+    context.initializeNewScope();
 
     /* evaluate the main function */
     evaluateStatement(main, &context);

@@ -14,9 +14,6 @@ class Node;
 
 enum ThreadStatus { RUNNING, STOPPED, DESTROYED, WAITING };
 
-/* macro to squelch unused variable warnings */
-#define UNUSED(x) (void) x;
-
 /* each context will have a flag as to what action should be taken when control reaches a structure
  * Node
  *
@@ -43,11 +40,6 @@ enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN, PARALLEL };
 class Scope {
    public:
     Scope() {
-        executionStatus = NORMAL;
-    }
-
-    Scope(const Node* node) {
-        UNUSED(node);
         executionStatus = NORMAL;
     }
 
