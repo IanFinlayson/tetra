@@ -17,6 +17,7 @@ class Symbol {
     Symbol();
     Symbol(String name, DataType type, int lineNumber, bool constant = false);
     Symbol(String name, DataType* type, int lineNumber, bool constant = false);
+    Symbol(String name, std::vector<DataType> types, int lineNumber, bool constant = false);
     Symbol(const Symbol&);
     ~Symbol();
     Symbol operator=(const Symbol& other);
@@ -69,7 +70,7 @@ class FunctionMap {
     bool hasFunction(Node* node);
     bool hasFunction(DataType*, String);
 
-    DataType getFunctionsNamed(String);
+    std::vector<DataType> getFunctionsNamed(String);
 
     /* renames functions with the name provided and returns them as a */
     /* vector of pairs */
@@ -96,7 +97,7 @@ class ClassContext {
     void addMethod(Node*);
     void addMethods(Node*);
     Symbol& getMember(String);
-    DataType getMethods(String);
+    std::vector<DataType> getMethods(String);
     const Node* getMethod(DataType*, String);
     std::map<String, Node*> removeInits();
 

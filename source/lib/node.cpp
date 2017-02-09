@@ -136,6 +136,20 @@ Symbol::Symbol(String name, DataType type, int lineNumber, bool constant) {
     this->constant = constant;
 }
 
+/* this one is used for overlaoding since it takes a list of symbols */
+Symbol::Symbol(String name, std::vector<DataType> types, int lineNumber, bool constant) {
+    this->name = name;
+    this->type = new DataType(TYPE_FUNCTION);
+    
+    /* add all the overlaods */
+    for (unsigned i = 0; i < types.size(); i++) {
+        this->type->subtypes->push_back(types[i]);
+    }
+
+    this->lineNumber = lineNumber;
+    this->constant = constant;
+}
+
 Symbol::Symbol(const Symbol& other) {
     this->name = String(other.name);
     this->type = new DataType(*other.getType());
