@@ -105,4 +105,7 @@ class String : public Value {
     QString str;
 };
 
+/* function to print a string in the debugger */
+void p(const String& str);
+
 #endif

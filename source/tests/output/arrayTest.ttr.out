@@ -1,8 +1,8 @@
-Just assigned val and val = [cccc, reghjgh, abbc, aaaaa]
-Just set val[0] = 'dfkjghkjghsdgksgsggjk' and val = [dfkjghkjghsdgksgsggjk, reghjgh, abbc, aaaaa]
-Just set val[1] = 'zzzzzzzzz' and val = [dfkjghkjghsdgksgsggjk, zzzzzzzzz, abbc, aaaaa]
-Just set val[2] = 'ddddddddd' and val = [dfkjghkjghsdgksgsggjk, zzzzzzzzz, ddddddddd, aaaaa]
-Just set val[3] = 'wwwwwwwww' and val = [dfkjghkjghsdgksgsggjk, zzzzzzzzz, ddddddddd, wwwwwwwww]
+Just assigned val and val = ['cccc', 'reghjgh', 'abbc', 'aaaaa']
+Just set val[0] = 'dfkjghkjghsdgksgsggjk' and val = ['dfkjghkjghsdgksgsggjk', 'reghjgh', 'abbc', 'aaaaa']
+Just set val[1] = 'zzzzzzzzz' and val = ['dfkjghkjghsdgksgsggjk', 'zzzzzzzzz', 'abbc', 'aaaaa']
+Just set val[2] = 'ddddddddd' and val = ['dfkjghkjghsdgksgsggjk', 'zzzzzzzzz', 'ddddddddd', 'aaaaa']
+Just set val[3] = 'wwwwwwwww' and val = ['dfkjghkjghsdgksgsggjk', 'zzzzzzzzz', 'ddddddddd', 'wwwwwwwww']
 Just set x = val[0] and x = dfkjghkjghsdgksgsggjk
  x != val[1]. x = dfkjghkjghsdgksgsggjkand val[1] = zzzzzzzzz
 Just set val[2] = val[1] and val[2] = zzzzzzzzzand val[1] =zzzzzzzzz

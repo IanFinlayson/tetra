@@ -37,9 +37,11 @@ class Context {
 
         if (getGlobalScopeRef()->containsVar(name)) {
             value = (getGlobalScopeRef()->lookupVar(name, type));
-        } else if (type->getKind() != TYPE_FUNCTION) {
+        } else if (type->getKind() != TYPE_FUNCTION && type->getKind() != TYPE_OVERLOAD) {
+            /* look up general variables */
             value = programStack.top()->lookupVar(name, type);
         } else {
+            /* find functions */
             String signature 
                 = FunctionMap::getFunctionSignature(name,type);
             Node* funcNode =  functions.getFunctionNode(signature);

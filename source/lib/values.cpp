@@ -148,3 +148,9 @@ String Container::toString() const {
 String Function::toString() const {
     return "<" + getName() + typeToString(getNode()->type()) + " at " + getAddress() + ">";
 }
+
+void p(const String& str) {
+    std::cout << str << std::endl;
+}
+
+

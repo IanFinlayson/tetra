@@ -11,7 +11,7 @@ do
   if [ $diffWords -ne 0 ]
   then
     fail=$(($fail + 1))
-    echo "$file failed"
+    echo "********** $file failed **********"
   else
     pass=$(($pass + 1))
   fi

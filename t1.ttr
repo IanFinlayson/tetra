@@ -1,7 +1,15 @@
+def getOne() int:
+    return 1
+
+def getOne(a int) int:
+    return a
+
+def getTwo() int:
+    return 2
+
 def main():
-    print("In main\n")
-    background:
-        print("Starting Background\n")
-        sleep(1.0)
-        print("Ending Background\n")
-    print("Back in main\n")
+    if getTwo() == 2:
+        print("Heyya 2\n")
+    if getOne() == 1:
+        print("Heyya")
+

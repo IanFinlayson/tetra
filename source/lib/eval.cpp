@@ -81,7 +81,6 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
     /* regular user defined functions */
     else {
         /* it's user defined, find it in the tree */
-        /*TODO look other places.*/
         Data* funcData = evaluateExpression(node->child(0), context);
         Node* funcNode = ((Function*)funcData->getValue())->getNode();
 

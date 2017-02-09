@@ -165,5 +165,14 @@ String FunctionMap::getFunctionSignature(const Node* node) {
 
 /* given a name and a functiontype, assembles a function signature */
 String FunctionMap::getFunctionSignature(const String name, const DataType* type) {
-     return name + typeToString(&((*(type->subtypes))[0]));
+    /* this returns the whole type including return */
+    String signature = name + typeToString(&((*(type->subtypes))[0]));
+
+    /* if there is an arrow in it, remove it */
+    int idx = signature.indexOf("->");
+    if (idx != -1) {
+        signature = signature.substring(0, idx);
+    }
+
+    return signature;
 }

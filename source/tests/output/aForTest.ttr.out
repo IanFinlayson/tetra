@@ -1,20 +1,20 @@
-Just made 'vec' and vec = [a, b, c, d, e]
-Just entered forTest() and par = [a, b, c, d, e]
+Just made 'vec' and vec = ['a', 'b', 'c', 'd', 'e']
+Just entered forTest() and par = ['a', 'b', 'c', 'd', 'e']
 i = 0
-Just set par[i] = 'qq' and par = [qq, b, c, d, e]
-Just set par[i] = 'q' and par = [q, b, c, d, e]
+Just set par[i] = 'qq' and par = ['qq', 'b', 'c', 'd', 'e']
+Just set par[i] = 'q' and par = ['q', 'b', 'c', 'd', 'e']
 i = 1
-Just set par[i] = 'qq' and par = [q, qq, c, d, e]
-Just set par[i] = 'q' and par = [q, q, c, d, e]
+Just set par[i] = 'qq' and par = ['q', 'qq', 'c', 'd', 'e']
+Just set par[i] = 'q' and par = ['q', 'q', 'c', 'd', 'e']
 i = 2
-Just set par[i] = 'qq' and par = [q, q, qq, d, e]
+Just set par[i] = 'qq' and par = ['q', 'q', 'qq', 'd', 'e']
 in the i = 2 block and i = 2
 i = 3
-Just set par[i] = 'qq' and par = [q, q, qq, qq, e]
-Just set par[i] = 'q' and par = [q, q, qq, q, e]
+Just set par[i] = 'qq' and par = ['q', 'q', 'qq', 'qq', 'e']
+Just set par[i] = 'q' and par = ['q', 'q', 'qq', 'q', 'e']
 i = 4
-Just set par[i] = 'qq' and par = [q, q, qq, q, qq]
+Just set par[i] = 'qq' and par = ['q', 'q', 'qq', 'q', 'qq']
 in the i > 3 block and i = 4
-Just returned from forTest() and vec = [q, q, qq, q, qq]
+Just returned from forTest() and vec = ['q', 'q', 'qq', 'q', 'qq']
 vec[2] = 'qq' and vec[4] = 'qq'
 
