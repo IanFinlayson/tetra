@@ -207,7 +207,7 @@ void dumpTreeGraphviz(Node* node) {
     out << "}\n";
     out.close();
 
-    system("rm tree.png");
+    system("rm -f tree.png");
     system("dot -Tpng tree.gv -o tree.png");
     system("xdg-open tree.png");
 }
