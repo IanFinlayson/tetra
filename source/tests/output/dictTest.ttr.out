@@ -1,0 +1,18 @@
+set bob = 5 and bob = 5
+set notbob = 7 and notbob = 7
+set l = {'bob':bob} and l = {'bob'}
+set l['bob'] = 1 and l = {'bob'}
+now bob = 5
+set l['notbob'] = notbob and l = {'bob', 'notbob'}
+set l['notbob'] = 3 and l = {'bob', 'notbob'}
+now notbob = 7
+set notbob = 8 and notbob = 8
+now l = {'bob', 'notbob'}
+set m = {'frank':6} and m = {'frank'}
+set n = {'harry':7} and n = {'harry'}
+set o = {m:n} and o = {{'frank'}}
+set m['frank'] = 2 and m = {'frank'}
+now o = {{'frank'}}
+set p = l and p = {'bob', 'notbob'}
+set p['bob'] = 3 and p = {'bob', 'notbob'}
+now l = {'bob', 'notbob'}

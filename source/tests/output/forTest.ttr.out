@@ -1,0 +1,41 @@
+num = 1
+num = 2
+num = 3
+num = 4
+num = 5
+num = 6
+num = 7
+num = 8
+num = 9
+num = 10
+
+fibnum = 1
+fibnum^2 = 1
+fibnum = 1
+fibnum^2 = 1
+fibnum = 2
+fibnum^2 = 4
+fibnum = 3
+fibnum^2 = 9
+fibnum = 5
+fibnum^2 = 25
+fibnum = 8
+fibnum^2 = 64
+fibnum = 13
+fibnum^2 = 169
+fibnum = 21
+fibnum^2 = 441
+fibnum = 34
+fibnum^2 = 1156
+
+key = 1
+val = one
+key = 2
+val = two
+key = 3
+val = three
+key = 4
+val = four
+key = 5
+val = five
+

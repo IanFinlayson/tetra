@@ -7,8 +7,6 @@ def fact(x int) int:
         return x * fact(x - 1)
 
 def main( ):
-    print("Enter n: ")
-    n = 5
-    print(n, "! = ", fact(n))
+    print(7, "! = ", fact(7))
 
 

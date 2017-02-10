@@ -1,0 +1,12 @@
+set bob = 5 and bob = 5
+set l = [bob] and l = [5]
+set l[0] = 1 and l = [1]
+now bob = 5
+set m = [6] and m = [6]
+set n = [7] and n = [7]
+set o = [m,n] and o = [[6], [7]]
+set m[0] = 2 and m = [2]
+now o = [[2], [7]]
+set p = l and p = [1]
+set p[0] = 3 and p = [3]
+now l = [3]
