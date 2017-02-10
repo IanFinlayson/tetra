@@ -512,6 +512,7 @@ Data* Data::create(DataType* type, const Value* value) {
             newData->value = new Pair();
             break;
         case TYPE_FUNCTION:
+        case TYPE_OVERLOAD:
             newData->value = new Function();
             break;
         default:

@@ -25,6 +25,7 @@ enum DataTypeKind {
     TYPE_CLASS,
     TYPE_MUTEX,
     TYPE_TASK,
+    TYPE_OVERLOAD,
     TYPE_PAIR
 };
 

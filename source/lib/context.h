@@ -37,7 +37,7 @@ class Context {
 
         if (getGlobalScopeRef()->containsVar(name)) {
             value = (getGlobalScopeRef()->lookupVar(name, type));
-        } else if (type->getKind() != TYPE_FUNCTION) {
+        } else if (type->getKind() != TYPE_FUNCTION && type->getKind() != TYPE_OVERLOAD) {
             /* look up general variables */
             value = programStack.top()->lookupVar(name, type);
         } else {
@@ -52,11 +52,10 @@ class Context {
         return value;
     }
 
-    /* the first is for when there is no initial setup for a scope
-       (i.e. a function call with no formal parameters that must be
-       initialized) the second is for adding a scope which had to have some
-       data preloaded into it, as is the case when calling a function with
-       arguments */
+    /* overloaded function call, one when there is no initial setup for a scope
+       (i.e. a function call with no formal parameters that must be initialized)
+       The second is for adding a scope which had to have some data preloaded into
+       it, as is the case when calling a function with arguments */
     void initializeNewScope();
     void initializeNewScope(Scope* newScope);
 

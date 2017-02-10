@@ -116,20 +116,26 @@ bool FunctionMap::hasFuncNamed(String name) {
     return false;
 }
 
-std::vector<DataType> FunctionMap::getFunctionsNamed(String name) {
-    /* all the functions we will find */
-    std::vector<DataType> functionList;
+DataType FunctionMap::getFunctionsNamed(String name) {
+    /* create a dataType to return */
+    DataType retType = DataType(TYPE_OVERLOAD);
 
     /* loop through all elements in the map */
     for (std::map<String, Node*>::iterator it = lookup.begin(); it != lookup.end(); it++) {
         /* check for a name match */
         if (name == it->first.substring(0, (it->first).indexOf("("))) {
             /* if one was found, add it to the subtypes */
-            functionList.push_back(DataType(*(it->second->type())));
+            retType.subtypes->push_back(DataType(*(it->second->type())));
         }
     }
-
-    return functionList;
+    /* If there are no subtypes, return null */
+    if (retType.subtypes->size() == 0) {
+        retType = DataType(TYPE_NONE);
+        /* If there is one, just return that one */
+    } else if (retType.subtypes->size() == 1) {
+        retType = (*(retType.subtypes))[0];
+    }
+    return retType;
 }
 
 bool FunctionMap::hasFunction(Node* node) {

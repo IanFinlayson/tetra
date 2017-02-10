@@ -64,6 +64,8 @@ String typeToString(DataType t) {
         case TYPE_FUNCTION: {
             return typeToString(&((*(t.subtypes))[0])) + "->" + typeToString(&((*(t.subtypes))[1]));
         }
+        case TYPE_OVERLOAD:
+            return "overload";
         default:
             throw Error("typeToString: Unknown data type");
     }
@@ -140,7 +142,7 @@ const Node* ClassContext::getMethod(DataType* type, String name) {
     return methods.getFunctionNode(type, name);
 }
 
-std::vector<DataType> ClassContext::getMethods(String name) {
+DataType ClassContext::getMethods(String name) {
     return methods.getFunctionsNamed(name);
 }
 
@@ -196,7 +198,7 @@ DataTypeKind DataType::getKind() const {
 /* compare two data types for equality */
 bool operator==(const DataType& lhs, const DataType& rhs) {
     /* check for an overload/function pairing */
-    if (lhs.getKind() == TYPE_FUNCTION && rhs.getKind() == TYPE_FUNCTION) {
+    if (lhs.getKind() == TYPE_OVERLOAD && rhs.getKind() == TYPE_FUNCTION) {
         /* check each of them */
         for (long unsigned int i = 0; i < lhs.subtypes->size(); i++) {
             /* if one has the right params... */
@@ -208,7 +210,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     }
 
     /* check for a function/overload pairing */
-    if (rhs.getKind() == TYPE_FUNCTION && lhs.getKind() == TYPE_FUNCTION) {
+    if (rhs.getKind() == TYPE_OVERLOAD && lhs.getKind() == TYPE_FUNCTION) {
         /* check each of them */
         for (long unsigned int i = 0; i < rhs.subtypes->size(); i++) {
             /* if one has the right params... */
@@ -992,7 +994,6 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
             lhs = inferExpression(expr->child(0), function);
             /* make an empty tuple type for the params */
             DataType* rhsParams = new DataType(TYPE_TUPLE);
-
             /* if there are arguments... */
             if (expr->getNumChildren() > 1) {
                 /* infer them */
@@ -1000,16 +1001,19 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                 /* add them to the tuple */
                 buildParamTupleType(rhsParams, expr->child(1));
             }
-            
-            /* make sure that we found a matching function */
-            if (lhs.getKind() == TYPE_FUNCTION) {
-                //std::cout << "We are looking for " << typeToString(rhsParams) << " in:\n";
-                //for (unsigned int i = 0; i < lhs.subtypes->size(); i++) {
-                //    std::cout << typeToString((*((*(lhs.subtypes))[i].subtypes))[1]) << "\n";
-                //}
-                //std::cout << "\n\n";
 
-                /* check each of the possibilities */
+            /* make sure that we found a matching function */
+            /* if we have a single function... */
+            if (lhs.getKind() == TYPE_FUNCTION) {
+                /* if it has the right params... */
+                if ((*(lhs.subtypes))[0] == *rhsParams) {
+                    /* return the return type */
+                    delete rhsParams;
+                    return (*(lhs.subtypes))[1];
+                }
+                /* if we have multiple possibilities */
+            } else if (lhs.getKind() == TYPE_OVERLOAD) {
+                /* check each of them */
                 for (long unsigned int i = 0; i < lhs.subtypes->size(); i++) {
                     /* if one has the right params... */
                     if ((*((*(lhs.subtypes))[i].subtypes))[0] == *rhsParams) {
@@ -1022,9 +1026,9 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
             /* if we get here, then we either haven't found any matches,
              * or the ones that we have found don't accept the correct arguments
              */
-
             throw Error("No matching function for: '" + expr->child(0)->getStringvalue() +
-                            typeToString(rhsParams) + "'.", expr->getLine());
+                            typeToString(rhsParams) + "'.",
+                        expr->getLine());
         }
 
         case NODE_ACTUAL_PARAM_LIST:
@@ -1581,7 +1585,8 @@ void addStls() {
     for (unsigned long i = 0; i < sizeof(stls) / sizeof(stls[0]); i++) {
         /* add them to the globals */
         DataType type(TYPE_FUNCTION);
-        globals.insert(std::pair<String, Symbol>(stls[i], Symbol(stls[i], &type, 0, true)));
+
+        globals.insert(std::pair<String, Symbol>("len", Symbol(stls[i], &type, 0, true)));
     }
 }
 
