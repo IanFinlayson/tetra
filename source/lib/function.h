@@ -1,5 +1,5 @@
-/* list.h
- * declares the List class which represents a Tetra List object */
+/* function.h
+ * declares the Function class which represents a Tetra function object */
 
 #ifndef FUNCTION_H
 #define FUNCTION_H

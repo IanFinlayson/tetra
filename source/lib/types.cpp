@@ -64,8 +64,13 @@ String typeToString(DataType t) {
         case TYPE_FUNCTION: {
             return typeToString(&((*(t.subtypes))[0])) + "->" + typeToString(&((*(t.subtypes))[1]));
         }
-        case TYPE_OVERLOAD:
-            return "overload";
+        case TYPE_OVERLOAD: {
+            String all = "Overloaded function: {";
+            for (unsigned long int i = 0; i < t.subtypes->size(); i++) {
+                all += typeToString(&((*(t.subtypes))[i])) + " ";
+            }
+            return all + "}"; 
+        }
         default:
             throw Error("typeToString: Unknown data type");
     }

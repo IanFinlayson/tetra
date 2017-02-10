@@ -31,31 +31,71 @@ class Context {
 
     void initializeGlobalVars(const Node*);
 
+    /* find an overloaded function by name and arguments */
+    Data* findOverload(Node* functionCall) {
+        //std::cout << "We are looking for a function overload:\n";
+        //dumpTreeStdout(functionCall, 0);
+
+        /* build the signature we are looking for from the supplied parameters */
+        String signature = functionCall->child(0)->getStringvalue() + "(";
+
+        /* loop over the args if any */
+        Node* args = (functionCall->getNumChildren() > 1) ? functionCall->child(1) : NULL;
+        bool first = true;
+        while (1) {
+            if (args == NULL) {
+                break;
+            }
+
+            /* only put comma in if this isnt' the first time */
+            if (!first) {
+                signature += ",";
+            }
+            first = false;
+
+            /* add this one in */
+            signature += typeToString(args->child(0)->type());
+
+            /* move to the next one */
+            args = (args->getNumChildren() > 1) ? args->child(1) : NULL;
+        }
+        signature += ")";
+
+        //String signature = "getNum(int,int)";
+        //std::cout << "WE BUILT THE SIGNATURE '" << signature << "'\n\n\n\n";
+
+        /* now find it in the tree and pack up an object for it */
+        Node* funcNode =  functions.getFunctionNode(signature);
+        Function funcVal(funcNode);
+        DataType t(TYPE_FUNCTION);
+        return Data::create(&t, &funcVal);
+    }
+
     /* lookup a variable  in the present context */
     Data* lookupVar(String name, DataType* type) {
         Data* value;
 
         if (getGlobalScopeRef()->containsVar(name)) {
             value = (getGlobalScopeRef()->lookupVar(name, type));
-        } else if (type->getKind() != TYPE_FUNCTION && type->getKind() != TYPE_OVERLOAD) {
-            /* look up general variables */
-            value = programStack.top()->lookupVar(name, type);
-        } else {
-            /* find functions */
-            String signature 
-                = FunctionMap::getFunctionSignature(name,type);
+        } else if (type->getKind() == TYPE_FUNCTION) {
+            /* find the function */
+            String signature = FunctionMap::getFunctionSignature(name,type);
             Node* funcNode =  functions.getFunctionNode(signature);
             Function funcVal(funcNode);
             value = Data::create(type, &funcVal);
+        } else {
+            /* look up general variables */
+            value = programStack.top()->lookupVar(name, type);
         }
 
         return value;
     }
 
-    /* overloaded function call, one when there is no initial setup for a scope
-       (i.e. a function call with no formal parameters that must be initialized)
-       The second is for adding a scope which had to have some data preloaded into
-       it, as is the case when calling a function with arguments */
+    /* the first is for when there is no initial setup for a scope
+       (i.e. a function call with no formal parameters that must be
+       initialized) the second is for adding a scope which had to have some
+       data preloaded into it, as is the case when calling a function with
+       arguments */
     void initializeNewScope();
     void initializeNewScope(Scope* newScope);
 

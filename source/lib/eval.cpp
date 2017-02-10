@@ -76,12 +76,21 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
     /* len function */
     else if (funcName == "len") {
         return tslLen(node->child(1), context);
-    }
 
-    /* regular user defined functions */
-    else {
-        /* it's user defined, find it in the tree */
-        Data* funcData = evaluateExpression(node->child(0), context);
+    } else {
+        /* it's just a regular user defined functions */
+
+        Data* funcData;
+        if (node->child(0)->type()->getKind() == TYPE_OVERLOAD) {
+            /* we need to find the function value as an overload */
+            funcData = context->findOverload(node);
+
+        } else {
+            /* else we can just look it up from the context iby name */
+            funcData = evaluateExpression(node->child(0), context);
+        }
+
+        /* get the body node out of the function */
         Node* funcNode = ((Function*)funcData->getValue())->getNode();
 
         /* check if there are parameters to be passed, and do so if needed */
