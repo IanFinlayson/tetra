@@ -155,7 +155,7 @@ String stringType(Node* node) {
             /* print the string, but escape new lines to preserve formatting */
             String constant = node->getStringvalue();
             constant.replace("\n", "\\n");
-            return "\"" + constant + "\"";
+            return "'" + constant + "'";
         }
         case NODE_IDENTIFIER:
             return "ID " + node->getStringvalue();
