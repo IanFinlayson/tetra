@@ -117,17 +117,17 @@ String Real::toString() const {
 }
 
 String Pair::toString() const {
-  String result = "";
+    String result = "";
 
-  DataTypeKind keyKind = key->getType()->getKind();
-  DataTypeKind valKind = value->getType()->getKind();
-   
-  String keyOuter = (keyKind == TYPE_STRING) ? "'" : "";
-  String valOuter = (valKind == TYPE_STRING) ? "'" : "";
+    DataTypeKind keyKind = key->getType()->getKind();
+    DataTypeKind valKind = value->getType()->getKind();
 
-  result += keyOuter + key->getValue()->toString() + keyOuter + ": ";
-  result += valOuter + value->getValue()->toString() + valOuter; 
-  return result;
+    String keyOuter = (keyKind == TYPE_STRING) ? "'" : "";
+    String valOuter = (valKind == TYPE_STRING) ? "'" : "";
+
+    result += keyOuter + key->getValue()->toString() + keyOuter + ": ";
+    result += valOuter + value->getValue()->toString() + valOuter;
+    return result;
 }
 
 String Container::toString() const {
@@ -135,7 +135,7 @@ String Container::toString() const {
     for (unsigned i = 0; i < length(); i++) {
         DataTypeKind kind = (*this)[i]->getType()->getKind();
         String outer = (kind == TYPE_STRING) ? "'" : "";
-        result += outer + (*this)[i]->getValue()->toString() + outer; 
+        result += outer + (*this)[i]->getValue()->toString() + outer;
         /* if not the last, print a comma */
         if ((i + 1) < values.size()) {
             result += ", ";
@@ -152,5 +152,3 @@ String Function::toString() const {
 void p(const String& str) {
     std::cout << str << std::endl;
 }
-
-

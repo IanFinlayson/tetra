@@ -23,7 +23,7 @@ class String : public Value {
     }
 
     String(const void* address) {
-        str.sprintf("%lX",(unsigned long)address);
+        str.sprintf("%lX", (unsigned long) address);
     }
 
     String(const Int& value);

@@ -144,7 +144,7 @@ bool FunctionMap::hasFunction(DataType* type, String name) {
  * runtime) Assembles the function signature for the function */
 String FunctionMap::getFunctionSignature(const Node* node) {
     if (node->kind() == NODE_FUNCTION) {
-        return getFunctionSignature(node->getStringvalue(),node->type());
+        return getFunctionSignature(node->getStringvalue(), node->type());
     } else if (node->kind() == NODE_FUNCALL) {
         /* get the params */
         DataType* params = new DataType(TYPE_TUPLE);

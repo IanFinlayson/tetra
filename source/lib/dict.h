@@ -12,8 +12,8 @@ class Data;
 /* the Dict class */
 class Dict : public Container {
    public:
-    Data* operator[](unsigned i) const{
-        return ((Pair*)(values[i]->getValue()))->getKey();
+    Data* operator[](unsigned i) const {
+        return ((Pair*) (values[i]->getValue()))->getKey();
     }
 
     /* get the value from the dict mapped to by the given key */
@@ -22,7 +22,7 @@ class Dict : public Container {
         if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return ((Pair*)(values[idxMap.at(keyString)])->getValue())->getVal();
+            return ((Pair*) (values[idxMap.at(keyString)])->getValue())->getVal();
         }
     }
 
@@ -32,7 +32,7 @@ class Dict : public Container {
         if (!idxMap.count(keyString)) {
             throw RuntimeError("Key not contained in dictionary.", 0);
         } else {
-            return ((Pair*)(values[idxMap.at(keyString)])->getValue())->getVal();
+            return ((Pair*) (values[idxMap.at(keyString)])->getValue())->getVal();
         }
     }
 
@@ -46,18 +46,19 @@ class Dict : public Container {
         /* add to the val list*/
         values.push_back(element);
         /*make the index mapping*/
-        String keyString = ((Pair*)(element->getValue()))->getKey()->getValue()->toString();
-        idxMap[keyString] =  (length() - 1); 
+        String keyString = ((Pair*) (element->getValue()))->getKey()->getValue()->toString();
+        idxMap[keyString] = (length() - 1);
     }
 
    protected:
-    String getLDelim () const {
+    String getLDelim() const {
         return L_DELIM;
     }
 
-    String getRDelim () const {
+    String getRDelim() const {
         return R_DELIM;
     }
+
    private:
     static const String L_DELIM;
     static const String R_DELIM;

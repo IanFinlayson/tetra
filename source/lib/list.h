@@ -27,13 +27,13 @@ class List : public Container {
     }
 
     /* for loop iteration through elems*/
-    Data* operator[](unsigned i) const{
+    Data* operator[](unsigned i) const {
         return values[i];
     }
 
     /* add an element */
     void add(Data* element) {
-        //Data* valPtr = Data::create(element->getType(), element->getValue());
+        // Data* valPtr = Data::create(element->getType(), element->getValue());
         values.push_back(element);
     }
 

@@ -1,5 +1,5 @@
 /* pair->h
- * declares the pair class which represents a Tetra 
+ * declares the pair class which represents a Tetra
  * dictionary key-value pair */
 
 #ifndef PAIR_H
@@ -12,11 +12,10 @@ class Data;
 
 /* the List class */
 class Pair : public Value {
-  public:
-
+   public:
     void copyValue(const Value& other) {
-       this->key = ((Pair&)other).key; 
-       this->value = ((Pair&)other).value; 
+        this->key = ((Pair&) other).key;
+        this->value = ((Pair&) other).value;
     }
 
     String toString() const;
@@ -31,13 +30,14 @@ class Pair : public Value {
         this->key = key;
         this->value = value;
     }
-    Data* getKey () {
+    Data* getKey() {
         return key;
     }
-    Data*& getVal () {
+    Data*& getVal() {
         return value;
     }
-  private:
+
+   private:
     Data* key;
     Data* value;
 };

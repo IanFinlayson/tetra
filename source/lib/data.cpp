@@ -459,14 +459,14 @@ Data* Data::opNegate() {
 
 Data* Data::opIndex(Data* other, bool isLValue) {
     switch (type.getKind()) {
-        case TYPE_DICT:  
+        case TYPE_DICT:
             if (isLValue && !(((Dict*) value)->hasKey(other))) {
                 Pair p;
                 p.set(other, Data::create(&((*(type.subtypes))[1]), nullptr));
-                ((Dict*)value)->add(Data::create(PAIR_TYPE,&p));
-             }
+                ((Dict*) value)->add(Data::create(PAIR_TYPE, &p));
+            }
         case TYPE_LIST:
-            return ((Container*)value)->get(other);
+            return ((Container*) value)->get(other);
         case TYPE_STRING: {
             int index = ((Int*) other->value)->toInt();
             String letter = ((String*) value)->substring(index, 1);

@@ -34,12 +34,12 @@ class Container : public Value {
         }
     }
 
-    virtual void add(Data* element) = 0; 
+    virtual void add(Data* element) = 0;
 
-    /* tetra program element access */ 
+    /* tetra program element access */
     virtual Data*& get(Data* idx) = 0;
     virtual Data* get(Data* idx) const = 0;
-    
+
    protected:
     virtual String getLDelim() const = 0;
     virtual String getRDelim() const = 0;

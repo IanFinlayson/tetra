@@ -11,17 +11,17 @@
 class Function : public Value {
    public:
     String toString() const;
-    
+
     Function() {
         f = nullptr;
     }
-    
+
     Function(Node* f) {
         this->f = f;
     }
 
     void copyValue(const Value& other) {
-        f = ((Function&)other).f;
+        f = ((Function&) other).f;
     }
 
     String getName() const {
@@ -29,9 +29,9 @@ class Function : public Value {
     }
 
     String getAddress() const {
-        return String(Int((unsigned long)f));
+        return String(Int((unsigned long) f));
     }
-     
+
     Node* getNode() const {
         return f;
     }

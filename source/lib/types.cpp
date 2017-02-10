@@ -69,7 +69,7 @@ String typeToString(DataType t) {
             for (unsigned long int i = 0; i < t.subtypes->size(); i++) {
                 all += typeToString(&((*(t.subtypes))[i])) + " ";
             }
-            return all + "}"; 
+            return all + "}";
         }
         default:
             throw Error("typeToString: Unknown data type");
@@ -373,7 +373,6 @@ DataType inferLen(Node* functionCall, Node* function) {
     /* should return an int */
     return DataType(TYPE_INT);
 }
-
 
 DataType inferSleep(Node* functionCall, Node* function) {
     /* check that there is one argument */

@@ -59,7 +59,7 @@ class Context {
         signature += ")";
 
         /* now find it in the tree and pack up an object for it */
-        Node* funcNode =  functions.getFunctionNode(signature);
+        Node* funcNode = functions.getFunctionNode(signature);
         Function funcVal(funcNode);
         DataType t(TYPE_FUNCTION);
         return Data::create(&t, &funcVal);
@@ -73,8 +73,8 @@ class Context {
             value = (getGlobalScopeRef()->lookupVar(name, type));
         } else if (type->getKind() == TYPE_FUNCTION) {
             /* find the function */
-            String signature = FunctionMap::getFunctionSignature(name,type);
-            Node* funcNode =  functions.getFunctionNode(signature);
+            String signature = FunctionMap::getFunctionSignature(name, type);
+            Node* funcNode = functions.getFunctionNode(signature);
             Function funcVal(funcNode);
             value = Data::create(type, &funcVal);
         } else {

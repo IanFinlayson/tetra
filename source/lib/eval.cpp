@@ -91,7 +91,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         }
 
         /* get the body node out of the function */
-        Node* funcNode = ((Function*)funcData->getValue())->getNode();
+        Node* funcNode = ((Function*) funcData->getValue())->getNode();
 
         /* check if there are parameters to be passed, and do so if needed */
         if (node->child(1) != NULL) {
@@ -599,7 +599,6 @@ Data* evaluateStatement(Node* node, Context* context) {
         } break;
 
         case NODE_FOR: {
-
             DataTypeKind k = node->child(1)->type()->getKind();
             if (k == TYPE_DICT || k == TYPE_LIST) {
                 /* evaluate the list we are looping through */
@@ -627,15 +626,15 @@ Data* evaluateStatement(Node* node, Context* context) {
                     context->normalizeStatus();
 
                     /* look the induction variable up in the context */
-                    Data* loopVariable =
-                        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                                                            node->child(0)->type());
 
                     /* set it to the next value */
                     loopVariable->opAssign((*container)[i]);
 
                     /* evaluate the body of the loop */
                     returnValue = evaluateStatement(node->child(2), context);
-            }
+                }
 
             } else if (k == TYPE_STRING) {
                 /* evaluate the string we are looping through */
