@@ -19,12 +19,6 @@
 /* given a function signature, returns the adress of a node containing the
    function definition for that signature */
 Node* FunctionMap::getFunctionNode(const String functionSignature) {
-    //std::cout << "Looking for function '" << functionSignature << "' in:\n";
-    //for (auto it = lookup.cbegin(); it != lookup.cend(); ++it) {
-            //std::cout << "\t" << it->first << " : " << it->second << "\n";
-    //}
-    //std::cout << "\n\n";
-
     /* if function is not there, will return default Node* (i.e. NULL) */
     return lookup[functionSignature];
 }

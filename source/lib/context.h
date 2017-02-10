@@ -33,9 +33,6 @@ class Context {
 
     /* find an overloaded function by name and arguments */
     Data* findOverload(Node* functionCall) {
-        //std::cout << "We are looking for a function overload:\n";
-        //dumpTreeStdout(functionCall, 0);
-
         /* build the signature we are looking for from the supplied parameters */
         String signature = functionCall->child(0)->getStringvalue() + "(";
 
@@ -60,9 +57,6 @@ class Context {
             args = (args->getNumChildren() > 1) ? args->child(1) : NULL;
         }
         signature += ")";
-
-        //String signature = "getNum(int,int)";
-        //std::cout << "WE BUILT THE SIGNATURE '" << signature << "'\n\n\n\n";
 
         /* now find it in the tree and pack up an object for it */
         Node* funcNode =  functions.getFunctionNode(signature);
