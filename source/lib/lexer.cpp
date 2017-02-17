@@ -8,7 +8,6 @@
 #include <cstring>
 #include <iostream>
 #include <string>
-
 #include <QFile>
 #include <QTextStream>
 

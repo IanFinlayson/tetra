@@ -7,8 +7,7 @@
 
 #include "values.h"
 #include "error.h"
-
-class Data;
+#include "container.h"
 
 /* the List class */
 class Pair : public Value {

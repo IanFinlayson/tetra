@@ -1,0 +1,8 @@
+def main():
+    background:
+        x = 0
+        print("Just created x and x = ", x, "\n")
+        for i in [1...100]:
+            print("i = ", i, "\n")
+            x += i 
+            print("Just added i to x and x = ", x, "\n")

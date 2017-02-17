@@ -1,12 +1,16 @@
+global v = 0 
+
 def main():
-#getNum()
-    getNum(1,1)
+    print("In main, global v = ", v, "\n")
+    doStuff()
+    print("Just returned to main from doStuff() and v = ", v, "\n")
 
-def getNum() int:
-    print("In getNum(), about to return 10.\n")
-    return 10
-
-def getNum(i int, j int) int:
-    print("In getNum(int, int), about to return 10.\n")
-    return 10
-
+def doStuff():
+    x = 2
+    print("In doStuff(), just created x and x = ", x, "\n")
+    background:
+        print("In background task in doStuff().","\n")
+        for z in [1 ... 1000]:
+            pass
+        v += x
+        print("Exited for loop, still in task, just added x to v and v = ",v,"\n")

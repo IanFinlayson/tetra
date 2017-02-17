@@ -7,8 +7,6 @@
 #include "container.h"
 #include "pair.h"
 
-class Data;
-
 /* the Dict class */
 class Dict : public Container {
    public:
