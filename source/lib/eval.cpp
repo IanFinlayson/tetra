@@ -382,6 +382,9 @@ Data* evaluateParallel(Node* node, Context* context) {
     Node* next = node->child(0);
     std::vector<ParallelWorker*> children_threads;
 
+    /* marks this context as parallel */
+    context->incrementBackgroundThreads();
+
     while (next != NULL) {
         /* peel off the left child */
         Node* left = next->child(0);
@@ -412,6 +415,7 @@ Data* evaluateParallel(Node* node, Context* context) {
 
     /* end parallel mode */
     context->normalizeStatus();
+    context->decrementBackgroundThreads();
 
     /* TODO what should happen if a parallel has a return in it??? */
     return NULL;
@@ -420,6 +424,9 @@ Data* evaluateParallel(Node* node, Context* context) {
 Data* evaluateBackground(Node* node, Context* context) {
     /* mark the context as being parallel */
     context->notifyParallel();
+
+    /* add in one thread to the scopes */
+    context->incrementBackgroundThreads();
 
     /* make a thread for running this node, and add to the list */
     ParallelWorker* worker = new ParallelWorker(node->child(0), context);

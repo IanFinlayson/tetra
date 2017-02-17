@@ -22,8 +22,6 @@ class ParallelWorker : public QThread {
         this->context = new Context(*context);
     }
 
-    /* TODO MAKE OUR OWN CONTEXT! */
-
     /* this function is called in the new thread */
     void run() Q_DECL_OVERRIDE {
         /* run evaluate our node, and save the return value */

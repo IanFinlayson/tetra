@@ -41,16 +41,17 @@ class Scope {
    public:
     Scope() {
         executionStatus = NORMAL;
+        numThreads = 0;
     }
 
     /* look a variable up in this scope by name */
     Data* lookupVar(String name, DataType* type) {
         Data* var;
-        if (executionStatus == PARALLEL) {
+        if (numThreads >= 1) {
             varMutex.lock();
         }
         var = varScope.lookupVar(name, type);
-        if (executionStatus == PARALLEL) {
+        if (numThreads >= 1) {
             varMutex.unlock();
         }
         return var;
@@ -73,6 +74,19 @@ class Scope {
         executionStatus = status;
     }
 
+    /* add a background thread into this scope */
+    void incrementBackgroundThreads() {
+        numThreads++;
+    }
+    void decrementBackgroundThreads() {
+        numThreads--;
+    }
+
+    /* return number of threads in the scope */
+    int getNumThreads() const {
+        return numThreads;
+    }
+
     bool containsVar(const String& varName) const {
         return varScope.containsVar(varName);
     }
@@ -88,10 +102,8 @@ class Scope {
     VarTable varScope;
     ExecutionStatus executionStatus;
 
-    /* this boolean denotes that there are multiple threads working in the
-     * current scope.  While that is the case, Insertions into the scope's
-     * VarTable must be performed in a threadsafe manner */
-    bool multiThreaded;
+    /* the number of threads active in this scope */
+    int numThreads;
 
     /* mutex for protecting variables when in parallel mode */
     QMutex varMutex;

@@ -10,7 +10,7 @@ def doStuff():
     print("In doStuff(), just created x and x = ", x, "\n")
     background:
         print("In background task in doStuff().","\n")
-        for z in [1 ... 1000]:
-            pass
+        sleep(0.5)
         v += x
         print("Exited for loop, still in task, just added x to v and v = ",v,"\n")
+
