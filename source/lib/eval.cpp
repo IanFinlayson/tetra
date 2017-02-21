@@ -421,6 +421,22 @@ Data* evaluateParallel(Node* node, Context* context) {
     return NULL;
 }
 
+Data* evaluateLock(Node* node, Context* context) {
+    /* find the mutex object here */
+    Data* mutex = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+
+    /* lock the mutex */
+    ((Mutex*) mutex->getValue())->lock();
+
+    /* evaluate the body */
+    Data* returnValue = evaluateStatement(node->child(1), context);
+
+    /* unlock the mutex */
+    ((Mutex*) mutex->getValue())->unlock();
+
+    return returnValue;
+}
+
 Data* evaluateBackground(Node* node, Context* context) {
     /* mark the context as being parallel */
     context->notifyParallel();
@@ -687,10 +703,12 @@ Data* evaluateStatement(Node* node, Context* context) {
         /* handle the parallel constructs */
         case NODE_PARALLEL:
             return evaluateParallel(node, context);
-            break;
 
         case NODE_BACKGROUND:
             return evaluateBackground(node, context);
+
+        case NODE_LOCK:
+            return evaluateLock(node, context);
 
         default:
             /* if it's none of these things, it must be an expression used as a

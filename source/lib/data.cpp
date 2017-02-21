@@ -6,17 +6,7 @@
 #include <cmath>
 #include <iostream>
 
-#include "types.h"
-#include "error.h"
-#include "data.h"
-#include "strings.h"
-#include "int.h"
-#include "real.h"
-#include "bool.h"
-#include "list.h"
-#include "dict.h"
-#include "tuple.h"
-#include "function.h"
+#include "tetra.h"
 
 Data* Data::opAssign(const Data* other) {
     /* copy our data type and also value */
@@ -510,6 +500,9 @@ Data* Data::create(DataType* type, const Value* value) {
             break;
         case TYPE_PAIR:
             newData->value = new Pair();
+            break;
+        case TYPE_MUTEX:
+            newData->value = new Mutex();
             break;
         case TYPE_FUNCTION:
         case TYPE_OVERLOAD:

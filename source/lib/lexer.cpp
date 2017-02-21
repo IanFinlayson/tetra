@@ -672,3 +672,11 @@ int yylex() {
     throw Error(message, yylineNumber);
     return 0;
 }
+
+/* this function generates a new unique id that can't be used by tetra code itself */
+String generateNewId() {
+    static Int nextIdNumber = 0;
+    String id = "@generatedId" + nextIdNumber.toString();
+    nextIdNumber++;
+    return id;
+}

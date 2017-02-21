@@ -612,6 +612,12 @@ background: TOK_BACKGROUND TOK_COLON block {
 /* a lock statement */
 lock_statement: TOK_LOCK TOK_COLON block {
     $$ = new Node(NODE_LOCK);
+
+    /* generate a name for it! */
+    Node* name = new Node(NODE_IDENTIFIER);
+    name->setStringvalue(generateNewId());
+    $$->addChild(name);
+
     $$->addChild($3);
     $$->setLine($1);
 }
