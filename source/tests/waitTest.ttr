@@ -1,0 +1,13 @@
+def main():
+    background t2:
+        sleep(0.2)
+        print("Done t2\n")
+    background t1:
+        sleep(0.1)
+        print("Done t1\n")
+    print("Launched them...\n")
+    wait t1
+    wait t2
+    print("All done!")
+
+

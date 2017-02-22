@@ -504,6 +504,9 @@ Data* Data::create(DataType* type, const Value* value) {
         case TYPE_MUTEX:
             newData->value = new Mutex();
             break;
+        case TYPE_TASK:
+            newData->value = new Task();
+            break;
         case TYPE_FUNCTION:
         case TYPE_OVERLOAD:
             newData->value = new Function();

@@ -1612,11 +1612,9 @@ void addMembers(ClassContext* context, Node* node) {
     }
 }
 
-/* Given a class context, removes any init functions
- * from its list of methods and adds them as
- * constructors to the lists of free functions
- * (also adds a default constructor if one does not
- * exist) */
+/* Given a class context, removes any init functions from its list of methods
+ * and adds them as constructors to the lists of free functions (also adds a
+ * default constructor if one does not exist) */
 void initSquared(ClassContext context) {
     /* remove the init functions */
     std::map<String, Node*> inits = context.removeInits();
@@ -1689,8 +1687,7 @@ void initClass(Node* node) {
 void checkClassTypes(Node* node) {
     /* check return types */
     if (node->kind() == NODE_FUNCTION) {
-        /* if the return type is a class, make sure that
-         * it exists */
+        /* if the return type is a class, make sure that it exists */
         if ((*(node->type()->subtypes)).back().getKind() == TYPE_CLASS &&
             !classes.count(*((*(node->type()->subtypes)).back().className))) {
             throw Error("Return type does not exist.", node->getLine());

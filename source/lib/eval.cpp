@@ -1,5 +1,5 @@
 /* eval.cpp
- * this file contains routines for evaluating the different tpyes of program
+ * this file contains routines for evaluating the different types of program
  * nodes
  */
 
@@ -373,6 +373,87 @@ Data* evaluateExpression(Node* node, Context* context) {
     }
 }
 
+Data* evaluateFor(Node* node, Context* context) {
+    DataTypeKind k = node->child(1)->type()->getKind();
+    if (k == TYPE_DICT || k == TYPE_LIST) {
+        /* evaluate the list we are looping through */
+        Data* containerData = evaluateExpression(node->child(1), context);
+
+        /* pull the list out of it */
+        Container* container = (Container*) containerData->getValue();
+
+        /* the return value if we hit one */
+        Data* returnValue = NULL;
+
+        /* for each item in this list */
+        for (unsigned i = 0; i < container->length(); i++) {
+            /* if we are breaking or returning, stop */
+            ExecutionStatus status = context->queryExecutionStatus();
+            if (status == BREAK) {
+                context->normalizeStatus();
+                return NULL;
+            } else if (status == RETURN) {
+                context->normalizeStatus();
+                return returnValue;
+            }
+
+            /* set context to normal for now */
+            context->normalizeStatus();
+
+            /* look the induction variable up in the context */
+            Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                    node->child(0)->type());
+
+            /* set it to the next value */
+            loopVariable->opAssign((*container)[i]);
+
+            /* evaluate the body of the loop */
+            returnValue = evaluateStatement(node->child(2), context);
+        }
+
+    } else if (k == TYPE_STRING) {
+        /* evaluate the string we are looping through */
+        Data* stringData = evaluateExpression(node->child(1), context);
+
+        /* pull the string out of it */
+        String* string = (String*) stringData->getValue();
+
+        /* the return value if we hit one */
+        Data* returnValue = NULL;
+
+        /* for each item in this string */
+        for (unsigned int i = 0; i < string->length(); i++) {
+            /* if we are breaking or returning, stop */
+            ExecutionStatus status = context->queryExecutionStatus();
+            if (status == BREAK) {
+                context->normalizeStatus();
+                return NULL;
+            } else if (status == RETURN) {
+                context->normalizeStatus();
+                return returnValue;
+            }
+
+            /* set context to normal for now */
+            context->normalizeStatus();
+
+            /* look the induction variable up in the context */
+            Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
+                    node->child(0)->type());
+
+            /* set it to the next value */
+            String letter = string->substring(i, 1);
+            DataType d(TYPE_STRING);
+            Data* letterD = Data::create(&d, &letter);
+            loopVariable->opAssign(letterD);
+
+            /* evaluate the body of the loop */
+            returnValue = evaluateStatement(node->child(2), context);
+        }
+    }
+
+    return NULL;
+}
+
 /* evaluate a parallel statement */
 Data* evaluateParallel(Node* node, Context* context) {
     /* mark the context as being parallel */
@@ -444,13 +525,37 @@ Data* evaluateBackground(Node* node, Context* context) {
     /* add in one thread to the scopes */
     context->incrementBackgroundThreads();
 
+    /* if there is a name, then the block is in child 1 instead */
+    int blockIdx = node->getNumChildren() == 2 ? 1 : 0;
+
     /* make a thread for running this node, and add to the list */
-    ParallelWorker* worker = new ParallelWorker(node->child(0), context);
+    ParallelWorker* worker = new ParallelWorker(node->child(blockIdx), context);
     worker->start();
     backgroundThreads.push_back(worker);
 
+    /* if it had a name, then set it up as a local variable */
+    if (node->getNumChildren() == 2) {
+        /* find the task object here */
+        Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+
+        /* assign the worker object into the task */
+        ((Task*) task->getValue())->setWorker(worker);
+    }
+
     return NULL;
 }
+
+Data* evaluateWait(Node* node, Context* context) {
+    /* find the task object here */
+    Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+    
+    /* wait for it to finish, then set it to NULL */
+    ((Task*) task->getValue())->wait();
+    ((Task*) task->getValue())->setWorker(NULL);
+
+    return NULL;
+}
+
 
 /* evaluate a statement node - only returns a value for return statements */
 Data* evaluateStatement(Node* node, Context* context) {
@@ -621,84 +726,9 @@ Data* evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
-        case NODE_FOR: {
-            DataTypeKind k = node->child(1)->type()->getKind();
-            if (k == TYPE_DICT || k == TYPE_LIST) {
-                /* evaluate the list we are looping through */
-                Data* containerData = evaluateExpression(node->child(1), context);
-
-                /* pull the list out of it */
-                Container* container = (Container*) containerData->getValue();
-
-                /* the return value if we hit one */
-                Data* returnValue = NULL;
-
-                /* for each item in this list */
-                for (unsigned i = 0; i < container->length(); i++) {
-                    /* if we are breaking or returning, stop */
-                    ExecutionStatus status = context->queryExecutionStatus();
-                    if (status == BREAK) {
-                        context->normalizeStatus();
-                        return NULL;
-                    } else if (status == RETURN) {
-                        context->normalizeStatus();
-                        return returnValue;
-                    }
-
-                    /* set context to normal for now */
-                    context->normalizeStatus();
-
-                    /* look the induction variable up in the context */
-                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                                                            node->child(0)->type());
-
-                    /* set it to the next value */
-                    loopVariable->opAssign((*container)[i]);
-
-                    /* evaluate the body of the loop */
-                    returnValue = evaluateStatement(node->child(2), context);
-                }
-
-            } else if (k == TYPE_STRING) {
-                /* evaluate the string we are looping through */
-                Data* stringData = evaluateExpression(node->child(1), context);
-
-                /* pull the string out of it */
-                String* string = (String*) stringData->getValue();
-
-                /* the return value if we hit one */
-                Data* returnValue = NULL;
-
-                /* for each item in this string */
-                for (unsigned int i = 0; i < string->length(); i++) {
-                    /* if we are breaking or returning, stop */
-                    ExecutionStatus status = context->queryExecutionStatus();
-                    if (status == BREAK) {
-                        context->normalizeStatus();
-                        return NULL;
-                    } else if (status == RETURN) {
-                        context->normalizeStatus();
-                        return returnValue;
-                    }
-
-                    /* set context to normal for now */
-                    context->normalizeStatus();
-
-                    /* look the induction variable up in the context */
-                    Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                                                            node->child(0)->type());
-
-                    /* set it to the next value */
-                    String letter = string->substring(i, 1);
-                    DataType d(TYPE_STRING);
-                    Data* letterD = Data::create(&d, &letter);
-                    loopVariable->opAssign(letterD);
-
-                    /* evaluate the body of the loop */
-                    returnValue = evaluateStatement(node->child(2), context);
-                }
-            }
-        } break;
+        case NODE_FOR:
+            return evaluateFor(node, context);
+            break;
 
         /* handle the parallel constructs */
         case NODE_PARALLEL:
@@ -709,6 +739,9 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_LOCK:
             return evaluateLock(node, context);
+
+        case NODE_WAIT:
+            return evaluateWait(node, context);
 
         default:
             /* if it's none of these things, it must be an expression used as a

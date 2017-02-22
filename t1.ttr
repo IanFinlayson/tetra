@@ -1,14 +1,10 @@
-global x = 0
 
 def main():
-    parallel:
-        for j in [1 ... 1000]:
-            lock xl:
-                x += 1
-        for i in [1 ... 1000]:
-            lock xl:
-                x += 1
-        print("Hey")
-    print(x)
-
+    print("Before bg\n")
+    background task1:
+        print("Start bg\n")
+        sleep(0.5)
+        print("Done bg\n")
+    wait task1
+    print("In main\n")
 
