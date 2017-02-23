@@ -1,0 +1,9 @@
+
+def main():
+    for i in [1, 2, 3]:
+        print(i, "\n")
+    for i in [2, 4, 6]:
+        print(i, "\n")
+    print(i)
+
+

@@ -1417,7 +1417,7 @@ void inferBlock(Node* block, Node* function) {
             }
 
             /* see if the identifier for indexing already exists */
-            Symbol idxSym = findIdSym(block->child(0));
+            Symbol idxSym = findIdSym(block->child(0), function);
 
             /* if it does, make sure it is the right type */
             if (idxSym.getName() != "") {
@@ -1436,6 +1436,9 @@ void inferBlock(Node* block, Node* function) {
                                     block->getLine());
                     }
                 }
+
+                /* set the type of the block to match */
+                block->child(0)->setDataType(*idxSym.getType());
 
                 /* otherwise, if it doesn't exist, add it */
             } else if (idxSym.getName() == "") {
