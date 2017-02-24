@@ -6,11 +6,13 @@
 #define SCOPE_H
 
 #include <list>
+#include <map>
 
 #include "vartable.h"
 #include "strings.h"
 
 class Node;
+class ParallelWorker;
 
 enum ThreadStatus { RUNNING, STOPPED, DESTROYED, WAITING };
 
@@ -50,7 +52,9 @@ class Scope {
         if (numThreads >= 1) {
             varMutex.lock();
         }
+
         var = varScope.lookupVar(name, type);
+        
         if (numThreads >= 1) {
             varMutex.unlock();
         }

@@ -20,6 +20,9 @@ class ParallelWorker : public QThread {
 
         /* make a copy of the context */
         this->context = new Context(*context);
+
+        /* assume no return */
+        this->returnValue = NULL;
     }
 
     /* this function is called in the new thread */

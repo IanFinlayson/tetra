@@ -21,7 +21,7 @@ void Environment::setMaxThreads(int pNum) {
     maxThreads = pNum;
 }
 
-int Environment::getMaxThreads() {
+unsigned int Environment::getMaxThreads() {
     return maxThreads;
 }
 
@@ -65,9 +65,8 @@ bool Environment::isEcho() {
 }
 
 /* static variable initializations for the environment */
-int Environment::maxThreads = QThread::idealThreadCount();
+unsigned int Environment::maxThreads = QThread::idealThreadCount();
 bool Environment::inputEcho = false;
 bool Environment::debugMode = false;
 bool Environment::running = true;
 VirtualConsole* Environment::console = NULL;
-long Environment::nextThreadID = 0;

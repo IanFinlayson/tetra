@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -558,18 +559,68 @@ Data* evaluateWait(Node* node, Context* context) {
 
 /* evaluate a parallel for loop */
 Data* evaluateParFor(Node* node, Context* context) {
+    /* keep track of all of thw worker threads */
+    std::vector<ParallelWorker*> workers;
+
+    /* find the type of thingy we are doing */
+    DataTypeKind k = node->child(1)->type()->getKind();
+    if (k == TYPE_DICT || k == TYPE_LIST) {
+        /* TODO somehow we must mark the induction variable as being from a par for loop */
+
+        /* evaluate the list we are looping through */
+        Data* containerData = evaluateExpression(node->child(1), context);
+
+        /* pull the actual list out of it */
+        Container* container = (Container*) containerData->getValue();
+
+        /* find the number of threads to spawn */
+        unsigned int numThreads = std::min(container->length(), Environment::getMaxThreads());
+
+        /* for each thread in the workgroup */
+        for (unsigned int i = 0; i < numThreads; i++) {
+            /* spawn one thread with these bounds */
+            ParallelWorker* worker = new ParallelWorker(node->child(2), context);
+            workers.push_back(worker);
+        }
+
+        /* for each data value */
+        for (unsigned int i = 0; i < container->length(); i++) {
+            /* find an idle worker */
+            ParallelWorker* idle = NULL;
+            while (true) {
+                for (unsigned int i = 0; i < workers.size(); i++) {
+                    if (workers[i]->isFinished()) {
+                        idle = workers[i];
+                        break;
+                    }
+                }
+
+                /* if there was an idle person we can exit the loop */
+                if (!idle) {
+                    break;
+                }
+            }
+
+            /* TODO now we must somehow assign this thread a value in the scope */
+
+            /* start the worker back up */
+            idle->start();
+        }
 
 
+    } else if (k == TYPE_STRING) {
+        throw Error("TODO, handle par fors on strings!!");
+    }
 
+    /* wait for all of the threads to finish before moving on */
+    for (unsigned int i = 0; i < workers.size(); i++) {
+        workers[i]->wait();
+        delete workers[i];
+    }
 
+    /* TODO somehow we must reset the parallel for loop variables */
 
-
-
-
-
-
-
-
+    return NULL;
 }
 
 /* evaluate a statement node - only returns a value for return statements */
@@ -619,7 +670,7 @@ Data* evaluateStatement(Node* node, Context* context) {
             return NULL;
             break;
 
-        /* set these in the context so we know where yo go next */
+            /* set these in the context so we know where yo go next */
         case NODE_BREAK:
             context->notifyBreak();
             break;
@@ -641,7 +692,7 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         } break;
 
-        /* handle simple if expressions */
+            /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
             Data* conditional = evaluateExpression(node->child(0), context);
@@ -656,7 +707,7 @@ Data* evaluateStatement(Node* node, Context* context) {
             }
         } break;
 
-        /* handle elif nodes */
+            /* handle elif nodes */
         case NODE_ELIF: {
             context->notifyElif();
 
@@ -745,7 +796,7 @@ Data* evaluateStatement(Node* node, Context* context) {
             return evaluateFor(node, context);
             break;
 
-        /* handle the parallel constructs */
+            /* handle the parallel constructs */
         case NODE_PARALLEL:
             return evaluateParallel(node, context);
 
