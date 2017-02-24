@@ -226,6 +226,18 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
         return false;
     }
 
+#if 0
+    EVENTUALLY THIS SHOULD WORK
+
+    /* check for int/real things
+     * if both are numerical, then the types match (due to auto promotion) */
+    if ((lhs.getKind() == TYPE_INT || lhs.getKind() == TYPE_REAL) &&
+        (rhs.getKind() == TYPE_INT || rhs.getKind() == TYPE_REAL)) {
+        return true;
+    }
+#endif
+
+
     /* otherwise, if they're not the same kind, fail */
     if (lhs.getKind() != rhs.getKind()) {
         return false;
@@ -890,7 +902,7 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                             expr->getLine());
             }
 
-            if ((lhs.getKind() != TYPE_INT) && (rhs.getKind() != TYPE_REAL)) {
+            if ((lhs.getKind() != TYPE_INT) && (lhs.getKind() != TYPE_REAL)) {
                 /* special case: adding strings and list is OK */
                 if ((expr->kind() == NODE_PLUS) &&
                     ((lhs.getKind() == TYPE_STRING) || (lhs.getKind() == TYPE_LIST))) {
@@ -1834,7 +1846,6 @@ void inferTypes(Node* node) {
         } else if (node->child(0)->kind() == NODE_CLASS) {
             inferClass(node->child(0));
         }
-        /* TODO: open, import */
 
         /* recursively infer any other functions */
         inferTypes(node->child(1));

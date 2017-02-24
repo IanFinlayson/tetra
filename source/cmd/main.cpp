@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 
     /* the default values */
     args.debug = 0;
-    args.threads = 8;
+    args.threads = QThread::idealThreadCount();
     args.echo = 0;
     args.inputFileName = NULL;
 

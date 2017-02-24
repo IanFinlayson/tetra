@@ -13,7 +13,7 @@
  */
 
 void Environment::initialize() {
-    maxThreads = 8;
+    maxThreads = QThread::idealThreadCount();
     console = NULL;
 }
 
@@ -65,7 +65,7 @@ bool Environment::isEcho() {
 }
 
 /* static variable initializations for the environment */
-int Environment::maxThreads = 8;
+int Environment::maxThreads = QThread::idealThreadCount();
 bool Environment::inputEcho = false;
 bool Environment::debugMode = false;
 bool Environment::running = true;

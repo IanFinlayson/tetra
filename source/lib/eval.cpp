@@ -556,6 +556,21 @@ Data* evaluateWait(Node* node, Context* context) {
     return NULL;
 }
 
+/* evaluate a parallel for loop */
+Data* evaluateParFor(Node* node, Context* context) {
+
+
+
+
+
+
+
+
+
+
+
+
+}
 
 /* evaluate a statement node - only returns a value for return statements */
 Data* evaluateStatement(Node* node, Context* context) {
@@ -742,6 +757,9 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_WAIT:
             return evaluateWait(node, context);
+
+        case NODE_PARFOR:
+            return evaluateParFor(node, context);
 
         default:
             /* if it's none of these things, it must be an expression used as a

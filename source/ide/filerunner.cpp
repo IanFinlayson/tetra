@@ -47,9 +47,9 @@ void FileRunner::runFile(bool debug) {
         program_root = parseFile(mainWindow->getOpenFile().toStdString().c_str());
 
         if (debug) {
-            interpret(program_root, true, 1);
+            interpret(program_root, true, QThread::idealThreadCount());
         } else {
-            interpret(program_root, false, 8);
+            interpret(program_root, false, QThread::idealThreadCount());
         }
 
     } catch (InterruptError e) {

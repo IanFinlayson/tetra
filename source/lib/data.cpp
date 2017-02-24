@@ -18,7 +18,7 @@ Data* Data::opAssign(const Data* other) {
 }
 
 /* operator methods
- * TODO: a lot of duplication here, how can these best be generalized?
+ * a lot of duplication here, how can these best be generalized?
  */
 Data* Data::opPlus(const Data* other) {
     /* create the result variable */
@@ -26,7 +26,7 @@ Data* Data::opPlus(const Data* other) {
 
     /* do different things depending on type what happens with real+int etc. */
     switch (type.getKind()) {
-        case TYPE_INT:
+        case TYPE_INT: 
             result->value->copyValue(*((Int*) value) + *((Int*) other->value));
             break;
         case TYPE_REAL:

@@ -50,9 +50,10 @@ class Data {
         return value;
     }
 
+
     /* return the data type of this */
-    DataType* getType() {
-        return &type;
+    DataType* getType() const {
+        return const_cast<DataType*>(&type);
     }
 
    private:
