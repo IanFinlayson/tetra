@@ -33,7 +33,7 @@ class Context {
     Data* findOverload(Node* functionCall);
 
     /* lookup a variable  in the present context */
-    Data* lookupVar(String name, DataType* type);
+    Data* lookupVar(String name, DataType* type, unsigned int threadid);
 
     /* the first is for when there is no initial setup for a scope
        (i.e. a function call with no formal parameters that must be

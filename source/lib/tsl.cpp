@@ -6,7 +6,7 @@
 #include "tetra.h"
 
 /* prints the expression(s) denoted by arguments given */
-Data* tslPrint(Node* args, Context* context) {
+Data* tslPrint(Node* args, Context* context, unsigned int threadId) {
     /* if no args given, just print a new line */
     if (args == NULL) {
         VirtualConsole* console = Environment::getConsole();
@@ -17,10 +17,10 @@ Data* tslPrint(Node* args, Context* context) {
     /* check if args is a structual node */
     if (args->kind() == NODE_ACTUAL_PARAM_LIST) {
         /* print the first thing */
-        tslPrint(args->child(0), context);
+        tslPrint(args->child(0), context, threadId);
         /* print the rest if there are any */
         if (args->getNumChildren() == 2) {
-            tslPrint(args->child(1), context);
+            tslPrint(args->child(1), context, threadId);
         }
     }
 
@@ -29,7 +29,7 @@ Data* tslPrint(Node* args, Context* context) {
         VirtualConsole* console = Environment::getConsole();
 
         /* evaluate the node and get the value of it */
-        Data* arg = evaluateExpression(args, context);
+        Data* arg = evaluateExpression(args, context, threadId);
 
         /* convert to a string and print it to the connected console */
         console->processStandardOutput(arg->getValue()->toString());
@@ -40,9 +40,9 @@ Data* tslPrint(Node* args, Context* context) {
 }
 
 /* sleeps for some real number of seconds */
-Data* tslSleep(Node* args, Context* context) {
+Data* tslSleep(Node* args, Context* context, unsigned int threadId) {
     /* evaluate the arguments */
-    Data* argument = evaluateExpression(args->child(0), context);
+    Data* argument = evaluateExpression(args->child(0), context, threadId);
 
     /* get it as a real */
     Real* rarg = (Real*) argument->getValue();
@@ -53,10 +53,10 @@ Data* tslSleep(Node* args, Context* context) {
 }
 
 /* get input from the user and return it */
-Data* tslInput(Node* args, Context* context) {
+Data* tslInput(Node* args, Context* context, unsigned int threadId) {
     /* if there is an argument, print it first */
     if (args != NULL) {
-        tslPrint(args, context);
+        tslPrint(args, context, threadId);
     }
 
     /* read the string from the user */
@@ -82,9 +82,9 @@ Data* tslInput(Node* args, Context* context) {
 }
 
 /* the type conversions */
-Data* tslInt(Node* args, Context* context) {
+Data* tslInt(Node* args, Context* context, unsigned int threadId) {
     /* evaluate the argument */
-    Data* argument = evaluateExpression(args->child(0), context);
+    Data* argument = evaluateExpression(args->child(0), context, threadId);
     DataType t(TYPE_INT);
 
     /* the three type possibilities */
@@ -109,9 +109,9 @@ Data* tslInt(Node* args, Context* context) {
     }
 }
 
-Data* tslReal(Node* args, Context* context) {
+Data* tslReal(Node* args, Context* context, unsigned int threadId) {
     /* evaluate the argument */
-    Data* argument = evaluateExpression(args->child(0), context);
+    Data* argument = evaluateExpression(args->child(0), context, threadId);
     DataType t(TYPE_REAL);
 
     /* the type possibilities */
@@ -131,9 +131,9 @@ Data* tslReal(Node* args, Context* context) {
     }
 }
 
-Data* tslString(Node* args, Context* context) {
+Data* tslString(Node* args, Context* context, unsigned int threadId) {
     /* evaluate the argument */
-    Data* argument = evaluateExpression(args->child(0), context);
+    Data* argument = evaluateExpression(args->child(0), context, threadId);
     DataType t(TYPE_STRING);
 
     /* the three type possibilities */
@@ -158,9 +158,9 @@ Data* tslString(Node* args, Context* context) {
     }
 }
 
-Data* tslBool(Node* args, Context* context) {
+Data* tslBool(Node* args, Context* context, unsigned int threadId) {
     /* evaluate the argument */
-    Data* argument = evaluateExpression(args->child(0), context);
+    Data* argument = evaluateExpression(args->child(0), context, threadId);
     DataType t(TYPE_BOOL);
 
     /* the type possibilities */
@@ -180,9 +180,9 @@ Data* tslBool(Node* args, Context* context) {
     }
 }
 
-Data* tslLen(Node* args, Context* context) {
+Data* tslLen(Node* args, Context* context, unsigned int threadId) {
     /* evaluate the argument */
-    Data* argument = evaluateExpression(args->child(0), context);
+    Data* argument = evaluateExpression(args->child(0), context, threadId);
     DataType t(TYPE_INT);
     Int length;
 

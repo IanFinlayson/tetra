@@ -45,11 +45,11 @@ Data* Context::findOverload(Node* functionCall) {
 }
 
 /* lookup a variable  in the present context */
-Data* Context::lookupVar(String name, DataType* type) {
+Data* Context::lookupVar(String name, DataType* type, unsigned int threadid) {
     Data* value;
 
     if (getGlobalScopeRef()->containsVar(name)) {
-        value = (getGlobalScopeRef()->lookupVar(name, type));
+        value = (getGlobalScopeRef()->lookupVar(name, type, threadid));
     } else if (type->getKind() == TYPE_FUNCTION) {
         /* find the function */
         String signature = FunctionMap::getFunctionSignature(name, type);
@@ -58,7 +58,7 @@ Data* Context::lookupVar(String name, DataType* type) {
         value = Data::create(type, &funcVal);
     } else {
         /* look up general variables */
-        value = programStack.top()->lookupVar(name, type);
+        value = programStack.top()->lookupVar(name, type, threadid);
     }
 
     return value;
@@ -71,7 +71,7 @@ void Context::initializeGlobalVars(const Node* tree) {
         Node* candidate = tree->child(0);
         if (candidate->kind() == NODE_GLOBAL || candidate->kind() == NODE_CONST) {
             /* perform assignment at this global scope */
-            evaluateStatement(candidate, this);
+            evaluateStatement(candidate, this, 0);
         }
 
         if (tree->child(1) != NULL) {

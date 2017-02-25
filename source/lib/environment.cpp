@@ -64,9 +64,19 @@ bool Environment::isEcho() {
     return inputEcho;
 }
 
+QMutex nextThreadIdLock;
+unsigned int Environment::getNextThreadId() {
+    nextThreadIdLock.lock();
+    unsigned int next = nextThreadId;
+    nextThreadId++;
+    nextThreadIdLock.unlock();
+    return next;
+}
+
 /* static variable initializations for the environment */
 unsigned int Environment::maxThreads = QThread::idealThreadCount();
 bool Environment::inputEcho = false;
 bool Environment::debugMode = false;
 bool Environment::running = true;
 VirtualConsole* Environment::console = NULL;
+unsigned int Environment::nextThreadId = 0;

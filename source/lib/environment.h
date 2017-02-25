@@ -23,6 +23,7 @@ class Environment {
     static void halt();
     static bool isRunning();
     static void setRunning();
+    static unsigned int getNextThreadId();
 
    private:
     static bool running;
@@ -30,6 +31,7 @@ class Environment {
     static unsigned int maxThreads;
     static VirtualConsole* console;
     static bool debugMode;
+    static unsigned int nextThreadId;
 };
 
 #endif

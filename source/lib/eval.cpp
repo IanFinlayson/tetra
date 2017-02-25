@@ -21,13 +21,13 @@ extern DataType* PAIR_TYPE;
 /* this function populates a scope object with the variables contained in a
  * portion of the subtree containing the actual parameter expressions which are
  * passed in */
-void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* sourceContext) {
+void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* sourceContext, unsigned int threadid) {
     /* check if we are a NODE_FORMAL_PARAM_LIST (structure), or an actual value */
     if (node1->kind() == NODE_FORMAL_PARAM_LIST) {
         /* recursively paste in the subtrees */
-        pasteArgList(node1->child(0), node2->child(0), destinationScope, sourceContext);
+        pasteArgList(node1->child(0), node2->child(0), destinationScope, sourceContext, threadid);
         if (node1->child(1)) {
-            pasteArgList(node1->child(1), node2->child(1), destinationScope, sourceContext);
+            pasteArgList(node1->child(1), node2->child(1), destinationScope, sourceContext, threadid);
         }
 
     } else {
@@ -35,11 +35,11 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
          * destination */
 
         /* evaluate node2 to get a value */
-        Data* sourceValue = evaluateExpression(node2, sourceContext);
+        Data* sourceValue = evaluateExpression(node2, sourceContext, threadid);
 
         /* create a data reference for this name in the new scope */
         Data* destinationValue =
-            destinationScope->lookupVar(node1->getStringvalue(), node1->type());
+            destinationScope->lookupVar(node1->getStringvalue(), node1->type(), threadid);
 
         /* do the assignment */
         destinationValue->opAssign(sourceValue);
@@ -47,36 +47,36 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
 }
 
 /* evaluate a function call node */
-Data* evaluateFunctionCall(Node* node, Context* context) {
+Data* evaluateFunctionCall(Node* node, Context* context, unsigned int threadid) {
     /* check to see if this is a standard library function */
     String funcName = node->child(0)->getStringvalue();
 
     /* i/o functions */
     if (funcName == "print") {
-        return tslPrint(node->child(1), context);
+        return tslPrint(node->child(1), context, threadid);
     } else if (funcName == "input") {
-        return tslInput(node->child(1), context);
+        return tslInput(node->child(1), context, threadid);
     }
 
     /* sleep function */
     else if (funcName == "sleep") {
-        return tslSleep(node->child(1), context);
+        return tslSleep(node->child(1), context, threadid);
     }
 
     /* type conversion ones */
     else if (funcName == "int") {
-        return tslInt(node->child(1), context);
+        return tslInt(node->child(1), context, threadid);
     } else if (funcName == "real") {
-        return tslReal(node->child(1), context);
+        return tslReal(node->child(1), context, threadid);
     } else if (funcName == "string") {
-        return tslString(node->child(1), context);
+        return tslString(node->child(1), context, threadid);
     } else if (funcName == "bool") {
-        return tslBool(node->child(1), context);
+        return tslBool(node->child(1), context, threadid);
     }
 
     /* len function */
     else if (funcName == "len") {
-        return tslLen(node->child(1), context);
+        return tslLen(node->child(1), context, threadid);
 
     } else {
         /* it's just a regular user defined functions */
@@ -88,7 +88,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
 
         } else {
             /* else we can just look it up from the context iby name */
-            funcData = evaluateExpression(node->child(0), context);
+            funcData = evaluateExpression(node->child(0), context, threadid);
         }
 
         /* get the body node out of the function */
@@ -100,7 +100,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
             Scope* destScope = new Scope();
 
             /* dump the passed parameters into the new scope */
-            pasteArgList(funcNode->child(0), node->child(1), destScope, context);
+            pasteArgList(funcNode->child(0), node->child(1), destScope, context, threadid);
 
             /* set the new scope in our context */
             context->initializeNewScope(destScope);
@@ -114,7 +114,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         context->getCurrentScope()->setCallNode(node);
 
         /* transfer control to the function capturing the return value */
-        Data* returnValue = evaluateStatement(funcNode, context);
+        Data* returnValue = evaluateStatement(funcNode, context, threadid);
 
         /* returns to the old scope once the function has finished evaluating */
         context->exitScope();
@@ -129,10 +129,11 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
  * from that class */
 Data* evaluateBinaryExpression(Node* node,
                                Context* context,
-                               Data* (Data::*operatorMethod)(const Data*) ) {
+                               Data* (Data::*operatorMethod)(const Data*),
+                               unsigned int threadid) {
     /* evaluate both of the children */
-    Data* lhs = evaluateExpression(node->child(0), context);
-    Data* rhs = evaluateExpression(node->child(1), context);
+    Data* lhs = evaluateExpression(node->child(0), context, threadid);
+    Data* rhs = evaluateExpression(node->child(1), context, threadid);
 
     /* call the operator method on the left, passing the right, and return the
      * result */
@@ -140,24 +141,24 @@ Data* evaluateBinaryExpression(Node* node,
 }
 
 /* fill a list from the children nodes of a list value node */
-void fillList(List* list, Node* node, Context* context) {
+void fillList(List* list, Node* node, Context* context, unsigned int threadid) {
     /* evaluate the first item */
-    Data* first = evaluateExpression(node->child(0), context);
+    Data* first = evaluateExpression(node->child(0), context, threadid);
 
     /* add it to the list */
     list->add(Data::create(first->getType(), first->getValue()));
 
     /* recursively add the rest of the list if there is one */
     if (node->getNumChildren() == 2) {
-        fillList(list, node->child(1), context);
+        fillList(list, node->child(1), context, threadid);
     }
 }
 
 /* fill a dict from the children nodes of a dict value node */
-void fillDict(Dict* dict, Node* node, Context* context) {
+void fillDict(Dict* dict, Node* node, Context* context, unsigned int threadid) {
     /* evaluate the first pair */
-    Data* firstKey = evaluateExpression(node->child(0), context);
-    Data* firstVal = evaluateExpression(node->child(1), context);
+    Data* firstKey = evaluateExpression(node->child(0), context, threadid);
+    Data* firstVal = evaluateExpression(node->child(1), context, threadid);
 
     /*copy */
     Data* keyCopy = Data::create(firstKey->getType(), firstKey->getValue());
@@ -172,7 +173,7 @@ void fillDict(Dict* dict, Node* node, Context* context) {
 
     /* recursively add the rest of the dict if there is one */
     if (node->getNumChildren() == 3) {
-        fillDict(dict, node->child(2), context);
+        fillDict(dict, node->child(2), context, threadid);
     }
 }
 
@@ -183,12 +184,12 @@ bool isLValue(Node* node) {
 }
 
 /* evaluates operations on data types and returns the value */
-Data* evaluateExpression(Node* node, Context* context) {
+Data* evaluateExpression(Node* node, Context* context, unsigned int threadid) {
     /* do different things based on the type of statement this is */
     switch (node->kind()) {
         /* evaluate the function call using the function above */
         case NODE_FUNCALL:
-            return evaluateFunctionCall(node, context);
+            return evaluateFunctionCall(node, context, threadid);
 
         case NODE_STRINGVAL: {
             /* make a Data for the value */
@@ -220,7 +221,7 @@ Data* evaluateExpression(Node* node, Context* context) {
             List l;
             /* if there are data elements, get them */
             if (node->getNumChildren() > 0) {
-                fillList(&l, node, context);
+                fillList(&l, node, context, threadid);
             }
 
             /* wrap this list in a tdata */
@@ -233,7 +234,7 @@ Data* evaluateExpression(Node* node, Context* context) {
             Dict d;
             /* if there are data elements, get them */
             if (node->getNumChildren() > 0) {
-                fillDict(&d, node, context);
+                fillDict(&d, node, context, threadid);
             }
 
             /* wrap this dict in a tdata */
@@ -246,8 +247,8 @@ Data* evaluateExpression(Node* node, Context* context) {
             List l;
 
             /* evaluate the start and end points */
-            Data* start = evaluateExpression(node->child(0), context);
-            Data* end = evaluateExpression(node->child(1), context);
+            Data* start = evaluateExpression(node->child(0), context, threadid);
+            Data* end = evaluateExpression(node->child(1), context, threadid);
 
             /* assemble the array */
             for (Int t = *((Int*) (start->getValue())); (t <= *((Int*) (end->getValue()))).toBool();
@@ -262,50 +263,50 @@ Data* evaluateExpression(Node* node, Context* context) {
 
         case NODE_ASSIGN: {
             /* evaluate both of the children */
-            Data* lhs = evaluateExpression(node->child(0), context);
-            Data* rhs = evaluateExpression(node->child(1), context);
+            Data* lhs = evaluateExpression(node->child(0), context, threadid);
+            Data* rhs = evaluateExpression(node->child(1), context, threadid);
             lhs->opAssign(rhs);
             return lhs;
         }
         case NODE_LT:
-            return evaluateBinaryExpression(node, context, &Data::opLt);
+            return evaluateBinaryExpression(node, context, &Data::opLt, threadid);
         case NODE_LTE:
-            return evaluateBinaryExpression(node, context, &Data::opLte);
+            return evaluateBinaryExpression(node, context, &Data::opLte, threadid);
         case NODE_GT:
-            return evaluateBinaryExpression(node, context, &Data::opGt);
+            return evaluateBinaryExpression(node, context, &Data::opGt, threadid);
         case NODE_GTE:
-            return evaluateBinaryExpression(node, context, &Data::opGte);
+            return evaluateBinaryExpression(node, context, &Data::opGte, threadid);
         case NODE_EQ:
-            return evaluateBinaryExpression(node, context, &Data::opEq);
+            return evaluateBinaryExpression(node, context, &Data::opEq, threadid);
         case NODE_NEQ:
-            return evaluateBinaryExpression(node, context, &Data::opNeq);
+            return evaluateBinaryExpression(node, context, &Data::opNeq, threadid);
         case NODE_BITXOR:
-            return evaluateBinaryExpression(node, context, &Data::opBitxor);
+            return evaluateBinaryExpression(node, context, &Data::opBitxor, threadid);
         case NODE_BITAND:
-            return evaluateBinaryExpression(node, context, &Data::opBitand);
+            return evaluateBinaryExpression(node, context, &Data::opBitand, threadid);
         case NODE_BITOR:
-            return evaluateBinaryExpression(node, context, &Data::opBitor);
+            return evaluateBinaryExpression(node, context, &Data::opBitor, threadid);
         case NODE_SHIFTL:
-            return evaluateBinaryExpression(node, context, &Data::opShiftl);
+            return evaluateBinaryExpression(node, context, &Data::opShiftl, threadid);
         case NODE_SHIFTR:
-            return evaluateBinaryExpression(node, context, &Data::opShiftr);
+            return evaluateBinaryExpression(node, context, &Data::opShiftr, threadid);
         case NODE_PLUS:
-            return evaluateBinaryExpression(node, context, &Data::opPlus);
+            return evaluateBinaryExpression(node, context, &Data::opPlus, threadid);
         case NODE_MINUS:
-            return evaluateBinaryExpression(node, context, &Data::opMinus);
+            return evaluateBinaryExpression(node, context, &Data::opMinus, threadid);
         case NODE_TIMES:
-            return evaluateBinaryExpression(node, context, &Data::opTimes);
+            return evaluateBinaryExpression(node, context, &Data::opTimes, threadid);
         case NODE_DIVIDE:
-            return evaluateBinaryExpression(node, context, &Data::opDivide);
+            return evaluateBinaryExpression(node, context, &Data::opDivide, threadid);
         case NODE_MODULUS:
-            return evaluateBinaryExpression(node, context, &Data::opModulus);
+            return evaluateBinaryExpression(node, context, &Data::opModulus, threadid);
         case NODE_EXP:
-            return evaluateBinaryExpression(node, context, &Data::opExp);
+            return evaluateBinaryExpression(node, context, &Data::opExp, threadid);
 
         /* these are done differently to support short-circuit evaluation */
         case NODE_OR: {
             /* evaluate lhs */
-            Data* lhs = evaluateExpression(node->child(0), context);
+            Data* lhs = evaluateExpression(node->child(0), context, threadid);
 
             /* if true, return a true value */
             if (((Bool*) lhs->getValue())->toBool()) {
@@ -313,13 +314,13 @@ Data* evaluateExpression(Node* node, Context* context) {
                 return Data::create(lhs->getType(), &falseValue);
             } else {
                 /* do the rest of it */
-                Data* rhs = evaluateExpression(node->child(1), context);
+                Data* rhs = evaluateExpression(node->child(1), context, threadid);
                 return lhs->opOr(rhs);
             }
         }
         case NODE_AND: {
             /* evaluate lhs */
-            Data* lhs = evaluateExpression(node->child(0), context);
+            Data* lhs = evaluateExpression(node->child(0), context, threadid);
 
             /* if false, return a false value */
             if (((Bool*) lhs->getValue())->toBool() == false) {
@@ -327,14 +328,14 @@ Data* evaluateExpression(Node* node, Context* context) {
                 return Data::create(lhs->getType(), &falseValue);
             } else {
                 /* do the rest of it */
-                Data* rhs = evaluateExpression(node->child(1), context);
+                Data* rhs = evaluateExpression(node->child(1), context, threadid);
                 return lhs->opAnd(rhs);
             }
         }
 
         case NODE_UMINUS: {
             /* evaluate the child */
-            Data* operand = evaluateExpression(node->child(0), context);
+            Data* operand = evaluateExpression(node->child(0), context, threadid);
 
             /* return the negative of this */
             return operand->opNegate();
@@ -342,7 +343,7 @@ Data* evaluateExpression(Node* node, Context* context) {
 
         case NODE_BITNOT: {
             /* evaluate the child */
-            Data* operand = evaluateExpression(node->child(0), context);
+            Data* operand = evaluateExpression(node->child(0), context, threadid);
 
             /* return the not of this */
             return operand->opBitnot();
@@ -350,7 +351,7 @@ Data* evaluateExpression(Node* node, Context* context) {
 
         case NODE_NOT: {
             /* evaluate the child */
-            Data* operand = evaluateExpression(node->child(0), context);
+            Data* operand = evaluateExpression(node->child(0), context, threadid);
 
             /* return the not of this */
             return operand->opNot();
@@ -358,15 +359,15 @@ Data* evaluateExpression(Node* node, Context* context) {
 
         case NODE_INDEX: {
             /* evaluate the list on the left and the index on the right */
-            Data* container = evaluateExpression(node->child(0), context);
-            Data* index = evaluateExpression(node->child(1), context);
+            Data* container = evaluateExpression(node->child(0), context, threadid);
+            Data* index = evaluateExpression(node->child(1), context, threadid);
 
             return container->opIndex(index, isLValue(node));
         }
 
         /* simply get the identifier out of the context */
         case NODE_IDENTIFIER:
-            return context->lookupVar(node->getStringvalue(), node->type());
+            return context->lookupVar(node->getStringvalue(), node->type(), threadid);
 
         default:
             throw SystemError("Unhandled node type in eval", 0, node);
@@ -374,11 +375,11 @@ Data* evaluateExpression(Node* node, Context* context) {
     }
 }
 
-Data* evaluateFor(Node* node, Context* context) {
+Data* evaluateFor(Node* node, Context* context, unsigned int threadid) {
     DataTypeKind k = node->child(1)->type()->getKind();
     if (k == TYPE_DICT || k == TYPE_LIST) {
         /* evaluate the list we are looping through */
-        Data* containerData = evaluateExpression(node->child(1), context);
+        Data* containerData = evaluateExpression(node->child(1), context, threadid);
 
         /* pull the list out of it */
         Container* container = (Container*) containerData->getValue();
@@ -403,18 +404,18 @@ Data* evaluateFor(Node* node, Context* context) {
 
             /* look the induction variable up in the context */
             Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                    node->child(0)->type());
+                    node->child(0)->type(), threadid);
 
             /* set it to the next value */
             loopVariable->opAssign((*container)[i]);
 
             /* evaluate the body of the loop */
-            returnValue = evaluateStatement(node->child(2), context);
+            returnValue = evaluateStatement(node->child(2), context, threadid);
         }
 
     } else if (k == TYPE_STRING) {
         /* evaluate the string we are looping through */
-        Data* stringData = evaluateExpression(node->child(1), context);
+        Data* stringData = evaluateExpression(node->child(1), context, threadid);
 
         /* pull the string out of it */
         String* string = (String*) stringData->getValue();
@@ -439,7 +440,7 @@ Data* evaluateFor(Node* node, Context* context) {
 
             /* look the induction variable up in the context */
             Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                    node->child(0)->type());
+                    node->child(0)->type(), threadid);
 
             /* set it to the next value */
             String letter = string->substring(i, 1);
@@ -448,7 +449,7 @@ Data* evaluateFor(Node* node, Context* context) {
             loopVariable->opAssign(letterD);
 
             /* evaluate the body of the loop */
-            returnValue = evaluateStatement(node->child(2), context);
+            returnValue = evaluateStatement(node->child(2), context, threadid);
         }
     }
 
@@ -456,7 +457,7 @@ Data* evaluateFor(Node* node, Context* context) {
 }
 
 /* evaluate a parallel statement */
-Data* evaluateParallel(Node* node, Context* context) {
+Data* evaluateParallel(Node* node, Context* context, unsigned int threadid) {
     /* mark the context as being parallel */
     context->notifyParallel();
 
@@ -503,15 +504,15 @@ Data* evaluateParallel(Node* node, Context* context) {
     return NULL;
 }
 
-Data* evaluateLock(Node* node, Context* context) {
+Data* evaluateLock(Node* node, Context* context, unsigned int threadid) {
     /* find the mutex object here */
-    Data* mutex = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+    Data* mutex = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
 
     /* lock the mutex */
     ((Mutex*) mutex->getValue())->lock();
 
     /* evaluate the body */
-    Data* returnValue = evaluateStatement(node->child(1), context);
+    Data* returnValue = evaluateStatement(node->child(1), context, threadid);
 
     /* unlock the mutex */
     ((Mutex*) mutex->getValue())->unlock();
@@ -519,7 +520,7 @@ Data* evaluateLock(Node* node, Context* context) {
     return returnValue;
 }
 
-Data* evaluateBackground(Node* node, Context* context) {
+Data* evaluateBackground(Node* node, Context* context, unsigned int threadid) {
     /* mark the context as being parallel */
     context->notifyParallel();
 
@@ -537,7 +538,7 @@ Data* evaluateBackground(Node* node, Context* context) {
     /* if it had a name, then set it up as a local variable */
     if (node->getNumChildren() == 2) {
         /* find the task object here */
-        Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+        Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
 
         /* assign the worker object into the task */
         ((Task*) task->getValue())->setWorker(worker);
@@ -546,9 +547,9 @@ Data* evaluateBackground(Node* node, Context* context) {
     return NULL;
 }
 
-Data* evaluateWait(Node* node, Context* context) {
+Data* evaluateWait(Node* node, Context* context, unsigned int threadid) {
     /* find the task object here */
-    Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+    Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
     
     /* wait for it to finish, then set it to NULL */
     ((Task*) task->getValue())->wait();
@@ -558,17 +559,24 @@ Data* evaluateWait(Node* node, Context* context) {
 }
 
 /* evaluate a parallel for loop */
-Data* evaluateParFor(Node* node, Context* context) {
+Data* evaluateParFor(Node* node, Context* context, unsigned int threadid) {
     /* keep track of all of thw worker threads */
     std::vector<ParallelWorker*> workers;
+
+    /* mark the context as being parallel */
+    context->notifyParallel();
+
+    /* add in one thread to the scopes */
+    context->incrementBackgroundThreads();
 
     /* find the type of thingy we are doing */
     DataTypeKind k = node->child(1)->type()->getKind();
     if (k == TYPE_DICT || k == TYPE_LIST) {
-        /* TODO somehow we must mark the induction variable as being from a par for loop */
+        /* we must mark the induction variable as being from a par for loop */
+        context->getCurrentScope()->setupParallelFor(node->child(0)->getStringvalue());
 
         /* evaluate the list we are looping through */
-        Data* containerData = evaluateExpression(node->child(1), context);
+        Data* containerData = evaluateExpression(node->child(1), context, threadid);
 
         /* pull the actual list out of it */
         Container* container = (Container*) containerData->getValue();
@@ -589,19 +597,25 @@ Data* evaluateParFor(Node* node, Context* context) {
             ParallelWorker* idle = NULL;
             while (true) {
                 for (unsigned int i = 0; i < workers.size(); i++) {
-                    if (workers[i]->isFinished()) {
+                    if (!workers[i]->isRunning()) {
                         idle = workers[i];
                         break;
                     }
                 }
 
                 /* if there was an idle person we can exit the loop */
-                if (!idle) {
+                if (idle) {
                     break;
                 }
+
+                /* sleep the main thread a tiny amount to give others some time */
+                QThread::currentThread()->msleep(500);
             }
 
-            /* TODO now we must somehow assign this thread a value in the scope */
+            /* now we must assign this thread a value in the scope */
+            Data* data = (*container)[i];
+            context->getCurrentScope()->assignParallelFor(node->child(0)->getStringvalue(),
+                    idle->getThreadId(), data);
 
             /* start the worker back up */
             idle->start();
@@ -618,32 +632,35 @@ Data* evaluateParFor(Node* node, Context* context) {
         delete workers[i];
     }
 
-    /* TODO somehow we must reset the parallel for loop variables */
+    context->normalizeStatus();
+    context->decrementBackgroundThreads();
 
+    /* we must reset the parallel for loop variables */
+    context->getCurrentScope()->clearParallelFor(node->child(0)->getStringvalue());
     return NULL;
 }
 
 /* evaluate a statement node - only returns a value for return statements */
-Data* evaluateStatement(Node* node, Context* context) {
+Data* evaluateStatement(Node* node, Context* context, unsigned int threadid) {
     /* do different things based on the type of statement this is */
     switch (node->kind()) {
         case NODE_FUNCTION: {
             /* if there were no arguments, child 0 is the body, else child 1 */
             if (node->getNumChildren() == 1) {
-                return evaluateStatement(node->child(0), context);
+                return evaluateStatement(node->child(0), context, threadid);
             } else {
-                return evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context, threadid);
             }
         } break;
 
         case NODE_STATEMENT: {
             /* evaluate the first child */
-            Data* value = evaluateStatement(node->child(0), context);
+            Data* value = evaluateStatement(node->child(0), context, threadid);
 
             /* if it didn't result in a break of some kind, do the second one */
             ExecutionStatus status = context->queryExecutionStatus();
             if (status != RETURN && status != BREAK && status != CONTINUE) {
-                return evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context, threadid);
 
                 /* if it is a return, we return that value back */
             } else if (status == RETURN) {
@@ -658,7 +675,7 @@ Data* evaluateStatement(Node* node, Context* context) {
             /* check if there is a child to return or not */
             if (node->child(0)) {
                 /* evaluate the expression */
-                returnValue = evaluateExpression(node->child(0), context);
+                returnValue = evaluateExpression(node->child(0), context, threadid);
             }
 
             context->notifyReturn();
@@ -681,11 +698,11 @@ Data* evaluateStatement(Node* node, Context* context) {
         case NODE_GLOBAL:
         case NODE_CONST: {
             /* evaluate the  right hand side */
-            Data* value = evaluateExpression(node->child(1), context);
+            Data* value = evaluateExpression(node->child(1), context, threadid);
 
             /* get a pointer to the global thing on the left */
             Data* global =
-                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
 
             /* do the assignment */
             global->opAssign(value);
@@ -695,14 +712,14 @@ Data* evaluateStatement(Node* node, Context* context) {
             /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
-            Data* conditional = evaluateExpression(node->child(0), context);
+            Data* conditional = evaluateExpression(node->child(0), context, threadid);
             /* if true execute the 2nd child */
             if (((Bool*) (conditional->getValue()))->toBool()) {
-                return evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context, threadid);
             } else {
                 /* check for else block and execute it if it exists */
                 if (node->child(2) != NULL) {
-                    return evaluateStatement(node->child(2), context);
+                    return evaluateStatement(node->child(2), context, threadid);
                 }
             }
         } break;
@@ -712,13 +729,13 @@ Data* evaluateStatement(Node* node, Context* context) {
             context->notifyElif();
 
             /* check the first branch */
-            Data* returnValue = evaluateStatement(node->child(0), context);
+            Data* returnValue = evaluateStatement(node->child(0), context, threadid);
 
             /* check if the first one was false */
             ExecutionStatus status = context->queryExecutionStatus();
             if (status == ELIF) {
                 /* if so, do the next one */
-                returnValue = evaluateStatement(node->child(1), context);
+                returnValue = evaluateStatement(node->child(1), context, threadid);
             }
 
             /* check to see if we need to execute the catchall else statement
@@ -726,7 +743,7 @@ Data* evaluateStatement(Node* node, Context* context) {
             status = context->queryExecutionStatus();
             if (status == ELIF && node->child(2) != NULL) {
                 /* if so, execute that */
-                returnValue = evaluateStatement(node->child(2), context);
+                returnValue = evaluateStatement(node->child(2), context, threadid);
             }
 
             return returnValue;
@@ -734,13 +751,13 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_ELIF_CHAIN: {
             /* try to execute the given case of the ELIF statement */
-            Data* returnValue = evaluateStatement(node->child(0), context);
+            Data* returnValue = evaluateStatement(node->child(0), context, threadid);
 
             /* check to see if we are doing the next one */
             ExecutionStatus status = context->queryExecutionStatus();
             if (status == ELIF) {
                 /* if so, do it */
-                returnValue = evaluateStatement(node->child(1), context);
+                returnValue = evaluateStatement(node->child(1), context, threadid);
             }
 
             return returnValue;
@@ -748,25 +765,25 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_ELIF_CLAUSE: {
             /* check the condition on the left */
-            Data* conditional = evaluateExpression(node->child(0), context);
+            Data* conditional = evaluateExpression(node->child(0), context, threadid);
 
             /* if condition is true, execute the body */
             if (((Bool*) conditional->getValue())->toBool()) {
                 /* we no longer need to check the rest of the branches */
                 context->normalizeStatus();
-                return evaluateStatement(node->child(1), context);
+                return evaluateStatement(node->child(1), context, threadid);
             }
             return NULL;
         } break;
 
         case NODE_WHILE: {
             /* evaluate the condition */
-            Data* conditional = evaluateExpression(node->child(0), context);
+            Data* conditional = evaluateExpression(node->child(0), context, threadid);
 
             /* while it is true */
             while (((Bool*) conditional->getValue())->toBool()) {
                 /* evaluate the loop body */
-                Data* returnValue = evaluateStatement(node->child(1), context);
+                Data* returnValue = evaluateStatement(node->child(1), context, threadid);
 
                 /* check the execution status */
                 ExecutionStatus status = context->queryExecutionStatus();
@@ -788,34 +805,34 @@ Data* evaluateStatement(Node* node, Context* context) {
                 }
 
                 /* recheck the condition */
-                conditional = evaluateExpression(node->child(0), context);
+                conditional = evaluateExpression(node->child(0), context, threadid);
             }
         } break;
 
         case NODE_FOR:
-            return evaluateFor(node, context);
+            return evaluateFor(node, context, threadid);
             break;
 
             /* handle the parallel constructs */
         case NODE_PARALLEL:
-            return evaluateParallel(node, context);
+            return evaluateParallel(node, context, threadid);
 
         case NODE_BACKGROUND:
-            return evaluateBackground(node, context);
+            return evaluateBackground(node, context, threadid);
 
         case NODE_LOCK:
-            return evaluateLock(node, context);
+            return evaluateLock(node, context, threadid);
 
         case NODE_WAIT:
-            return evaluateWait(node, context);
+            return evaluateWait(node, context, threadid);
 
         case NODE_PARFOR:
-            return evaluateParFor(node, context);
+            return evaluateParFor(node, context, threadid);
 
         default:
             /* if it's none of these things, it must be an expression used as a
              * statement */
-            return evaluateExpression(node, context);
+            return evaluateExpression(node, context, threadid);
     }
 
     /* if we got down here, it was not a return or an expression so just NULL */
@@ -845,7 +862,8 @@ int interpret(Node* tree, int debug, int threads) {
     context.initializeNewScope();
 
     /* evaluate the main function */
-    evaluateStatement(main, &context);
+    unsigned int mainThreadId = Environment::getNextThreadId();
+    evaluateStatement(main, &context, mainThreadId);
 
     /* wait for any background threads to finish */
     for (unsigned int i = 0; i < backgroundThreads.size(); i++) {

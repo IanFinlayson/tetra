@@ -10,6 +10,7 @@
 
 #include "vartable.h"
 #include "strings.h"
+#include "error.h"
 
 class Node;
 class ParallelWorker;
@@ -47,13 +48,21 @@ class Scope {
     }
 
     /* look a variable up in this scope by name */
-    Data* lookupVar(String name, DataType* type) {
+    Data* lookupVar(const String& name, DataType* type, unsigned int threadid) {
         Data* var;
         if (numThreads >= 1) {
             varMutex.lock();
         }
 
-        var = varScope.lookupVar(name, type);
+        /* first check if this is a parallel for loop variable */
+        auto search = parallelForVariables.find(name);
+        if (search != parallelForVariables.end()) {
+            /* look it up by thread id */
+            var = search->second[threadid];
+        } else {
+            /* just look it up in the normal place */
+            var = varScope.lookupVar(name, type);
+        }
         
         if (numThreads >= 1) {
             varMutex.unlock();
@@ -102,6 +111,38 @@ class Scope {
 
     const Node* getCallNode() const;
 
+    /* called when we are starting a new parallel for loop on some variable in this scope */
+    void setupParallelFor(const String& variable) {
+        std::map<unsigned int, Data*> newOne;
+        parallelForVariables.insert(std::make_pair(variable, newOne));
+    }
+
+    /* called when we are assigning the parallel for variable for a thread */
+    void assignParallelFor(const String& variable, unsigned int threadid, Data* value) {
+        /* find the sub map for this variable */
+        auto search = parallelForVariables.find(variable);
+
+        if (search == parallelForVariables.end()) {
+            throw Error("Could not assign parallel for variable");
+        } else {
+            /* insert/overwrite this thread/value pairing */
+            search->second[threadid] = value;
+        }
+    }
+
+    /* called when we are done with a parallel for variable i.e. the loop is done */
+    void clearParallelFor(const String& variable) {
+        /* find the sub map for this variable */
+        auto search = parallelForVariables.find(variable);
+        if (search == parallelForVariables.end()) {
+            throw Error("Could not assign parallel for variable");
+        } else {
+            /* remove this map */
+            parallelForVariables.erase(search);
+        }
+    }
+
+
    private:
     VarTable varScope;
     ExecutionStatus executionStatus;
@@ -115,6 +156,12 @@ class Scope {
     /* by storing the address of the call node, we can print back a call stack to
      * the user if the program terminates unexpectedly */
     const Node* callNode;
+
+    /* each scope keeps track of a parallel for variables in it
+     * we map them by name and thread id, to the actual data */
+    std::map<String, std::map<unsigned int, Data*> > parallelForVariables;
+
+
 };
 
 #endif

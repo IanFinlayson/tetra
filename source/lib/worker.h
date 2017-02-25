@@ -7,6 +7,7 @@
 #include <QThread>
 
 #include "node.h"
+#include "environment.h"
 #include "eval.h"
 
 /* dummy class for having statement nodes evaluated in separate threads */
@@ -23,12 +24,19 @@ class ParallelWorker : public QThread {
 
         /* assume no return */
         this->returnValue = NULL;
+
+        /* get a new thread id */
+        this->threadId = Environment::getNextThreadId();
+    }
+
+    unsigned int getThreadId() const {
+        return threadId;
     }
 
     /* this function is called in the new thread */
     void run() Q_DECL_OVERRIDE {
         /* run evaluate our node, and save the return value */
-        returnValue = evaluateStatement(node, context);
+        returnValue = evaluateStatement(node, context, threadId);
 
         /* remove the context clone */
         delete context;
@@ -45,6 +53,7 @@ class ParallelWorker : public QThread {
     Node* node;
     Context* context;
     Data* returnValue;
+    unsigned int threadId;
 };
 
 #endif
