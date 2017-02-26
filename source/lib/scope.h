@@ -113,26 +113,35 @@ class Scope {
 
     /* called when we are starting a new parallel for loop on some variable in this scope */
     void setupParallelFor(const String& variable) {
+        varMutex.lock();
         std::map<unsigned int, Data*> newOne;
         parallelForVariables.insert(std::make_pair(variable, newOne));
+        varMutex.unlock();
     }
 
     /* called when we are assigning the parallel for variable for a thread */
     void assignParallelFor(const String& variable, unsigned int threadid, Data* value) {
         /* find the sub map for this variable */
+        varMutex.lock();
         auto search = parallelForVariables.find(variable);
 
         if (search == parallelForVariables.end()) {
             throw Error("Could not assign parallel for variable");
         } else {
             /* insert/overwrite this thread/value pairing */
+            std::cout << "Adding parforvar: (" << variable << ", " << threadid << ")\n";
+            std::cout << "Before length = " << parallelForVariables["i"].size() << "\n";
             search->second[threadid] = value;
+
+            std::cout << "Afterwards length = " << parallelForVariables["i"].size() << "\n";
         }
+        varMutex.unlock();
     }
 
     /* called when we are done with a parallel for variable i.e. the loop is done */
     void clearParallelFor(const String& variable) {
         /* find the sub map for this variable */
+        varMutex.lock();
         auto search = parallelForVariables.find(variable);
         if (search == parallelForVariables.end()) {
             throw Error("Could not assign parallel for variable");
@@ -140,6 +149,7 @@ class Scope {
             /* remove this map */
             parallelForVariables.erase(search);
         }
+        varMutex.unlock();
     }
 
 

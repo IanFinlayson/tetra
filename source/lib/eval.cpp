@@ -605,6 +605,7 @@ Data* evaluateParFor(Node* node, Context* context, unsigned int threadid) {
 
                 /* if there was an idle person we can exit the loop */
                 if (idle) {
+                    std::cout << "Thread " << idle->getThreadId() << " is free\n";
                     break;
                 }
 
@@ -618,6 +619,7 @@ Data* evaluateParFor(Node* node, Context* context, unsigned int threadid) {
                     idle->getThreadId(), data);
 
             /* start the worker back up */
+            std::cout << "Spawning thread " << idle->getThreadId() << "\n";
             idle->start();
         }
 
