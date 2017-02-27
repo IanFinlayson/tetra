@@ -33,7 +33,7 @@ class Context {
     Data* findOverload(Node* functionCall);
 
     /* lookup a variable  in the present context */
-    Data* lookupVar(String name, DataType* type, unsigned int threadid);
+    Data* lookupVar(String name, DataType* type);
 
     /* the first is for when there is no initial setup for a scope
        (i.e. a function call with no formal parameters that must be
@@ -102,10 +102,17 @@ class Context {
     /* performs a deep copy of the current context */
     Context& operator=(const Context&);
 
+    /* get and set the thread id */
+    void setThreadId(int threadId);
+    int getThreadId() const;
+
    private:
     /* the scopes avaiable at this time */
     std::stack<Scope*> programStack;
     Scope* globalScope;
+
+    /* the thread id of the thread in this context */
+    int threadId;
 };
 
 #endif

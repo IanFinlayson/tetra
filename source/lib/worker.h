@@ -23,10 +23,11 @@ class ParallelWorker : public QThread {
         this->context = new Context(*context);
 
         /* assume no return */
-        this->returnValue = NULL;
+        returnValue = NULL;
 
         /* get a new thread id */
-        this->threadId = Environment::getNextThreadId();
+        threadId = Environment::getNextThreadId();
+        this->context->setThreadId(threadId);
     }
 
     virtual ~ParallelWorker() {
@@ -41,7 +42,7 @@ class ParallelWorker : public QThread {
     /* this function is called in the new thread */
     void run() Q_DECL_OVERRIDE {
         /* run evaluate our node, and save the return value */
-        returnValue = evaluateStatement(node, context, threadId);
+        returnValue = evaluateStatement(node, context);
     }
 
     /* provides the return value of the node we run */

@@ -45,11 +45,11 @@ Data* Context::findOverload(Node* functionCall) {
 }
 
 /* lookup a variable  in the present context */
-Data* Context::lookupVar(String name, DataType* type, unsigned int threadid) {
+Data* Context::lookupVar(String name, DataType* type) {
     Data* value;
 
     if (getGlobalScopeRef()->containsVar(name)) {
-        value = (getGlobalScopeRef()->lookupVar(name, type, threadid));
+        value = (getGlobalScopeRef()->lookupVar(name, type, threadId));
     } else if (type->getKind() == TYPE_FUNCTION) {
         /* find the function */
         String signature = FunctionMap::getFunctionSignature(name, type);
@@ -58,7 +58,7 @@ Data* Context::lookupVar(String name, DataType* type, unsigned int threadid) {
         value = Data::create(type, &funcVal);
     } else {
         /* look up general variables */
-        value = programStack.top()->lookupVar(name, type, threadid);
+        value = programStack.top()->lookupVar(name, type, threadId);
     }
 
     return value;
@@ -71,7 +71,7 @@ void Context::initializeGlobalVars(const Node* tree) {
         Node* candidate = tree->child(0);
         if (candidate->kind() == NODE_GLOBAL || candidate->kind() == NODE_CONST) {
             /* perform assignment at this global scope */
-            evaluateStatement(candidate, this, 0);
+            evaluateStatement(candidate, this);
         }
 
         if (tree->child(1) != NULL) {
@@ -102,6 +102,14 @@ void Context::exitScope() {
     }
 
     programStack.pop();
+}
+
+void Context::setThreadId(int threadId) {
+    this->threadId = threadId;
+}
+
+int Context::getThreadId() const {
+    return threadId;
 }
 
 /* If, for some reason the tetra program crashes inadvertantly, we may as well */

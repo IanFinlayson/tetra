@@ -21,10 +21,10 @@
 #include "context.h"
 
 /* evaluate a statement node */
-Data* evaluateStatement(Node* node, Context* context, unsigned int threadid);
+Data* evaluateStatement(Node* node, Context* context);
 
 /* evaluate an expression node */
-Data* evaluateExpression(Node* node, Context* context, unsigned int threadid);
+Data* evaluateExpression(Node* node, Context* context);
 
 /* interpret a tetra program parsed into a Node tree */
 int interpret(Node* tree, int debug, int threads);
