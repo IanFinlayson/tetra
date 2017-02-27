@@ -29,6 +29,11 @@ class ParallelWorker : public QThread {
         this->threadId = Environment::getNextThreadId();
     }
 
+    virtual ~ParallelWorker() {
+        /* remove the context clone */
+        delete context;
+    }
+
     unsigned int getThreadId() const {
         return threadId;
     }
@@ -37,17 +42,12 @@ class ParallelWorker : public QThread {
     void run() Q_DECL_OVERRIDE {
         /* run evaluate our node, and save the return value */
         returnValue = evaluateStatement(node, context, threadId);
-
-        /* remove the context clone */
-        delete context;
     }
 
     /* provides the return value of the node we run */
     Data* getReturn() const {
         return returnValue;
     }
-
-    virtual ~ParallelWorker() {}
 
    private:
     Node* node;

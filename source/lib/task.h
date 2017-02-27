@@ -36,4 +36,3 @@ class Task : public Value {
 };
 
 #endif
-

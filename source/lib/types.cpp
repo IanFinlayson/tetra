@@ -237,7 +237,6 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     }
 #endif
 
-
     /* otherwise, if they're not the same kind, fail */
     if (lhs.getKind() != rhs.getKind()) {
         return false;

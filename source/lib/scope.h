@@ -63,7 +63,7 @@ class Scope {
             /* just look it up in the normal place */
             var = varScope.lookupVar(name, type);
         }
-        
+
         if (numThreads >= 1) {
             varMutex.unlock();
         }
@@ -129,11 +129,7 @@ class Scope {
             throw Error("Could not assign parallel for variable");
         } else {
             /* insert/overwrite this thread/value pairing */
-            std::cout << "Adding parforvar: (" << variable << ", " << threadid << ")\n";
-            std::cout << "Before length = " << parallelForVariables["i"].size() << "\n";
             search->second[threadid] = value;
-
-            std::cout << "Afterwards length = " << parallelForVariables["i"].size() << "\n";
         }
         varMutex.unlock();
     }
@@ -152,7 +148,6 @@ class Scope {
         varMutex.unlock();
     }
 
-
    private:
     VarTable varScope;
     ExecutionStatus executionStatus;
@@ -170,8 +165,6 @@ class Scope {
     /* each scope keeps track of a parallel for variables in it
      * we map them by name and thread id, to the actual data */
     std::map<String, std::map<unsigned int, Data*> > parallelForVariables;
-
-
 };
 
 #endif

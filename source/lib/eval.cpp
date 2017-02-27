@@ -21,13 +21,18 @@ extern DataType* PAIR_TYPE;
 /* this function populates a scope object with the variables contained in a
  * portion of the subtree containing the actual parameter expressions which are
  * passed in */
-void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* sourceContext, unsigned int threadid) {
+void pasteArgList(Node* node1,
+                  Node* node2,
+                  Scope* destinationScope,
+                  Context* sourceContext,
+                  unsigned int threadid) {
     /* check if we are a NODE_FORMAL_PARAM_LIST (structure), or an actual value */
     if (node1->kind() == NODE_FORMAL_PARAM_LIST) {
         /* recursively paste in the subtrees */
         pasteArgList(node1->child(0), node2->child(0), destinationScope, sourceContext, threadid);
         if (node1->child(1)) {
-            pasteArgList(node1->child(1), node2->child(1), destinationScope, sourceContext, threadid);
+            pasteArgList(node1->child(1), node2->child(1), destinationScope, sourceContext,
+                         threadid);
         }
 
     } else {
@@ -404,7 +409,7 @@ Data* evaluateFor(Node* node, Context* context, unsigned int threadid) {
 
             /* look the induction variable up in the context */
             Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                    node->child(0)->type(), threadid);
+                                                    node->child(0)->type(), threadid);
 
             /* set it to the next value */
             loopVariable->opAssign((*container)[i]);
@@ -440,7 +445,7 @@ Data* evaluateFor(Node* node, Context* context, unsigned int threadid) {
 
             /* look the induction variable up in the context */
             Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                    node->child(0)->type(), threadid);
+                                                    node->child(0)->type(), threadid);
 
             /* set it to the next value */
             String letter = string->substring(i, 1);
@@ -506,7 +511,8 @@ Data* evaluateParallel(Node* node, Context* context, unsigned int threadid) {
 
 Data* evaluateLock(Node* node, Context* context, unsigned int threadid) {
     /* find the mutex object here */
-    Data* mutex = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
+    Data* mutex =
+        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
 
     /* lock the mutex */
     ((Mutex*) mutex->getValue())->lock();
@@ -538,7 +544,8 @@ Data* evaluateBackground(Node* node, Context* context, unsigned int threadid) {
     /* if it had a name, then set it up as a local variable */
     if (node->getNumChildren() == 2) {
         /* find the task object here */
-        Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
+        Data* task =
+            context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
 
         /* assign the worker object into the task */
         ((Task*) task->getValue())->setWorker(worker);
@@ -549,8 +556,9 @@ Data* evaluateBackground(Node* node, Context* context, unsigned int threadid) {
 
 Data* evaluateWait(Node* node, Context* context, unsigned int threadid) {
     /* find the task object here */
-    Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
-    
+    Data* task =
+        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
+
     /* wait for it to finish, then set it to NULL */
     ((Task*) task->getValue())->wait();
     ((Task*) task->getValue())->setWorker(NULL);
@@ -605,24 +613,21 @@ Data* evaluateParFor(Node* node, Context* context, unsigned int threadid) {
 
                 /* if there was an idle person we can exit the loop */
                 if (idle) {
-                    std::cout << "Thread " << idle->getThreadId() << " is free\n";
                     break;
                 }
 
                 /* sleep the main thread a tiny amount to give others some time */
-                QThread::currentThread()->msleep(500);
+                QThread::currentThread()->msleep(10);
             }
 
             /* now we must assign this thread a value in the scope */
             Data* data = (*container)[i];
             context->getCurrentScope()->assignParallelFor(node->child(0)->getStringvalue(),
-                    idle->getThreadId(), data);
+                                                          idle->getThreadId(), data);
 
             /* start the worker back up */
-            std::cout << "Spawning thread " << idle->getThreadId() << "\n";
             idle->start();
         }
-
 
     } else if (k == TYPE_STRING) {
         throw Error("TODO, handle par fors on strings!!");
@@ -689,7 +694,7 @@ Data* evaluateStatement(Node* node, Context* context, unsigned int threadid) {
             return NULL;
             break;
 
-            /* set these in the context so we know where yo go next */
+        /* set these in the context so we know where yo go next */
         case NODE_BREAK:
             context->notifyBreak();
             break;
@@ -703,15 +708,15 @@ Data* evaluateStatement(Node* node, Context* context, unsigned int threadid) {
             Data* value = evaluateExpression(node->child(1), context, threadid);
 
             /* get a pointer to the global thing on the left */
-            Data* global =
-                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type(), threadid);
+            Data* global = context->lookupVar(node->child(0)->getStringvalue(),
+                                              node->child(0)->type(), threadid);
 
             /* do the assignment */
             global->opAssign(value);
 
         } break;
 
-            /* handle simple if expressions */
+        /* handle simple if expressions */
         case NODE_IF: {
             /* evaluate the conditional expression */
             Data* conditional = evaluateExpression(node->child(0), context, threadid);
@@ -726,7 +731,7 @@ Data* evaluateStatement(Node* node, Context* context, unsigned int threadid) {
             }
         } break;
 
-            /* handle elif nodes */
+        /* handle elif nodes */
         case NODE_ELIF: {
             context->notifyElif();
 
@@ -815,7 +820,7 @@ Data* evaluateStatement(Node* node, Context* context, unsigned int threadid) {
             return evaluateFor(node, context, threadid);
             break;
 
-            /* handle the parallel constructs */
+        /* handle the parallel constructs */
         case NODE_PARALLEL:
             return evaluateParallel(node, context, threadid);
 

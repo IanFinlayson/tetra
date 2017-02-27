@@ -1,6 +1,6 @@
 #this program has a decent chance to segfault if the variable lookup is not properly protected
 def main():
-        parallel for i in [1...1000]:
+        parallel for i in [1...100]:
                 parallel:
                         if trueWork():
                                 x = 0
