@@ -15,8 +15,6 @@
 class Node;
 class ParallelWorker;
 
-enum ThreadStatus { RUNNING, STOPPED, DESTROYED, WAITING };
-
 /* each context will have a flag as to what action should be taken when control reaches a structure
  * Node
  *
@@ -32,25 +30,21 @@ enum ThreadStatus { RUNNING, STOPPED, DESTROYED, WAITING };
  * BREAK: keep returning until you hit a loop node, then return from that node
  *
  * RETURN: keep returning until you hit a function call, then return from the
- * function call. This takes precedence over breaks and continues
- *
- * PARALLEL: each statement node encountered will result in a new spwned thread.
- * Note that for conditionals and loops, only one thread will be spawned to
- * evaluate the bodies of the conditionals/loops */
-enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN, PARALLEL };
+ * function call. This takes precedence over breaks and continues */
+enum ExecutionStatus {NORMAL, ELIF, CONTINUE, BREAK, RETURN};
 
 /* a scope contains local variables of a function */
 class Scope {
    public:
     Scope() {
         executionStatus = NORMAL;
-        numThreads = 0;
+        isParallel = false;
     }
 
     /* look a variable up in this scope by name */
     Data* lookupVar(const String& name, DataType* type, unsigned int threadid) {
         Data* var;
-        if (numThreads >= 1) {
+        if (isParallel) {
             varMutex.lock();
         }
 
@@ -64,17 +58,11 @@ class Scope {
             var = varScope.lookupVar(name, type);
         }
 
-        if (numThreads >= 1) {
+        if (isParallel) {
             varMutex.unlock();
         }
         return var;
     }
-
-    /* Used for aliasing an array
-     * Returns an uninitialized pointer that will be associated with varName
-     * The calling program can set this pointer to point to whatever varname
-     * should alias. */
-    Data& declareReference(const String varName);
 
     /* Used by loops and constrol statements to determine if they can proceed, or
      * if they should return */
@@ -82,22 +70,14 @@ class Scope {
         return executionStatus;
     }
 
+    /* mark the scope as being parallel */
+    void markParallel() {
+        isParallel = true;
+    }
+
     /* sets the execution status to the specified value */
     void setExecutionStatus(ExecutionStatus status) {
         executionStatus = status;
-    }
-
-    /* add a background thread into this scope */
-    void incrementBackgroundThreads() {
-        numThreads++;
-    }
-    void decrementBackgroundThreads() {
-        numThreads--;
-    }
-
-    /* return number of threads in the scope */
-    int getNumThreads() const {
-        return numThreads;
     }
 
     bool containsVar(const String& varName) const {
@@ -152,8 +132,8 @@ class Scope {
     VarTable varScope;
     ExecutionStatus executionStatus;
 
-    /* the number of threads active in this scope */
-    int numThreads;
+    /* whether this is a parallel scope */
+    bool isParallel;
 
     /* mutex for protecting variables when in parallel mode */
     QMutex varMutex;

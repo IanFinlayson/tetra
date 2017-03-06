@@ -1,7 +1,1 @@
-- Can we stick threadid into the context, so we don't have to lug it around
-  everywhere?
-- Clean up the awful num background threads thing - either it's parallel or
-  it's not, detecting when it's no longer parallel not worth it
-- Also, fix deleting scope when we return from it the last time, we will make
-  the scopes ref-counted soon to address that issue.
 - Fix bug with nested parfors, etc.

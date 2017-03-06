@@ -78,20 +78,9 @@ class Context {
         programStack.top()->setExecutionStatus(ELIF);
     }
 
-    void notifyParallel() {
-        globalScope->setExecutionStatus(PARALLEL);
-        programStack.top()->setExecutionStatus(PARALLEL);
-    }
-
-    /* add a background thread to each of the scopes we are in */
-    void incrementBackgroundThreads() {
-        globalScope->incrementBackgroundThreads();
-        programStack.top()->incrementBackgroundThreads();
-    }
-
-    void decrementBackgroundThreads() {
-        globalScope->decrementBackgroundThreads();
-        programStack.top()->decrementBackgroundThreads();
+    void markParallel() {
+        globalScope->markParallel();
+        programStack.top()->markParallel();
     }
 
     /* sets the current scope's executionStatus to NORMAL */

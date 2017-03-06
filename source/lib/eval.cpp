@@ -21,10 +21,7 @@ extern DataType* PAIR_TYPE;
 /* this function populates a scope object with the variables contained in a
  * portion of the subtree containing the actual parameter expressions which are
  * passed in */
-void pasteArgList(Node* node1,
-                  Node* node2,
-                  Scope* destinationScope,
-                  Context* sourceContext) {
+void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* sourceContext) {
     /* check if we are a NODE_FORMAL_PARAM_LIST (structure), or an actual value */
     if (node1->kind() == NODE_FORMAL_PARAM_LIST) {
         /* recursively paste in the subtrees */
@@ -40,7 +37,7 @@ void pasteArgList(Node* node1,
         /* evaluate node2 to get a value */
         Data* sourceValue = evaluateExpression(node2, sourceContext);
 
-        /* create a data reference for this name in the new scope 
+        /* create a data reference for this name in the new scope
          * the thread id does not matter because this will NOT be a thread specfic
          * variable (i.e. not a parallel for variable */
         Data* destinationValue =
@@ -134,7 +131,7 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
  * from that class */
 Data* evaluateBinaryExpression(Node* node,
                                Context* context,
-                               Data* (Data::*operatorMethod)(const Data*)) {
+                               Data* (Data::*operatorMethod)(const Data*) ) {
     /* evaluate both of the children */
     Data* lhs = evaluateExpression(node->child(0), context);
     Data* rhs = evaluateExpression(node->child(1), context);
@@ -407,8 +404,8 @@ Data* evaluateFor(Node* node, Context* context) {
             context->normalizeStatus();
 
             /* look the induction variable up in the context */
-            Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                                                    node->child(0)->type());
+            Data* loopVariable =
+                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
             /* set it to the next value */
             loopVariable->opAssign((*container)[i]);
@@ -443,8 +440,8 @@ Data* evaluateFor(Node* node, Context* context) {
             context->normalizeStatus();
 
             /* look the induction variable up in the context */
-            Data* loopVariable = context->lookupVar(node->child(0)->getStringvalue(),
-                                                    node->child(0)->type());
+            Data* loopVariable =
+                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
             /* set it to the next value */
             String letter = string->substring(i, 1);
@@ -463,14 +460,14 @@ Data* evaluateFor(Node* node, Context* context) {
 /* evaluate a parallel statement */
 Data* evaluateParallel(Node* node, Context* context) {
     /* mark the context as being parallel */
-    context->notifyParallel();
+    context->markParallel();
 
     /* keep track of all the sub-statements */
     Node* next = node->child(0);
     std::vector<ParallelWorker*> children_threads;
 
     /* marks this context as parallel */
-    context->incrementBackgroundThreads();
+    context->markParallel();
 
     while (next != NULL) {
         /* peel off the left child */
@@ -502,7 +499,6 @@ Data* evaluateParallel(Node* node, Context* context) {
 
     /* end parallel mode */
     context->normalizeStatus();
-    context->decrementBackgroundThreads();
 
     /* TODO what should happen if a parallel has a return in it??? */
     return NULL;
@@ -510,8 +506,7 @@ Data* evaluateParallel(Node* node, Context* context) {
 
 Data* evaluateLock(Node* node, Context* context) {
     /* find the mutex object here */
-    Data* mutex =
-        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+    Data* mutex = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
     /* lock the mutex */
     ((Mutex*) mutex->getValue())->lock();
@@ -527,10 +522,10 @@ Data* evaluateLock(Node* node, Context* context) {
 
 Data* evaluateBackground(Node* node, Context* context) {
     /* mark the context as being parallel */
-    context->notifyParallel();
+    context->markParallel();
 
     /* add in one thread to the scopes */
-    context->incrementBackgroundThreads();
+    context->markParallel();
 
     /* if there is a name, then the block is in child 1 instead */
     int blockIdx = node->getNumChildren() == 2 ? 1 : 0;
@@ -543,8 +538,7 @@ Data* evaluateBackground(Node* node, Context* context) {
     /* if it had a name, then set it up as a local variable */
     if (node->getNumChildren() == 2) {
         /* find the task object here */
-        Data* task =
-            context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+        Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
         /* assign the worker object into the task */
         ((Task*) task->getValue())->setWorker(worker);
@@ -555,8 +549,7 @@ Data* evaluateBackground(Node* node, Context* context) {
 
 Data* evaluateWait(Node* node, Context* context) {
     /* find the task object here */
-    Data* task =
-        context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
+    Data* task = context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
     /* wait for it to finish, then set it to NULL */
     ((Task*) task->getValue())->wait();
@@ -571,10 +564,10 @@ Data* evaluateParFor(Node* node, Context* context) {
     std::vector<ParallelWorker*> workers;
 
     /* mark the context as being parallel */
-    context->notifyParallel();
+    context->markParallel();
 
     /* add in one thread to the scopes */
-    context->incrementBackgroundThreads();
+    context->markParallel();
 
     /* find the type of thingy we are doing */
     DataTypeKind k = node->child(1)->type()->getKind();
@@ -639,7 +632,6 @@ Data* evaluateParFor(Node* node, Context* context) {
     }
 
     context->normalizeStatus();
-    context->decrementBackgroundThreads();
 
     /* we must reset the parallel for loop variables */
     context->getCurrentScope()->clearParallelFor(node->child(0)->getStringvalue());
@@ -707,8 +699,8 @@ Data* evaluateStatement(Node* node, Context* context) {
             Data* value = evaluateExpression(node->child(1), context);
 
             /* get a pointer to the global thing on the left */
-            Data* global = context->lookupVar(node->child(0)->getStringvalue(),
-                                              node->child(0)->type());
+            Data* global =
+                context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
             /* do the assignment */
             global->opAssign(value);

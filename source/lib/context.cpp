@@ -94,13 +94,6 @@ void Context::initializeNewScope(Scope* newScope) {
 
 /* destroys the current scope, returning to the previously initialized scope */
 void Context::exitScope() {
-    Scope* scope = programStack.top();
-
-    /* if the scope is empty, delete it */
-    if (scope->getNumThreads() == 0) {
-        delete scope;
-    }
-
     programStack.pop();
 }
 
