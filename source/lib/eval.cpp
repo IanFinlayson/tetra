@@ -41,7 +41,7 @@ void pasteArgList(Node* node1, Node* node2, Scope* destinationScope, Context* so
          * the thread id does not matter because this will NOT be a thread specfic
          * variable (i.e. not a parallel for variable */
         Data* destinationValue =
-            destinationScope->lookupVar(node1->getStringvalue(), node1->type(), -1);
+            destinationScope->lookupVar(node1->getStringvalue(), node1->type(), NULL);
 
         /* do the assignment */
         destinationValue->opAssign(sourceValue);
@@ -566,9 +566,6 @@ Data* evaluateParFor(Node* node, Context* context) {
     /* mark the context as being parallel */
     context->markParallel();
 
-    /* add in one thread to the scopes */
-    context->markParallel();
-
     /* find the type of thingy we are doing */
     DataTypeKind k = node->child(1)->type()->getKind();
     if (k == TYPE_DICT || k == TYPE_LIST) {
@@ -584,9 +581,8 @@ Data* evaluateParFor(Node* node, Context* context) {
         /* find the number of threads to spawn */
         unsigned int numThreads = std::min(container->length(), Environment::getMaxThreads());
 
-        /* for each thread in the workgroup */
+        /* spawn each thread in the workgroup */
         for (unsigned int i = 0; i < numThreads; i++) {
-            /* spawn one thread with these bounds */
             ParallelWorker* worker = new ParallelWorker(node->child(2), context);
             workers.push_back(worker);
         }
@@ -631,10 +627,6 @@ Data* evaluateParFor(Node* node, Context* context) {
         delete workers[i];
     }
 
-    context->normalizeStatus();
-
-    /* we must reset the parallel for loop variables */
-    context->getCurrentScope()->clearParallelFor(node->child(0)->getStringvalue());
     return NULL;
 }
 

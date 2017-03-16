@@ -227,7 +227,7 @@ bool operator==(const DataType& lhs, const DataType& rhs) {
     }
 
 #if 0
-    EVENTUALLY THIS SHOULD WORK
+    TODO FIXME EVENTUALLY THIS SHOULD WORK
 
     /* check for int/real things
      * if both are numerical, then the types match (due to auto promotion) */

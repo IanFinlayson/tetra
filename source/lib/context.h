@@ -95,6 +95,10 @@ class Context {
     void setThreadId(int threadId);
     int getThreadId() const;
 
+    /* get and set the parent context */
+    void setParent(Context* parent);
+    Context* getParent() const;
+
    private:
     /* the scopes avaiable at this time */
     std::stack<Scope*> programStack;
@@ -102,6 +106,9 @@ class Context {
 
     /* the thread id of the thread in this context */
     int threadId;
+
+    /* the context which spawned this one */
+    Context* parent;
 };
 
 #endif

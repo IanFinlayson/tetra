@@ -8,6 +8,7 @@ Context::Context() {
     /* initialize the global scope */
     globalScope = new Scope();
     programStack.push(globalScope);
+    parent = NULL;
 }
 
 /* find an overloaded function by name and arguments */
@@ -49,7 +50,7 @@ Data* Context::lookupVar(String name, DataType* type) {
     Data* value;
 
     if (getGlobalScopeRef()->containsVar(name)) {
-        value = (getGlobalScopeRef()->lookupVar(name, type, threadId));
+        value = (getGlobalScopeRef()->lookupVar(name, type, this));
     } else if (type->getKind() == TYPE_FUNCTION) {
         /* find the function */
         String signature = FunctionMap::getFunctionSignature(name, type);
@@ -58,7 +59,7 @@ Data* Context::lookupVar(String name, DataType* type) {
         value = Data::create(type, &funcVal);
     } else {
         /* look up general variables */
-        value = programStack.top()->lookupVar(name, type, threadId);
+        value = programStack.top()->lookupVar(name, type, this);
     }
 
     return value;
@@ -103,6 +104,14 @@ void Context::setThreadId(int threadId) {
 
 int Context::getThreadId() const {
     return threadId;
+}
+
+void Context::setParent(Context* parent) {
+    this->parent = parent;
+}
+
+Context* Context::getParent() const {
+    return parent;
 }
 
 /* If, for some reason the tetra program crashes inadvertantly, we may as well */

@@ -21,6 +21,7 @@ class ParallelWorker : public QThread {
 
         /* make a copy of the context */
         this->context = new Context(*context);
+        this->context->setParent(context);
 
         /* assume no return */
         returnValue = NULL;

@@ -14,6 +14,7 @@
 
 class Node;
 class ParallelWorker;
+class Context;
 
 /* each context will have a flag as to what action should be taken when control reaches a structure
  * Node
@@ -31,102 +32,42 @@ class ParallelWorker;
  *
  * RETURN: keep returning until you hit a function call, then return from the
  * function call. This takes precedence over breaks and continues */
-enum ExecutionStatus {NORMAL, ELIF, CONTINUE, BREAK, RETURN};
+enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN };
+
+// TODO FIXME for debugging
+void pmap(std::map<String, std::map<unsigned int, Data*> > parallelForVariables);
 
 /* a scope contains local variables of a function */
 class Scope {
    public:
-    Scope() {
-        executionStatus = NORMAL;
-        isParallel = false;
-    }
+    Scope();
 
     /* look a variable up in this scope by name */
-    Data* lookupVar(const String& name, DataType* type, unsigned int threadid) {
-        Data* var;
-        if (isParallel) {
-            varMutex.lock();
-        }
-
-        /* first check if this is a parallel for loop variable */
-        auto search = parallelForVariables.find(name);
-        if (search != parallelForVariables.end()) {
-            /* look it up by thread id */
-            var = search->second[threadid];
-        } else {
-            /* just look it up in the normal place */
-            var = varScope.lookupVar(name, type);
-        }
-
-        if (isParallel) {
-            varMutex.unlock();
-        }
-        return var;
-    }
+    Data* lookupVar(const String& name, DataType* type, Context* context);
 
     /* Used by loops and constrol statements to determine if they can proceed, or
      * if they should return */
-    ExecutionStatus queryExecutionStatus() {
-        return executionStatus;
-    }
+    ExecutionStatus queryExecutionStatus();
 
     /* mark the scope as being parallel */
-    void markParallel() {
-        isParallel = true;
-    }
+    void markParallel();
 
     /* sets the execution status to the specified value */
-    void setExecutionStatus(ExecutionStatus status) {
-        executionStatus = status;
-    }
+    void setExecutionStatus(ExecutionStatus status);
 
-    bool containsVar(const String& varName) const {
-        return varScope.containsVar(varName);
-    }
+    bool containsVar(const String& varName) const;
 
     /* Used by the TetraContext to obtain a stack trace */
-    void setCallNode(const Node* node) {
-        callNode = node;
-    }
-
-    const Node* getCallNode() const;
+    void setCallNode(const Node* node);
 
     /* called when we are starting a new parallel for loop on some variable in this scope */
-    void setupParallelFor(const String& variable) {
-        varMutex.lock();
-        std::map<unsigned int, Data*> newOne;
-        parallelForVariables.insert(std::make_pair(variable, newOne));
-        varMutex.unlock();
-    }
+    void setupParallelFor(const String& variable);
 
     /* called when we are assigning the parallel for variable for a thread */
-    void assignParallelFor(const String& variable, unsigned int threadid, Data* value) {
-        /* find the sub map for this variable */
-        varMutex.lock();
-        auto search = parallelForVariables.find(variable);
-
-        if (search == parallelForVariables.end()) {
-            throw Error("Could not assign parallel for variable");
-        } else {
-            /* insert/overwrite this thread/value pairing */
-            search->second[threadid] = value;
-        }
-        varMutex.unlock();
-    }
+    void assignParallelFor(const String& variable, unsigned int threadid, Data* value);
 
     /* called when we are done with a parallel for variable i.e. the loop is done */
-    void clearParallelFor(const String& variable) {
-        /* find the sub map for this variable */
-        varMutex.lock();
-        auto search = parallelForVariables.find(variable);
-        if (search == parallelForVariables.end()) {
-            throw Error("Could not assign parallel for variable");
-        } else {
-            /* remove this map */
-            parallelForVariables.erase(search);
-        }
-        varMutex.unlock();
-    }
+    void clearParallelFor(const String& variable);
 
    private:
     VarTable varScope;
