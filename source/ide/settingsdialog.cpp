@@ -58,21 +58,6 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     font_choice = SettingsManager::font();
 
     /* set up the color buttons so the color matches the current choice */
-    /*
-    foreground->setPalette(SettingsManager::foreground());
-    background->setPalette(SettingsManager::background());
-    keywords->setPalette(SettingsManager::keywords());
-    types->setPalette(SettingsManager::types());
-    values->setPalette(SettingsManager::values());
-    comments->setPalette(SettingsManager::comments());
-    functions->setPalette(SettingsManager::functions());
-    termForeground->setPalette(SettingsManager::termForeground());
-    termBackground->setPalette(SettingsManager::termBackground());
-    linesForeground->setPalette(SettingsManager::linesForeground());
-    linesBackground->setPalette(SettingsManager::linesBackground());
-    search->setPalette(SettingsManager::search());
-    error->setPalette(SettingsManager::error());
-    */
     foreground->setStyleSheet("background-color: " + SettingsManager::foreground().name());
     background->setStyleSheet("background-color: " + SettingsManager::background().name());
     keywords->setStyleSheet("background-color: " + SettingsManager::keywords().name());
