@@ -58,6 +58,7 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     font_choice = SettingsManager::font();
 
     /* set up the color buttons so the color matches the current choice */
+    /*
     foreground->setPalette(SettingsManager::foreground());
     background->setPalette(SettingsManager::background());
     keywords->setPalette(SettingsManager::keywords());
@@ -71,6 +72,20 @@ SettingsDialog::SettingsDialog(QWidget* parent)
     linesBackground->setPalette(SettingsManager::linesBackground());
     search->setPalette(SettingsManager::search());
     error->setPalette(SettingsManager::error());
+    */
+    foreground->setStyleSheet("background-color: " + SettingsManager::foreground().name());
+    background->setStyleSheet("background-color: " + SettingsManager::background().name());
+    keywords->setStyleSheet("background-color: " + SettingsManager::keywords().name());
+    types->setStyleSheet("background-color: " + SettingsManager::types().name());
+    values->setStyleSheet("background-color: " + SettingsManager::values().name());
+    comments->setStyleSheet("background-color: " + SettingsManager::comments().name());
+    functions->setStyleSheet("background-color: " + SettingsManager::functions().name());
+    termForeground->setStyleSheet("background-color: " + SettingsManager::termForeground().name());
+    termBackground->setStyleSheet("background-color: " + SettingsManager::termBackground().name());
+    linesForeground->setStyleSheet("background-color: " + SettingsManager::linesForeground().name());
+    linesBackground->setStyleSheet("background-color: " + SettingsManager::linesBackground().name());
+    search->setStyleSheet("background-color: " + SettingsManager::search().name());
+    error->setStyleSheet("background-color: " + SettingsManager::error().name());
 
     /* connect them to the color dialog action */
     connect(foreground, SIGNAL(released()), this, SLOT(askColor()));
