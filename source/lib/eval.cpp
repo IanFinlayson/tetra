@@ -620,6 +620,9 @@ Data* evaluateParFor(Node* node, Context* context) {
             context->getCurrentScope()->assignParallelFor(node->child(0)->getStringvalue(),
                                                           idle->getThreadId(), data);
 
+            /* reset the worker's context to normal status */
+            idle->getContext()->normalizeStatus();
+
             /* start the worker back up */
             idle->start();
         }

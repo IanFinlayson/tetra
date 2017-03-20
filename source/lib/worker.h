@@ -40,6 +40,10 @@ class ParallelWorker : public QThread {
         return threadId;
     }
 
+    Context* getContext() const {
+        return context;
+    }
+
     /* this function is called in the new thread */
     void run() Q_DECL_OVERRIDE {
         /* run evaluate our node, and save the return value */
