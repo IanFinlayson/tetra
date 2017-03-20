@@ -115,11 +115,18 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
          * trace */
         context->getCurrentScope()->setCallNode(node);
 
+        /* save current execution status, mark as normal for new one */
+        ExecutionStatus original = context->queryExecutionStatus();
+        context->normalizeStatus();
+
         /* transfer control to the function capturing the return value */
         Data* returnValue = evaluateStatement(funcNode, context);
 
         /* returns to the old scope once the function has finished evaluating */
         context->exitScope();
+
+        /* reset status to what it had been prior to function call */
+        context->setStatus(original);
 
         /* return the functions return value back */
         return returnValue;
@@ -682,6 +689,7 @@ Data* evaluateStatement(Node* node, Context* context) {
             context->notifyBreak();
             break;
         case NODE_CONTINUE:
+            //std::cout << "CONT\n";
             context->notifyContinue();
             break;
 

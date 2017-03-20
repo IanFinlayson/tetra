@@ -17,6 +17,24 @@
 
 class Node;
 
+/* each context will have a flag as to what action should be taken when control reaches a structure
+ * Node
+ *
+ * NORMAL: continue as usual
+ *
+ * ELIF: Denotes that program control is in an elif chain. Keep evaluating
+ * conditions while this is true. Note that if the program ever needs to change
+ * to any other mode, it means that some condition was true (and hence no longer
+ * has an ELIF execution status).
+ *
+ * CONTINUIE: Keep returning until a loop is hit, then reevaluate the loop node
+ *
+ * BREAK: keep returning until you hit a loop node, then return from that node
+ *
+ * RETURN: keep returning until you hit a function call, then return from the
+ * function call. This takes precedence over breaks and continues */
+enum ExecutionStatus { NORMAL, ELIF, CONTINUE, BREAK, RETURN };
+
 /* this class contains a stack of scopes, as well as information on the currently
  * executing program */
 class Context {
@@ -58,34 +76,34 @@ class Context {
         return globalScope;
     }
 
-    /* wraps a call to the current scope's queryExecutionStatus */
     ExecutionStatus queryExecutionStatus() {
-        assert(programStack.empty() == false);
-        return programStack.top()->queryExecutionStatus();
+        return executionStatus;
     }
 
-    /* sets the current scope's ExecutionStatus to the appropriate value */
+    /* sets the ExecutionStatus to the appropriate value */
     void notifyBreak() {
-        programStack.top()->setExecutionStatus(BREAK);
+        executionStatus = BREAK;
     }
     void notifyContinue() {
-        programStack.top()->setExecutionStatus(CONTINUE);
+        executionStatus = CONTINUE;
     }
     void notifyReturn() {
-        programStack.top()->setExecutionStatus(RETURN);
+        executionStatus = RETURN;
     }
     void notifyElif() {
-        programStack.top()->setExecutionStatus(ELIF);
+        executionStatus = ELIF;
+    }
+    void normalizeStatus() {
+        executionStatus = NORMAL;
+    }
+    void setStatus(ExecutionStatus s) {
+        executionStatus = s;
     }
 
+    /* set this context's current scopes as being parallel */
     void markParallel() {
         globalScope->markParallel();
         programStack.top()->markParallel();
-    }
-
-    /* sets the current scope's executionStatus to NORMAL */
-    void normalizeStatus() {
-        programStack.top()->setExecutionStatus(NORMAL);
     }
 
     /* performs a deep copy of the current context */
@@ -109,6 +127,9 @@ class Context {
 
     /* the context which spawned this one */
     Context* parent;
+
+    /* the execution status of this context */
+    ExecutionStatus executionStatus;
 };
 
 #endif

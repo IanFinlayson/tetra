@@ -5,7 +5,6 @@
 #include "tetra.h"
 
 Scope::Scope() {
-    executionStatus = NORMAL;
     isParallel = false;
 }
 
@@ -52,20 +51,9 @@ Data* Scope::lookupVar(const String& name, DataType* type, Context* context) {
     return var;
 }
 
-/* Used by loops and constrol statements to determine if they can proceed, or
- * if they should return */
-ExecutionStatus Scope::queryExecutionStatus() {
-    return executionStatus;
-}
-
 /* mark the scope as being parallel */
 void Scope::markParallel() {
     isParallel = true;
-}
-
-/* sets the execution status to the specified value */
-void Scope::setExecutionStatus(ExecutionStatus status) {
-    executionStatus = status;
 }
 
 bool Scope::containsVar(const String& varName) const {
@@ -107,12 +95,3 @@ void Scope::assignParallelFor(const String& variable, unsigned int threadid, Dat
     varMutex.unlock();
 }
 
-// TODO FIXME for debugging
-void pmap(std::map<String, std::map<unsigned int, Data*> > parallelForVariables) {
-    for (auto it : parallelForVariables) {
-        std::cout << it.first << ":\n";
-        for (auto it2 : it.second) {
-            std::cout << "\t" << it2.first << " : " << it2.second->getValue()->toString() << "\n";
-        }
-    }
-}
