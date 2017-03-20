@@ -615,6 +615,11 @@ Data* evaluateParFor(Node* node, Context* context) {
                 QThread::currentThread()->msleep(10);
             }
 
+            /* check if the worker broke, then break out of this loop */
+            if (idle->getContext()->queryExecutionStatus() == BREAK) {
+                break;
+            }
+
             /* now we must assign this thread a value in the scope */
             Data* data = (*container)[i];
             context->getCurrentScope()->assignParallelFor(node->child(0)->getStringvalue(),
