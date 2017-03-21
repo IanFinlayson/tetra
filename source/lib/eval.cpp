@@ -845,7 +845,7 @@ Data* evaluateStatement(Node* node, Context* context) {
     return NULL;
 }
 
-/* equivilant of main for the interpreter module */
+/* equivalent to the main function of the interpreter */
 int interpret(Node* tree, int debug, int threads) {
     /* set environment settings */
     Environment::setDebug(debug);

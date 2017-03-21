@@ -26,7 +26,7 @@ Data* evaluateStatement(Node* node, Context* context);
 /* evaluate an expression node */
 Data* evaluateExpression(Node* node, Context* context);
 
-/* interpret a tetra program parsed into a Node tree */
+/*equivilant of main for the interpreter module */
 int interpret(Node* tree, int debug, int threads);
 
 /* allows other libraries to define how the interpreter should handle I/O */
