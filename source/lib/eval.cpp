@@ -703,15 +703,15 @@ Data* evaluateStatement(Node* node, Context* context) {
 
         case NODE_GLOBAL:
         case NODE_CONST: {
-            /* evaluate the  right hand side */
-            Data* value = evaluateExpression(node->child(1), context);
-
             /* get a pointer to the global thing on the left */
             Data* global =
                 context->lookupVar(node->child(0)->getStringvalue(), node->child(0)->type());
 
-            /* do the assignment */
-            global->opAssign(value);
+            /* if there is an assignment, do it */
+            if (node->getNumChildren() == 2) {
+                Data* value = evaluateExpression(node->child(1), context);
+                global->opAssign(value);
+            }
 
         } break;
 

@@ -1545,10 +1545,9 @@ void inferParams(Node* node, Node* function) {
 /* infer a global/const definition */
 void inferGlobal(Node* node, bool isConst = false) {
     /* name for errors */
-    String varType;
-    isConst ? varType = "Constant" : varType = "Global";
+    String varType = isConst ? "Constant" : "Global";
 
-    /* check if this symbol exists already, (it shouldn't)*/
+    /* check if this symbol exists already, (it shouldn't) */
     if (globals.count(node->child(0)->getStringvalue()) > 0 ||
         functions.hasFuncNamed(node->child(0)->getStringvalue()) ||
         classes.count(node->child(0)->getStringvalue()) > 0) {
@@ -1578,7 +1577,7 @@ void inferGlobal(Node* node, bool isConst = false) {
     /* add it in */
     globals.insert(std::pair<String, Symbol>(
         node->child(0)->getStringvalue(),
-        Symbol(node->child(0)->getStringvalue(), node->type(), node->getLine())));
+        Symbol(node->child(0)->getStringvalue(), node->child(0)->type(), node->getLine())));
 }
 
 void inferGlobals(Node* node) {

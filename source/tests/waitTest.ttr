@@ -1,9 +1,11 @@
+# this one is kind of funny since it relies on the sleep functions
+# to work as expected for the output to be correct
 def main():
     background t2:
-        sleep(0.2)
+        sleep(0.02)
         print("Done t2\n")
     background t1:
-        sleep(0.1)
+        sleep(0.01)
         print("Done t1\n")
     print("Launched them...\n")
     wait t1
