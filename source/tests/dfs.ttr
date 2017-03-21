@@ -1,0 +1,66 @@
+# print a maze to the screen
+def printMaze(maze [[string]]):
+    for line in maze:
+        for char in line:
+            print(char)
+        print("\n")
+
+# search the maze using recursive DFS
+def search(maze [[string]], x int, y int) bool:
+    maze[y][x] = "*"
+    printMaze(maze)
+    print("We are at (", x, ", ", y, ")\n")
+
+    # check if we are done
+    if x == 17 and y == 7:
+        return true
+    
+    # mark this spot as seen
+    maze[y][x] = "X"
+    
+    # if we haven't gone left, and not out of bounds, go left
+    if ((x - 1) >= 0) and (maze[y][x - 1] == "-"):
+        if search(maze, x - 1, y):
+            return true
+
+    # go bottom
+    if ((y + 1) <= 7) and (maze[y + 1][x] == "-"):
+        if search(maze, x, y + 1):
+            return true
+
+    # go top
+    if ((y - 1) >= 0) and (maze[y - 1][x] == "-"):
+        if search(maze, x, y - 1):
+            return true
+
+    # go right
+    if ((x + 1) <= 17) and (maze[y][x + 1] == "-"):
+        if search(maze, x + 1, y):
+            return true
+
+    # if we got here, there was no way on this path
+    return false
+  
+ 
+def main():
+    # this is extremely ugly
+    maze = [["-", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#", "#"], \
+            ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-", "#", "#", "-", "-", "-", "-", "-", "#"], \
+            ["-", "#", "#", "#", "#", "#", "#", "#", "#", "-", "#", "#", "-", "#", "#", "-", "#", "#"], \
+            ["-", "#", "#", "#", "#", "#", "#", "#", "#", "-", "-", "-", "-", "#", "#", "-", "#", "#"], \
+            ["-", "#", "#", "#", "#", "#", "#", "#", "#", "-", "#", "#", "#", "#", "#", "-", "#", "#"], \
+            ["-", "-", "-", "-", "-", "#", "#", "#", "#", "-", "#", "#", "#", "#", "#", "-", "#", "#"], \
+            ["#", "#", "#", "#", "#", "#", "#", "#", "#", "-", "#", "#", "#", "-", "-", "-", "#", "#"], \
+            ["#", "#", "#", "#", "-", "-", "-", "-", "-", "-", "#", "#", "#", "#", "#", "-", "-", "-"]]
+
+    if search(maze, 0, 0):
+        print("Done!\n")
+    else:
+        print("No Path\n")
+
+
+
+
+
+
+
