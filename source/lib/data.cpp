@@ -441,7 +441,7 @@ Data* Data::opNegate() {
             result->value->copyValue(-(*((Real*) value)));
             break;
         default:
-            throw RuntimeError("Unhandled operands to not operator", 0);
+            throw RuntimeError("Unhandled operands to unary negate operator", 0);
     }
 
     return result;
@@ -455,6 +455,8 @@ Data* Data::opIndex(Data* other, bool isLValue) {
                 p.set(other, Data::create(&((*(type.subtypes))[1]), nullptr));
                 ((Dict*) value)->add(Data::create(PAIR_TYPE, &p));
             }
+        case TYPE_TUPLE:
+            return ((Container*) value)->get(other);
         case TYPE_LIST:
             return ((Container*) value)->get(other);
         case TYPE_STRING: {
@@ -463,7 +465,7 @@ Data* Data::opIndex(Data* other, bool isLValue) {
             return Data::create(&type, &letter);
         }
         default:
-            throw RuntimeError("Unhandled operands to + operator", 0);
+            throw RuntimeError("Unhandled operands to [] operator", 0);
     }
 }
 
