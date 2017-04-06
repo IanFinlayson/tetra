@@ -21,6 +21,7 @@
 #include "function.h"
 #include "node.h"
 #include "parser.h"
+#include "object.h"
 #include "mutex.h"
 #include "real.h"
 #include "scope.h"

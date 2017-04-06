@@ -513,6 +513,9 @@ Data* Data::create(DataType* type, const Value* value) {
         case TYPE_OVERLOAD:
             newData->value = new Function();
             break;
+        case TYPE_CLASS:
+            newData->value = new Object();
+            break;
         default:
             throw RuntimeError("Unhandled data type in Data::create", 0);
     }
