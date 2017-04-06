@@ -96,6 +96,23 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         /* get the body node out of the function */
         Node* funcNode = ((Function*) funcData->getValue())->getNode();
 
+        /* check if this is a constructor - if the name of the function is a
+         * the same as the return type class name */
+        String* className = funcNode->type()->subtypes->at(1).className;
+        if (className && (*className == funcName)) {
+            std::cout <<"AAAAAAAAAAAAAAAAAAAAAAAAAA\n";
+            while (1);
+
+
+            /* FIXME - what do we need to do differently if this is a constructor ???? */
+
+
+        }
+
+
+
+
+
         /* check if there are parameters to be passed, and do so if needed */
         if (node->child(1) != NULL) {
             /* make a scope for the new function we are calling */

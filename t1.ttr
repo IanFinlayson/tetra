@@ -1,0 +1,14 @@
+class Square:
+    size as real
+
+    def init(size real):
+        #self.size = size
+        print("In cons")
+
+#def area() real:
+#return size ** 2.0
+
+def main():
+    s = Square(5.0)
+#print("Size = ", s.area())
+
