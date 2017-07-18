@@ -4,12 +4,184 @@
 
 <h1>Language Reference</h1>
 
-<hr />
 <h3>Introduction</h3>
+
+<p>This page documents the syntax and semantics of the Tetra language.  The
+page does not provide a formal specification, but an informal one.  For a
+formal syntax specification, see the parser.y file in the Tetra code.</p>
+
+<p>The goal of this page is to provide more detailed information than is
+given in the tutorial or descriptor pages.</p>
+
 
 
 <hr />
 <h3>Program Structure</h3>
+
+<p>Tetra programs are made of several top-level elements.  These can be functions,
+classes, constants or globals.</p>
+
+<p>Constants consist of the keyword <tt>constant</tt>, followed by the name of the
+constant variable, followed by an assignment to a value.  Below is an example:</p>
+
+<pre>
+<code>
+constant E = 2.718281828
+</code>
+</pre>
+
+<p>Globals are similar, except they use the <tt>global</tt> keyword, and do not
+require an assignment.  If a global does not contain an assignment, it must be given
+a type.  Below are two examples of globals:</p>
+
+<pre>
+<code>
+global x = 4.0
+global y as real
+</code>
+</pre>
+
+<p>Comments in Tetra begin with an octothorpe (#) and continue until the end
+of the line.</p>
+
+
+<hr />
+<h3>Types</h3>
+
+<p>All variable types are known to the Tetra interpreter before the program
+is executed.  This means that each newly introduced variables must either be
+assigned an initial value, or have a type declared.  Tetra types can be any of
+the following:</p>
+
+<ul>
+<li>A built-in type (specified with just the name of the type):
+<ul>
+<li><tt>int</tt></li>
+<li><tt>real</tt></li>
+<li><tt>string</tt></li>
+<li><tt>bool</tt></li>
+<li><tt>mutex</tt></li>
+<li><tt>task</tt></li>
+</ul>
+
+</li>
+<li>A list of any type.  Lists are specified as the component type
+of the list inside of square brackets.  For instance, a list of strings
+would be specified as <tt>[string]</tt></li>
+<li>A tuple containing any number of elements of other types.  These
+are specified by listing the component types inside of parenthesis, separated
+by commas.  For example, a tuple containing an integer, a string, and a bool
+would be given as <tt>(int, string, bool)</tt>.</li>
+<li>A dictionary mapping one type to another.  These are specified by providing
+the type of the keys and values, inside of curly braces, separated by a colon.
+For instance, a dictionary mapping strings to mutexes would be specified as
+<tt>{string : mutex}</tt>.</li>
+<li>A function type.  These are specified by listing the parameters to the
+function, in the same format as a tuple, followed by the <tt>-&gt;</tt>
+symbol, followed by the return type.  For instance, a function which
+takes a list of integers and a string, and returns a real would be specified
+<tt>([string], string) -&gt; real</tt>.</li>
+<li>An identifier name which refers to a class.</li>
+</ul>
+
+<p>Note that the above refer to specifying a type in a declaration only.</p>
+
+
+
+
+<hr />
+<h3>Functions</h3>
+
+<p>Functions in Tetra are created with the <tt>def</tt> keyword, followed by the
+name of the function, followed by the parameter list, followed by a colon, and then
+a new line.  After that comes the body of the function which is indented one level.</p>
+
+<p>Below is an example of a function which takes two integers and returns the sum:</p>
+
+<pre>
+<code>
+def sum(a int, b int) int:
+    return a + b
+</code>
+</pre>
+
+<p>Note that the types follow parameter names, and that the return type is
+between the closing parenthesis and colon.</p>
+
+<p>If the function returns no value, then the return type is simply omitted.</p>
+
+
+
+
+<hr />
+<h3>Indentation</h3>
+
+<p>Tetra uses indentation to delimit blocks, as seen in the function example
+above.  The indentation must be some number of spaces - tab characters are
+illegal in Tetra code.  The interpreter does not care how many spaces you use
+to indent so long as you are consistent.</p>
+
+<p>The interpreter finds the first indented block in your program and uses the
+amount of spaces you used as the indentation level.  You must use this same amount
+of indentation level each subsequent time you indent, to use more or less will
+cause a syntax error.</p>
+
+
+
+<hr />
+<h3>Scope</h3>
+
+<p>Unlike some languages, Tetra does not treat each block of code as its own
+scope.  Instead, each function contains one scope, regardless of how many indented
+blocks it contains.  There is also one global scope which contains the constant
+and global declarations.</p>
+
+
+
+
+
+<hr />
+<h3>Statements</h3>
+
+<p>A function body is made up of statements.  These can either be a "simple
+statement" or a "compound statement".  The difference is that multiple simple
+statements can be combined in one line, separated by semi-colons.</p>
+
+<p>The simple statements are:</p>
+
+<ul>
+<li><tt>pass</tt> - this statement does nothing and has limited value except
+for specifying an empty loop or function body.</li>
+<li><tt>break</tt> - this statement causes the interpreter to halt the most
+closely nested loop that the break statement appears in.</li>
+<li><tt>continue</tt> - this statement causes the interpreter to go back to
+the start of the most closely nested loop that the break statement appears in.
+If it is a for loop, the for variable will be assigned a new value before
+restarting the loop.</li>
+<li><tt>return</tt> - This statement causes the interpreter to stop the currently
+executing function and return control back to the caller.  If the return statement
+is given a value, then this value is returned to the caller.</li>
+<li><tt>wait</tt> - This statement is given a <tt>task</tt> object.  It will
+cause the current thread to pause until the specified task completes.</li>
+<li><tt>Any expression</tt> - any expression (described below) can be used as a
+statement.  Most frequently these will be assignments or function calls.</li>
+</ul>
+
+<p>The compound statements ate:</p>
+
+
+<ul>
+<li><tt>if</tt> - </li>
+<li><tt>while</tt> - </li>
+<li><tt>for</tt> - </li>
+<li><tt>parallel for</tt> - </li>
+<li><tt>background</tt> - </li>
+<li><tt>lock</tt> - </li>
+<li><tt>parallel</tt> - </li>
+</ul>
+
+
+
 
 
 <hr />
@@ -17,17 +189,19 @@
 
 
 
+
+
+
+
 <hr />
-<h3>Statements</h3>
-
-
-<hr />
-<h3>Types</h3>
+<h3>Classes</h3>
 
 
 
+<!--
 <hr />
 <h3>Modules</h3>
+-->
 
 
 
