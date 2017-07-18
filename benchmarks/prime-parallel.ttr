@@ -1,0 +1,20 @@
+#calculates the number of primes between 0 and 1000000
+def main():
+    currentPrime = 0
+    parallel for x in [0 ... 1000]:
+        if determinePrime(x):
+            lock sum:
+                currentPrime += 1
+    print(currentPrime)
+
+def determinePrime(num int) bool:
+    if num < 2:
+        return false
+    fact = 2
+    #print("testing: ",num,"\n")
+    while (fact * fact <= num):
+        if num % fact == 0:
+            return false
+        fact += 1
+    return true
+
