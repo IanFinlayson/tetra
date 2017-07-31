@@ -150,40 +150,92 @@ statements can be combined in one line, separated by semi-colons.</p>
 <p>The simple statements are:</p>
 
 <ul>
+
 <li><tt>pass</tt> - this statement does nothing and has limited value except
 for specifying an empty loop or function body.</li>
+
 <li><tt>break</tt> - this statement causes the interpreter to halt the most
 closely nested loop that the break statement appears in.</li>
-<li><tt>continue</tt> - this statement causes the interpreter to go back to
-the start of the most closely nested loop that the break statement appears in.
-If it is a for loop, the for variable will be assigned a new value before
+
+<li><tt>continue</tt> - this statement causes the interpreter to go back to the
+start of the most closely nested loop that the break statement appears in.  If
+it is a for loop, the for variable will be assigned a new value before
 restarting the loop.</li>
-<li><tt>return</tt> - This statement causes the interpreter to stop the currently
-executing function and return control back to the caller.  If the return statement
-is given a value, then this value is returned to the caller.</li>
+
+<li><tt>return</tt> - This statement causes the interpreter to stop the
+currently executing function and return control back to the caller.  If the
+return statement is given a value, then this value is returned to the
+caller.</li>
+
 <li><tt>wait</tt> - This statement is given a <tt>task</tt> object.  It will
 cause the current thread to pause until the specified task completes.</li>
+
 <li><tt>Any expression</tt> - any expression (described below) can be used as a
 statement.  Most frequently these will be assignments or function calls.</li>
+
 </ul>
 
 <p>The compound statements ate:</p>
 
 
 <ul>
-<li><tt>if</tt> - </li>
-<li><tt>while</tt> - </li>
-<li><tt>for</tt> - </li>
-<li><tt>parallel for</tt> - </li>
-<li><tt>background</tt> - </li>
-<li><tt>lock</tt> - </li>
-<li><tt>parallel</tt> - </li>
+
+<li><tt>if</tt> - this statement is followed by an expression which should
+produce a boolean value, followed by a colon, and then an indented code block.
+If the expression is true, the code block is executed.  If not, it is not.</li>
+
+<li><tt>elif</tt> - this statement can only follow an <tt>if</tt> statement or
+another <tt>elif</tt> statement.  Like <tt>if</tt> statements, these contain an
+expression followed by a colon, and then an indented block.  An <tt>elif</tt>
+condition will only be evaluated <tt>if</tt> all of the <tt>if</tt> and
+<tt>elif</tt> conditions above it have evaluated to false.  If the condition
+for an <tt>elif</tt> does evaluate to true, then its block is executed.</li>
+
+<li><tt>else</tt> - this statement can optionally follow an <tt>if</tt> or
+<tt>elif</tt> statement.  Each <tt>if</tt> block (with or without
+<tt>elif</tt>) can have exactly one <tt>else</tt> attached to it.  The
+<tt>else</tt> is followed by a colon and an indented block.  If none of the
+prior <tt>if</tt> or <tt>elif</tt> conditions have been met, the <tt>else</tt>
+block is executed.</li>
+
+<li><tt>while</tt> - this statement contains an expression followed by a colon,
+and then an indented block.  The expression is evaluated and, if it is true,
+the block is executed.  Then the expression is evaluated again.  This process
+is repeated until the condition evaluates to false.</li>
+
+<li><tt>for</tt> - this statement contains an "induction variable", the keyword
+<tt>in</tt>, and then an expression which produces a list.  These are followed by
+a colon and an indented block.  The induction variable is assigned all of the values
+from the list, one by one, and the block is executed with that value.</li>
+
+<li><tt>parallel for</tt> - this statement is identical to a regular <tt>for</tt>
+loop, except that all of the loop iterations can be executed in parallel.  The order
+and manner in which they are executed is unspecified.</li>
+
+<li><tt>background</tt> - this statement is followed by a colon, and an indented
+block.  All of the code in the block is executed in a separate thread.  This thread is
+not joined implicitly.  If the <tt>background</tt> statement is given a name (between the
+<tt>background</tt> keyword and colon), then a <tt>task</tt> object is created in the current
+function.</li>
+
+<li><tt>lock</tt> - this statement is followed by a colon and an indented
+block.  The block is executed in a critical section.  So if a different thread
+is already executing the same block, then the current thread will stall.  If
+the <tt>lock</tt> is given a name, then a <tt>mutex</tt> object is created in
+the current function.</li>
+
+<li><tt>parallel</tt> - this statement is followed by a colon and an indented block.
+Each statement directly under the <tt>parallel</tt> statement will be executed in an
+independent thread.  All of these threads are joined before the <tt>parallel</tt>
+statement is complete.</li>
+
 </ul>
 
 
 
 
 
+<!--
 <hr />
 <h3>Expressions</h3>
 
@@ -198,7 +250,6 @@ statement.  Most frequently these will be assignments or function calls.</li>
 
 
 
-<!--
 <hr />
 <h3>Modules</h3>
 -->
