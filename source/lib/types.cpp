@@ -1074,6 +1074,21 @@ DataType inferExpressionPrime(Node* expr, Node* function) {
                 /* then just return the type it already has */
                 return *expr->type();
             }
+
+            /* check if it is the "self" keyword - which is parsed as a reserved word, but handled
+             * internally as a special case identifier */
+            if (expr->getStringvalue() == "self") {
+                /* find the class this is a part of */
+                Node* classNode = expr;
+                while (classNode->kind() != NODE_CLASS) {
+                    classNode = classNode->getParent();
+                }
+
+                DataType selfType = DataType(TYPE_CLASS);
+                *(selfType.className) = classNode->getStringvalue();
+                return selfType;
+            }
+
             /* otherwise, if it doesn't already have a type... */
             /* if the id already exists, get its type */
             Symbol sym = findIdSym(expr, function);

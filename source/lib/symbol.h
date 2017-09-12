@@ -100,7 +100,6 @@ class ClassContext {
     const Node* getMethod(DataType*, String);
     std::map<String, Node*> removeInits();
 
-   private:
     String name;
     FunctionMap methods;
     std::map<String, Symbol> members;

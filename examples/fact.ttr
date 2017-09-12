@@ -6,6 +6,6 @@ def fact(x int) int:
     else:
         return x * fact(x - 1)
 
-def main( ):
+def main():
     n = int(input("Enter n: "))
     print(n, "! = ", fact(n))
