@@ -41,6 +41,7 @@ class Data {
     Data* opNot();
     Data* opNegate();
     Data* opIndex(Data* other, bool isLValue = true);
+    Data* opDot(const String& field);
 
     /* create a Data of a given type */
     static Data* create(DataType* type, const Value* value);

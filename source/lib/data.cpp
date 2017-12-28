@@ -469,6 +469,17 @@ Data* Data::opIndex(Data* other, bool isLValue) {
     }
 }
 
+Data* Data::opDot(const String& field) {
+    switch (type.getKind()) {
+        case TYPE_CLASS: {
+            Object* object = (Object*) value;
+            return object->lookup(field);
+        }
+        default:
+            throw RuntimeError("Invalid type applied to . operator", 0);
+    }
+}
+
 /* create a Data of a given type */
 Data* Data::create(DataType* type, const Value* value) {
     /* make a new Data currently a memory leak - TODO gc */
@@ -514,7 +525,7 @@ Data* Data::create(DataType* type, const Value* value) {
             newData->value = new Function();
             break;
         case TYPE_CLASS:
-            newData->value = new Object();
+            newData->value = new Object(type);
             break;
         default:
             throw RuntimeError("Unhandled data type in Data::create", 0);

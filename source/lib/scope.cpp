@@ -94,4 +94,3 @@ void Scope::assignParallelFor(const String& variable, unsigned int threadid, Dat
     }
     varMutex.unlock();
 }
-

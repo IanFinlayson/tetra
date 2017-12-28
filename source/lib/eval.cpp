@@ -96,37 +96,24 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
         /* get the body node out of the function */
         Node* funcNode = ((Function*) funcData->getValue())->getNode();
 
+        /* make a scope for the new function we are calling */
+        Scope* destScope = new Scope();
+
+        /* check if there are parameters to be passed, and do so if needed */
+        if (node->child(1) != NULL) {
+            pasteArgList(funcNode->child(0), node->child(1), destScope, context);
+        }
+
         /* check if this is a constructor - if the name of the function is a
          * the same as the return type class name */
         String* className = funcNode->type()->subtypes->at(1).className;
         if (className && (*className == funcName)) {
-            std::cout <<"AAAAAAAAAAAAAAAAAAAAAAAAAA\n";
-            while (1);
-
-
-            /* FIXME - what do we need to do differently if this is a constructor ???? */
-
-
+            /* insert the object into the scope as "self" */
+            destScope->lookupVar("self", &funcNode->type()->subtypes->at(1), NULL);
         }
 
-
-
-
-
-        /* check if there are parameters to be passed, and do so if needed */
-        if (node->child(1) != NULL) {
-            /* make a scope for the new function we are calling */
-            Scope* destScope = new Scope();
-
-            /* dump the passed parameters into the new scope */
-            pasteArgList(funcNode->child(0), node->child(1), destScope, context);
-
-            /* set the new scope in our context */
-            context->initializeNewScope(destScope);
-        } else {
-            /* if there are no args, we still need to initialize a new scope */
-            context->initializeNewScope();
-        }
+        /* set the new scope in our context */
+        context->initializeNewScope(destScope);
 
         /* place this node on the call stack, so it can be printed in the stack
          * trace */
@@ -138,6 +125,11 @@ Data* evaluateFunctionCall(Node* node, Context* context) {
 
         /* transfer control to the function capturing the return value */
         Data* returnValue = evaluateStatement(funcNode, context);
+
+        /* if it's a  constructor, we need the return value to be "self" */
+        if (className && (*className == funcName)) {
+            returnValue = destScope->lookupVar("self", &funcNode->type()->subtypes->at(1), NULL);
+        }
 
         /* returns to the old scope once the function has finished evaluating */
         context->exitScope();
@@ -394,6 +386,14 @@ Data* evaluateExpression(Node* node, Context* context) {
         case NODE_IDENTIFIER:
             return context->lookupVar(node->getStringvalue(), node->type());
 
+        case NODE_DOT: {
+            /* evaluate the thing on the left */
+            Data* object = evaluateExpression(node->child(0), context);
+
+            /* apply the operator */
+            return object->opDot(node->child(1)->getStringvalue());
+        }
+
         default:
             throw SystemError("Unhandled node type in eval", 0, node);
             break;
@@ -584,13 +584,13 @@ Data* evaluateWait(Node* node, Context* context) {
 
 /* evaluate a parallel for loop */
 Data* evaluateParFor(Node* node, Context* context) {
-    /* keep track of all of thw worker threads */
+    /* keep track of all of the worker threads */
     std::vector<ParallelWorker*> workers;
 
     /* mark the context as being parallel */
     context->markParallel();
 
-    /* find the type of thingy we are doing */
+    /* find the type of data we are iterating through */
     DataTypeKind k = node->child(1)->type()->getKind();
     if (k == TYPE_DICT || k == TYPE_LIST) {
         /* we must mark the induction variable as being from a par for loop */
@@ -714,7 +714,6 @@ Data* evaluateStatement(Node* node, Context* context) {
             context->notifyBreak();
             break;
         case NODE_CONTINUE:
-            //std::cout << "CONT\n";
             context->notifyContinue();
             break;
 
@@ -736,6 +735,7 @@ Data* evaluateStatement(Node* node, Context* context) {
         case NODE_IF: {
             /* evaluate the conditional expression */
             Data* conditional = evaluateExpression(node->child(0), context);
+
             /* if true execute the 2nd child */
             if (((Bool*) (conditional->getValue()))->toBool()) {
                 return evaluateStatement(node->child(1), context);

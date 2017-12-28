@@ -973,7 +973,8 @@ rvalue: functionCall {
 } | dict_value {
     $$ = $1;
 } | TOK_SELF { 
-    $$ = new Node(NODE_SELF);
+    $$ = new Node(NODE_IDENTIFIER);
+    $$->setStringvalue("self");
 } | lvalue {
     $$ = $1;
 }
