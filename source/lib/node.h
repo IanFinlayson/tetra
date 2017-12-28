@@ -10,7 +10,7 @@
 
 #include "int.h"
 #include "real.h"
-#include "strings.h"
+#include "string-obj.h"
 #include "bool.h"
 
 /* forward declarations */

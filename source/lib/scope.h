@@ -9,7 +9,7 @@
 #include <map>
 
 #include "vartable.h"
-#include "strings.h"
+#include "string-obj.h"
 #include "error.h"
 
 class Node;

@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "types.h"
-#include "strings.h"
+#include "string-obj.h"
 
 /* any type of error is handled with this exception */
 class Error {

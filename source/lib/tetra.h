@@ -25,7 +25,7 @@
 #include "mutex.h"
 #include "real.h"
 #include "scope.h"
-#include "strings.h"
+#include "string-obj.h"
 #include "symbol.h"
 #include "task.h"
 #include "tsl.h"
