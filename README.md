@@ -52,5 +52,3 @@ More Information
 
 Tetra is licensed under the MIT license.
 
-See http://tetra-lang.org for more details.
-
